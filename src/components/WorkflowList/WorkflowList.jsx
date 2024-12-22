@@ -5,7 +5,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Chip,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -15,56 +14,9 @@ import {
 import { fetchWorkflowRuns } from '../../services/api';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled, keyframes } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
-
-const pulse = keyframes`
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 1;
-  }
-`;
-
-const StatusChip = styled(Chip)(({ status }) => ({
-  '&.MuiChip-root': {
-    fontWeight: 500,
-    minWidth: '100px',
-    justifyContent: 'center',
-    ...(status === 'COMPLETED' && {
-      backgroundColor: '#a8e6cf', // pastel green
-      color: '#2d6a4f'
-    }),
-    ...(status === 'RUNNING' && {
-      backgroundColor: '#b8e0ff', // pastel blue
-      color: '#1e4976',
-      animation: `${pulse} 1.5s ease-in-out infinite`,
-      '&::before': {
-        content: '""',
-        display: 'inline-block',
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        backgroundColor: 'currentColor',
-        marginRight: '8px',
-        animation: `${pulse} 1.5s ease-in-out infinite`
-      }
-    }),
-    ...(status === 'CANCELED' && {
-      backgroundColor: '#e9ecef', // pastel gray
-      color: '#495057'
-    }),
-    ...(status === 'TERMINATED' && {
-      backgroundColor: '#ffd3d1', // pastel red
-      color: '#842029'
-    })
-  }
-}));
+import StatusChip from '../Common/StatusChip'
 
 const WorkflowList = () => {
   const [workflows, setWorkflows] = useState({});
@@ -110,15 +62,15 @@ const WorkflowList = () => {
           <IconButton 
             onClick={loadWorkflows}
             disabled={isLoading}
-            sx={{ 
-              '&.Mui-disabled': {
-                animation: `${pulse} 1.5s ease-in-out infinite`
-              },
-              display: 'flex',
-              gap: 1,
-              borderRadius: 2,
-              padding: '8px 16px'
-            }}
+            // sx={{ 
+            //   '&.Mui-disabled': {
+            //     animation: `${pulse} 1.5s ease-in-out infinite`
+            //   },
+            //   display: 'flex',
+            //   gap: 1,
+            //   borderRadius: 2,
+            //   padding: '8px 16px'
+            // }}
           >
             <RefreshIcon />
             <Typography 

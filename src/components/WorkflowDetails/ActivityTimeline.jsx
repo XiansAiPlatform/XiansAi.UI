@@ -11,14 +11,8 @@ const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
 
   const sortedEvents = React.useMemo(() => {
     return [...events].sort((a, b) => {
-      const timeA = a.startTime ? new Date(a.startTime).getTime() : 0;
-      const timeB = b.startTime ? new Date(b.startTime).getTime() : 0;
-      
-      if (timeA === timeB) {
-        const idA = String(a.completedEventId || a.id || '');
-        const idB = String(b.completedEventId || b.id || '');
-        return sortAscending ? idA.localeCompare(idB) : idB.localeCompare(idA);
-      }
+      const timeA = a.startedTime ? new Date(a.startedTime).getTime() : 0;
+      const timeB = b.startedTime ? new Date(b.startedTime).getTime() : 0;
       
       return sortAscending ? timeA - timeB : timeB - timeA;
     });
