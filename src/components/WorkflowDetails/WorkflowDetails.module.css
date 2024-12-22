@@ -1,0 +1,23 @@
+.preBlock {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 600px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.timelineContainer {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.expandButton {
+  transition: transform 0.3s;
+}
+
+.expandButtonRotated {
+  transform: rotate(180deg);
+}
