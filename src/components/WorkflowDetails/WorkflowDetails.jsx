@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Container } from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -6,6 +6,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
 import { fetchActivityEvents } from '../../services/api';
+import { useError } from '../../contexts/ErrorContext';
 
 const WorkflowDetails = () => {
   const { id } = useParams();
@@ -15,25 +16,27 @@ const WorkflowDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { openSlider } = useSlider();
   const { setLoading } = useLoading();
+  const { showError } = useError();
 
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     setIsLoading(true);
     setLoading(true);
     try {
       const data = await fetchActivityEvents(id);
       setEvents(data || []);
     } catch (error) {
+      showError(error.message || 'Failed to load events');
       console.error('Failed to load events:', error);
       setEvents([]);
     } finally {
       setIsLoading(false);
       setLoading(false);
     }
-  };
+  }, [id, setLoading, showError]);
 
   useEffect(() => {
     loadEvents();
-  }, [id]);
+  }, [loadEvents]);
 
   return (
     <Container>

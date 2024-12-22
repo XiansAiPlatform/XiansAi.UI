@@ -71,7 +71,7 @@ const LeftNav = () => {
             <AccountTreeOutlinedIcon />
           </ListItemIcon>
           <ListItemText 
-            primary="Workflows" 
+            primary="Flows" 
             primaryTypographyProps={{ 
               sx: { fontWeight: 500, fontSize: '0.875rem' } 
             }} 

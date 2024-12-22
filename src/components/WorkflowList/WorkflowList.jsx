@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Container, 
   Typography, 
@@ -17,13 +17,17 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import StatusChip from '../Common/StatusChip'
+import { useError } from '../../contexts/ErrorContext';
+
 
 const WorkflowList = () => {
   const [workflows, setWorkflows] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { setLoading } = useLoading();
+  const { showError } = useError();
 
-  const loadWorkflows = async () => {
+
+  const loadWorkflows = useCallback(async () => {
     setIsLoading(true);
     setLoading(true);
     try {
@@ -38,15 +42,17 @@ const WorkflowList = () => {
           return acc;
         }, {});
       setWorkflows(grouped);
+    } catch (error) {
+      showError(error.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
       setLoading(false);
     }
-  };
+  }, [setLoading, showError]);
 
   useEffect(() => {
     loadWorkflows();
-  }, []);
+  }, [loadWorkflows]);
 
   const formatWorkflowType = (type) => {
     return type
@@ -58,25 +64,22 @@ const WorkflowList = () => {
     <>
       <Container>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Typography variant="h4">Workflows</Typography>
+          <Typography variant="h4">Flows</Typography>
           <IconButton 
             onClick={loadWorkflows}
             disabled={isLoading}
-            // sx={{ 
-            //   '&.Mui-disabled': {
-            //     animation: `${pulse} 1.5s ease-in-out infinite`
-            //   },
-            //   display: 'flex',
-            //   gap: 1,
-            //   borderRadius: 2,
-            //   padding: '8px 16px'
-            // }}
+            sx={{
+              borderRadius: '4px',
+              '&:hover': {
+                borderRadius: '4px'
+              }
+            }}
           >
             <RefreshIcon />
             <Typography 
               variant="button"
               sx={{ 
-                display: { xs: 'none', sm: 'block' }  // Hide text on extra small screens
+                display: { xs: 'none', sm: 'block' }
               }}
             >
               Refresh
@@ -148,6 +151,7 @@ const WorkflowList = () => {
                       primary={
                         <Typography 
                           variant="subtitle1" 
+                          component="div"
                           sx={{ 
                             fontWeight: 500,
                             color: 'text.primary',
@@ -158,14 +162,18 @@ const WorkflowList = () => {
                         </Typography>
                       }
                       secondary={
-                        <Box sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+                        <Typography
+                          component="div"
+                          variant="body2"
+                          sx={{ color: 'text.secondary' }}
+                        >
                           <Box component="span" sx={{ display: 'block', mb: 0.5 }}>
                             Start: {new Date(run.startTime).toLocaleString()}
                           </Box>
                           <Box component="span" sx={{ display: 'block' }}>
                             End: {run.closeTime ? new Date(run.closeTime).toLocaleString() : 'In Progress'}
                           </Box>
-                        </Box>
+                        </Typography>
                       }
                     />
                     <StatusChip 

@@ -1,6 +1,5 @@
 import React from 'react';
 import { Box, Typography, Menu, MenuItem, IconButton, Avatar } from '@mui/material';
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import MenuIcon from '@mui/icons-material/Menu';
