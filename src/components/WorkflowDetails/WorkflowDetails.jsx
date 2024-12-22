@@ -7,6 +7,7 @@ import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
 import { fetchActivityEvents } from '../../services/api';
 import { useError } from '../../contexts/ErrorContext';
+import WorkflowViewer from './WorkflowViewer';
 
 const WorkflowDetails = () => {
   const { id } = useParams();
@@ -41,6 +42,7 @@ const WorkflowDetails = () => {
   return (
     <Container>
       <WorkflowOverview workflow={workflow} />
+      <WorkflowViewer workflowData={workflow} />
       <ActivityTimeline 
         events={events}
         isLoading={isLoading}
