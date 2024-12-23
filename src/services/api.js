@@ -25,4 +25,25 @@ export const fetchActivityEvents = async (workflowId) => {
   } catch (error) {
     throw new Error(`Unable to load workflow events: ${error.message}`);
   }
+};
+
+export const executeWorkflowCancelAction = async (workflowId, force = false) => {
+  try {
+    if (!workflowId) {
+      throw new Error('Workflow ID is required');
+    }
+    
+    const response = await fetch(
+      `${API_BASE_URL}/api/workflows/${workflowId}/cancel?force=${force}`,
+      { method: 'POST' }
+    );
+    
+    if (!response.ok) {
+      throw new Error(`Failed to execute workflow cancel action (${response.status}): ${response.statusText}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    throw new Error(`Error: ${error.message}`);
+  }
 }; 

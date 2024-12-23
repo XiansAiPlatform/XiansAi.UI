@@ -8,14 +8,14 @@ import {
 import { fetchWorkflowRuns } from '../../services/api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
-import { useError } from '../../contexts/ErrorContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import WorkflowAccordion from './WorkflowAccordion';
 
-const WorkflowList = () => {
+const WorkflowList = () => {  
   const [workflows, setWorkflows] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const { setLoading } = useLoading();
-  const { showError } = useError();
+  const { showError } = useNotification();
 
   const loadWorkflows = useCallback(async () => {
     setIsLoading(true);

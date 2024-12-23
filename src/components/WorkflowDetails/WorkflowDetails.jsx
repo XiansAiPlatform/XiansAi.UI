@@ -6,7 +6,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
 import { fetchActivityEvents } from '../../services/api';
-import { useError } from '../../contexts/ErrorContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import WorkflowViewer from './WorkflowViewer';
 
 const WorkflowDetails = () => {
@@ -17,7 +17,7 @@ const WorkflowDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { openSlider } = useSlider();
   const { setLoading } = useLoading();
-  const { showError } = useError();
+  const { showError } = useNotification();
 
   const loadEvents = useCallback(async () => {
     setIsLoading(true);

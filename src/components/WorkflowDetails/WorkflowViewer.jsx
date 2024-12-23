@@ -14,8 +14,7 @@ flowchart TD
     classDef gateway fill:#ffd700,stroke:#666,stroke-width:2px;
     classDef subprocess fill:white,stroke:#666,stroke-width:2px;
     
-    Start((●)) --> Init>Initialize ActivityOptions]
-    Init --> ScrapeLinks>Scrape News Links]
+    Start((●))  --> ScrapeLinks>Scrape News Links]
     ScrapeLinks --> ForEachLoop{For each link}
     
     ForEachLoop --> |Loop| ScrapeDetails>Scrape News Details]
@@ -35,14 +34,10 @@ flowchart TD
         Input1[sourceLink]
         Input2[prompt]
     end
-    
-    subgraph Config
-        Timeout[Timeout: 5min]
-    end
+
     
     Input1 -.-> Start
     Input2 -.-> Start
-    Timeout -.-> Init
     
     class Start startEvent
     class End endEvent
