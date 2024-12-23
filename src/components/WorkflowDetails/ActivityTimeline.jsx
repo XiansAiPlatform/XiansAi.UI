@@ -109,9 +109,9 @@ const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
           }
         }}
       >
-        {sortedEvents.map((event) => (
+        {sortedEvents.map((event, index) => (
           <ActivityTimelineItem
-            key={event.completedEventId || event.id}
+            key={`${event.completedEventId || event.id}-${index}`}
             event={event}
             onShowDetails={handleShowDetails}
             sortAscending={sortAscending}

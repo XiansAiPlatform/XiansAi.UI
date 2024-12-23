@@ -58,8 +58,8 @@ const WorkflowAccordion = ({ type, runs }) => {
       </AccordionSummary>
       <AccordionDetails>
         <List sx={{ p: 0 }}>
-          {runs.map((run) => (
-            <WorkflowRunItem key={run.id} run={run} />
+          {runs.map((run, index) => (
+            <WorkflowRunItem key={`${run.id}-${index}`} run={run} />
           ))}
         </List>
       </AccordionDetails>

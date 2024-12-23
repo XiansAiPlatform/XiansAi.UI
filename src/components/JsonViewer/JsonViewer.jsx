@@ -52,7 +52,8 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
               size="small"
               sx={{
                 transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s'
+                transition: 'transform 0.2s',
+                color: '#ffffff'
               }}
             >
               <ExpandMoreIcon fontSize="small" />
@@ -77,7 +78,8 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
                 size="small"
                 sx={{
                   transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s'
+                  transition: 'transform 0.2s',
+                  color: '#ffffff'
                 }}
               >
                 <ExpandMoreIcon fontSize="small" />
@@ -90,7 +92,7 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
                 <span style={{ color: '#e06c75' }}>
                   {isArray ? '' : `"${key}": `}
                 </span>
-                {renderValue(val, `${path}.${key}`, depth + 1)}
+                {renderValue(val, `${path}${isArray ? `[${key}]` : `.${key}`}`, depth + 1)}
                 {index < Object.keys(value).length - 1 && <span>,</span>}
               </div>
             ))}
