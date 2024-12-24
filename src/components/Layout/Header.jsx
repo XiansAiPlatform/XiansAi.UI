@@ -42,7 +42,7 @@ const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
           onClick={handleMenu}
           sx={{ cursor: 'pointer', bgcolor: '#6366f1' }}
         >
-          JD
+          U
         </Avatar>
         <Menu
           id="menu-appbar"

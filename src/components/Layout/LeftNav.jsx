@@ -4,6 +4,7 @@ import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { Link, useLocation } from 'react-router-dom';
 
 const LeftNav = () => {
@@ -101,6 +102,35 @@ const LeftNav = () => {
           </ListItemIcon>
           <ListItemText 
             primary="Agents" 
+            primaryTypographyProps={{ 
+              sx: { fontWeight: 500, fontSize: '0.875rem' } 
+            }} 
+          />
+        </ListItem>
+
+        <ListItem  
+          className="nav-item"
+          component={Link}
+          to="/agent-profiles"
+          selected={location.pathname === '/agent-profiles'}
+          sx={{
+            '&.Mui-selected': {
+              backgroundColor: '#6366f108',
+              '& .MuiListItemIcon-root': {
+                color: '#6366f1',
+              },
+              '& .MuiTypography-root': {
+                color: '#6366f1',
+                fontWeight: 600,
+              },
+            },
+          }}
+        >
+          <ListItemIcon>
+            <DescriptionOutlinedIcon />
+          </ListItemIcon>
+          <ListItemText 
+            primary="Agent Profiles" 
             primaryTypographyProps={{ 
               sx: { fontWeight: 500, fontSize: '0.875rem' } 
             }} 
