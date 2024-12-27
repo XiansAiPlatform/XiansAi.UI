@@ -15,14 +15,15 @@ import {
   MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 import StatusChip from '../Common/StatusChip';
-import { executeWorkflowCancelAction } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useApi } from '../../services/api';
 
 
 const WorkflowOverview = ({ workflow, onActionComplete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
+  const api = useApi();
 
   const isRunning = workflow?.status?.toUpperCase() === 'RUNNING';
 
@@ -36,7 +37,7 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
 
   const handleAction = async (action, force = false) => {
     try {
-      await executeWorkflowCancelAction(workflow.id, force);
+      await api.executeWorkflowCancelAction(workflow.id, force);
       if (onActionComplete) onActionComplete();
       showSuccess('Action requested. it may take a few minutes to complete.');
     } catch (error) {

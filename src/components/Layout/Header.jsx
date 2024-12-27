@@ -1,12 +1,32 @@
 import React from 'react';
-import { Box, Typography, Menu, MenuItem, IconButton, Avatar } from '@mui/material';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import MenuOpenIcon from '@mui/icons-material/MenuOpen';
-import MenuIcon from '@mui/icons-material/Menu';
+import { Box, Typography, Menu, MenuItem, Avatar } from '@mui/material';
 import './Layout.css'; // Import the CSS file
+import { useAuth0 } from '@auth0/auth0-react';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
+  const { user, logout, getAccessTokenSilently } = useAuth0();
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [organization, setOrganization] = React.useState('');
+  const [name, setName] = React.useState('');
+  React.useEffect(() => {
+    const getOrganization = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const orgInfo = decodedToken['https://flowmaxer.ai/tenant'];
+        const name = decodedToken['https://flowmaxer.ai/name'];
+        console.log('orgInfo', orgInfo);
+        console.log('name', name);
+        setOrganization(orgInfo);
+        setName(name);
+      } catch (error) {
+        console.error('Error fetching organization:', error);
+      }
+    };
+
+    getOrganization();
+  }, [getAccessTokenSilently]);
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -16,33 +36,44 @@ const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
     setAnchorEl(null);
   };
 
+  const handleLogout = () => {
+    logout({ returnTo: window.location.origin });
+    handleClose();
+  };
+
   return (
     <Box sx={{ 
       gridArea: 'header',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 16px'
+      padding: '0 50px'
     }}>
-      <Typography variant="h6" sx={{ color: '#1a1a1a', fontWeight: 600 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: 1.5 
+      }}>
         {pageTitle}
-      </Typography>
+      </Box>
       
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <IconButton 
-          onClick={onToggleSlider}
-          sx={{ color: '#6366f1' }}
-        >
-          {isSliderVisible ? <MenuOpenIcon /> : <MenuIcon />}
-        </IconButton>
-        <IconButton size="large" color="default">
-          <NotificationsNoneIcon />
-        </IconButton>
+        <Typography variant="h6" sx={{ 
+          color: '#1a1a1a', 
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          {organization}
+        </Typography>
+
         <Avatar
           onClick={handleMenu}
           sx={{ cursor: 'pointer', bgcolor: '#6366f1' }}
+          src={user?.picture}
+          alt={user?.name || 'User'}
         >
-          U
+          {!user?.picture && (user?.name?.charAt(0) || 'U')}
         </Avatar>
         <Menu
           id="menu-appbar"
@@ -60,15 +91,42 @@ const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
           onClose={handleClose}
           PaperProps={{
             sx: {
-              mt: 1,
-              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-              border: '1px solid #f0f0f0',
+              mt: 1.5,
+              minWidth: '200px',
+              borderRadius: '12px',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+              border: '1px solid rgba(0, 0, 0, 0.08)',
+              '& .MuiMenuItem-root': {
+                py: 1,
+                px: 2,
+              }
             }
           }}
         >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={handleClose}>Settings</MenuItem>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            width: '100%',
+            borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+            p: 2,
+            pb: 1
+          }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{name}</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {user?.email}
+            </Typography>
+          </Box>
+          <MenuItem 
+            onClick={handleLogout}
+            sx={{ 
+              color: 'error.main',
+              gap: 1,
+              mt: 0.5
+            }}
+          >
+            <LogoutIcon fontSize="small" />
+            <Typography>Logout</Typography>
+          </MenuItem>
         </Menu>
       </Box>
     </Box>

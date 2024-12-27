@@ -12,7 +12,7 @@ const WorkflowRunItem = ({ run }) => {
   return (
     <ListItem 
       component={Link}
-      to={`/workflows/${run.id}`}
+      to={`/runs/${run.id}`}
       state={{ workflow: run }}
       sx={{
         mb: 1,

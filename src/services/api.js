@@ -1,49 +1,105 @@
+import { useAuth0 } from '@auth0/auth0-react';
+import { handleApiError } from '../utils/errorHandler';
+
 const API_BASE_URL = 'http://localhost:5257';
 
-export const fetchWorkflowRuns = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/workflows`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch workflows (${response.status}): ${response.statusText}`);
+// Create a custom hook to handle auth
+export const useApi = () => {
+  const { getAccessTokenSilently } = useAuth0();
+
+  const getAccessToken = async () => {
+    try {
+      return await getAccessTokenSilently();
+    } catch (error) {
+      console.error('Error getting access token:', error);
+      return null;
     }
-    return response.json();
-  } catch (error) {
-    throw new Error(`Unable to load workflows: ${error.message}`);
-  }
+  };
+
+  const createAuthHeaders = async () => ({
+    'Authorization': `Bearer ${await getAccessToken()}`,
+    'Content-Type': 'application/json',
+  });
+
+  // Return API methods that use the token
+  return {
+    fetchWorkflowRuns : async () => {
+      try {
+        console.log('fetchWorkflowRuns called');
+        const response = await fetch(`${API_BASE_URL}/api/workflows`, {
+          headers: await createAuthHeaders()
+        });
+        
+        if (!response.ok) {
+          // Get the error message from the server if available
+          let serverError = '';
+          try {
+            const errorData = await response.json();
+            serverError = errorData.message || errorData.error || response.statusText;
+          } catch {
+            serverError = response.statusText;
+          }
+
+          throw new Error(JSON.stringify({
+            status: response.status,
+            statusText: response.statusText,
+            message: serverError
+          }));
+        }
+
+        return response.json();
+      } catch (error) {
+        throw new Error(handleApiError(error, 'Failed to fetch workflows').description);
+      }
+    },
+
+    fetchActivityEvents : async (workflowId) => {
+      try {
+        if (!workflowId) {
+          throw new Error('Workflow ID is required');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/workflows/${workflowId}/events`, {
+          headers: await createAuthHeaders()
+        });
+
+        if (!response.ok) {
+          let serverError = '';
+          try {
+            const errorData = await response.json();
+            serverError = errorData.message || errorData.error || response.statusText;
+          } catch {
+            serverError = response.statusText;
+          }
+
+          throw new Error(JSON.stringify({
+            status: response.status,
+            statusText: response.statusText,
+            message: serverError
+          }));
+        }
+
+        return response.json();
+      } catch (error) {
+        throw new Error(handleApiError(error, 'Failed to fetch workflow events').description);
+      }
+    },
+
+    executeWorkflowCancelAction : async (workflowId, force = false) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/workflows/${workflowId}/cancel?force=${force}`, { 
+          method: 'POST', 
+          headers: await createAuthHeaders() 
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to execute workflow cancel action (${response.status}): ${response.statusText}`);
+        }
+        return response.json();
+      } catch (error) {
+        throw new Error(`Error: ${error.message}`);
+      }
+    },
+  };
+
 };
 
-export const fetchActivityEvents = async (workflowId) => {
-  try {
-    if (!workflowId) {
-      throw new Error('Workflow ID is required');
-    }
-    const response = await fetch(`${API_BASE_URL}/api/workflows/${workflowId}/events`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch workflow events (${response.status}): ${response.statusText}`);
-    }
-    return response.json();
-  } catch (error) {
-    throw new Error(`Unable to load workflow events: ${error.message}`);
-  }
-};
-
-export const executeWorkflowCancelAction = async (workflowId, force = false) => {
-  try {
-    if (!workflowId) {
-      throw new Error('Workflow ID is required');
-    }
-    
-    const response = await fetch(
-      `${API_BASE_URL}/api/workflows/${workflowId}/cancel?force=${force}`,
-      { method: 'POST' }
-    );
-    
-    if (!response.ok) {
-      throw new Error(`Failed to execute workflow cancel action (${response.status}): ${response.statusText}`);
-    }
-    
-    return response.json();
-  } catch (error) {
-    throw new Error(`Error: ${error.message}`);
-  }
-}; 

@@ -5,9 +5,9 @@ import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
-import { fetchActivityEvents } from '../../services/api';
 import { useNotification } from '../../contexts/NotificationContext';
 import WorkflowViewer from './WorkflowViewer';
+import { useApi } from '../../services/api';
 
 const WorkflowDetails = () => {
   const { id } = useParams();
@@ -18,12 +18,12 @@ const WorkflowDetails = () => {
   const { openSlider } = useSlider();
   const { setLoading } = useLoading();
   const { showError } = useNotification();
-
+  const api = useApi();
   const loadEvents = useCallback(async () => {
     setIsLoading(true);
     setLoading(true);
     try {
-      const data = await fetchActivityEvents(id);
+      const data = await api.fetchActivityEvents(id);
       setEvents(data || []);
     } catch (error) {
       showError(error.message || 'Failed to load events');
@@ -33,6 +33,7 @@ const WorkflowDetails = () => {
       setIsLoading(false);
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, setLoading, showError]);
 
   useEffect(() => {
