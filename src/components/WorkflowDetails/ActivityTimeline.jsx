@@ -9,11 +9,24 @@ import ActivityDetailsView from './ActivityDetailsView';
 const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
   const [sortAscending, setSortAscending] = React.useState(false);
 
-  const sortedEvents = React.useMemo(() => {
-    return [...events].sort((a, b) => {
+  const sortedEventsWithIndex = React.useMemo(() => {
+    // First sort by start time chronologically (ascending)
+    const chronologicalOrder = [...events].sort((a, b) => {
       const timeA = a.startedTime ? new Date(a.startedTime).getTime() : 0;
       const timeB = b.startedTime ? new Date(b.startedTime).getTime() : 0;
-      
+      return timeA - timeB;
+    });
+
+    // Assign indices based on chronological order
+    const withIndices = chronologicalOrder.map((event, idx) => ({
+      ...event,
+      chronologicalIndex: idx + 1
+    }));
+
+    // Then sort based on user's preference (ascending/descending)
+    return withIndices.sort((a, b) => {
+      const timeA = a.startedTime ? new Date(a.startedTime).getTime() : 0;
+      const timeB = b.startedTime ? new Date(b.startedTime).getTime() : 0;
       return sortAscending ? timeA - timeB : timeB - timeA;
     });
   }, [events, sortAscending]);
@@ -109,10 +122,11 @@ const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
           }
         }}
       >
-        {sortedEvents.map((event, index) => (
+        {sortedEventsWithIndex.map((event) => (
           <ActivityTimelineItem
-            key={`${event.completedEventId || event.id}-${index}`}
+            key={`${event.completedEventId || event.id}-${event.chronologicalIndex}`}
             event={event}
+            index={event.chronologicalIndex}
             onShowDetails={handleShowDetails}
             sortAscending={sortAscending}
           />

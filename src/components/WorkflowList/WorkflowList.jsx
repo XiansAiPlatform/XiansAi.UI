@@ -124,7 +124,12 @@ const WorkflowList = () => {
       />
 
       {Object.entries(workflows).map(([type, runs]) => (
-        <WorkflowAccordion key={type} type={type} runs={runs} />
+        <WorkflowAccordion
+          key={type}
+          type={type}
+          runs={runs}
+          onWorkflowStarted={loadWorkflows}
+        />
       ))}
     </Container>
   );

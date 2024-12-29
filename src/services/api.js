@@ -99,6 +99,38 @@ export const useApi = () => {
         throw new Error(`Error: ${error.message}`);
       }
     },
+
+    startNewWorkflow: async (workflowType, parameters) => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/workflows`, {
+          method: 'POST',
+          headers: await createAuthHeaders(),
+          body: JSON.stringify({
+            WorkflowType: workflowType,
+            Parameters: parameters
+          })
+        });
+
+        if (!response.ok) {
+          let serverError = '';
+          try {
+            const errorData = await response.json();
+            serverError = errorData.message || errorData.error || response.statusText;
+          } catch {
+            serverError = response.statusText;
+          }
+          throw new Error(JSON.stringify({
+            status: response.status,
+            statusText: response.statusText,
+            message: serverError
+          }));
+        }
+
+        return response.json();
+      } catch (error) {
+        throw new Error(handleApiError(error, 'Failed to start workflow').description);
+      }
+    },
   };
 
 };

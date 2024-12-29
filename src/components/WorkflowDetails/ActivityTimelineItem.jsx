@@ -32,7 +32,7 @@ const ArrowDot = ({ ascending }) => {
   );
 };
 
-const ActivityTimelineItem = ({ event, onShowDetails, sortAscending }) => {
+const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index }) => {
   return (
     <TimelineItem>
       <TimelineSeparator>
@@ -53,7 +53,9 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending }) => {
       <TimelineContent sx={{ py: '12px', px: 2 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box>
-            <Typography variant="h6">{event.activityName}</Typography>
+            <Typography variant="h6">
+              {index}. {event.activityName}
+            </Typography>
             <Typography variant="body2" color="textSecondary">
               Started: {new Date(event.startedTime).toLocaleString()}
             </Typography>
