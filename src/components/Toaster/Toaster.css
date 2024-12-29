@@ -1,0 +1,14 @@
+.toast-error {
+  background: #FED7D7;
+  color: #822727;
+  padding: 16px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90vw;
+}
+
+.toast-success {
+  background: #D1FAE5;
+  color: #15803D;
+  padding: 16px;
+} 

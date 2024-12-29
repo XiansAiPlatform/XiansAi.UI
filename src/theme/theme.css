@@ -1,0 +1,48 @@
+:root {
+  /* Colors */
+  --primary: #6366f1;
+  --primary-light: #6366f115;
+  --primary-lighter: #6366f108;
+  
+  /* Text colors */
+  --text-primary: #1a1a1a;
+  --text-secondary: #666;
+  --text-light: #495057;
+  
+  /* Background colors */
+  --bg-main: #f8fafc;
+  --bg-paper: #fff;
+  --bg-hover: rgba(0, 0, 0, 0.04);
+  
+  /* Border & Shadow */
+  --border-color: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  
+  /* Typography */
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 500;
+  --font-weight-bold: 600;
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  /* Add letter spacing variables */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.02em;
+} 

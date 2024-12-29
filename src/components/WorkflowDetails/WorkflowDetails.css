@@ -1,0 +1,97 @@
+/* Common Paper styles */
+.paper-container {
+  padding: 24px;
+  margin-bottom: 32px;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 0;
+}
+
+/* Activity count badge */
+.activity-count {
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 4px 12px;
+  border-radius: 0;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 4px;
+}
+
+/* Button styles */
+.action-button {
+  display: flex;
+  gap: 4px;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 0;
+  margin-left: auto;
+}
+
+.action-button.disabled {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Timeline styles */
+.timeline-root :global(.MuiTimelineItem-root:before) {
+  flex: 0;
+  padding: 0;
+}
+
+/* Arrow dot container */
+.arrow-dot-container {
+  position: relative;
+  height: 20px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Overview grid */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+/* Header layout */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Existing styles from WorkflowDetails.module.css */
+.preBlock {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 0;
+  overflow-x: auto;
+  width: 100%;
+  max-width: 600px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.timelineContainer {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.expandButton {
+  transition: transform 0.3s;
+}
+
+.expandButtonRotated {
+  transform: rotate(180deg);
+} 

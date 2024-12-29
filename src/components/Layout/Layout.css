@@ -1,46 +1,177 @@
+/* Grid Layout */
+.layout-container {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 64px 1fr;
+  grid-template-areas: "nav header" "nav main";
+  height: 100vh;
+  background-color: var(--bg-main);
+}
+
+.layout-main {
+  grid-area: main;
+  padding: var(--spacing-lg);
+  background-color: var(--bg-main);
+  overflow-y: auto;
+}
+
+.layout-slider {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 400px;
+  background-color: var(--bg-paper);
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  height: 100%;
+}
+
+/* Header Styles */
 .header {
-  background: #ffffff;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  padding: 0 24px;
+  grid-area: header;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  grid-area: header;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 0 50px;
 }
 
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-organization {
+  font-family: 'Inter', sans-serif;
+  color: #1a1a1a;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.header-avatar {
+  cursor: pointer;
+  background-color: #6366f1;
+}
+
+.header-menu-paper {
+  margin-top: 12px;
+  min-width: 200px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.header-menu-item {
+  padding: 8px 16px;
+}
+
+.header-user-info {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  padding-bottom: 8px;
+}
+
+.header-logout {
+  color: #d32f2f;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* Left Navigation Styles */
 .nav {
-  background: #ffffff;
   grid-area: nav;
-  border-right: 1px solid #f0f0f0;
-  padding: 24px 16px;
+  padding-top: 0;
 }
 
-.logo {
-  height: 32px;
-  margin-right: 16px;
+/* Add padding to the List container */
+.nav .MuiList-root {
+  padding-top: var(--spacing-lg);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: 64px;
+  cursor: pointer;
+}
+
+.nav-logo-icon {
+  font-size: 32px;
+  color: #6366f1;
+  transform: rotate(-10deg);
+}
+
+.nav-logo-text {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+.nav-section-title {
+  font-family: 'Inter', sans-serif;
+  color: #666;
+  margin: 24px 0;
+  padding: 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .nav-item {
-  border-radius: 8px !important;
-  margin-bottom: 4px !important;
-}
-
-.nav-item.active {
-  background-color: #f5f5f5 !important;
+  border-radius: 4px;
+  margin-bottom: 4px;
 }
 
 .nav-item:hover {
-  background-color: #fafafa !important;
-} 
+  background-color: #6366f115;
+}
+
+.nav-item.selected {
+  background-color: #6366f108;
+}
+
+.nav-item.selected .nav-item-icon,
+.nav-item.selected .nav-item-text {
+  color: #6366f1;
+}
+
+.nav-item-icon {
+  min-width: 40px;
+}
+
+.nav-item-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.nav-item.selected .nav-item-text {
+  font-weight: 600;
+}
 
 body {
   overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
-.layout-container {
-  position: relative;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
+/* Add these styles for menu items */
+.header-user-info .MuiTypography-subtitle1 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+.header-user-info .MuiTypography-caption {
+  font-family: 'Inter', sans-serif;
+}
+
+.header-logout .MuiTypography-root {
+  font-family: 'Inter', sans-serif;
 } 

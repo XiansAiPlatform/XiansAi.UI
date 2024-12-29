@@ -10,13 +10,13 @@ import {
   ListItemText 
 } from '@mui/material';
 import {
-  Cancel as CancelIcon,
   Stop as TerminateIcon,
   MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 import StatusChip from '../Common/StatusChip';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useApi } from '../../services/api';
+import './WorkflowDetails.css';
 
 
 const WorkflowOverview = ({ workflow, onActionComplete }) => {
@@ -66,10 +66,12 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
         borderRadius: 2
       }}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-        <Box>
-          <Typography variant="h4">{workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}</Typography>
-          <Typography variant="subtitle1" color="text.secondary">{workflow?.id || 'N/A'}</Typography>
+      <Box className="header-container">
+        <Box className="header-left">
+          <Box>
+            <Typography variant="h4">{workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}</Typography>
+            <Typography variant="subtitle1" color="text.secondary">{workflow?.id || 'N/A'}</Typography>
+          </Box>
         </Box>
         
         <Button
@@ -80,11 +82,7 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
           onClick={handleClick}
           startIcon={<MoreVertIcon />}
           disabled={!isRunning}
-          sx={{
-            '&.Mui-disabled': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            }
-          }}
+          className="action-button"
         >
           Actions
         </Button>

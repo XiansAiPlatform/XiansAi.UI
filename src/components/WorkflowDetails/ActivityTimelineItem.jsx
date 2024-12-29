@@ -4,6 +4,7 @@ import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } f
 import InputIcon from '@mui/icons-material/Input';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { useTheme } from '@mui/material/styles';
+import './WorkflowDetails.css';
 
 const ArrowDot = ({ ascending }) => {
   const theme = useTheme();
@@ -34,25 +35,31 @@ const ArrowDot = ({ ascending }) => {
 
 const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index }) => {
   return (
-    <TimelineItem>
+    <TimelineItem sx={{
+      '&.MuiTimelineItem-root': {
+        '&::before': {
+          display: 'none'
+        }
+      }
+    }}>
       <TimelineSeparator>
-        <Box 
-          sx={{ 
-            position: 'relative',
-            height: 20,
-            width: 20,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
+        <Box className="arrow-dot-container">
           <ArrowDot ascending={sortAscending} />
         </Box>
         <TimelineConnector />
       </TimelineSeparator>
-      <TimelineContent sx={{ py: '12px', px: 2 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <Box>
+      <TimelineContent sx={{ 
+        py: '12px', 
+        px: 2,
+        textAlign: 'left'
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 1,
+          alignItems: 'flex-start'
+        }}>
+          <Box sx={{ width: '100%' }}>
             <Typography variant="h6">
               {index}. {event.activityName}
             </Typography>
@@ -63,7 +70,11 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index }) =>
               Ended: {new Date(event.endedTime).toLocaleString()}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 1,
+            justifyContent: 'flex-start'
+          }}>
             <IconButton
               onClick={() => onShowDetails(event)}
               size="small"

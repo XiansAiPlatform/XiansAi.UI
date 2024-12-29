@@ -9,36 +9,14 @@ const Layout = ({ children }) => {
   const { isOpen, closeSlider, sliderContent } = useSlider();
 
   return (
-    <Box sx={{ 
-      display: 'grid', 
-      gridTemplateColumns: '240px 1fr',
-      gridTemplateRows: '64px 1fr', 
-      gridTemplateAreas: `"nav header" "nav main"`,
-      height: '100vh',
-      backgroundColor: '#f8fafc'
-    }}>
+    <Box className="layout-container">
       <LeftNav />
       <Header />
-      <Box sx={{ 
-        gridArea: 'main', 
-        padding: '24px',
-        backgroundColor: '#f8fafc',
-        overflowY: 'auto'
-      }}>
+      <Box className="layout-main">
         {children}
       </Box>
       {isOpen && (
-        <Box sx={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: '400px',
-          backgroundColor: '#fff',
-          boxShadow: '-2px 0 8px rgba(0,0,0,0.15)',
-          zIndex: 1000,
-          height: '100%'
-        }}>
+        <Box className="layout-slider">
           <RightSlider onClose={closeSlider}>
             {sliderContent}
           </RightSlider>

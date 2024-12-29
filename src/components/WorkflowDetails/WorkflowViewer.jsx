@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import MermaidDiagram from './MermaidDiagram';
 import { Paper, Typography } from '@mui/material';
+import './WorkflowDetails.css';
+
 const WorkflowViewer = ({ workflowData }) => {
   useEffect(() => {
     console.log('Workflow Data:', workflowData);
@@ -51,19 +53,11 @@ const WorkflowViewer = ({ workflowData }) => {
   `;
 
   return (
-    <Paper 
-    elevation={0} 
-    sx={{ 
-      p: 3, 
-      mb: 4, 
-      backgroundColor: 'rgba(0, 0, 0, 0.02)',
-      borderRadius: 2
-    }}
-  >
-    <Typography variant="h4" gutterBottom>{'Flow Visualization'}</Typography>
-    <div style={{ width: '100%' }}>
-      <MermaidDiagram diagram={mermaidDiagram} />
-    </div>
+    <Paper className="paper-container">
+      <Typography variant="h4" gutterBottom>{'Flow Visualization'}</Typography>
+      <div style={{ width: '100%' }}>
+        <MermaidDiagram diagram={mermaidDiagram} />
+      </div>
     </Paper>
   );
 };

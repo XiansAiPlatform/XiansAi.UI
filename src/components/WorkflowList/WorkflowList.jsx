@@ -11,8 +11,7 @@ import { useApi } from '../../services/api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
-import { alpha } from '@mui/material/styles';
-import styles from '../../styles/workflowStatus.module.css';
+import './WorkflowList.css';
 
 const INITIAL_STATS = {
   running: 0,
@@ -23,11 +22,11 @@ const INITIAL_STATS = {
 };
 
 const STATUS_CONFIG = [
-  { label: 'Total', value: 'total', className: '' },
-  { label: 'Running', value: 'running', className: styles.running },
-  { label: 'Completed', value: 'completed', className: styles.completed },
-  { label: 'Canceled', value: 'canceled', className: styles.canceled },
-  { label: 'Terminated', value: 'terminated', className: styles.terminated }
+  { label: 'Total', value: 'total', className: 'total' },
+  { label: 'Running', value: 'running', className: 'running' },
+  { label: 'Completed', value: 'completed', className: 'completed' },
+  { label: 'Canceled', value: 'canceled', className: 'canceled' },
+  { label: 'Terminated', value: 'terminated', className: 'terminated' }
 ];
 
 const WorkflowList = () => {  
@@ -92,14 +91,7 @@ const WorkflowList = () => {
     <Container>
       <Paper 
         elevation={0}
-        sx={{ 
-          mb: 3, 
-          p: 3,
-          background: (theme) => alpha(theme.palette.background.default, 0.7),
-          backdropFilter: 'blur(10px)',
-          borderRadius: 4,
-          border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.1)}`
-        }}
+        className="stats-container"
       >
         <Stack 
           direction={{ xs: 'column', sm: 'row' }} 
@@ -136,39 +128,9 @@ const WorkflowList = () => {
 };
 
 const StatusBox = ({ label, value, className }) => (
-  <Box
-    sx={{
-      px: 3,
-      py: 2,
-      borderRadius: 2,
-      background: className ? `var(--status-bg)` : (theme) => alpha(theme.palette.primary.main, 0.1),
-      minWidth: 120,
-      textAlign: 'center'
-    }}
-    className={className}
-  >
-    <Typography 
-      variant="h3" 
-      sx={{ 
-        color: className ? `var(--status-color)` : 'primary.main',
-        fontSize: '2rem',
-        fontWeight: 'bold',
-        mb: 1
-      }}
-    >
-      {value}
-    </Typography>
-    <Typography 
-      variant="body2"
-      sx={{ 
-        color: 'text.secondary',
-        textTransform: 'uppercase',
-        letterSpacing: '0.1em',
-        fontWeight: 500
-      }}
-    >
-      {label}
-    </Typography>
+  <Box className={`status-box ${className}`}>
+    <Typography className="status-value">{value}</Typography>
+    <Typography className="status-label">{label}</Typography>
   </Box>
 );
 

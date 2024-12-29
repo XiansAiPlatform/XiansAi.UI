@@ -8,14 +8,15 @@ import Layout from './components/Layout/Layout';
 import { SliderProvider } from './contexts/SliderContext';
 import { LoadingProvider } from './contexts/LoadingContext';
 import Toaster from './components/Toaster/Toaster';
-import ProtectedRoute from './components/Auth/ProtectedRoute';
-import Callback from './components/Auth/Callback';
+import ProtectedRoute from './auth/ProtectedRoute';
+import Callback from './auth/Callback';
 import { getConfig } from "./config";
 import { createBrowserHistory } from "history";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NotImplemented from './components/NotImplemented/NotImplemented';
-
+import { ThemeProvider } from '@mui/material/styles';
+import { theme } from './theme/mui-theme';
 
 function App() {
   const config = getConfig();
@@ -42,6 +43,8 @@ function App() {
       <Auth0Provider
         {...providerConfig}
       >
+        <ThemeProvider theme={theme}>
+
         <NotificationProvider>
           <LoadingProvider>
             <SliderProvider>
@@ -89,6 +92,7 @@ function App() {
             </SliderProvider>
           </LoadingProvider>
         </NotificationProvider>
+        </ThemeProvider>
       </Auth0Provider>
       <ToastContainer />
     </BrowserRouter>

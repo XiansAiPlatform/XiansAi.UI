@@ -1,19 +1,16 @@
-import { styled } from '@mui/material/styles';
+import React from 'react';
 import { Chip } from '@mui/material';
 import './StatusChip.css';
 
-const StatusChip = styled(Chip)(({ status }) => ({
-  '&.MuiChip-root': {
-    '&.status-chip': {
-      // Base styles will be applied from CSS
-    }
-  },
-  [`&.${status?.toLowerCase()}`]: {}
-}));
+const StatusChip = ({ status, label }) => {
+  const statusClass = status.toLowerCase();
+  
+  return (
+    <Chip
+      label={label}
+      className={`status-chip ${statusClass}`}
+    />
+  );
+};
 
-export default function CustomStatusChip(props) {
-  return <StatusChip 
-    {...props} 
-    className={`status-chip ${props.status?.toLowerCase()}`} 
-  />;
-} 
+export default StatusChip; 

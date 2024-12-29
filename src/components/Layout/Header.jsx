@@ -4,7 +4,7 @@ import './Layout.css'; // Import the CSS file
 import { useAuth0 } from '@auth0/auth0-react';
 import LogoutIcon from '@mui/icons-material/Logout';
 
-const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
+const Header = ({ pageTitle = "" }) => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [organization, setOrganization] = React.useState('');
@@ -42,34 +42,19 @@ const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
   };
 
   return (
-    <Box sx={{ 
-      gridArea: 'header',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 50px'
-    }}>
-      <Box sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: 1.5 
-      }}>
+    <Box className="header">
+      <Box className="header-content">
         {pageTitle}
       </Box>
       
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Typography variant="h6" sx={{ 
-          color: '#1a1a1a', 
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center'
-        }}>
+      <Box className="header-content">
+        <Typography variant="h6" className="header-organization">
           {organization}
         </Typography>
 
         <Avatar
           onClick={handleMenu}
-          sx={{ cursor: 'pointer', bgcolor: '#6366f1' }}
+          className="header-avatar"
           src={user?.picture}
           alt={user?.name || 'User'}
         >
@@ -90,27 +75,10 @@ const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
           open={Boolean(anchorEl)}
           onClose={handleClose}
           PaperProps={{
-            sx: {
-              mt: 1.5,
-              minWidth: '200px',
-              borderRadius: '12px',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-              border: '1px solid rgba(0, 0, 0, 0.08)',
-              '& .MuiMenuItem-root': {
-                py: 1,
-                px: 2,
-              }
-            }
+            className: "header-menu-paper"
           }}
         >
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            width: '100%',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-            p: 2,
-            pb: 1
-          }}>
+          <Box className="header-user-info">
             <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{name}</Typography>
             <Typography variant="caption" color="text.secondary">
               {user?.email}
@@ -118,11 +86,7 @@ const Header = ({ onToggleSlider, isSliderVisible, pageTitle = "" }) => {
           </Box>
           <MenuItem 
             onClick={handleLogout}
-            sx={{ 
-              color: 'error.main',
-              gap: 1,
-              mt: 0.5
-            }}
+            className="header-logout"
           >
             <LogoutIcon fontSize="small" />
             <Typography>Logout</Typography>

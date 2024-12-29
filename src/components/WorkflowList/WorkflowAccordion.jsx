@@ -13,7 +13,6 @@ import AddIcon from '@mui/icons-material/Add';
 import WorkflowRunItem from './WorkflowRunItem';
 import RightSlider from '../Layout/RightSlider';
 import NewWorkflowForm from './NewWorkflowForm';
-import { keyframes } from '@mui/system';
 
 const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
   const [showNewWorkflowForm, setShowNewWorkflowForm] = useState(false);
@@ -39,18 +38,6 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
 
   const runningWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'running').length;
   const hasRunningWorkflows = runningWorkflowsCount > 0;
-
-  const pulse = keyframes`
-    0% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.6;
-    }
-    100% {
-      opacity: 1;
-    }
-  `;
 
   return (
     <>
@@ -93,23 +80,18 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant="h6">
-                {formatWorkflowType(type)} <Typography component="span" color="text.secondary">({runs.length})</Typography>
+                {formatWorkflowType(type)}
               </Typography>
-              {hasRunningWorkflows && (
-                <Box
-                  sx={{
-                    px: 1,
-                    py: 0.5,
-                    borderRadius: 1,
-                    backgroundColor: '#b8e0ff',
-                    color: '#1e4976',
-                    fontSize: '0.75rem',
-                    animation: `${pulse} 1.5s ease-in-out infinite`,
-                  }}
-                >
-                  {runningWorkflowsCount} running
+              <Box className="status-indicators">
+                <Box className="total-indicator">
+                  {runs.length} total
                 </Box>
-              )}
+                {hasRunningWorkflows && (
+                  <Box className="running-indicator">
+                    {runningWorkflowsCount} running
+                  </Box>
+                )}
+              </Box>
             </Box>
             {isExpanded && (
               <Button

@@ -5,6 +5,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SortIcon from '@mui/icons-material/Sort';
 import ActivityTimelineItem from './ActivityTimelineItem';
 import ActivityDetailsView from './ActivityDetailsView';
+import './WorkflowDetails.css';
 
 const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
   const [sortAscending, setSortAscending] = React.useState(false);
@@ -45,45 +46,21 @@ const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
   };
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        p: 3,
-        mb: 4,
-        backgroundColor: 'rgba(0, 0, 0, 0.02)',
-        borderRadius: 2
-      }}
-    >
-      <Box sx={{ 
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        mb: 3
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Paper className="paper-container">
+      <Box className="header-container">
+        <Box className="header-left">
           <Typography variant="h4">Workflow Activities</Typography>
           <Typography 
             variant="subtitle1" 
-            sx={{ 
-              bgcolor: 'action.hover',
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 1,
-              color: 'text.secondary'
-            }}
+            className="activity-count"
           >
             {events.length}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box className="header-actions">
           <IconButton
             onClick={() => setSortAscending(!sortAscending)}
-            sx={{
-              display: 'flex',
-              gap: 0.5,
-              bgcolor: 'action.hover',
-              borderRadius: 1
-            }}
+            className="action-button"
             title={`Sort ${sortAscending ? 'newest first' : 'oldest first'}`}
           >
             <SortIcon 
@@ -100,12 +77,7 @@ const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
           <IconButton
             onClick={loadEvents}
             disabled={isLoading}
-            sx={{
-              display: 'flex',
-              gap: 0.5,
-              bgcolor: 'action.hover',
-              borderRadius: 1
-            }}
+            className="action-button"
             title="Refresh activities"
           >
             <RefreshIcon fontSize="small" />
@@ -114,13 +86,9 @@ const ActivityTimeline = ({ events, isLoading, loadEvents, openSlider }) => {
         </Box>
       </Box>
 
-      <Timeline
-        sx={{
-          [`& .MuiTimelineItem-root:before`]: {
-            flex: 0,
-            padding: 0
-          }
-        }}
+      <Timeline 
+        className="timeline-root" 
+        position="left"
       >
         {sortedEventsWithIndex.map((event) => (
           <ActivityTimelineItem

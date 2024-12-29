@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
+import './WorkflowList.css';
 
 const WorkflowRunItem = ({ run }) => {
   return (
@@ -14,23 +15,7 @@ const WorkflowRunItem = ({ run }) => {
       component={Link}
       to={`/runs/${run.id}`}
       state={{ workflow: run }}
-      sx={{
-        mb: 1,
-        borderRadius: 2,
-        backgroundColor: 'background.paper',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
-        transition: 'all 0.2s ease-in-out',
-        textDecoration: 'none',
-        '&:hover': {
-          backgroundColor: 'rgba(0, 0, 0, 0.02)',
-          transform: 'translateY(-1px)',
-          boxShadow: '0 4px 8px rgba(0,0,0,0.08)',
-        },
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        p: 2,
-      }}
+      className="workflow-run-item"
     >
       <ListItemText 
         primary={
@@ -63,7 +48,7 @@ const WorkflowRunItem = ({ run }) => {
       />
       <StatusChip 
         label={run.status}
-        status={run.status.toUpperCase()}
+        status={run.status.toLowerCase()}
         sx={{ ml: 2 }}
       />
     </ListItem>

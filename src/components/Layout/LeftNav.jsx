@@ -8,17 +8,6 @@ import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { Link, useLocation } from 'react-router-dom';
 
-// Styles constants
-const SELECTED_STYLES = {
-  backgroundColor: '#6366f108 !important',
-  '& .MuiListItemIcon-root': {
-    color: '#6366f1 !important',
-  },
-  '& .MuiListItemText-root .MuiTypography-root': {
-    color: '#6366f1 !important',
-    fontWeight: 600,
-  },
-};
 
 const NAV_ITEMS = [
   {
@@ -61,34 +50,15 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
     <ListItem
       component={Link}
       to={to}
-      selected={selected}
-      sx={{
-        borderRadius: 1,
-        mb: 0.5,
-        color: selected ? '#6366f1' : 'inherit',
-        backgroundColor: selected ? '#6366f108' : 'transparent',
-        '&.Mui-selected': SELECTED_STYLES,
-        '&:hover': {
-          backgroundColor: '#6366f115',
-        },
-      }}
+      className={`nav-item ${selected ? 'selected' : ''}`}
     >
-      <ListItemIcon 
-        sx={{ 
-          minWidth: 40, 
-          color: selected ? '#6366f1' : 'inherit'
-        }}
-      >
+      <ListItemIcon className="nav-item-icon">
         {icon}
       </ListItemIcon>
       <ListItemText
         primary={label}
         primaryTypographyProps={{
-          sx: { 
-            fontWeight: selected ? 600 : 500, 
-            fontSize: '0.875rem',
-            color: selected ? '#6366f1' : 'inherit'
-          }
+          className: "nav-item-text"
         }}
       />
     </ListItem>
@@ -101,46 +71,16 @@ const LeftNav = () => {
   return (
     <Box className="nav">
       <Link to="/" style={{ textDecoration: 'none' }}>
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.5,
-          mb: 4,
-          px: 2,
-          height: 64,
-          mt: -3,
-          cursor: 'pointer'
-        }}>
-          <AutoGraphIcon sx={{
-            fontSize: 32,
-            color: '#6366f1',
-            transform: 'rotate(-10deg)'
-          }} />
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              color: '#1a1a1a',
-              letterSpacing: '-0.5px'
-            }}
-          >
+        <Box className="nav-logo">
+          <AutoGraphIcon className="nav-logo-icon" />
+          <Typography variant="h6" className="nav-logo-text">
             Flowmaxer
           </Typography>
         </Box>
       </Link>
       
-      <Typography
-        variant="subtitle2"
-        sx={{
-          color: '#666',
-          mb: 3,
-          px: 1,
-          textTransform: 'uppercase',
-          letterSpacing: '0.5px',
-          fontSize: '0.75rem'
-        }}
-      >
-        Menu
+      <Typography variant="subtitle2" className="nav-section-title">
+        
       </Typography>
 
       <List>

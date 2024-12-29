@@ -12,6 +12,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useApi } from '../../services/api';
+import './WorkflowList.css';
 
 const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
   const [parameters, setParameters] = useState([]); // Start with no parameters
@@ -82,14 +83,7 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
           <Paper
             key={index}
             elevation={0}
-            sx={{
-              p: 2,
-              mb: 2,
-              border: '1px solid',
-              borderColor: 'divider',
-              backgroundColor: 'background.paper',
-              position: 'relative'
-            }}
+            className="parameter-paper"
           >
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
               <TextField
@@ -104,12 +98,7 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
               <IconButton
                 onClick={() => removeParameter(index)}
                 size="small"
-                sx={{
-                  color: 'text.secondary',
-                  '&:hover': {
-                    color: 'error.main',
-                  }
-                }}
+                className="delete-button"
               >
                 <DeleteIcon />
               </IconButton>
