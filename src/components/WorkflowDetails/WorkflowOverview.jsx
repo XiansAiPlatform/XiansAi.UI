@@ -59,18 +59,23 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
   return (
     <Paper 
       elevation={0} 
-      sx={{ 
-        p: 3, 
-        mb: 4, 
-        backgroundColor: 'rgba(0, 0, 0, 0.02)',
-        borderRadius: 2
-      }}
+      className="overview-paper"
     >
       <Box className="header-container">
         <Box className="header-left">
-          <Box>
-            <Typography variant="h4">{workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}</Typography>
-            <Typography variant="subtitle1" color="text.secondary">{workflow?.id || 'N/A'}</Typography>
+          <Box className="overview-header-content">
+            <Box className="overview-title-row">
+              <Typography className="overview-title">
+                {workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}
+              </Typography>
+              <StatusChip 
+                label={workflow?.status || 'N/A'}
+                status={workflow?.status?.toUpperCase()}
+              />
+            </Box>
+            <Typography className="overview-subtitle">
+              {workflow?.id || 'N/A'}
+            </Typography>
           </Box>
         </Box>
         
@@ -82,7 +87,7 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
           onClick={handleClick}
           startIcon={<MoreVertIcon />}
           disabled={!isRunning}
-          className="action-button"
+          className="overview-action-button action-button"
         >
           Actions
         </Button>
@@ -100,26 +105,28 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
         </Menu>
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 3 }}>
-      <Box>
-          <StatusChip 
-            label={workflow?.status || 'N/A'}
-            status={workflow?.status?.toUpperCase()}
-          />
-        </Box>
-        <Box>
-          <Typography variant="subtitle2" color="text.secondary">Workflow Type</Typography>
-          <Typography variant="body1">{workflow?.workflowType || 'N/A'}</Typography>
+      <Box className="overview-grid">
+        <Box className="overview-grid-item">
+          <Typography className="overview-label" variant="subtitle2">
+            Workflow Type
+          </Typography>
+          <Typography variant="body1">
+            {workflow?.workflowType || 'N/A'}
+          </Typography>
         </Box>
 
-        <Box>
-          <Typography variant="subtitle2" color="text.secondary">Start Time</Typography>
+        <Box className="overview-grid-item">
+          <Typography className="overview-label" variant="subtitle2">
+            Start Time
+          </Typography>
           <Typography variant="body1">
             {workflow?.startTime ? new Date(workflow.startTime).toLocaleString() : 'N/A'}
           </Typography>
         </Box>
-        <Box>
-          <Typography variant="subtitle2" color="text.secondary">End Time</Typography>
+        <Box className="overview-grid-item">
+          <Typography className="overview-label" variant="subtitle2">
+            End Time
+          </Typography>
           <Typography variant="body1">
             {workflow?.closeTime ? new Date(workflow.closeTime).toLocaleString() : 'In Progress'}
           </Typography>
