@@ -48,12 +48,6 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
   };
 
   const menuItems = isRunning ? [
-    <MenuItem key="cancel" onClick={() => handleAction('cancel')}>
-      <ListItemIcon>
-        <CancelIcon fontSize="small" />
-      </ListItemIcon>
-      <ListItemText>Cancel</ListItemText>
-    </MenuItem>,
     <MenuItem key="terminate" onClick={() => handleAction('cancel', true)}>
       <ListItemIcon>
         <TerminateIcon fontSize="small" />

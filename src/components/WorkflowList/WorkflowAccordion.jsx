@@ -13,9 +13,11 @@ import AddIcon from '@mui/icons-material/Add';
 import WorkflowRunItem from './WorkflowRunItem';
 import RightSlider from '../Layout/RightSlider';
 import NewWorkflowForm from './NewWorkflowForm';
+import { keyframes } from '@mui/system';
 
 const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
   const [showNewWorkflowForm, setShowNewWorkflowForm] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const formatWorkflowType = (type) => {
     return type
@@ -34,6 +36,21 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
       onWorkflowStarted();
     }
   };
+
+  const runningWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'running').length;
+  const hasRunningWorkflows = runningWorkflowsCount > 0;
+
+  const pulse = keyframes`
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+    100% {
+      opacity: 1;
+    }
+  `;
 
   return (
     <>
@@ -62,6 +79,7 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
             my: 1.5
           }
         }}
+        onChange={(_, expanded) => setIsExpanded(expanded)}
       >
         <AccordionSummary 
           expandIcon={<ExpandMoreIcon />}
@@ -73,29 +91,48 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-            <Typography variant="h6">
-              {formatWorkflowType(type)} <Typography component="span" color="text.secondary">({runs.length})</Typography>
-            </Typography>
-            <Button
-              startIcon={<AddIcon />}
-              variant="outlined"
-              size="small"
-              onClick={handleStartNew}
-              sx={{
-                mr: 2,
-                borderColor: 'rgba(0, 0, 0, 0.12)',
-                color: 'text.secondary',
-                backgroundColor: 'transparent',
-                '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  borderColor: 'rgba(0, 0, 0, 0.23)',
-                },
-                textTransform: 'none',
-                boxShadow: 'none'
-              }}
-            >
-              Start New
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h6">
+                {formatWorkflowType(type)} <Typography component="span" color="text.secondary">({runs.length})</Typography>
+              </Typography>
+              {hasRunningWorkflows && (
+                <Box
+                  sx={{
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: 1,
+                    backgroundColor: '#b8e0ff',
+                    color: '#1e4976',
+                    fontSize: '0.75rem',
+                    animation: `${pulse} 1.5s ease-in-out infinite`,
+                  }}
+                >
+                  {runningWorkflowsCount} running
+                </Box>
+              )}
+            </Box>
+            {isExpanded && (
+              <Button
+                startIcon={<AddIcon />}
+                variant="outlined"
+                size="small"
+                onClick={handleStartNew}
+                sx={{
+                  mr: 2,
+                  borderColor: 'rgba(0, 0, 0, 0.12)',
+                  color: 'text.secondary',
+                  backgroundColor: 'transparent',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    borderColor: 'rgba(0, 0, 0, 0.23)',
+                  },
+                  textTransform: 'none',
+                  boxShadow: 'none'
+                }}
+              >
+                Start New
+              </Button>
+            )}
           </Box>
         </AccordionSummary>
         <AccordionDetails>

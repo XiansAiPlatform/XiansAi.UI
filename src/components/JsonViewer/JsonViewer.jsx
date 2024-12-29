@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, IconButton, Collapse } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import './JsonViewer.css';
 
 const JsonViewer = ({ data, initialDepth = 2 }) => {
   const [expandedPaths, setExpandedPaths] = useState(new Set());
@@ -30,7 +31,7 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
       const isEmpty = Object.keys(value).length === 0;
       
       if (isEmpty) {
-        return <span style={{ color: '#98c379' }}>{isArray ? '[]' : '{}'}</span>;
+        return <span className="json-viewer__value--string">{isArray ? '[]' : '{}'}</span>;
       }
 
       const shouldAutoExpand = depth < initialDepth;
@@ -38,23 +39,15 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
         return (
           <div 
             onClick={() => toggleExpand(path)}
-            style={{ 
-              cursor: 'pointer',
-              display: 'inline-flex', 
-              alignItems: 'center',
-              width: '100%'
-            }}
+            className="json-viewer__expandable"
           >
-            <span style={{ color: '#98c379' }}>
+            <span className="json-viewer__value--string">
               {isArray ? '[...]' : '{...}'}
             </span>
             <IconButton 
               size="small"
-              sx={{
-                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s',
-                color: '#ffffff'
-              }}
+              className={`json-viewer__expand-button ${isExpanded ? 'json-viewer__expand-button--expanded' : 'json-viewer__expand-button--collapsed'}`}
+              sx={{ color: '#ffffff' }}
             >
               <ExpandMoreIcon fontSize="small" />
             </IconButton>
@@ -66,21 +59,14 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
         <div style={{ marginLeft: depth > 0 ? 20 : 0 }}>
           <div 
             onClick={() => toggleExpand(path)}
-            style={{ 
-              cursor: 'pointer',
-              display: 'inline-flex', 
-              alignItems: 'center' 
-            }}
+            className="json-viewer__expandable"
           >
-            <span style={{ color: '#98c379' }}>{isArray ? '[' : '{'}</span>
+            <span className="json-viewer__value--string">{isArray ? '[' : '{'}</span>
             {!isEmpty && (
               <IconButton 
                 size="small"
-                sx={{
-                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
-                  color: '#ffffff'
-                }}
+                className={`json-viewer__expand-button ${isExpanded ? 'json-viewer__expand-button--expanded' : 'json-viewer__expand-button--collapsed'}`}
+                sx={{ color: '#ffffff' }}
               >
                 <ExpandMoreIcon fontSize="small" />
               </IconButton>
@@ -88,8 +74,8 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
           </div>
           <Collapse in={isExpanded || shouldAutoExpand}>
             {Object.entries(value).map(([key, val], index) => (
-              <div key={key} style={{ marginLeft: 20 }}>
-                <span style={{ color: '#e06c75' }}>
+              <div key={key} className="json-viewer__row">
+                <span className="json-viewer__key">
                   {isArray ? '' : `"${key}": `}
                 </span>
                 {renderValue(val, `${path}${isArray ? `[${key}]` : `.${key}`}`, depth + 1)}
@@ -97,46 +83,32 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
               </div>
             ))}
           </Collapse>
-          <span style={{ color: '#98c379' }}>{isArray ? ']' : '}'}</span>
+          <span className="json-viewer__value--string">{isArray ? ']' : '}'}</span>
         </div>
       );
     }
 
     if (typeof value === 'string') {
-      return <span style={{ color: '#98c379' }}>"{value}"</span>;
+      return <span className="json-viewer__value--string">"{value}"</span>;
     }
     if (typeof value === 'number') {
-      return <span style={{ color: '#d19a66' }}>{value}</span>;
+      return <span className="json-viewer__value--number">{value}</span>;
     }
     if (typeof value === 'boolean') {
-      return <span style={{ color: '#c678dd' }}>{value.toString()}</span>;
+      return <span className="json-viewer__value--boolean">{value.toString()}</span>;
     }
     if (value === null) {
-      return <span style={{ color: '#c678dd' }}>null</span>;
+      return <span className="json-viewer__value--null">null</span>;
     }
     return <span>{String(value)}</span>;
   };
 
   return (
-    <Box 
-      sx={{ 
-        bgcolor: '#282c34',
-        color: '#abb2bf',
-        p: 2,
-        borderRadius: 1,
-        fontFamily: 'monospace',
-        position: 'relative'
-      }}
-    >
+    <Box className="json-viewer">
       <IconButton 
         size="small" 
         onClick={() => copyToClipboard(data)}
-        sx={{ 
-          position: 'absolute',
-          right: 8,
-          top: 8,
-          color: '#abb2bf'
-        }}
+        className="json-viewer__copy-button"
       >
         <ContentCopyIcon fontSize="small" />
       </IconButton>
