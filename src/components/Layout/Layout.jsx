@@ -9,19 +9,21 @@ const Layout = ({ children }) => {
   const { isOpen, closeSlider, sliderContent } = useSlider();
 
   return (
-    <Box className="layout-container">
-      <LeftNav />
-      <Header />
-      <Box className="layout-main">
-        {children}
-      </Box>
-      {isOpen && (
-        <Box className="layout-slider">
-          <RightSlider onClose={closeSlider}>
-            {sliderContent}
-          </RightSlider>
+    <Box className="layout-wrapper">
+      <Box className="layout-container">
+        <LeftNav />
+        <Header />
+        <Box className="layout-main">
+          {children}
         </Box>
-      )}
+        {isOpen && (
+          <Box className="layout-slider">
+            <RightSlider onClose={closeSlider}>
+              {sliderContent}
+            </RightSlider>
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };

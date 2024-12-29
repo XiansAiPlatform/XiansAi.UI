@@ -6,13 +6,39 @@
   grid-template-areas: "nav header" "nav main";
   height: 100vh;
   background-color: var(--bg-main);
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
 }
 
+/* Add a wrapper to create the background effect */
+.layout-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-main);
+  z-index: -1;
+}
+
+/* Update header styles */
+.header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 50px;
+  max-width: 1200px;
+}
+
+/* Update layout-main styles */
 .layout-main {
   grid-area: main;
   padding: var(--spacing-lg);
   background-color: var(--bg-main);
   overflow-y: auto;
+  max-width: 1200px;
 }
 
 .layout-slider {
@@ -28,14 +54,6 @@
 }
 
 /* Header Styles */
-.header {
-  grid-area: header;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 50px;
-}
-
 .header-content {
   display: flex;
   align-items: center;
