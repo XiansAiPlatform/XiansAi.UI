@@ -136,7 +136,7 @@ const StatusBox = ({ label, value, className }) => (
 
 const HeaderSection = ({ isLoading, onRefresh }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-    <Typography variant="h4">All Flows</Typography>
+    <Typography variant="h4"></Typography>
     <IconButton 
       onClick={onRefresh}
       disabled={isLoading}
