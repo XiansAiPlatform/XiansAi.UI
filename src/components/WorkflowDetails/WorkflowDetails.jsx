@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Container } from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -19,6 +19,15 @@ const WorkflowDetails = () => {
   const { setLoading } = useLoading();
   const { showError } = useNotification();
   const api = useApi();
+  const containerRef = useRef(null);
+
+  // Add scroll to top effect when component mounts
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTo(0, 0);
+    }
+  }, []);
+
   const loadEvents = useCallback(async () => {
     setIsLoading(true);
     setLoading(true);
@@ -41,7 +50,7 @@ const WorkflowDetails = () => {
   }, [loadEvents]);
 
   return (
-    <Container>
+    <Container ref={containerRef} sx={{ height: '100%', overflow: 'auto' }}>
       <WorkflowOverview workflow={workflow} />
       <WorkflowViewer workflowData={workflow} />
       <ActivityTimeline 
