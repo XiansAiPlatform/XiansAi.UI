@@ -164,7 +164,7 @@ export const useApi = () => {
       }
     },
 
-    streamWorkflowEvents: async (workflowId, onEventReceived) => {
+    streamActivityEvents: async (workflowId, onEventReceived) => {
       try {
         if (!workflowId) {
           throw new Error('Workflow ID is required');
