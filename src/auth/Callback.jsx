@@ -7,6 +7,9 @@ const Callback = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!navigator.onLine) {
+      throw new Error('No internet connection. Please check your network and try again.');
+    }
     if (isAuthenticated) {
       navigate('/');
     } else {

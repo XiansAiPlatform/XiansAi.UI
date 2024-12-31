@@ -272,3 +272,18 @@
     background-color: var(--status-running-bg);
   }
 }
+
+.empty-state-container {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 4px 24px -8px rgba(0, 0, 0, 0.1),
+    0 2px 16px -8px rgba(0, 0, 0, 0.06) !important;
+}
+
+@media (max-width: 600px) {
+  .empty-state-container {
+    padding: 32px 16px;
+  }
+}

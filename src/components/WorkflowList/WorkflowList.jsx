@@ -5,13 +5,15 @@ import {
   IconButton,
   Box,
   Stack,
-  Paper
+  Paper,
+  Button
 } from '@mui/material';
 import { useApi } from '../../services/api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
+import { Link } from 'react-router-dom';
 
 const INITIAL_STATS = {
   running: 0,
@@ -87,6 +89,10 @@ const WorkflowList = () => {
     }));
   }, [stats]);
 
+  const hasWorkflows = useMemo(() => {
+    return Object.keys(workflows).length > 0;
+  }, [workflows]);
+
   return (
     <Container>
       <Paper 
@@ -115,14 +121,43 @@ const WorkflowList = () => {
         onRefresh={loadWorkflows}
       />
 
-      {Object.entries(workflows).map(([type, runs]) => (
-        <WorkflowAccordion
-          key={type}
-          type={type}
-          runs={runs}
-          onWorkflowStarted={loadWorkflows}
-        />
-      ))}
+      {hasWorkflows ? (
+        Object.entries(workflows).map(([type, runs]) => (
+          <WorkflowAccordion
+            key={type}
+            type={type}
+            runs={runs}
+            onWorkflowStarted={loadWorkflows}
+          />
+        ))
+      ) : (
+        <Paper 
+          elevation={0}
+          className="empty-state-container"
+          sx={{ 
+            textAlign: 'center', 
+            py: 8, 
+            px: 4,
+            borderRadius: 3,
+            bgcolor: 'background.paper' 
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            No Flow Runs Found
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+            To get started, navigate to Flow Definitions to create and start new workflows.
+          </Typography>
+          <Button
+            component={Link}
+            to="/definitions"
+            variant="contained"
+            color="primary"
+          >
+            Go to Flow Definitions
+          </Button>
+        </Paper>
+      )}
     </Container>
   );
 };
