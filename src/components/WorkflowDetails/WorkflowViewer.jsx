@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import MermaidDiagram from './MermaidDiagram';
-import { Paper, Typography } from '@mui/material';
+import { Paper, Typography, IconButton } from '@mui/material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import './WorkflowDetails.css';
 
 const WorkflowViewer = ({ workflowData }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   useEffect(() => {
     console.log('Workflow Data:', workflowData);
   }, [workflowData]);
@@ -54,8 +57,16 @@ const WorkflowViewer = ({ workflowData }) => {
 
   return (
     <Paper className="paper-container">
-      <Typography variant="h4" gutterBottom>{'Flow Visualization'}</Typography>
-      <div style={{ width: '100%' }}>
+      <div className="flow-header" onClick={() => setIsExpanded(!isExpanded)}>
+        <Typography className="overview-title">Flow Visualization</Typography>
+        <IconButton 
+          className={`expand-button ${isExpanded ? 'expanded' : ''}`}
+          aria-label={isExpanded ? 'collapse' : 'expand'}
+        >
+          <KeyboardArrowDownIcon />
+        </IconButton>
+      </div>
+      <div className={`flow-content ${isExpanded ? 'expanded' : ''}`}>
         <MermaidDiagram diagram={mermaidDiagram} />
       </div>
     </Paper>

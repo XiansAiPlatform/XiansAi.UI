@@ -120,7 +120,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
     <Paper className="paper-container">
       <Box className="header-container">
         <Box className="header-left">
-          <Typography variant="h4">Workflow Activities</Typography>
+          <Typography className="overview-title">Flow Activities</Typography>
           <Typography 
             variant="subtitle1" 
             className="activity-count"

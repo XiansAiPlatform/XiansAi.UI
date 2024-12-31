@@ -188,4 +188,38 @@
     /* Temporarily make this more obvious for debugging */
     background-color: rgba(255, 255, 0, 0.3) !important;
   }
+}
+
+/* Flow Visualization styles */
+.flow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.flow-content {
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease-in-out;
+}
+
+.flow-content.expanded {
+  height: auto;
+  margin-top: 16px;
+}
+
+.expand-button {
+  transition: transform 0.3s ease !important;
+}
+
+.expand-button.expanded {
+  transform: rotate(180deg);
+}
+
+/* Add hover effect to the header */
+.flow-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
 } 
