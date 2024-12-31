@@ -12,6 +12,7 @@ import { useApi } from '../../services/api';
 
 const ActivityTimeline = ({ workflowId, openSlider }) => {
   const [events, setEvents] = useState([]);
+  const [highlightedEventIds, setHighlightedEventIds] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [sortAscending, setSortAscending] = useState(false);
   const { setLoading } = useLoading();
@@ -24,26 +25,47 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
     try {
       console.log('Starting event stream for workflow:', workflowId);
       
-      // Create an abort controller to cleanup the stream
       const abortController = new AbortController();
       
       await api.streamActivityEvents(workflowId, (newEvent) => {
+        console.log('New event received:', newEvent);
+        
         setEvents(currentEvents => {
           if (!newEvent.ID) {
             console.warn('Event missing ID:', newEvent);
             return currentEvents;
           }
 
-          // Check if event already exists to prevent duplicates
+          // Check if event already exists
           if (currentEvents.some(e => e.ID === newEvent.ID)) {
             return currentEvents;
           }
+
+          // Debug log for highlighting
+          console.log('Adding highlight for event:', newEvent.ID);
+          
+          // Add event ID to highlighted set
+          setHighlightedEventIds(prev => {
+            const newSet = new Set(prev);
+            newSet.add(newEvent.ID);
+            console.log('Updated highlighted IDs:', Array.from(newSet));
+            return newSet;
+          });
+          
+          // Remove highlight after 5 seconds
+          setTimeout(() => {
+            console.log('Removing highlight for event:', newEvent.ID);
+            setHighlightedEventIds(prev => {
+              const updated = new Set(prev);
+              updated.delete(newEvent.ID);
+              return updated;
+            });
+          }, 5000);
 
           return [...currentEvents, newEvent];
         });
       }, abortController.signal);
 
-      // Store the abort controller for cleanup
       return () => abortController.abort();
     } catch (error) {
       showError(error.message || 'Failed to connect to event stream');
@@ -161,6 +183,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
             index={event.chronologicalIndex}
             onShowDetails={handleShowDetails}
             sortAscending={sortAscending}
+            isHighlighted={highlightedEventIds.has(event.ID)}
           />
         ))}
       </Timeline>

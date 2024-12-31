@@ -168,4 +168,24 @@
 
 .expandButtonRotated {
   transform: rotate(180deg);
+}
+
+/* Timeline item highlight styles */
+.timeline-item-content {
+  padding: 16px;
+  border-radius: 8px;
+  transition: background-color 0.5s ease;
+}
+
+.timeline-item-content.highlighted {
+  /* Temporarily make this more obvious for debugging */
+  background-color: rgba(255, 255, 0, 0.2) !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .timeline-item-content.highlighted {
+    /* Temporarily make this more obvious for debugging */
+    background-color: rgba(255, 255, 0, 0.3) !important;
+  }
 } 
