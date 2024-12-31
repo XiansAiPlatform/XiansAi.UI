@@ -170,7 +170,7 @@ export const useApi = () => {
           throw new Error('Workflow ID is required');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/client/workflows/${workflowId}/stream-events`, {
+        const response = await fetch(`${API_BASE_URL}/api/client/workflows/${workflowId}/events/stream`, {
           headers: await createAuthHeaders()
         });
 
@@ -180,6 +180,7 @@ export const useApi = () => {
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let buffer = ''; // Add buffer to handle incomplete JSON
 
         async function readStream() {
           try {
@@ -187,22 +188,35 @@ export const useApi = () => {
               const { done, value } = await reader.read();
               
               if (done) {
+                console.log('Stream ended');
                 break;
               }
               
-              const decodedValue = decoder.decode(value);
-              const events = decodedValue.split('\n')
-                .filter(line => line.trim())
-                .map(line => JSON.parse(line));
-                
-              events.forEach(event => onEventReceived(event));
+              // Append new data to buffer
+              buffer += decoder.decode(value, { stream: true });
+              
+              // Split by newlines and process each complete line
+              const lines = buffer.split('\n');
+              // Keep the last potentially incomplete line in the buffer
+              buffer = lines.pop() || '';
+              
+              // Process complete lines
+              lines.filter(line => line.trim()).forEach(line => {
+                try {
+                  const event = JSON.parse(line);
+                  onEventReceived(event);
+                } catch (parseError) {
+                  console.warn('Failed to parse event:', parseError);
+                }
+              });
             }
           } catch (error) {
+            console.error('Stream reading failed:', error);
             throw new Error(handleApiError(error, 'Stream reading failed').description);
           }
         }
 
-        return readStream();
+        readStream();
       } catch (error) {
         throw new Error(handleApiError(error, 'Failed to establish event stream').description);
       }

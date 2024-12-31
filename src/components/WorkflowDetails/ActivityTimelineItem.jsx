@@ -61,13 +61,13 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index }) =>
         }}>
           <Box sx={{ width: '100%' }}>
             <Typography variant="h6">
-              {index}. {event.activityName}
+              {index}. {event.ActivityName}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Started: {new Date(event.startedTime).toLocaleString()}
+              Started: {new Date(event.StartedTime).toLocaleString()}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Ended: {new Date(event.endedTime).toLocaleString()}
+              Ended: {new Date(event.EndedTime).toLocaleString()}
             </Typography>
           </Box>
           <Box sx={{ 

@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useEffect,  useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { Container } from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
-import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
-import { useNotification } from '../../contexts/NotificationContext';
 import WorkflowViewer from './WorkflowViewer';
-import { useApi } from '../../services/api';
 
 const WorkflowDetails = () => {
   const { id } = useParams();

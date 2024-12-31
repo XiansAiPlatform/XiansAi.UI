@@ -18,31 +18,62 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
   const { showError } = useNotification();
   const api = useApi();
 
-  const loadEvents = useCallback(async () => {
+  const startEventStream = useCallback(async () => {
     setIsLoading(true);
     setLoading(true);
     try {
-      const data = await api.fetchActivityEvents(workflowId);
-      setEvents(data || []);
+      console.log('Starting event stream for workflow:', workflowId);
+      
+      // Create an abort controller to cleanup the stream
+      const abortController = new AbortController();
+      
+      await api.streamActivityEvents(workflowId, (newEvent) => {
+        setEvents(currentEvents => {
+          if (!newEvent.ID) {
+            console.warn('Event missing ID:', newEvent);
+            return currentEvents;
+          }
+
+          // Check if event already exists to prevent duplicates
+          if (currentEvents.some(e => e.ID === newEvent.ID)) {
+            return currentEvents;
+          }
+
+          return [...currentEvents, newEvent];
+        });
+      }, abortController.signal);
+
+      // Store the abort controller for cleanup
+      return () => abortController.abort();
     } catch (error) {
-      showError(error.message || 'Failed to load events');
-      console.error('Failed to load events:', error);
-      setEvents([]);
+      showError(error.message || 'Failed to connect to event stream');
+      console.error('Failed to connect to event stream:', error);
     } finally {
       setIsLoading(false);
       setLoading(false);
     }
-  }, [workflowId, setLoading, showError]);
+  }, [workflowId, showError, setLoading]);
 
+  // Cleanup function for the stream
   useEffect(() => {
-    loadEvents();
-  }, [loadEvents]);
+    let cleanup;
+
+    const initStream = async () => {
+      cleanup = await startEventStream();
+    };
+
+    initStream();
+
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [startEventStream]);
 
   const sortedEventsWithIndex = React.useMemo(() => {
     // First sort by start time chronologically (ascending)
     const chronologicalOrder = [...events].sort((a, b) => {
-      const timeA = a.startedTime ? new Date(a.startedTime).getTime() : 0;
-      const timeB = b.startedTime ? new Date(b.startedTime).getTime() : 0;
+      const timeA = a.StartedTime ? new Date(a.StartedTime).getTime() : 0;
+      const timeB = b.StartedTime ? new Date(b.StartedTime).getTime() : 0;
       return timeA - timeB;
     });
 
@@ -54,8 +85,8 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
 
     // Then sort based on user's preference (ascending/descending)
     return withIndices.sort((a, b) => {
-      const timeA = a.startedTime ? new Date(a.startedTime).getTime() : 0;
-      const timeB = b.startedTime ? new Date(b.startedTime).getTime() : 0;
+      const timeA = a.StartedTime ? new Date(a.StartedTime).getTime() : 0;
+      const timeB = b.StartedTime ? new Date(b.StartedTime).getTime() : 0;
       return sortAscending ? timeA - timeB : timeB - timeA;
     });
   }, [events, sortAscending]);
@@ -63,14 +94,19 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
   const handleShowDetails = (event) => {
     try {
       const details = {
-        activityName: event.activityName,
-        inputs: event.inputs,
-        result: typeof event.result === 'string' ? JSON.parse(event.result) : event.result
+        activityName: event.ActivityName,
+        inputs: event.Inputs,
+        result: typeof event.Result === 'string' ? JSON.parse(event.Result) : event.Result
       };
       openSlider(<ActivityDetailsView activityDetails={details} />);
     } catch (error) {
       console.error('Error processing event details:', error);
     }
+  };
+
+  const handleRefresh = () => {
+    setEvents([]); // Clear existing events
+    startEventStream(); // Restart the stream
   };
 
   return (
@@ -103,7 +139,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
             </Typography>
           </IconButton>
           <IconButton
-            onClick={loadEvents}
+            onClick={handleRefresh}
             disabled={isLoading}
             className="action-button"
             title="Refresh activities"
@@ -120,7 +156,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
       >
         {sortedEventsWithIndex.map((event) => (
           <ActivityTimelineItem
-            key={`${event.completedEventId || event.id}-${event.chronologicalIndex}`}
+            key={`${event.ID}-${event.chronologicalIndex}`}
             event={event}
             index={event.chronologicalIndex}
             onShowDetails={handleShowDetails}
