@@ -23,12 +23,10 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
     setIsLoading(true);
     setLoading(true);
     try {
-      console.log('Starting event stream for workflow:', workflowId);
       
       const abortController = new AbortController();
       
       await api.streamActivityEvents(workflowId, (newEvent) => {
-        console.log('New event received:', newEvent);
         
         setEvents(currentEvents => {
           if (!newEvent.ID) {
@@ -42,19 +40,16 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
           }
 
           // Debug log for highlighting
-          console.log('Adding highlight for event:', newEvent.ID);
           
           // Add event ID to highlighted set
           setHighlightedEventIds(prev => {
             const newSet = new Set(prev);
             newSet.add(newEvent.ID);
-            console.log('Updated highlighted IDs:', Array.from(newSet));
             return newSet;
           });
           
           // Remove highlight after 5 seconds
           setTimeout(() => {
-            console.log('Removing highlight for event:', newEvent.ID);
             setHighlightedEventIds(prev => {
               const updated = new Set(prev);
               updated.delete(newEvent.ID);

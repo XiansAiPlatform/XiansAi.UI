@@ -34,10 +34,6 @@ const ArrowDot = ({ ascending }) => {
 };
 
 const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHighlighted }) => {
-  console.log('TimelineItem render:', {
-    eventId: event.ID,
-    isHighlighted,
-  });
 
   // Updated helper function to format text
   const formatText = (text, maxLength = 100) => {
