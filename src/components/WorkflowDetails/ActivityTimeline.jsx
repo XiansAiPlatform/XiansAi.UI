@@ -12,7 +12,7 @@ import { useApi } from '../../services/api';
 
 const ActivityTimeline = ({ workflowId, openSlider }) => {
   const [events, setEvents] = useState([]);
-  const [highlightedEventIds, setHighlightedEventIds] = useState(new Set());
+  const [latestEventId, setLatestEventId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [sortAscending, setSortAscending] = useState(false);
   const { setLoading } = useLoading();
@@ -39,22 +39,12 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
             return currentEvents;
           }
 
-          // Debug log for highlighting
-          
-          // Add event ID to highlighted set
-          setHighlightedEventIds(prev => {
-            const newSet = new Set(prev);
-            newSet.add(newEvent.ID);
-            return newSet;
-          });
+          // Set latest event ID
+          setLatestEventId(newEvent.ID);
           
           // Remove highlight after 5 seconds
           setTimeout(() => {
-            setHighlightedEventIds(prev => {
-              const updated = new Set(prev);
-              updated.delete(newEvent.ID);
-              return updated;
-            });
+            setLatestEventId(null);
           }, 5000);
 
           return [...currentEvents, newEvent];
@@ -178,7 +168,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
             index={event.chronologicalIndex}
             onShowDetails={handleShowDetails}
             sortAscending={sortAscending}
-            isHighlighted={highlightedEventIds.has(event.ID)}
+            isHighlighted={event.ID === latestEventId}
           />
         ))}
       </Timeline>
