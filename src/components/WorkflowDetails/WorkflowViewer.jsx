@@ -58,7 +58,7 @@ const WorkflowViewer = ({ workflowData }) => {
   return (
     <Paper className="paper-container">
       <div className="flow-header" onClick={() => setIsExpanded(!isExpanded)}>
-        <Typography className="overview-title">Flow Visualization</Typography>
+        <Typography className="overview-title-small">Flow Visualization</Typography>
         <IconButton 
           className={`expand-button ${isExpanded ? 'expanded' : ''}`}
           aria-label={isExpanded ? 'collapse' : 'expand'}

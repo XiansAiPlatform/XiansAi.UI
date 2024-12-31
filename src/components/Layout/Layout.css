@@ -4,7 +4,7 @@
   grid-template-columns: 240px 1fr;
   grid-template-rows: 64px 1fr;
   grid-template-areas: "nav header" "nav main";
-  height: 100vh;
+  min-height: 100vh;
   background-color: var(--bg-main);
   max-width: 1440px;
   margin: 0 auto;
@@ -20,6 +20,7 @@
   bottom: 0;
   background-color: var(--bg-main);
   z-index: -1;
+  overflow-y: auto;
 }
 
 /* Update header styles */
@@ -37,7 +38,6 @@
   grid-area: main;
   padding: var(--spacing-lg);
   background-color: var(--bg-main);
-  overflow-y: auto;
   max-width: 1200px;
 }
 

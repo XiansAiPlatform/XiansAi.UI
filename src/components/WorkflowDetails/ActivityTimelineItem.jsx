@@ -53,9 +53,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
       return parsed.length > maxLength ? `${parsed.slice(0, maxLength)}...` : parsed;
     } else if (typeof parsed === 'object') {
       // For objects, stringify with proper formatting and then truncate
-      const formatted = JSON.stringify(parsed, null, 2)
-        .replace(/['"]+/g, '') // Remove quotes from keys and string values
-        .replace(/[{}\[\]]/g, ''); // Remove brackets
+      const formatted = JSON.stringify(parsed, null, 2);
       return formatted.length > maxLength ? `${formatted.slice(0, maxLength)}...` : formatted;
     }
     
