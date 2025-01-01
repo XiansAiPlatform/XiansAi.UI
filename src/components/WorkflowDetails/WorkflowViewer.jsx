@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MermaidDiagram from './MermaidDiagram';
 import { Paper, Typography, IconButton } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
@@ -6,10 +6,6 @@ import './WorkflowDetails.css';
 
 const WorkflowViewer = ({ workflowData }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  useEffect(() => {
-    console.log('Workflow Data:', workflowData);
-  }, [workflowData]);
 
   const mermaidDiagram = `
   flowchart TD

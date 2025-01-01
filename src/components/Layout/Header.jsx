@@ -8,18 +8,15 @@ const Header = ({ pageTitle = "" }) => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [organization, setOrganization] = React.useState('');
-  const [name, setName] = React.useState('');
+  const [name] = React.useState('');
   React.useEffect(() => {
     const getOrganization = async () => {
       try {
         const token = await getAccessTokenSilently();
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
         const orgInfo = decodedToken['https://flowmaxer.ai/tenant'];
-        const name = decodedToken['https://flowmaxer.ai/name'];
         console.log('orgInfo', orgInfo);
-        console.log('name', name);
         setOrganization(orgInfo);
-        setName(name);
       } catch (error) {
         console.error('Error fetching organization:', error);
       }

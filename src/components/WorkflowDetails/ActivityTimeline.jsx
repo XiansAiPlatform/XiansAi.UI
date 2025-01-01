@@ -59,7 +59,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
       setIsLoading(false);
       setLoading(false);
     }
-  }, [workflowId, showError, setLoading]);
+  }, [workflowId, showError, setLoading, api]);
 
   // Cleanup function for the stream
   useEffect(() => {
