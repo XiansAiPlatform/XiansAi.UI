@@ -1,7 +1,9 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { handleApiError } from '../utils/errorHandler';
+import { getConfig } from '../config';
 
-const API_BASE_URL = 'http://localhost:5257';
+// Remove the hard-coded API_BASE_URL and use config
+const { apiBaseUrl } = getConfig();
 
 // Create a custom hook to handle auth
 export const useApi = () => {
@@ -26,7 +28,7 @@ export const useApi = () => {
     fetchWorkflowRuns : async () => {
       try {
         console.log('fetchWorkflowRuns called');
-        const response = await fetch(`${API_BASE_URL}/api/client/workflows`, {
+        const response = await fetch(`${apiBaseUrl}/api/client/workflows`, {
           headers: await createAuthHeaders()
         });
         
@@ -59,7 +61,7 @@ export const useApi = () => {
           throw new Error('Workflow ID is required');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/client/workflows/${workflowId}/events`, {
+        const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/events`, {
           headers: await createAuthHeaders()
         });
 
@@ -87,7 +89,7 @@ export const useApi = () => {
 
     executeWorkflowCancelAction : async (workflowId, force = false) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/client/workflows/${workflowId}/cancel?force=${force}`, { 
+        const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/cancel?force=${force}`, { 
           method: 'POST', 
           headers: await createAuthHeaders() 
         });
@@ -102,7 +104,7 @@ export const useApi = () => {
 
     startNewWorkflow: async (workflowType, parameters) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/client/workflows`, {
+        const response = await fetch(`${apiBaseUrl}/api/client/workflows`, {
           method: 'POST',
           headers: await createAuthHeaders(),
           body: JSON.stringify({
@@ -134,7 +136,7 @@ export const useApi = () => {
 
     generateCertificate: async (name, password) => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/client/certificates/generate`, {
+        const response = await fetch(`${apiBaseUrl}/api/client/certificates/generate`, {
           method: 'POST',
           headers: await createAuthHeaders(),
           body: JSON.stringify({
@@ -170,7 +172,7 @@ export const useApi = () => {
           throw new Error('Workflow ID is required');
         }
 
-        const response = await fetch(`${API_BASE_URL}/api/client/workflows/${workflowId}/events/stream`, {
+        const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/events/stream`, {
           headers: await createAuthHeaders()
         });
 
