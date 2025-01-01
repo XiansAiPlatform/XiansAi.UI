@@ -39,9 +39,9 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
     try {
       await api.executeWorkflowCancelAction(workflow.id, force);
       if (onActionComplete) onActionComplete();
-      showSuccess('Action requested. it may take a few minutes to complete.');
+      showSuccess('Termination requested. it may take a few minutes to complete.');
     } catch (error) {
-      showError(error.message || 'An unexpected error occurred');
+      showError('An unexpected error occurred. Please check if the workflow is still running. Error: ' + error.message);
       console.error(`Error executing ${action}:`, error);
     }
     handleClose();

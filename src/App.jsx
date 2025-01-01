@@ -17,7 +17,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import NotImplemented from './components/NotImplemented/NotImplemented';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme/mui-theme';
-
+import Settings from './components/Settings/Settings';
 function App() {
   const config = getConfig();
 
@@ -84,7 +84,7 @@ function App() {
                   } />    
                   <Route path="/settings" element={
                     <ProtectedRoute>
-                      <NotImplemented />
+                      <Settings />
                     </ProtectedRoute>
                   } />                                                                      
                 </Routes>
