@@ -294,7 +294,7 @@
 .timeline-actions {
   display: flex;
   gap: 8px;
-  justify-content: flex-start;
+  margin-left: auto;
 }
 
 .timeline-action-button {

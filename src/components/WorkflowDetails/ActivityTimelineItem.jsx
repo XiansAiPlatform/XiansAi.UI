@@ -2,6 +2,7 @@ import React from 'react';
 import { Typography, IconButton, Box, Tooltip } from '@mui/material';
 import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } from '@mui/lab';
 import InputIcon from '@mui/icons-material/Input';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
@@ -82,23 +83,61 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
         >
           <Box className="timeline-item-container">
             <Box className="timeline-item-header">
-              <Typography variant="h6">
-                {index}. {event.ActivityName}
-              </Typography>
-              {isHighlighted && (
-                <Chip 
-                  label="New" 
-                  size="small" 
-                  color="primary" 
-                  sx={{ 
-                    height: '20px',
-                    fontSize: '0.75rem',
-                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                    color: 'primary.main',
-                  }} 
-                />
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="h6">
+                  {index}. {event.ActivityName}
+                </Typography>
+                {isHighlighted && (
+                  <Chip 
+                    label="New" 
+                    size="small" 
+                    color="primary" 
+                    sx={{ 
+                      height: '20px',
+                      fontSize: '0.75rem',
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: 'primary.main',
+                      ml: 1
+                    }} 
+                  />
+                )}
+              </Box>
+              
+              <Box className="timeline-actions">
+                <IconButton
+                  onClick={() => onShowDetails(event)}
+                  size="small"
+                  className="timeline-action-button"
+                  title="View Inputs & Outputs"
+                >
+                  <InputIcon fontSize="small" />
+                  <Typography variant="caption" sx={{ ml: 1 }}>
+                    Inputs & Outputs
+                  </Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  className="timeline-action-button"
+                  title="View Agent"
+                >
+                  <SmartToyOutlinedIcon fontSize="small" />
+                  <Typography variant="caption" sx={{ ml: 1 }}>
+                    Agent
+                  </Typography>
+                </IconButton>
+                <IconButton
+                  size="small"
+                  className="timeline-action-button"
+                  title="View Instructions"
+                >
+                  <DescriptionOutlinedIcon fontSize="small" />
+                  <Typography variant="caption" sx={{ ml: 1 }}>
+                    Instructions
+                  </Typography>
+                </IconButton>
+              </Box>
             </Box>
+
             <Typography variant="body2" color="textSecondary">
               Started: {new Date(event.StartedTime).toLocaleString()}
             </Typography>
@@ -141,26 +180,6 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
                 </Tooltip>
               </Box>
             )}
-
-            <Box className="timeline-actions">
-              <IconButton
-                onClick={() => onShowDetails(event)}
-                size="small"
-                className="timeline-action-button"
-                title="View Inputs & Outputs"
-              >
-                <InputIcon fontSize="small" />
-                <Typography variant="button">View Inputs & Outputs</Typography>
-              </IconButton>
-              <IconButton
-                size="small"
-                className="timeline-action-button"
-                title="View Agents"
-              >
-                <SmartToyOutlinedIcon fontSize="small" />
-                <Typography variant="button">View Agents</Typography>
-              </IconButton>
-            </Box>
           </Box>
         </Box>
       </TimelineContent>

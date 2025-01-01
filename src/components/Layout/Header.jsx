@@ -3,6 +3,7 @@ import { Box, Typography, Menu, MenuItem, Avatar } from '@mui/material';
 import './Layout.css'; // Import the CSS file
 import { useAuth0 } from '@auth0/auth0-react';
 import LogoutIcon from '@mui/icons-material/Logout';
+import BusinessIcon from '@mui/icons-material/Business';
 
 const Header = ({ pageTitle = "" }) => {
   const { user, logout, getAccessTokenSilently } = useAuth0();
@@ -40,20 +41,51 @@ const Header = ({ pageTitle = "" }) => {
 
   return (
     <Box className="header">
-      <Box className="header-content">
+      <Box className="header-content" sx={{ display: 'flex', alignItems: 'center' }}>
         {pageTitle}
       </Box>
       
-      <Box className="header-content">
-        <Typography variant="h6" className="header-organization">
-          {organization}
-        </Typography>
+      <Box className="header-content" sx={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        gap: '16px'
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <BusinessIcon sx={{ 
+            color: 'text.secondary',
+            fontSize: '20px'
+          }} />
+          <Typography 
+            variant="h6" 
+            className="header-organization"
+            sx={{
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              color: 'text.secondary'
+            }}
+          >
+            {organization}
+          </Typography>
+        </Box>
 
         <Avatar
           onClick={handleMenu}
           className="header-avatar"
           src={user?.picture}
           alt={user?.name || 'User'}
+          sx={{
+            cursor: 'pointer',
+            width: 36,
+            height: 36,
+            transition: 'transform 0.2s',
+            '&:hover': {
+              transform: 'scale(1.05)'
+            }
+          }}
         >
           {!user?.picture && (user?.name?.charAt(0) || 'U')}
         </Avatar>

@@ -4,10 +4,6 @@ import JsonViewer from '../JsonViewer/JsonViewer';
 
 const ActivityDetailsView = ({ activityDetails }) => (
   <Box>
-    <Typography variant="h5" gutterBottom>
-      {activityDetails.activityName}
-    </Typography>
-
     <Typography variant="h6" sx={{ mt: 3 }}>
       Inputs:
     </Typography>

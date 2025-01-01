@@ -104,11 +104,21 @@ const JsonViewer = ({ data, initialDepth = 2 }) => {
   };
 
   return (
-    <Box className="json-viewer">
+    <Box className="json-viewer" sx={{ position: 'relative' }}>
       <IconButton 
         size="small" 
         onClick={() => copyToClipboard(data)}
         className="json-viewer__copy-button"
+        sx={{
+          position: 'absolute',
+          right: 8,
+          top: 8,
+          color: '#fff',
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          }
+        }}
       >
         <ContentCopyIcon fontSize="small" />
       </IconButton>

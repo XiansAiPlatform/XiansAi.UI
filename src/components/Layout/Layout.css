@@ -26,11 +26,11 @@
 /* Update header styles */
 .header {
   grid-area: header;
+  height: 64px;
+  padding: 0 24px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 0 50px;
-  max-width: 1200px;
+  align-items: center;
 }
 
 /* Update layout-main styles */
@@ -55,9 +55,7 @@
 
 /* Header Styles */
 .header-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  height: 100%;
 }
 
 .header-organization {

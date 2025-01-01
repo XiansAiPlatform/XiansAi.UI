@@ -105,7 +105,7 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
         inputs: event.Inputs,
         result: typeof event.Result === 'string' ? JSON.parse(event.Result) : event.Result
       };
-      openSlider(<ActivityDetailsView activityDetails={details} />);
+      openSlider(<ActivityDetailsView activityDetails={details} />, event.ActivityName);
     } catch (error) {
       console.error('Error processing event details:', error);
     }

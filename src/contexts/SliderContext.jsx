@@ -5,19 +5,22 @@ const SliderContext = createContext();
 export const SliderProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [sliderContent, setSliderContent] = useState(null);
+  const [sliderTitle, setSliderTitle] = useState(null);
 
-  const openSlider = (content) => {
+  const openSlider = (content, title) => {
     setSliderContent(content);
+    setSliderTitle(title);
     setIsOpen(true);
   };
 
   const closeSlider = () => {
     setIsOpen(false);
     setSliderContent(null);
+    setSliderTitle(null);
   };
 
   return (
-    <SliderContext.Provider value={{ isOpen, openSlider, closeSlider, sliderContent }}>
+    <SliderContext.Provider value={{ isOpen, openSlider, closeSlider, sliderContent, sliderTitle }}>
       {children}
     </SliderContext.Provider>
   );

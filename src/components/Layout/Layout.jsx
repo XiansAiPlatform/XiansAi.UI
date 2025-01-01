@@ -6,7 +6,7 @@ import RightSlider from './RightSlider';
 import { useSlider } from '../../contexts/SliderContext';
 
 const Layout = ({ children }) => {
-  const { isOpen, closeSlider, sliderContent } = useSlider();
+  const { isOpen, closeSlider, sliderContent, sliderTitle } = useSlider();
 
   return (
     <Box className="layout-wrapper">
@@ -18,7 +18,7 @@ const Layout = ({ children }) => {
         </Box>
         {isOpen && (
           <Box className="layout-slider">
-            <RightSlider onClose={closeSlider}>
+            <RightSlider onClose={closeSlider} title={sliderTitle}>
               {sliderContent}
             </RightSlider>
           </Box>

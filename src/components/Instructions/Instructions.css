@@ -1,0 +1,236 @@
+/* Layout */
+.container {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+/* List Styles */
+.instructions-list {
+  padding: 0.75rem;
+}
+
+.instructions-list .MuiListItem-root {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  width: auto;
+  margin: 0;
+}
+
+.instructions-list > *:not(:last-child) {
+  margin-bottom: 0.25rem;
+}
+
+/* Instruction Item */
+.instruction-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 0.5rem;
+}
+
+.instruction-item:hover {
+  transform: translateY(-2px);
+}
+
+/* Separate List Item Style */
+.instruction-list-item.MuiPaper-root {
+  border-radius: var(--radius-lg) !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 1rem !important;
+  backdrop-filter: blur(8px);
+  padding-right: 3rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.instruction-list-item.MuiPaper-root:hover {
+  background-color: var(--bg-main) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.instruction-item-expanded .instruction-list-item.MuiPaper-root {
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-bottom: none !important;
+}
+
+/* Viewer Content Style */
+.instruction-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Item Header */
+.instruction-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.instruction-title {
+  font-size: 1.1rem;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.instruction-metadata {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+/* Chips and Tags */
+.type-chip {
+  border-radius: var(--radius-md);
+  background-color: var(--bg-hover);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-medium);
+  padding: 0.25rem 0.75rem;
+  height: 24px;
+}
+
+.type-chip:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.version-chip {
+  border-radius: var(--radius-md);
+  background-color: var(--bg-hover);
+  padding: 0.25rem 0.75rem;
+  height: 24px;
+  font-size: 0.8125rem;
+}
+
+.version-chip:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.version-chip-current {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Buttons */
+.version-toggle-btn {
+  margin-left: 0.25rem;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.version-toggle-btn:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Delete Button */
+.delete-btn {
+  position: absolute !important;
+  right: 1.25rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
+  color: var(--text-secondary) !important;
+  background-color: transparent !important;
+}
+
+.delete-btn:hover {
+  background-color: var(--error-light) !important;
+  color: var(--error-main) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.delete-btn svg {
+  font-size: 1.25rem !important;
+}
+
+/* Version History Panel */
+.version-history.MuiPaper-root {
+  padding: 1.25rem;
+  border-radius: 0 0 16px 16px !important;
+  background-color: var(--bg-main) !important;
+  border: 1px solid var(--border-color) !important;
+  border-top: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.version-history.MuiPaper-root:hover {
+  background-color: var(--bg-paper) !important;
+  border-color: rgba(0, 0, 0, 0.23) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.version-history .version-chip {
+  margin: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.version-history .version-chip:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+/* Content Viewer */
+.content-viewer {
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 0.5rem;
+}
+
+.content-viewer pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Instruction Viewer Specific Styles */
+.instruction-item {
+  padding: .5rem;
+}
+
+.instruction-header-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.instruction-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.instruction-name-field {
+  margin-bottom: 1rem;
+}
+
+.instruction-metadata {
+  margin-bottom: 1rem;
+}
+
+.content-viewer {
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+.content-viewer pre {
+  margin: 0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

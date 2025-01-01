@@ -18,6 +18,8 @@ import NotImplemented from './components/NotImplemented/NotImplemented';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme/mui-theme';
 import Settings from './components/Settings/Settings';
+import Instructions from './components/Instructions/Instructions';
+
 function App() {
   const config = getConfig();
 
@@ -79,7 +81,7 @@ function App() {
                   } />
                   <Route path="/instructions" element={
                     <ProtectedRoute>
-                      <NotImplemented />
+                      <Instructions />
                     </ProtectedRoute>
                   } />    
                   <Route path="/settings" element={
