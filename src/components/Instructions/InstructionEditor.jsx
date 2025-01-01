@@ -6,8 +6,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  Typography
+  MenuItem
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
 
@@ -17,14 +16,41 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
     content: '',
     type: null,
   });
+  const [jsonError, setJsonError] = useState(null);
+
+  const validateJSON = (content) => {
+    if (!content) return null;
+    try {
+      JSON.parse(content);
+      return null;
+    } catch (e) {
+      return e.message;
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (formData.type === 'json') {
+      const error = validateJSON(formData.content);
+      if (error) {
+        setJsonError(error);
+        return;
+      }
+    }
+
     onSave({
       ...formData,
       version: crypto.randomUUID(),
     });
     onClose();
+  };
+
+  const handleEditorChange = (value) => {
+    setFormData({ ...formData, content: value });
+    if (formData.type === 'json') {
+      setJsonError(validateJSON(value));
+    }
   };
 
   return (
@@ -109,7 +135,7 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
             height="400px"
             language={formData.type === 'json' ? 'json' : 'markdown'}
             value={formData.content}
-            onChange={(value) => setFormData({ ...formData, content: value })}
+            onChange={handleEditorChange}
             theme="light"
             options={{
               minimap: { enabled: false },
@@ -119,12 +145,24 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
               scrollBeyondLastLine: false
             }}
           />
+          {jsonError && (
+            <Box sx={{ 
+              p: 1, 
+              color: 'error.main',
+              borderTop: 1,
+              borderColor: 'error.main',
+              fontSize: '0.875rem'
+            }}>
+              {jsonError}
+            </Box>
+          )}
         </Box>
 
         <Button 
           variant="contained" 
           type="submit" 
           fullWidth
+          disabled={formData.type === 'json' && jsonError}
           sx={{
             bgcolor: 'var(--primary)',
             color: '#fff',
@@ -134,10 +172,15 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
             '&:hover': {
               bgcolor: 'var(--primary)',
               opacity: 0.9
+            },
+            '&.Mui-disabled': {
+              bgcolor: 'var(--primary)',
+              opacity: 0.5,
+              color: '#fff'
             }
           }}
         >
-          Save New Version
+          {mode === 'add' ? 'Create Instruction' : 'Save New Version'}
         </Button>
       </form>
     </Box>
