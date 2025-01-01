@@ -20,17 +20,20 @@
 
 /* Button styles */
 .action-button {
-  display: flex;
-  gap: 8px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
-  margin-left: auto;
-  padding: 8px 16px;
-  transition: background-color 0.2s ease;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-radius: 6px !important;
+  margin-left: auto !important;
+  padding: 8px 16px !important;
+  transition: background-color 0.2s ease !important;
+  min-width: auto !important;
+  height: auto !important;
 }
 
 .action-button:hover {
-  background-color: #eeeeee;
+  background-color: rgba(0, 0, 0, 0.08) !important;
 }
 
 .action-button.disabled {
@@ -183,18 +186,26 @@
   padding: 16px;
   border-radius: 8px;
   transition: background-color 0.5s ease;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  margin: 8px 0;
+  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .timeline-item-content.highlighted {
-  /* Temporarily make this more obvious for debugging */
-  background-color: rgba(255, 255, 0, 0.2) !important;
+  background-color: rgba(255, 255, 0, 0.05) !important;
+  border: 1px solid rgba(255, 255, 0, 0.3) !important;
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
+  .timeline-item-content {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
   .timeline-item-content.highlighted {
-    /* Temporarily make this more obvious for debugging */
-    background-color: rgba(255, 255, 0, 0.3) !important;
+    background-color: rgba(255, 255, 0, 0.08) !important;
+    border: 1px solid rgba(255, 255, 0, 0.2) !important;
   }
 }
 
@@ -230,4 +241,173 @@
 .flow-header:hover {
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 4px;
+}
+
+/* Timeline item styles */
+.timeline-item {
+  text-align: left;
+}
+
+.timeline-item::before {
+  display: none;
+}
+
+.timeline-content {
+  padding: 12px 16px;
+}
+
+.timeline-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.timeline-item-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.timeline-data-container {
+  width: 100%;
+  text-align: left;
+}
+
+.timeline-data-content {
+  background-color: rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  display: block;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.timeline-data-content:hover {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+
+.timeline-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.timeline-action-button {
+  display: flex !important;
+  gap: 4px !important;
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  border-radius: 4px !important;
+  padding: 6px 12px !important;
+  min-width: auto !important;
+  height: auto !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .timeline-data-content {
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .timeline-data-content:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  
+  .timeline-action-button {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+  }
+}
+
+/* Increase specificity and target MUI classes */
+.MuiTimelineItem-root .timeline-item-content {
+  padding: 16px;
+  border-radius: 8px;
+  transition: background-color 0.5s ease;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  margin: 8px 0;
+  background-color: rgba(0, 0, 0, 0.04) !important; /* Force override */
+}
+
+.MuiTimelineItem-root .timeline-data-content.MuiTypography-root {
+  background-color: rgba(0, 0, 0, 0.08) !important; /* Force override */
+  padding: 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+  display: block;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.MuiTimelineItem-root .timeline-data-content.MuiTypography-root:hover {
+  background-color: rgba(0, 0, 0, 0.12) !important; /* Force override */
+}
+
+
+/* Update highlight styles with increased specificity */
+.MuiTimelineItem-root .timeline-item-content.highlighted {
+  background-color: rgba(255, 255, 0, 0.05) !important;
+  border: 1px solid rgba(255, 255, 0, 0.3) !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  /* ... existing dark mode styles ... */
+
+  .MuiTimelineItem-root .timeline-item-content.highlighted {
+    background-color: rgba(255, 255, 0, 0.08) !important;
+    border: 1px solid rgba(255, 255, 0, 0.2) !important;
+  }
+}
+
+/* Base styles without theme selectors */
+.MuiTimelineItem-root .timeline-item-content {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease !important; /* Smooth transition for highlight effect */
+}
+
+.MuiTimelineItem-root .timeline-data-content.MuiTypography-root {
+  background-color: rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.MuiTimelineItem-root .timeline-data-content.MuiTypography-root:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.action-button {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.action-button:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.timeline-action-button {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.timeline-action-button:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Highlight styles */
+.MuiTimelineItem-root .timeline-item-content.highlighted {
+  background-color: rgba(255, 255, 0, 0.03) !important;
+  border: 1px solid rgba(255, 255, 0, 0.08) !important;
+}
+
+/* Highlight styles with more prominent border */
+.MuiTimelineItem-root .timeline-item-content.highlighted {
+  background-color: rgba(255, 255, 0, 0.03) !important;
+  border: 1px solid rgba(25, 118, 210, 0.3) !important; /* Using MUI primary color */
+  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.1) !important;
 } 

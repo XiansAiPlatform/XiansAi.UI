@@ -5,6 +5,7 @@ import InputIcon from '@mui/icons-material/Input';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
+import Chip from '@mui/material/Chip';
 
 const ArrowDot = ({ ascending }) => {
   const theme = useTheme();
@@ -66,50 +67,48 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
   const outputs = event.Result ? formatText(JSON.stringify(event.Result)) : null;
 
   return (
-    <TimelineItem sx={{
-      '&.MuiTimelineItem-root': {
-        '&::before': {
-          display: 'none'
-        }
-      }
-    }}>
+    <TimelineItem className="timeline-item">
       <TimelineSeparator>
         <Box className="arrow-dot-container">
           <ArrowDot ascending={sortAscending} />
         </Box>
         <TimelineConnector />
       </TimelineSeparator>
-      <TimelineContent sx={{ 
-        py: '12px', 
-        px: 2,
-        textAlign: 'left'
-      }}>
+      <TimelineContent className="timeline-content">
         <Box 
           className={`timeline-item-content ${isHighlighted ? 'highlighted' : ''}`}
           data-highlighted={isHighlighted}
           data-event-id={event.ID}
         >
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: 1,
-            alignItems: 'flex-start'
-          }}>
-            <Box sx={{ width: '100%' }}>
+          <Box className="timeline-item-container">
+            <Box className="timeline-item-header">
               <Typography variant="h6">
                 {index}. {event.ActivityName}
               </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Started: {new Date(event.StartedTime).toLocaleString()}
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                Ended: {new Date(event.EndedTime).toLocaleString()}
-              </Typography>
+              {isHighlighted && (
+                <Chip 
+                  label="New" 
+                  size="small" 
+                  color="primary" 
+                  sx={{ 
+                    height: '20px',
+                    fontSize: '0.75rem',
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                    color: 'primary.main',
+                  }} 
+                />
+              )}
             </Box>
+            <Typography variant="body2" color="textSecondary">
+              Started: {new Date(event.StartedTime).toLocaleString()}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Ended: {new Date(event.EndedTime).toLocaleString()}
+            </Typography>
 
             {/* Updated Inputs display */}
             {inputs && (
-              <Box sx={{ width: '100%' }}>
+              <Box className="timeline-data-container">
                 <Typography variant="subtitle2" color="primary">
                   Inputs:
                 </Typography>
@@ -117,19 +116,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
                   <Typography 
                     variant="body2" 
                     onClick={() => onShowDetails(event)}
-                    sx={{ 
-                      bgcolor: 'action.hover',
-                      p: 1,
-                      borderRadius: 1,
-                      fontFamily: 'monospace',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-all',
-                      display: 'block',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        bgcolor: 'action.selected'
-                      }
-                    }}
+                    className="timeline-data-content"
                   >
                     {inputs}
                   </Typography>
@@ -139,7 +126,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
 
             {/* Updated Outputs display */}
             {outputs && (
-              <Box sx={{ width: '100%' }}>
+              <Box className="timeline-data-container">
                 <Typography variant="subtitle2" color="primary">
                   Outputs:
                 </Typography>
@@ -147,18 +134,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
                   <Typography 
                     variant="body2" 
                     onClick={() => onShowDetails(event)}
-                    sx={{ 
-                      bgcolor: 'action.hover',
-                      p: 1,
-                      borderRadius: 1,
-                      fontFamily: 'monospace',
-                      whiteSpace: 'pre-wrap',
-                      wordBreak: 'break-all',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        bgcolor: 'action.selected'
-                      }
-                    }}
+                    className="timeline-data-content"
                   >
                     {outputs}
                   </Typography>
@@ -166,15 +142,11 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
               </Box>
             )}
 
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 1,
-              justifyContent: 'flex-start'
-            }}>
+            <Box className="timeline-actions">
               <IconButton
                 onClick={() => onShowDetails(event)}
                 size="small"
-                sx={{ display: 'flex', gap: 0.5, bgcolor: 'action.hover', borderRadius: 1 }}
+                className="timeline-action-button"
                 title="View Inputs & Outputs"
               >
                 <InputIcon fontSize="small" />
@@ -182,7 +154,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
               </IconButton>
               <IconButton
                 size="small"
-                sx={{ display: 'flex', gap: 0.5, bgcolor: 'action.hover', borderRadius: 1 }}
+                className="timeline-action-button"
                 title="View Agents"
               >
                 <SmartToyOutlinedIcon fontSize="small" />
