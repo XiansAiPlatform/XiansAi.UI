@@ -2,11 +2,13 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { handleApiError } from '../utils/errorHandler';
 import { getConfig } from '../config';
 import { useMemo } from 'react';
+import { useSelectedOrg } from '../contexts/OrganizationContext';
 
 const { apiBaseUrl } = getConfig();
 
 export const useApi = () => {
   const { getAccessTokenSilently } = useAuth0();
+  const { selectedOrg } = useSelectedOrg();
 
   // Memoize the API object so it remains stable across renders
   const api = useMemo(() => {
@@ -22,6 +24,7 @@ export const useApi = () => {
     const createAuthHeaders = async () => ({
       'Authorization': `Bearer ${await getAccessToken()}`,
       'Content-Type': 'application/json',
+      'X-Tenant-Id': selectedOrg || '',
     });
 
     return {
@@ -223,7 +226,7 @@ export const useApi = () => {
         }
       },
     };
-  }, [getAccessTokenSilently]); // Only depends on getAccessTokenSilently
+  }, [getAccessTokenSilently, selectedOrg]); // Only depends on getAccessTokenSilently
 
   return api;
 };

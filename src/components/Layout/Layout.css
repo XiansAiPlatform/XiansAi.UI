@@ -191,3 +191,20 @@ body {
 .header-logout .MuiTypography-root {
   font-family: 'Inter', sans-serif;
 } 
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+.nav-logo-icon {
+  color: var(--primary);
+  font-size: 32px;
+}
+
+.nav-logo-text {
+  font-weight: 700 !important;
+  letter-spacing: -0.5px;
+}

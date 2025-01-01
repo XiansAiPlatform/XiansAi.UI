@@ -72,9 +72,10 @@ const LeftNav = () => {
     <Box className="nav">
       <Link to="/" style={{ textDecoration: 'none' }}>
         <Box className="nav-logo">
-          <AutoGraphIcon className="nav-logo-icon" />
-          <Typography variant="h6" className="nav-logo-text">
-            Flowmaxer
+          
+          <Typography variant="h5" className="nav-logo-text">
+            <span style={{ color: 'var(--primary)' }}>Xians</span>
+            <span style={{ color: 'var(--secondary)' }}>.ai</span>
           </Typography>
         </Box>
       </Link>

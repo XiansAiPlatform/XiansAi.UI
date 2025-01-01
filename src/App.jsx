@@ -19,6 +19,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme/mui-theme';
 import Settings from './components/Settings/Settings';
 import Instructions from './components/Instructions/Instructions';
+import { OrganizationProvider } from './contexts/OrganizationContext';
 
 function App() {
   const config = getConfig();
@@ -41,63 +42,65 @@ function App() {
 
 
   return (
-    <BrowserRouter>
-      <Auth0Provider
-        {...providerConfig}
-      >
-        <ThemeProvider theme={theme}>
+    <OrganizationProvider>
+      <BrowserRouter>
+        <Auth0Provider
+          {...providerConfig}
+        >
+          <ThemeProvider theme={theme}>
 
-        <NotificationProvider>
-          <LoadingProvider>
-            <SliderProvider>
-              <Toaster />
-              <Layout>
-                <Routes>
-                  <Route path="/callback" element={<Callback />} />
-                  <Route path="/" element={
-                    <ProtectedRoute>
-                      <WorkflowList />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/runs" element={
-                    <ProtectedRoute>
-                      <WorkflowList />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/runs/:id" element={
-                    <ProtectedRoute>
-                      <WorkflowDetails />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/definitions" element={
-                    <ProtectedRoute>
-                      <NotImplemented />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/agents" element={
-                    <ProtectedRoute>
-                      <NotImplemented />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/instructions" element={
-                    <ProtectedRoute>
-                      <Instructions />
-                    </ProtectedRoute>
-                  } />    
-                  <Route path="/settings" element={
-                    <ProtectedRoute>
-                      <Settings />
-                    </ProtectedRoute>
-                  } />                                                                      
-                </Routes>
-              </Layout>
-            </SliderProvider>
-          </LoadingProvider>
-        </NotificationProvider>
-        </ThemeProvider>
-      </Auth0Provider>
-      <ToastContainer />
-    </BrowserRouter>
+          <NotificationProvider>
+            <LoadingProvider>
+              <SliderProvider>
+                <Toaster />
+                <Layout>
+                  <Routes>
+                    <Route path="/callback" element={<Callback />} />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <WorkflowList />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/runs" element={
+                      <ProtectedRoute>
+                        <WorkflowList />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/runs/:id" element={
+                      <ProtectedRoute>
+                        <WorkflowDetails />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/definitions" element={
+                      <ProtectedRoute>
+                        <NotImplemented />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/agents" element={
+                      <ProtectedRoute>
+                        <NotImplemented />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/instructions" element={
+                      <ProtectedRoute>
+                        <Instructions />
+                      </ProtectedRoute>
+                    } />    
+                    <Route path="/settings" element={
+                      <ProtectedRoute>
+                        <Settings />
+                      </ProtectedRoute>
+                    } />                                                                      
+                  </Routes>
+                </Layout>
+              </SliderProvider>
+            </LoadingProvider>
+          </NotificationProvider>
+          </ThemeProvider>
+        </Auth0Provider>
+        <ToastContainer />
+      </BrowserRouter>
+    </OrganizationProvider>
   );
 }
 
