@@ -12,18 +12,18 @@ import { Add} from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
 import InstructionEditor from './InstructionEditor';
 import InstructionItem from './InstructionItem';
-import { useWorkflowApi } from '../../services/instructions-api';
+import { useInstructionsApi } from '../../services/instructions-api';
 
 const Instructions = () => {
   const [instructions, setInstructions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { openSlider, closeSlider } = useSlider();
-  const workflowApi = useWorkflowApi();
+  const instructionsApi = useInstructionsApi();
 
   useEffect(() => {
     const fetchInstructions = async () => {
       try {
-        const data = await workflowApi.getLatestInstructions();
+        const data = await instructionsApi.getLatestInstructions();
         setInstructions(data);
       } catch (error) {
         console.error('Failed to fetch instructions:', error);
@@ -34,7 +34,7 @@ const Instructions = () => {
     };
 
     fetchInstructions();
-  }, [workflowApi]);
+  }, [instructionsApi]);
 
   const handleAdd = () => {
     openSlider(
@@ -42,8 +42,10 @@ const Instructions = () => {
         mode="add"
         onSave={async (newInstruction) => {
           try {
-            const savedInstruction = await workflowApi.createInstruction(newInstruction);
-            setInstructions([...instructions, savedInstruction]);
+            await instructionsApi.createInstruction(newInstruction);
+            // Fetch fresh data after creating
+            const updatedInstructions = await instructionsApi.getLatestInstructions();
+            setInstructions(updatedInstructions);
             closeSlider();
           } catch (error) {
             console.error('Failed to create instruction:', error);
@@ -56,16 +58,43 @@ const Instructions = () => {
     );
   };
 
-  const handleUpdateInstruction = (updatedInstruction) => {
-    // TODO: Save to API
-    setInstructions(instructions.map(i => 
-      i.name === updatedInstruction.name ? updatedInstruction : i
-    ));
+  const handleUpdateInstruction = async (updatedInstruction) => {
+    try {
+      await instructionsApi.createInstruction(updatedInstruction);
+      // Fetch fresh data after updating
+      const updatedInstructions = await instructionsApi.getLatestInstructions();
+      setInstructions(updatedInstructions);
+      closeSlider();
+    } catch (error) {
+      console.error('Failed to update instruction:', error);
+      // TODO: Add error handling/notification
+    }
   };
 
-  const handleDeleteInstruction = (instruction) => {
-    // TODO: Implement delete logic with API
-    console.log('Deleting instruction:', instruction);
+  const handleDeleteAllInstruction = async (instruction) => {
+    try {
+      const success = await instructionsApi.deleteAllVersions(instruction.name);
+      if (success) {
+        // Fetch fresh data after deletion
+        const updatedInstructions = await instructionsApi.getLatestInstructions();
+        setInstructions(updatedInstructions);
+        closeSlider();
+      }
+    } catch (error) {
+      console.error('Failed to delete instruction versions:', error);
+      // TODO: Add error handling/notification
+    }
+  };
+
+  const handleDeleteOneInstruction = async (instruction) => {
+
+    var success = instructionsApi.deleteInstruction(instruction.id);
+    if (success) {
+        // Fetch fresh data after creating
+        const updatedInstructions = await instructionsApi.getLatestInstructions();
+        setInstructions(updatedInstructions);
+        closeSlider();
+    }
   };
 
   return (
@@ -146,10 +175,11 @@ const Instructions = () => {
             >
               {instructions.map((instruction) => (
                 <InstructionItem
-                  key={instruction.name}
+                  key={instruction.id}
                   instruction={instruction}
                   onUpdateInstruction={handleUpdateInstruction}
-                  onDeleteInstruction={handleDeleteInstruction}
+                  onDeleteAllInstruction={handleDeleteAllInstruction}
+                  onDeleteOneInstruction={handleDeleteOneInstruction}
                 />
               ))}
             </List>

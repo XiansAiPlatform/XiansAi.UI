@@ -6,7 +6,7 @@ import { useSelectedOrg } from '../contexts/OrganizationContext';
 
 const { apiBaseUrl } = getConfig();
 
-export const useWorkflowApi = () => {
+export const useInstructionsApi = () => {
   const { getAccessTokenSilently } = useAuth0();
   const { selectedOrg } = useSelectedOrg();
 
@@ -27,7 +27,11 @@ export const useWorkflowApi = () => {
     });
 
     return {
+
+
+      
       createInstruction: async (instructionRequest) => {
+        console.log('Creating instruction:', instructionRequest);
         try {
           const headers = await createAuthHeaders();
           const response = await fetch(`${apiBaseUrl}/api/client/instructions`, {
@@ -62,6 +66,66 @@ export const useWorkflowApi = () => {
           return await response.json();
         } catch (error) {
           console.error('Error fetching latest instructions:', error);
+          throw error;
+        }
+      },
+
+      deleteInstruction: async (id) => {
+        try {
+          const headers = await createAuthHeaders();
+          const response = await fetch(`${apiBaseUrl}/api/client/instructions/${id}`, {
+            method: 'DELETE',
+            headers
+          });
+
+          if (!response.ok) {
+            throw await handleApiError(response);
+          }
+
+          return true;
+        } catch (error) {
+          console.error('Error deleting instruction:', error);
+          throw error;
+        }
+      },
+
+      deleteAllVersions: async (name) => {
+        try {
+          const headers = await createAuthHeaders();
+          const response = await fetch(`${apiBaseUrl}/api/client/instructions/all`, {
+            method: 'DELETE',
+            headers,
+            body: JSON.stringify({ "Name": name })
+          });
+
+          if (!response.ok) {
+            throw await handleApiError(response);
+          }
+
+          return true;
+        } catch (error) {
+          console.error('Error deleting all versions:', error);
+          throw error;
+        }
+      },
+
+      getInstructionVersions: async (name) => {
+        try {
+          const headers = await createAuthHeaders();
+          const encodedName = encodeURIComponent(name);
+          const response = await fetch(`${apiBaseUrl}/api/client/instructions/${encodedName}/versions`, {
+            method: 'GET',
+            headers
+          });
+
+          if (!response.ok) {
+            throw await handleApiError(response);
+          }
+
+          var versions = await response.json();
+          return versions;
+        } catch (error) {
+          console.error('Error fetching instruction versions:', error);
           throw error;
         }
       }

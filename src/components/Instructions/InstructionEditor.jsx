@@ -9,10 +9,8 @@ import {
   MenuItem
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
-import { useWorkflowApi } from '../../services/instructions-api';
 
 const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
-  const workflowApi = useWorkflowApi();
   const [formData, setFormData] = useState(instruction || {
     name: '',
     content: '',
@@ -59,19 +57,16 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
       const error = validateJSON(formData.content);
       if (error) {
         setJsonError(error);
+        setIsSubmitting(false);
         return;
       }
     }
 
     try {
-      const savedInstruction = await workflowApi.createInstruction({
-        ...formData,
-        version: crypto.randomUUID(),
-      });
-      
-      onSave(savedInstruction);
+      onSave(formData);
       onClose();
     } catch (error) {
+      console.error('Error saving instruction:', error);
       setSubmitError(error.message || 'Failed to save instruction');
     } finally {
       setIsSubmitting(false);
@@ -206,7 +201,7 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
           variant="contained" 
           type="submit" 
           fullWidth
-          disabled={formData.type === 'json' && jsonError || isSubmitting}
+          disabled={(formData.type === 'json' && jsonError) || isSubmitting}
           sx={{
             bgcolor: 'var(--primary)',
             color: '#fff',

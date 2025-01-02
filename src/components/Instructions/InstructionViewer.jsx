@@ -1,10 +1,14 @@
 import React from 'react';
-import { Box, Typography, Chip, IconButton, Tooltip, TextField } from '@mui/material';
+import { Box, IconButton, Tooltip, TextField } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteVersionIcon from '@mui/icons-material/DeleteForever';
 
-const InstructionViewer = ({ instruction, onEdit, onDelete }) => {
+const InstructionViewer = ({ instruction, onEdit, onDelete, isHistoricalVersion = false }) => {
+  const handleDelete = () => {
+    onDelete(instruction);
+  };
+
   const renderContent = () => {
     switch (instruction.type) {
       case 'json':
@@ -21,19 +25,13 @@ const InstructionViewer = ({ instruction, onEdit, onDelete }) => {
   };
 
   return (
-    <Box className="instruction-item">
+    <Box >
       <Box className="instruction-header-container">
-        <Typography 
-          variant="h6"
-          sx={{
-            color: 'var(--text-primary)',
-            fontWeight: 'var(--font-weight-semibold)',
-            letterSpacing: 'var(--letter-spacing-tight)'
-          }}
-        >
-          View Instruction
-        </Typography>
-        <Box className="instruction-actions">
+        <Box className="instruction-actions" sx={{ 
+          display: 'flex',
+          justifyContent: 'flex-end',
+          width: '100%'
+        }}>
           <Tooltip title="Create New Version">
             <IconButton 
               onClick={onEdit}
@@ -43,9 +41,9 @@ const InstructionViewer = ({ instruction, onEdit, onDelete }) => {
               <AddIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Delete Instruction">
+          <Tooltip title="Delete This Version">
             <IconButton 
-              onClick={onDelete}
+              onClick={handleDelete}
               size="small"
             >
               <DeleteVersionIcon />
@@ -55,34 +53,66 @@ const InstructionViewer = ({ instruction, onEdit, onDelete }) => {
       </Box>
 
       <Box className="instruction-item-content">
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            fullWidth
+            label="Name"
+            value={instruction.name}
+            className="instruction-name-field"
+            disabled
+            sx={{
+              '& .MuiInputBase-input': {
+                color: 'var(--text-primary)'
+              }
+            }}
+          />
+          
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <TextField
+            fullWidth
+            label="Type"
+            value={instruction.type || 'No Type'}
+            className="instruction-type-field"
+            disabled
+            sx={{
+              mt: 2,
+              mb: 2,
+              '& .MuiInputBase-input': {
+                color: 'var(--text-primary)'
+              }
+            }}
+          />
+          <TextField
+            label="Created At"
+            value={instruction.createdAt ? new Date(instruction.createdAt).toLocaleString() : 'Unknown'}
+            className="instruction-created-at-field"
+            disabled
+            sx={{
+              mt: 2,
+              mb: 2,
+              minWidth: '200px',
+              flex: 1,
+              '& .MuiInputBase-input': {
+                color: 'var(--text-primary)'
+              }
+            }}
+          />
+        </Box>
+
         <TextField
-          fullWidth
-          label="Name"
-          value={instruction.name}
-          className="instruction-name-field"
+          label="Version"
+          value={instruction.version || 'v1'}
+          className="instruction-version-field"
           disabled
           sx={{
+            width: '100%',
             '& .MuiInputBase-input': {
               color: 'var(--text-primary)'
             }
           }}
         />
-
-        <TextField
-          fullWidth
-          label="Type"
-          value={instruction.type || 'No Type'}
-          className="instruction-type-field"
-          disabled
-          sx={{
-            mt: 2,
-            mb: 2,
-            '& .MuiInputBase-input': {
-              color: 'var(--text-primary)'
-            }
-          }}
-        />
-
         <Box className="content-viewer" sx={{
           backgroundColor: 'var(--bg-main)',
           border: '1px solid var(--border-color)',
