@@ -31,7 +31,7 @@ export const useInstructionsApi = () => {
 
       
       createInstruction: async (instructionRequest) => {
-        console.log('Creating instruction:', instructionRequest);
+        instructionRequest.name = instructionRequest.name.trim();
         try {
           const headers = await createAuthHeaders();
           const response = await fetch(`${apiBaseUrl}/api/client/instructions`, {
@@ -95,7 +95,7 @@ export const useInstructionsApi = () => {
           const response = await fetch(`${apiBaseUrl}/api/client/instructions/all`, {
             method: 'DELETE',
             headers,
-            body: JSON.stringify({ "Name": name })
+            body: JSON.stringify({ "Name": name.trim() })
           });
 
           if (!response.ok) {
@@ -113,7 +113,7 @@ export const useInstructionsApi = () => {
         try {
           const headers = await createAuthHeaders();
           const encodedName = encodeURIComponent(name);
-          const response = await fetch(`${apiBaseUrl}/api/client/instructions/${encodedName}/versions`, {
+          const response = await fetch(`${apiBaseUrl}/api/client/instructions/versions?name=${encodedName}`, {
             method: 'GET',
             headers
           });

@@ -77,6 +77,20 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
     setFormData({ ...formData, content: value });
     if (formData.type === 'json') {
       setJsonError(validateJSON(value));
+    } else {
+      setJsonError(null);
+    }
+  };
+
+  const handleTypeChange = (e) => {
+    const newType = e.target.value;
+    setFormData({ ...formData, type: newType });
+    
+    // Clear or set JSON validation errors when type changes
+    if (newType === 'json') {
+      setJsonError(validateJSON(formData.content));
+    } else {
+      setJsonError(null);
     }
   };
 
@@ -122,7 +136,7 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
           }}>Type</InputLabel>
           <Select
             value={normalizeType(formData.type)}
-            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+            onChange={handleTypeChange}
             sx={{
               backgroundColor: 'var(--background-light)',
               borderRadius: 'var(--radius-sm)',
