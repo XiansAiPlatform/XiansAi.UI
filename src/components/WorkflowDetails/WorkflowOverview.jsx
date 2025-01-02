@@ -15,7 +15,7 @@ import {
 } from '@mui/icons-material';
 import StatusChip from '../Common/StatusChip';
 import { useNotification } from '../../contexts/NotificationContext';
-import { useApi } from '../../services/api';
+import { useApi } from '../../services/workflow-api';
 import './WorkflowDetails.css';
 
 

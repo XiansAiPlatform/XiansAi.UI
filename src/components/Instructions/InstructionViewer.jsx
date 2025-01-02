@@ -68,6 +68,21 @@ const InstructionViewer = ({ instruction, onEdit, onDelete }) => {
           }}
         />
 
+        <TextField
+          fullWidth
+          label="Type"
+          value={instruction.type || 'No Type'}
+          className="instruction-type-field"
+          disabled
+          sx={{
+            mt: 2,
+            mb: 2,
+            '& .MuiInputBase-input': {
+              color: 'var(--text-primary)'
+            }
+          }}
+        />
+
         <Box className="content-viewer" sx={{
           backgroundColor: 'var(--bg-main)',
           border: '1px solid var(--border-color)',

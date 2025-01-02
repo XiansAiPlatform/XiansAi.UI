@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useApi } from '../../services/api';
+import { useApi } from '../../services/workflow-api';
 import './WorkflowList.css';
 
 const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {

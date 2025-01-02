@@ -8,7 +8,7 @@ import ActivityDetailsView from './ActivityDetailsView';
 import './WorkflowDetails.css';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import { useApi } from '../../services/api';
+import { useApi } from '../../services/workflow-api';
 
 const ActivityTimeline = ({ workflowId, openSlider }) => {
   const [events, setEvents] = useState([]);

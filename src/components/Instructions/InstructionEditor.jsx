@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -17,6 +17,24 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
     type: null,
   });
   const [jsonError, setJsonError] = useState(null);
+
+  const normalizeType = (type) => {
+    if (!type) return '';
+    const normalized = type.toLowerCase();
+    if (['text', 'markdown', 'json'].includes(normalized)) {
+      return normalized;
+    }
+    return '';
+  };
+
+  useEffect(() => {
+    if (instruction?.type) {
+      setFormData(prev => ({
+        ...prev,
+        type: normalizeType(instruction.type)
+      }));
+    }
+  }, [instruction]);
 
   const validateJSON = (content) => {
     if (!content) return null;
@@ -94,7 +112,7 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
             }
           }}>Type</InputLabel>
           <Select
-            value={formData.type || ''}
+            value={normalizeType(formData.type)}
             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
             sx={{
               backgroundColor: 'var(--background-light)',

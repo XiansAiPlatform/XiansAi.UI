@@ -8,7 +8,7 @@ import {
   Paper,
   Button
 } from '@mui/material';
-import { useApi } from '../../services/api';
+import { useApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';

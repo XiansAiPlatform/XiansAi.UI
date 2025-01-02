@@ -6,29 +6,49 @@ import {
   Container,
   List,
   Fab,
+  CircularProgress,
 } from '@mui/material';
 import { Add} from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
 import InstructionEditor from './InstructionEditor';
 import InstructionItem from './InstructionItem';
+import { useWorkflowApi } from '../../services/instructions-api';
 
 const Instructions = () => {
   const [instructions, setInstructions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { openSlider, closeSlider } = useSlider();
+  const workflowApi = useWorkflowApi();
 
   useEffect(() => {
-    // TODO: Fetch instructions from API
-    // fetchInstructions().then(setInstructions);
-  }, []);
+    const fetchInstructions = async () => {
+      try {
+        const data = await workflowApi.getLatestInstructions();
+        setInstructions(data);
+      } catch (error) {
+        console.error('Failed to fetch instructions:', error);
+        // TODO: Add error handling/notification
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchInstructions();
+  }, [workflowApi]);
 
   const handleAdd = () => {
     openSlider(
       <InstructionEditor 
         mode="add"
-        onSave={(newInstruction) => {
-          // TODO: Save to API
-          setInstructions([...instructions, newInstruction]);
-          closeSlider();
+        onSave={async (newInstruction) => {
+          try {
+            const savedInstruction = await workflowApi.createInstruction(newInstruction);
+            setInstructions([...instructions, savedInstruction]);
+            closeSlider();
+          } catch (error) {
+            console.error('Failed to create instruction:', error);
+            // TODO: Add error handling/notification
+          }
         }}
         onClose={closeSlider}
       />,
@@ -108,7 +128,11 @@ const Instructions = () => {
             }
           }}
         >
-          {instructions.length > 0 ? (
+          {isLoading ? (
+            <Box sx={{ p: 6, textAlign: 'center' }}>
+              <CircularProgress />
+            </Box>
+          ) : instructions.length > 0 ? (
             <List
               sx={{
                 '& .MuiListItem-root': {

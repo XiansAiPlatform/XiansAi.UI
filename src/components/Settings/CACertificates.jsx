@@ -7,11 +7,11 @@ import {
   Box,
   Alert
 } from '@mui/material';
-import { useApi } from '../../services/api';
+import { useApi } from '../../services/workflow-api';
 import { toast } from 'react-toastify';
 
 const CACertificates = () => {
-  const [certName, setCertName] = useState('Flowmaxer');
+  const [certName, setCertName] = useState('xians-ai');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const api = useApi();
