@@ -164,13 +164,12 @@ const Instructions = () => {
                 color: 'var(--text-secondary)'
               }}
             >
-              <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
+              <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
                 No instructions yet
               </Typography>
-              <Typography variant="body1" sx={{ mb: 3, maxWidth: 460 }}>
+              <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
                 Create your first instruction by clicking the + button above. Instructions help customize the AI's behavior and responses.
               </Typography>
-
             </Box>
           )}
         </Paper>

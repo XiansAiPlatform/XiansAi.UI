@@ -9,14 +9,18 @@ import {
   MenuItem
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
+import { useWorkflowApi } from '../../services/instructions-api';
 
 const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
+  const workflowApi = useWorkflowApi();
   const [formData, setFormData] = useState(instruction || {
     name: '',
     content: '',
     type: null,
   });
   const [jsonError, setJsonError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const normalizeType = (type) => {
     if (!type) return '';
@@ -46,8 +50,10 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError(null);
+    setIsSubmitting(true);
     
     if (formData.type === 'json') {
       const error = validateJSON(formData.content);
@@ -57,11 +63,19 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
       }
     }
 
-    onSave({
-      ...formData,
-      version: crypto.randomUUID(),
-    });
-    onClose();
+    try {
+      const savedInstruction = await workflowApi.createInstruction({
+        ...formData,
+        version: crypto.randomUUID(),
+      });
+      
+      onSave(savedInstruction);
+      onClose();
+    } catch (error) {
+      setSubmitError(error.message || 'Failed to save instruction');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEditorChange = (value) => {
@@ -176,11 +190,23 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
           )}
         </Box>
 
+        {submitError && (
+          <Box sx={{ 
+            mb: 2,
+            p: 2,
+            color: 'error.main',
+            bgcolor: 'error.light',
+            borderRadius: 'var(--radius-sm)'
+          }}>
+            {submitError}
+          </Box>
+        )}
+
         <Button 
           variant="contained" 
           type="submit" 
           fullWidth
-          disabled={formData.type === 'json' && jsonError}
+          disabled={formData.type === 'json' && jsonError || isSubmitting}
           sx={{
             bgcolor: 'var(--primary)',
             color: '#fff',
@@ -198,7 +224,7 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
             }
           }}
         >
-          {mode === 'add' ? 'Create Instruction' : 'Save New Version'}
+          {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create Instruction' : 'Save New Version'}
         </Button>
       </form>
     </Box>

@@ -63,7 +63,6 @@ const InstructionItem = ({
       sx={{ width: '100%' }}
     >
       <ListItem 
-        button 
         onClick={handleView}
         component={Paper}
         elevation={0}
@@ -73,56 +72,42 @@ const InstructionItem = ({
           '& .MuiListItemText-primary': {
             color: 'var(--text-primary)',
             fontWeight: 'var(--font-weight-medium)'
-          },
-          '& .MuiListItemText-secondary': {
-            color: 'var(--text-secondary)'
           }
         }}
       >
-        <ListItemText 
-          primary={
-            <Box className="instruction-title" sx={{ 
-              textAlign: 'left',
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              {instruction.name}
-            </Box>
-          }
-          secondary={
-            <Box className="instruction-metadata" sx={{ 
-              display: 'flex',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              gap: 1
-            }}>
-              <Chip 
-                size="small" 
-                label={instruction.type || 'No Type'} 
-                className="type-chip"
-              />
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Chip 
-                  size="small" 
-                  label={`v.${instruction.version?.substring(0, 7) || 'draft'}`}
-                  className="version-chip"
-                />
-                <IconButton 
-                  size="small"
-                  onClick={handleVersions}
-                  className="version-toggle-btn"
-                  sx={{
-                    transform: expanded ? 'rotate(180deg)' : 'none',
-                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}
-                >
-                  <KeyboardArrowDown fontSize="small" />
-                </IconButton>
-              </Box>
-            </Box>
-          }
-        />
+        <ListItemText primary={instruction.name} />
+        
+        <Box className="instruction-metadata" sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          mr: 6
+        }}>
+          <Chip 
+            size="small" 
+            label={instruction.type || 'No Type'} 
+            className="type-chip"
+          />
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Chip 
+              size="small" 
+              label={`v.${instruction.version?.substring(0, 7) || 'draft'}`}
+              className="version-chip"
+            />
+            <IconButton 
+              size="small"
+              onClick={handleVersions}
+              className="version-toggle-btn"
+              sx={{
+                transform: expanded ? 'rotate(180deg)' : 'none',
+                transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <KeyboardArrowDown fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
+
         <ListItemSecondaryAction>
           <Tooltip title="Delete All Versions" placement="top">
             <IconButton 
