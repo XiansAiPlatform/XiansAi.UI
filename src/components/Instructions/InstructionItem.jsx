@@ -61,7 +61,7 @@ const InstructionItem = ({
         }}
         onClose={closeSlider}
       />,
-      "Edit Instruction"
+      `${instruction.name}`
     );
   };
 
@@ -71,9 +71,9 @@ const InstructionItem = ({
         instruction={instruction} 
         onEdit={handleEdit}
         onDelete={(instructionToDelete) => handleDeleteOne(instructionToDelete)}
-        title="View Instruction"
+        title={`View: ${instruction.name}`}
       />,
-      "View Instruction"
+      `${instruction.name}`
     );
   };
 
