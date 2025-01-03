@@ -143,10 +143,10 @@ const WorkflowList = () => {
           }}
         >
           <Typography variant="h6" gutterBottom>
-            No Flow Runs Found
+            {isLoading ? 'Loading...' : 'Find Your Flow Runs here'}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            To get started, navigate to Flow Definitions to create and start new workflows.
+            To get started, <Link to="/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
           </Typography>
           <Button
             component={Link}

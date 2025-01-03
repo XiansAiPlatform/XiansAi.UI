@@ -88,6 +88,7 @@ const InstructionItem = ({
   };
 
   const handleDeleteOneConfirm = () => {
+    console.log('handleDeleteOneConfirm', versionToDelete);
     onDeleteOneInstruction(versionToDelete);
     setVersions(versions.filter(v => v.version !== versionToDelete.version));
     setDeleteOneDialogOpen(false);
@@ -247,18 +248,24 @@ const InstructionItem = ({
               {isLoading ? (
                 <Chip size="small" label="Loading..." className="version-chip" />
               ) : (
-                versions.map((version) => (
-                  <Chip
-                    key={version.id}
-                    size="small"
-                    label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
-                    className={`version-chip ${version.version === instruction.version ? 'version-chip-current' : ''}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleVersionSelect(version);
-                    }}
-                  />
-                ))
+                versions.map((version) => {
+                  const latestVersion = versions.reduce((latest, current) => 
+                    new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
+                  );
+                  
+                  return (
+                    <Chip
+                      key={version.id}
+                      size="small"
+                      label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
+                      className={`version-chip ${version.id === latestVersion.id ? 'version-chip-current' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVersionSelect(version);
+                      }}
+                    />
+                  );
+                })
               )}
             </Box>
           </Paper>
