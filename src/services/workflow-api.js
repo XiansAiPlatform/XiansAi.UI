@@ -35,7 +35,8 @@ export const useApi = () => {
           });
           return response.json();
         } catch (error) {
-          throw new Error(handleApiError(error, 'Failed to fetch workflow').description);
+          console.error('Failed to fetch workflow:', error);
+          handleApiError(error, 'Failed to fetch workflow');
         }
       },
       fetchWorkflowRuns: async () => {
@@ -63,7 +64,8 @@ export const useApi = () => {
 
           return response.json();
         } catch (error) {
-          throw new Error(handleApiError(error, 'Failed to fetch workflows').description);
+          console.error('Failed to fetch workflows:', error);
+          handleApiError(error, 'Failed to fetch workflows');
         }
       },
 
@@ -95,8 +97,10 @@ export const useApi = () => {
 
           return response.json();
         } catch (error) {
-          throw new Error(handleApiError(error, 'Failed to fetch workflow events').description);
+          console.error('Failed to fetch workflow events:', error);
+          handleApiError(error, 'Failed to fetch workflow events');
         }
+        
       },
 
       executeWorkflowCancelAction: async (workflowId, force = false) => {
@@ -110,7 +114,8 @@ export const useApi = () => {
           }
           return response.json();
         } catch (error) {
-          throw new Error(`Error: ${error.message}`);
+          console.error('Failed to execute workflow cancel action:', error);
+          handleApiError(error, 'Failed to execute workflow cancel action');
         }
       },
 
@@ -142,7 +147,8 @@ export const useApi = () => {
 
           return response.json();
         } catch (error) {
-          throw new Error(handleApiError(error, 'Failed to start workflow').description);
+          console.error('Failed to start workflow:', error);
+          handleApiError(error, 'Failed to start workflow');
         }
       },
 
@@ -174,7 +180,8 @@ export const useApi = () => {
 
           return response.blob();
         } catch (error) {
-          throw new Error(handleApiError(error, 'Failed to generate certificate').description);
+          console.error('Failed to generate certificate:', error);
+          throw handleApiError(error, 'Failed to generate certificate');
         }
       },
 
@@ -225,13 +232,14 @@ export const useApi = () => {
               }
             } catch (error) {
               console.error('Stream reading failed:', error);
-              throw new Error(handleApiError(error, 'Stream reading failed').description);
+              throw error;
             }
           }
 
           readStream();
         } catch (error) {
-          throw new Error(handleApiError(error, 'Failed to establish event stream').description);
+          console.error('Failed to establish event stream:', error);
+          handleApiError(error, 'Failed to establish event stream');
         }
       },
     };
