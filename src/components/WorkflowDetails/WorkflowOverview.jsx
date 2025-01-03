@@ -17,13 +17,47 @@ import StatusChip from '../Common/StatusChip';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useApi } from '../../services/workflow-api';
 import './WorkflowDetails.css';
+import { useEffect } from 'react';
 
 
-const WorkflowOverview = ({ workflow, onActionComplete }) => {
+const WorkflowOverview = ({ workflowId, onActionComplete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [workflow, setWorkflow] = useState(null);
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
   const api = useApi();
+  
+  // Replace the old useEffect with a new one to fetch workflow data
+  useEffect(() => {
+    const fetchWorkflow = async () => {
+      if (!workflowId) return;
+      
+      try {
+        const workflowData = await api.getWorkflow(workflowId);
+        setWorkflow(workflowData);
+      } catch (error) {
+        showError('Failed to fetch workflow details');
+      }
+    };
+
+    fetchWorkflow();
+  }, [workflowId, api, showError]);
+
+  // Update the refresh useEffect
+  useEffect(() => {
+    if (onActionComplete && workflowId) {
+      const refreshWorkflow = async () => {
+        try {
+          const updatedWorkflow = await api.getWorkflow(workflowId);
+          setWorkflow(updatedWorkflow);
+        } catch (error) {
+          showError('Failed to refresh workflow details');
+        }
+      };
+
+      refreshWorkflow();
+    }
+  }, [onActionComplete, workflowId, api, showError]);
 
   const isRunning = workflow?.status?.toUpperCase() === 'RUNNING';
 
@@ -38,7 +72,11 @@ const WorkflowOverview = ({ workflow, onActionComplete }) => {
   const handleAction = async (action, force = false) => {
     try {
       await api.executeWorkflowCancelAction(workflow.id, force);
-      if (onActionComplete) onActionComplete();
+      
+      // Fetch updated workflow data
+      const updatedWorkflow = await api.getWorkflow(workflow.id);
+      setWorkflow(updatedWorkflow);
+      
       showSuccess('Termination requested. it may take a few minutes to complete.');
     } catch (error) {
       showError('An unexpected error occurred. Please check if the workflow is still running. Error: ' + error.message);

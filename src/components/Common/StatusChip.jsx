@@ -2,13 +2,13 @@ import React from 'react';
 import { Chip } from '@mui/material';
 import './StatusChip.css';
 
-const StatusChip = ({ status, label }) => {
-  const statusClass = status.toLowerCase();
+const StatusChip = ({ label, status }) => {
+  const normalizedStatus = status?.toLowerCase() || 'unknown';
   
   return (
     <Chip
-      label={label}
-      className={`status-chip ${statusClass}`}
+      label={label || 'N/A'}
+      className={`status-chip ${normalizedStatus}`}
     />
   );
 };

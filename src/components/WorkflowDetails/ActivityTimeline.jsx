@@ -10,11 +10,12 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useApi } from '../../services/workflow-api';
 
-const ActivityTimeline = ({ workflowId, openSlider }) => {
+const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
   const [events, setEvents] = useState([]);
   const [latestEventId, setLatestEventId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [sortAscending, setSortAscending] = useState(false);
+  const [shouldNotifyCompletion, setShouldNotifyCompletion] = useState(false);
   const { setLoading } = useLoading();
   const { showError } = useNotification();
   const api = useApi();
@@ -32,6 +33,10 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
           if (!newEvent.ID) {
             console.warn('Event missing ID:', newEvent);
             return currentEvents;
+          }
+
+          if (newEvent.ActivityName === 'Flow Completed') {
+            setShouldNotifyCompletion(true);
           }
 
           // Check if event already exists
@@ -75,6 +80,14 @@ const ActivityTimeline = ({ workflowId, openSlider }) => {
       if (cleanup) cleanup();
     };
   }, [startEventStream]);
+
+  // Add new effect to handle completion notification
+  useEffect(() => {
+    if (shouldNotifyCompletion) {
+      onWorkflowComplete?.();
+      setShouldNotifyCompletion(false);
+    }
+  }, [shouldNotifyCompletion, onWorkflowComplete]);
 
   const sortedEventsWithIndex = React.useMemo(() => {
     // First sort by start time chronologically (ascending)
