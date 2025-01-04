@@ -1,9 +1,7 @@
 import React from 'react';
 import { Box, Typography, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
-import AutoGraphIcon from '@mui/icons-material/AutoGraph';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { Link, useLocation } from 'react-router-dom';
@@ -15,12 +13,6 @@ const NAV_ITEMS = [
     icon: <AirIcon />,
     label: 'Flow Runs',
     isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
-  },
-  {
-    to: '/definitions',
-    icon: <AccountTreeOutlinedIcon />,
-    label: 'Flow Definitions',
-    isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
   {
     to: '/agents',

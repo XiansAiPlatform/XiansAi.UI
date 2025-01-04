@@ -37,7 +37,7 @@ const WorkflowDetails = () => {
     };
 
     fetchWorkflow();
-  }, [id, workflow, showError]);
+  }, [id, workflow, showError, api]);
 
   const handleWorkflowComplete = () => {
     setOnActionComplete(prev => !prev); // Toggle to trigger useEffect
