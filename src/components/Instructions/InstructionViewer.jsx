@@ -6,7 +6,7 @@ import DeleteVersionIcon from '@mui/icons-material/DeleteForever';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-const InstructionViewer = ({ instruction, onEdit, onDelete, isHistoricalVersion = false }) => {
+const InstructionViewer = ({ instruction, onEdit = () => {}, onDelete = () => {} , hideActions = false }) => {
   const handleDelete = () => {
     onDelete(instruction);
   };
@@ -65,28 +65,30 @@ const InstructionViewer = ({ instruction, onEdit, onDelete, isHistoricalVersion 
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box className="instruction-actions" sx={{ 
-          display: 'flex',
-          gap: 1
-        }}>
-          <Tooltip title="Create New Version">
-            <IconButton 
-              onClick={onEdit}
-              color="primary"
-              size="small"
-            >
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete This Version">
-            <IconButton 
-              onClick={handleDelete}
-              size="small"
-            >
-              <DeleteVersionIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
+        {!hideActions && (
+          <Box className="instruction-actions" sx={{ 
+            display: 'flex',
+            gap: 1
+          }}>
+            <Tooltip title="Create New Version">
+              <IconButton 
+                onClick={onEdit}
+                color="primary"
+                size="small"
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Delete This Version">
+              <IconButton 
+                onClick={handleDelete}
+                size="small"
+              >
+                <DeleteVersionIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
       </Box>
 
       <Box className="instruction-item-content">

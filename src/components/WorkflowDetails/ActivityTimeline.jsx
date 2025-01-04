@@ -176,9 +176,9 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
       >
         {sortedEventsWithIndex.map((event) => (
           <ActivityTimelineItem
+            workflowId={workflowId}
             key={`${event.ID}-${event.chronologicalIndex}`}
             event={event}
-            index={event.chronologicalIndex}
             onShowDetails={handleShowDetails}
             sortAscending={sortAscending}
             isHighlighted={event.ID === latestEventId}

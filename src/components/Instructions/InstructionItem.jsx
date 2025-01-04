@@ -115,10 +115,10 @@ const InstructionItem = ({
     openSlider(
       <InstructionViewer 
         instruction={{ ...instruction, ...version }}
+        
         onEdit={handleEdit}
         onDelete={(instructionToDelete) => handleDeleteOne(instructionToDelete)}
         title={`View Instruction (v.${version.version.substring(0, 7)})`}
-        isHistoricalVersion={version.version !== instruction.version}
       />,
       `View Instruction (v.${version.version.substring(0, 7)})`
     );

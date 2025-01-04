@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, IconButton, Box, Tooltip } from '@mui/material';
+import { Typography, IconButton, Box, Tooltip, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText } from '@mui/material';
 import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } from '@mui/lab';
 import InputIcon from '@mui/icons-material/Input';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -7,6 +7,12 @@ import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
 import Chip from '@mui/material/Chip';
+import { useSlider } from '../../contexts/SliderContext';
+import { useActivitiesApi } from '../../services/activities-api';
+import { useInstructionsApi } from '../../services/instructions-api';
+import InstructionViewer from '../Instructions/InstructionViewer';
+import { styled } from '@mui/material/styles';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const ArrowDot = ({ ascending }) => {
   const theme = useTheme();
@@ -35,7 +41,109 @@ const ArrowDot = ({ ascending }) => {
   );
 };
 
-const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHighlighted }) => {
+const ModernDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    borderRadius: 12,
+    padding: theme.spacing(1),
+    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+  }
+}));
+
+const ModernDialogTitle = styled(DialogTitle)(({ theme }) => ({
+  padding: theme.spacing(2),
+  '& .MuiTypography-root': {
+    fontSize: '1.25rem',
+    fontWeight: 600,
+  }
+}));
+
+const ModernDialogContent = styled(DialogContent)(({ theme }) => ({
+  padding: theme.spacing(1),
+  '& .MuiList-root': {
+    padding: 0,
+  },
+  '& .MuiListItem-root': {
+    borderRadius: 8,
+    marginBottom: theme.spacing(0.5),
+    '&:hover': {
+      backgroundColor: theme.palette.mode === 'dark' 
+        ? 'rgba(255, 255, 255, 0.08)'
+        : 'rgba(0, 0, 0, 0.04)',
+    }
+  }
+}));
+
+const ModernListItem = styled(ListItem)(({ theme }) => ({
+  padding: theme.spacing(1.5, 2),
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    transform: 'translateX(4px)',
+  }
+}));
+
+const NoInstructionsBox = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(4),
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  color: theme.palette.text.secondary,
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? 'rgba(255, 255, 255, 0.03)'
+    : 'rgba(0, 0, 0, 0.02)',
+  borderRadius: 8,
+  margin: theme.spacing(1),
+}));
+
+const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlighted, workflowId }) => {
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [instructions, setInstructions] = React.useState([]);
+  const { openSlider } = useSlider();
+  const activitiesApi = useActivitiesApi();
+  const instructionsApi = useInstructionsApi();
+
+  const handleInstructionClick = async () => {
+    try {
+      const activity = await activitiesApi.getWorkflowActivity(
+        workflowId,
+        event.ActivityId
+      );
+
+      const instructionIds = activity?.instructionIds || [];
+      if (instructionIds.length === 0) {
+        // No instructions - show dialog with message
+        setInstructions([]);
+        setIsDialogOpen(true);
+      } else if (instructionIds.length === 1) {
+        // Single instruction - directly show slider
+        const instruction = await instructionsApi.getInstruction(instructionIds[0]);
+        showInstruction(instruction);
+      } else {
+        // Multiple instructions - show dialog with list
+        const instructionPromises = instructionIds.map(id => 
+          instructionsApi.getInstruction(id)
+        );
+        const fetchedInstructions = await Promise.all(instructionPromises);
+        setInstructions(fetchedInstructions);
+        setIsDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error fetching instructions:', error);
+      // Show dialog with error state
+      setInstructions([]);
+      setIsDialogOpen(true);
+    }
+  };
+
+  const showInstruction = (instruction) => {
+    const instructionsContent = (
+      <InstructionViewer
+        instruction={instruction}
+        hideActions={true}
+      />
+    );
+    openSlider(instructionsContent, instruction.name);
+    setIsDialogOpen(false);
+  };
 
   // Updated helper function to format text
   const formatText = (text, maxLength = 100) => {
@@ -129,6 +237,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
                   size="small"
                   className="timeline-action-button"
                   title="View Instructions"
+                  onClick={handleInstructionClick}
                 >
                   <DescriptionOutlinedIcon fontSize="small" />
                   <Typography variant="caption" sx={{ ml: 1 }}>
@@ -183,6 +292,62 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
           </Box>
         </Box>
       </TimelineContent>
+
+      <ModernDialog 
+        open={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        TransitionProps={{
+          enteringClassName: 'animate__animated animate__fadeIn animate__faster',
+          exitingClassName: 'animate__animated animate__fadeOut animate__faster'
+        }}
+      >
+        <ModernDialogTitle>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 1 
+          }}>
+            <DescriptionOutlinedIcon sx={{ color: 'primary.main' }} />
+            Instructions
+          </Box>
+        </ModernDialogTitle>
+        <ModernDialogContent>
+          {instructions.length > 0 ? (
+            <List>
+              {instructions.map((instruction) => (
+                <ModernListItem 
+                  button 
+                  key={instruction.id} 
+                  onClick={() => showInstruction(instruction)}
+                >
+                  <ListItemText 
+                    primary={instruction.name}
+                    primaryTypographyProps={{
+                      sx: {
+                        fontWeight: 500,
+                      }
+                    }}
+                  />
+                </ModernListItem>
+              ))}
+            </List>
+          ) : (
+            <NoInstructionsBox>
+              <Typography sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                gap: 1,
+                fontWeight: 500
+              }}>
+                <InfoOutlinedIcon sx={{ fontSize: 20 }} />
+                No instructions applied for this activity
+              </Typography>
+            </NoInstructionsBox>
+          )}
+        </ModernDialogContent>
+      </ModernDialog>
     </TimelineItem>
   );
 };
