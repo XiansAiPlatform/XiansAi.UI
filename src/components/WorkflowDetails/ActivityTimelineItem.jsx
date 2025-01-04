@@ -85,7 +85,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, index, isHi
             <Box className="timeline-item-header">
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="h6">
-                  {index}. {event.ActivityName}
+                  {event.ActivityId ? `${event.ActivityId}.` : ''} {event.ActivityName}
                 </Typography>
                 {isHighlighted && (
                   <Chip 
