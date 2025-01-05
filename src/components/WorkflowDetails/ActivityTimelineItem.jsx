@@ -299,10 +299,6 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
         onClose={() => setIsDialogOpen(false)}
         maxWidth="sm"
         fullWidth
-        TransitionProps={{
-          enteringClassName: 'animate__animated animate__fadeIn animate__faster',
-          exitingClassName: 'animate__animated animate__fadeOut animate__faster'
-        }}
       >
         <ModernDialogTitle>
           <Box sx={{ 

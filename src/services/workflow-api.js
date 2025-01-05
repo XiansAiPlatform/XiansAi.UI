@@ -44,7 +44,7 @@ export const useApi = () => {
           const response = await fetch(`${apiBaseUrl}/api/client/workflows`, {
             headers: await createAuthHeaders()
           });
-          
+
           if (!response.ok) {
             // Get the error message from the server if available
             let serverError = '';
@@ -100,14 +100,14 @@ export const useApi = () => {
           console.error('Failed to fetch workflow events:', error);
           handleApiError(error, 'Failed to fetch workflow events');
         }
-        
+
       },
 
       executeWorkflowCancelAction: async (workflowId, force = false) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/cancel?force=${force}`, { 
-            method: 'POST', 
-            headers: await createAuthHeaders() 
+          const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/cancel?force=${force}`, {
+            method: 'POST',
+            headers: await createAuthHeaders()
           });
           if (!response.ok) {
             throw new Error(`Failed to execute workflow cancel action (${response.status}): ${response.statusText}`);
@@ -204,36 +204,33 @@ export const useApi = () => {
           let buffer = ''; // Add buffer to handle incomplete JSON
 
           async function readStream() {
-            try {
-              while (true) {
-                const { done, value } = await reader.read();
-                
-                if (done) {
-                  break;
-                }
-                
-                // Append new data to buffer
-                buffer += decoder.decode(value, { stream: true });
-                
-                // Split by newlines and process each complete line
-                const lines = buffer.split('\n');
-                // Keep the last potentially incomplete line in the buffer
-                buffer = lines.pop() || '';
-                
-                // Process complete lines
-                lines.filter(line => line.trim()).forEach(line => {
-                  try {
-                    const event = JSON.parse(line);
-                    onEventReceived(event);
-                  } catch (parseError) {
-                    console.warn('Failed to parse event:', parseError);
-                  }
-                });
+
+            while (true) {
+              const { done, value } = await reader.read();
+
+              if (done) {
+                break;
               }
-            } catch (error) {
-              console.error('Stream reading failed:', error);
-              throw error;
+
+              // Append new data to buffer
+              buffer += decoder.decode(value, { stream: true });
+
+              // Split by newlines and process each complete line
+              const lines = buffer.split('\n');
+              // Keep the last potentially incomplete line in the buffer
+              buffer = lines.pop() || '';
+
+              // Process complete lines
+              lines.filter(line => line.trim()).forEach(line => {
+                try {
+                  const event = JSON.parse(line);
+                  onEventReceived(event);
+                } catch (parseError) {
+                  console.warn('Failed to parse event:', parseError);
+                }
+              });
             }
+
           }
 
           readStream();
