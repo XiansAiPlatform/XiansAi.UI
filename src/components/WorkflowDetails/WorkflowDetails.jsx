@@ -20,6 +20,7 @@ const WorkflowDetails = () => {
   const containerRef = useRef(null);
   const [onActionComplete, setOnActionComplete] = useState(false);
   const api = useApi();
+
   useEffect(() => {
     const fetchWorkflow = async () => {
       if (!workflow) {

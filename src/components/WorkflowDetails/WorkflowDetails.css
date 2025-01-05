@@ -1,21 +1,21 @@
 /* Common Paper styles */
 .paper-container {
-  padding: 24px;
-  margin-bottom: 32px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+  background-color: var(--bg-paper);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
 /* Activity count badge */
 .activity-count {
-  background-color: #f5f5f5;
-  padding: 6px 14px;
-  border-radius: 6px;
-  color: #666666;
-  margin-top: 4px;
-  font-weight: 500;
+  background-color: var(--bg-overlay);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  margin-top: var(--spacing-xs);
+  font-weight: var(--font-weight-medium);
 }
 
 /* Button styles */
@@ -23,17 +23,17 @@
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  background-color: rgba(0, 0, 0, 0.04) !important;
-  border-radius: 6px !important;
+  background-color: var(--bg-overlay) !important;
+  border-radius: var(--radius-sm) !important;
   margin-left: auto !important;
-  padding: 8px 16px !important;
-  transition: background-color 0.2s ease !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  transition: var(--transition-fast) !important;
   min-width: auto !important;
   height: auto !important;
 }
 
 .action-button:hover {
-  background-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: var(--bg-hover) !important;
 }
 
 .action-button.disabled {
@@ -59,12 +59,12 @@
 
 /* Overview Paper styles */
 .overview-paper {
-  padding: 32px;
-  margin-bottom: 32px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  background-color: var(--bg-paper);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Overview header styles */
@@ -183,12 +183,12 @@
 
 /* Timeline item highlight styles */
 .timeline-item-content {
-  padding: 16px;
-  border-radius: 8px;
-  transition: background-color 0.5s ease;
-  border: 1px solid rgba(0, 0, 0, 0.2);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: var(--transition-normal);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-overlay) !important;
   margin: 8px 0;
-  background-color: rgba(0, 0, 0, 0.04);
 }
 
 .timeline-item-content.highlighted {
@@ -276,19 +276,19 @@
 }
 
 .timeline-data-content {
-  background-color: rgba(0, 0, 0, 0.08);
-  padding: 8px;
-  border-radius: 4px;
-  font-family: monospace;
+  background-color: var(--bg-hover);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-color);
   white-space: pre-wrap;
   word-break: break-all;
   display: block;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .timeline-data-content:hover {
-  background-color: rgba(0, 0, 0, 0.12);
+  background-color: var(--bg-hover-dark);
 }
 
 .timeline-actions {
@@ -409,5 +409,5 @@
 .MuiTimelineItem-root .timeline-item-content.highlighted {
   background-color: rgba(255, 255, 0, 0.03) !important;
   border: 1px solid rgba(25, 118, 210, 0.3) !important; /* Using MUI primary color */
-  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.1) !important;
+  box-shadow: 0 1px 2px rgba(25, 118, 210, 0.1) !important;
 } 

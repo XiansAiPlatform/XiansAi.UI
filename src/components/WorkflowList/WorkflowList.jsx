@@ -12,6 +12,7 @@ import { useApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
+import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowList.css';
 import { Link } from 'react-router-dom';
 
@@ -101,9 +102,10 @@ const WorkflowList = () => {
       >
         <Stack 
           direction={{ xs: 'column', sm: 'row' }} 
-          spacing={3} 
-          justifyContent="space-around"
+          spacing={{ xs: 2, sm: 3 }}
+          justifyContent="space-between"
           alignItems="center"
+          sx={{ width: '100%' }}
         >
           {statusDisplayConfig.map(({ label, value, className }) => (
             <StatusBox 
@@ -170,28 +172,21 @@ const StatusBox = ({ label, value, className }) => (
 );
 
 const HeaderSection = ({ isLoading, onRefresh }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+  <Box sx={{ 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'space-between', 
+    mb: 2 
+  }}>
     <Typography variant="h4"></Typography>
-    <IconButton 
+    <Button
       onClick={onRefresh}
       disabled={isLoading}
-      sx={{
-        borderRadius: '4px',
-        '&:hover': {
-          borderRadius: '4px'
-        }
-      }}
+      className={`button-refresh ${isLoading ? 'loading' : ''}`}
+      startIcon={<RefreshIcon />}
     >
-      <RefreshIcon />
-      <Typography 
-        variant="button"
-        sx={{ 
-          display: { xs: 'none', sm: 'block' }
-        }}
-      >
-        Refresh
-      </Typography>
-    </IconButton>
+      <span>Refresh</span>
+    </Button>
   </Box>
 );
 

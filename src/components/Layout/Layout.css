@@ -59,43 +59,43 @@
 }
 
 .header-organization {
-  font-family: 'Inter', sans-serif;
-  color: #1a1a1a;
-  font-weight: 600;
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
   display: flex;
   align-items: center;
 }
 
 .header-avatar {
   cursor: pointer;
-  background-color: #6366f1;
+  background-color: var(--primary);
 }
 
 .header-menu-paper {
-  margin-top: 12px;
+  margin-top: var(--spacing-md);
   min-width: 200px;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
 }
 
 .header-menu-item {
-  padding: 8px 16px;
+  padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .header-user-info {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  padding: 16px;
-  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  padding: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
 }
 
 .header-logout {
-  color: #d32f2f;
-  gap: 8px;
-  margin-top: 4px;
+  color: var(--error-main);
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-xs);
 }
 
 /* Left Navigation Styles */
@@ -119,40 +119,40 @@
 }
 
 .nav-logo-icon {
-  font-size: 32px;
-  color: #6366f1;
+  font-size: var(--text-3xl);
+  color: var(--primary);
   transform: rotate(-10deg);
 }
 
 .nav-logo-text {
-  font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  color: #1a1a1a;
-  letter-spacing: -0.5px;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .nav-section-title {
-  font-family: 'Inter', sans-serif;
-  color: #666;
-  margin: 24px 0;
-  padding: 0 8px;
+  font-family: var(--font-family);
+  color: var(--text-secondary);
+  margin: var(--spacing-xl) 0;
+  padding: 0 var(--spacing-sm);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  letter-spacing: var(--letter-spacing-wider);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .nav-item {
-  border-radius: 4px;
-  margin-bottom: 4px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .nav-item:hover {
-  background-color: #6366f115;
+  background-color: var(--primary-light);
 }
 
 .nav-item.selected {
-  background-color: #6366f108;
+  background-color: var(--primary-lighter);
 }
 
 .nav-item.selected .nav-item-icon,
@@ -165,9 +165,9 @@
 }
 
 .nav-item-text {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-family: var(--font-family);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
 }
 
 .nav-item.selected .nav-item-text {
@@ -180,16 +180,16 @@ body {
 
 /* Add these styles for menu items */
 .header-user-info .MuiTypography-subtitle1 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-medium);
 }
 
 .header-user-info .MuiTypography-caption {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family);
 }
 
 .header-logout .MuiTypography-root {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-family);
 } 
 
 .nav-logo {

@@ -5,8 +5,7 @@ import {
   AccordionDetails,
   Typography,
   List,
-  Box,
-  Button,
+  IconButton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
@@ -42,83 +41,45 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
   return (
     <>
       <Accordion 
-        sx={{ 
-          mb: 2,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-          borderRadius: '10px !important',
-          '&:before': {
-            display: 'none',
-          },
-          '&.Mui-expanded': {
-            borderRadius: '10px 10px 0 0 !important',
-          },
-          '& .MuiAccordionSummary-root': {
-            borderRadius: '10px',
-            backgroundColor: 'rgba(0, 0, 0, 0.02)',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-            },
-            '&.Mui-expanded': {
-              borderRadius: '10px 10px 0 0',
-            }
-          },
-          '& .MuiAccordionSummary-content': {
-            my: 1.5
-          }
-        }}
+        className="workflow-accordion"
         onChange={(_, expanded) => setIsExpanded(expanded)}
+        disableGutters
       >
         <AccordionSummary 
-          expandIcon={<ExpandMoreIcon />}
-          sx={{
-            '& .MuiTypography-root': {
-              fontWeight: 500,
-              color: 'text.primary'
-            }
-          }}
+          expandIcon={<ExpandMoreIcon className="expand-icon" />}
+          className="workflow-accordion-header"
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant="h6">
+          <div className="workflow-header-content">
+            <div className="workflow-title-section">
+              <Typography className="workflow-type-title">
                 {formatWorkflowType(type)}
               </Typography>
-              <Box className="status-indicators">
-                <Box className="total-indicator">
+              <div className="status-indicators">
+                <div className="total-indicator">
                   {runs.length} total
-                </Box>
+                </div>
                 {hasRunningWorkflows && (
-                  <Box className="running-indicator">
+                  <div className="running-indicator">
                     {runningWorkflowsCount} running
-                  </Box>
+                  </div>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
             {isExpanded && (
-              <Button
-                startIcon={<AddIcon />}
-                variant="outlined"
-                size="small"
+              <IconButton
                 onClick={handleStartNew}
-                sx={{
-                  mr: 2,
-                  borderColor: 'rgba(0, 0, 0, 0.12)',
-                  color: 'text.secondary',
-                  backgroundColor: 'transparent',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                    borderColor: 'rgba(0, 0, 0, 0.23)',
-                  },
-                  textTransform: 'none',
-                  boxShadow: 'none'
-                }}
+                className="start-new-button"
+                size="small"
+                title="Start New Workflow"
               >
-                Start New
-              </Button>
+                <AddIcon />
+                <span>Start New</span>
+              </IconButton>
             )}
-          </Box>
+          </div>
         </AccordionSummary>
-        <AccordionDetails>
-          <List sx={{ p: 0 }}>
+        <AccordionDetails className="workflow-accordion-details">
+          <List>
             {runs.map((run, index) => (
               <WorkflowRunItem key={`${run.id}-${index}`} run={run} />
             ))}
