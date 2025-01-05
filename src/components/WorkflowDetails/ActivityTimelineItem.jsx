@@ -13,6 +13,7 @@ import { useInstructionsApi } from '../../services/instructions-api';
 import InstructionViewer from '../Instructions/InstructionViewer';
 import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const ArrowDot = ({ ascending }) => {
   const theme = useTheme();
@@ -100,8 +101,10 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
   const { openSlider } = useSlider();
   const activitiesApi = useActivitiesApi();
   const instructionsApi = useInstructionsApi();
+  const { setLoading } = useLoading();
 
   const handleInstructionClick = async () => {
+    setLoading(true);
     try {
       const activity = await activitiesApi.getWorkflowActivity(
         workflowId,
@@ -110,15 +113,12 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
 
       const instructionIds = activity?.instructionIds || [];
       if (instructionIds.length === 0) {
-        // No instructions - show dialog with message
         setInstructions([]);
         setIsDialogOpen(true);
       } else if (instructionIds.length === 1) {
-        // Single instruction - directly show slider
         const instruction = await instructionsApi.getInstruction(instructionIds[0]);
         showInstruction(instruction);
       } else {
-        // Multiple instructions - show dialog with list
         const instructionPromises = instructionIds.map(id => 
           instructionsApi.getInstruction(id)
         );
@@ -128,9 +128,10 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
       }
     } catch (error) {
       console.error('Error fetching instructions:', error);
-      // Show dialog with error state
       setInstructions([]);
       setIsDialogOpen(true);
+    } finally {
+      setLoading(false);
     }
   };
 
