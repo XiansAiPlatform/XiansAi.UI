@@ -6,39 +6,17 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
-const STORAGE_KEY = 'selectedOrganization';
-
 const Header = ({ pageTitle = "" }) => {
-  const { user, logout, getAccessTokenSilently } = useAuth0();
+  const { user, logout } = useAuth0();
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [organizations, setOrganizations] = React.useState([]);
+  const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
   const [name] = React.useState('');
-  const { selectedOrg, setSelectedOrg } = useSelectedOrg();
 
-  React.useEffect(() => {
-    const getOrganization = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const orgInfo = decodedToken['https://flowmaxer.ai/tenants'];
-        const orgs = Array.isArray(orgInfo) ? orgInfo : [];
-        setOrganizations(orgs);
-
-        // Get stored org or use first available
-        const storedOrg = localStorage.getItem(STORAGE_KEY);
-        if (storedOrg && orgs.includes(storedOrg)) {
-          setSelectedOrg(storedOrg);
-        } else if (orgs.length > 0) {
-          setSelectedOrg(orgs[0]);
-          localStorage.setItem(STORAGE_KEY, orgs[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching organization:', error);
-      }
-    };
-
-    getOrganization();
-  }, [getAccessTokenSilently, setSelectedOrg]);
+  const handleOrgChange = (event) => {
+    const newOrg = event.target.value;
+    setSelectedOrg(newOrg);
+    window.location.reload();
+  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -51,13 +29,6 @@ const Header = ({ pageTitle = "" }) => {
   const handleLogout = () => {
     logout({ returnTo: window.location.origin });
     handleClose();
-  };
-
-  const handleOrgChange = (event) => {
-    const newOrg = event.target.value;
-    setSelectedOrg(newOrg);
-    localStorage.setItem(STORAGE_KEY, newOrg);
-    window.location.reload();
   };
 
   return (
