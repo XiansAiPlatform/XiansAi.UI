@@ -152,39 +152,6 @@ export const useApi = () => {
         }
       },
 
-      generateCertificate: async (name, password) => {
-        try {
-          const response = await fetch(`${apiBaseUrl}/api/client/certificates/generate`, {
-            method: 'POST',
-            headers: await createAuthHeaders(),
-            body: JSON.stringify({
-              Name: name,
-              Password: password
-            })
-          });
-
-          if (!response.ok) {
-            let serverError = '';
-            try {
-              const errorData = await response.json();
-              serverError = errorData.message || errorData.error || response.statusText;
-            } catch {
-              serverError = response.statusText;
-            }
-            throw new Error(JSON.stringify({
-              status: response.status,
-              statusText: response.statusText,
-              message: serverError
-            }));
-          }
-
-          return response.blob();
-        } catch (error) {
-          console.error('Failed to generate certificate:', error);
-          throw handleApiError(error, 'Failed to generate certificate');
-        }
-      },
-
       streamActivityEvents: async (workflowId, onEventReceived) => {
         try {
           if (!workflowId) {

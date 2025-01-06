@@ -1,0 +1,85 @@
+.settings-container {
+  margin-top: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.ca-certificates-paper {
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.info-alert {
+  margin-bottom: var(--spacing-lg);
+}
+
+.code-container {
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: var(--bg-overlay);
+  border-radius: var(--radius-sm);
+}
+
+.code-example {
+  margin-top: var(--spacing-sm);
+  margin-bottom: 0;
+  font-family: var(--font-mono);
+}
+
+.readonly-input {
+  cursor: default;
+  background-color: var(--bg-hover);
+}
+
+.readonly-input fieldset {
+  border-color: var(--border-color) !important;
+}
+
+.readonly-input:hover fieldset {
+  border-color: var(--border-color) !important;
+}
+
+.readonly-input.Mui-focused fieldset {
+  border-color: var(--border-color) !important;
+  border-width: 1px !important;
+}
+
+.readonly-code-input {
+  resize: none;
+  background-color: var(--bg-hover);
+}
+
+.readonly-code-input .MuiInputBase-input {
+  overflow: hidden;
+  cursor: default;
+}
+
+.app-server-url {
+  margin-bottom: 0;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.input-row {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.input-field {
+  flex: 1;
+  min-width: 250px;
+}
+
+.submit-button {
+  margin-top: var(--spacing-sm);
+  align-self: flex-end;
+}
+
+.server-url-container {
+  margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}

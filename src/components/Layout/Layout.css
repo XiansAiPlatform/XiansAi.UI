@@ -36,7 +36,6 @@
 /* Update layout-main styles */
 .layout-main {
   grid-area: main;
-  padding: var(--spacing-lg);
   background-color: var(--bg-main);
   max-width: 1200px;
 }
