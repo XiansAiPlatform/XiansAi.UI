@@ -111,7 +111,8 @@
 /* Start new button styles */
 .start-new-button {
   min-width: unset !important;
-  padding: var(--spacing-xs) var(--spacing-sm) !important;
+  padding: var(--spacing-xs) var(--spacing-sm)  !important;
+  margin-right: var(--spacing-xl) !important;
   border: 1px solid var(--primary) !important;
   color: var(--primary) !important;
   background-color: transparent !important;
