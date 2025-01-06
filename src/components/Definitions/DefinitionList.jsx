@@ -16,7 +16,6 @@ import {
   Stack,
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -175,18 +174,24 @@ const Row = ({ definition, isOpen, onToggle }) => {
                     <TableRow key={index}>
                       <TableCell>{activity.activityName}</TableCell>
                       <TableCell>
-                        <Typography 
-                          component="code" 
-                          sx={{ 
-                            fontFamily: 'var(--font-mono)',
-                            backgroundColor: 'var(--bg-hover)',
-                            padding: 'var(--spacing-xs) var(--spacing-sm)',
-                            borderRadius: 'var(--radius-sm)',
-                            fontSize: 'var(--text-sm)',
-                          }}
-                        >
-                          {activity.dockerImage}
-                        </Typography>
+                        {activity.dockerImage ? (
+                          <Typography 
+                            component="code" 
+                            sx={{ 
+                              fontFamily: 'var(--font-mono)',
+                              backgroundColor: 'var(--bg-hover)',
+                              padding: 'var(--spacing-xs) var(--spacing-sm)',
+                              borderRadius: 'var(--radius-sm)',
+                              fontSize: 'var(--text-sm)',
+                            }}
+                          >
+                            {activity.dockerImage}
+                          </Typography>
+                        ) : (
+                          <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
+                            No docker
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell>
                         {activity.instructions && activity.instructions.length > 0 ? (
@@ -213,7 +218,15 @@ const Row = ({ definition, isOpen, onToggle }) => {
                           </Typography>
                         )}
                       </TableCell>
-                      <TableCell>{activity.parameters.map(param => param.name).join(', ')}</TableCell>
+                      <TableCell>
+                        {activity.parameters && activity.parameters.length > 0 ? (
+                          activity.parameters.map(param => param.name).join(', ')
+                        ) : (
+                          <Typography variant="body2" sx={{ color: 'var(--text-secondary)' }}>
+                            No parameters
+                          </Typography>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
