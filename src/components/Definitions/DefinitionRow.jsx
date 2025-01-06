@@ -6,12 +6,27 @@ import DefinitionActivities from './DefinitionActivities';
 import DefinitionParameters from './DefinitionParameters';
 import { useSlider } from '../../contexts/SliderContext';
 import MermaidDiagram from '../WorkflowDetails/MermaidDiagram';
+import NewWorkflowForm from '../WorkflowList/NewWorkflowForm';
 
 const DefinitionRow = ({ definition, isOpen, onToggle }) => {
-  const { openSlider } = useSlider();
+  const { openSlider, closeSlider } = useSlider();
 
   const handleStartNew = () => {
-    console.log('Start new flow:', definition.id);
+    const formContent = (
+      <NewWorkflowForm 
+        workflowType={definition.typeName}
+        parameterInfo={definition.parameters}
+        onSuccess={() => {
+          // Close the slider after successful submission
+          closeSlider();
+        }}
+        onCancel={() => {
+          // Close the slider when cancelled
+          closeSlider();
+        }}
+      />
+    );
+    openSlider(formContent, `Start New ${definition.typeName}`);
   };
 
   const handleVisualize = () => {

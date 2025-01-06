@@ -65,7 +65,7 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
                 )}
               </div>
             </div>
-            {isExpanded && (
+            {isExpanded && false && (
               <IconButton
                 onClick={handleStartNew}
                 className="start-new-button"

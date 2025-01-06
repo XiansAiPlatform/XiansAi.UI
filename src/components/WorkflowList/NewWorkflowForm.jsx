@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   TextField,
@@ -6,16 +7,18 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  IconButton,
   Paper,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { useApi } from '../../services/workflow-api';
 import './WorkflowList.css';
 
-const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
-  const [parameters, setParameters] = useState([]); // Start with no parameters
+const NewWorkflowForm = ({ workflowType, parameterInfo, onSuccess, onCancel }) => {
+  const navigate = useNavigate();
+  const [parameters, setParameters] = useState(
+    parameterInfo ? 
+      Object.fromEntries(parameterInfo.map(param => [param.name, ''])) : 
+      {}
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = useApi();
@@ -26,10 +29,12 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
     setError(null);
 
     try {
-      // Filter out empty parameters
-      const filteredParams = parameters.filter(param => param.trim() !== '');
-      await api.startNewWorkflow(workflowType, filteredParams);
+      const parameterValues = parameterInfo 
+        ? parameterInfo.map(param => parameters[param.name])
+        : [];
+      await api.startNewWorkflow(workflowType, parameterValues);
       onSuccess();
+      navigate('/runs');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -37,19 +42,11 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
     }
   };
 
-  const handleParameterChange = (index, value) => {
-    const newParameters = [...parameters];
-    newParameters[index] = value;
-    setParameters(newParameters);
-  };
-
-  const addParameter = () => {
-    setParameters([...parameters, '']);
-  };
-
-  const removeParameter = (index) => {
-    const newParameters = parameters.filter((_, i) => i !== index);
-    setParameters(newParameters);
+  const handleParameterChange = (paramName, value) => {
+    setParameters(prev => ({
+      ...prev,
+      [paramName]: value
+    }));
   };
 
   return (
@@ -58,14 +55,6 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
         <Typography variant="h6">
           Start New {workflowType.replace(/([A-Z])/g, ' $1').trim()}
         </Typography>
-        <Button
-          startIcon={<AddIcon />}
-          onClick={addParameter}
-          size="small"
-          variant="outlined"
-        >
-          Inputs
-        </Button>
       </Box>
 
       {error && (
@@ -75,13 +64,9 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
       )}
 
       <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-          Refer to Flow Docs to know the inputs for this workflow
-        </Typography>
-
-        {parameters.map((parameter, index) => (
+        {parameterInfo && parameterInfo.map((param, index) => (
           <Paper
-            key={index}
+            key={param.name}
             elevation={0}
             className="parameter-paper"
           >
@@ -90,18 +75,12 @@ const NewWorkflowForm = ({ workflowType, onSuccess, onCancel }) => {
                 fullWidth
                 multiline
                 rows={2}
-                value={parameter}
-                onChange={(e) => handleParameterChange(index, e.target.value)}
-                placeholder={`Input ${index + 1}`}
+                value={parameters[param.name]}
+                onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                placeholder={param.name}
+                label={`${param.name} (${param.type})`}
                 sx={{ flex: 1 }}
               />
-              <IconButton
-                onClick={() => removeParameter(index)}
-                size="small"
-                className="delete-button"
-              >
-                <DeleteIcon />
-              </IconButton>
             </Box>
           </Paper>
         ))}
