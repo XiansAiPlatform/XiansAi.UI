@@ -4,14 +4,27 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DefinitionActivities from './DefinitionActivities';
 import DefinitionParameters from './DefinitionParameters';
+import { useSlider } from '../../contexts/SliderContext';
+import MermaidDiagram from '../WorkflowDetails/MermaidDiagram';
 
 const DefinitionRow = ({ definition, isOpen, onToggle }) => {
+  const { openSlider } = useSlider();
+
   const handleStartNew = () => {
     console.log('Start new flow:', definition.id);
   };
 
   const handleVisualize = () => {
-    console.log('Visualize flow:', definition.id);
+    const diagramContent = (
+      <Box sx={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <MermaidDiagram diagram={definition.markdown} />
+      </Box>
+    );
+    openSlider(diagramContent, `${definition.typeName} Visualization`);
   };
 
   return (

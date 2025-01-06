@@ -102,7 +102,9 @@ const RightSlider = ({ onClose, children, title }) => {
         <Box sx={{ 
           padding: '24px',
           overflowY: 'auto',
-          flex: 1
+          flex: 1,
+          minHeight: 0,
+          height: '100%'
         }}>
           {children}
         </Box>

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
+import { Box } from '@mui/material';
 
 const MermaidDiagram = ({ diagram }) => {
   const diagramRef = useRef(null);
@@ -11,7 +12,22 @@ const MermaidDiagram = ({ diagram }) => {
     }
   }, [diagram]);
 
-  return <div ref={diagramRef} className="mermaid">{diagram}</div>;
+  return (
+    <Box sx={{ 
+      width: '100%',
+      py: 4,
+      '& .mermaid': {
+        display: 'flex',
+        justifyContent: 'center',
+        width: '100%',
+        '& svg': {
+          maxWidth: '100%'
+        }
+      }
+    }}>
+      <div ref={diagramRef} className="mermaid">{diagram}</div>
+    </Box>
+  );
 };
 
 export default MermaidDiagram; 

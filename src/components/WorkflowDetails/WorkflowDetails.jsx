@@ -72,7 +72,7 @@ const WorkflowDetails = () => {
       {workflow && (
         <>
           <WorkflowOverview workflowId={workflow.id} onActionComplete={onActionComplete} />
-          <WorkflowViewer workflowData={workflow} />
+          {/* <WorkflowViewer workflowData={workflow} /> */}
           <ActivityTimeline 
             workflowId={id}
             openSlider={openSlider}
