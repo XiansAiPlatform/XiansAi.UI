@@ -67,7 +67,6 @@ const Header = ({ pageTitle = "" }) => {
                 gap: 1
               }}
             >
-              <SmartToyOutlinedIcon sx={{ color: 'primary.main', fontSize: '28px' }} />
               <span style={{ color: 'var(--primary)' }}>Xians</span>
               <span style={{ color: 'var(--accent)' }}>.ai</span>
             </Typography>
