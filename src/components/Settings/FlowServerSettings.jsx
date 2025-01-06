@@ -50,11 +50,11 @@ const FlowServerSettings = () => {
     try {
       // Generate certificate with password
       const certResponse = await api.getFlowServerCertFile(certName);  // Empty password for now
-      downloadBlob(certResponse, `${certName}.crt`, 'application/x-x509-ca-cert');
+      downloadBlob(certResponse, `${certName}-${Date.now()}.crt`, 'application/x-x509-ca-cert');
 
       // Generate key
       const keyResponse = await api.getFlowServerPrivateKeyFile(keyName);
-      downloadBlob(keyResponse, `${keyName}.key`, 'application/x-pem-file');
+      downloadBlob(keyResponse, `${keyName}-${Date.now()}.key`, 'application/x-pem-file');
 
       toast.success('Certificate and key generated successfully');
       await fetchSettings(); // Refresh settings after generating new files

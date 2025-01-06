@@ -4,6 +4,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
 import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import { Link, useLocation } from 'react-router-dom';
 
 
@@ -13,6 +14,12 @@ const NAV_ITEMS = [
     icon: <AirIcon />,
     label: 'Flow Runs',
     isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
+  },
+  {
+    to: '/definitions',
+    icon: <CodeOutlinedIcon />,
+    label: 'Definitions',
+    isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
   {
     to: '/agents',

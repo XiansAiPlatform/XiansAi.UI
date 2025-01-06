@@ -57,14 +57,12 @@ const AppServerSettings = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${certName}.pfx`);
+      link.setAttribute('download', `${certName}-${Date.now()}.pfx`);
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
 
-      // Clear form
-      setCertName('');
       setPassword('');
       toast.success('Certificate generated and downloaded successfully');
     } catch (error) {

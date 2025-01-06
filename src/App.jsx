@@ -20,6 +20,7 @@ import { theme } from './theme/mui-theme';
 import Settings from './components/Settings/Settings';
 import Instructions from './components/Instructions/Instructions';
 import { OrganizationProvider } from './contexts/OrganizationContext';
+import DefinitionList from './components/Definitions/DefinitionList';
 
 function App() {
   const config = getConfig();
@@ -62,14 +63,14 @@ function App() {
                           <WorkflowList />
                         </ProtectedRoute>
                       } />
+                      <Route path="/definitions" element={
+                        <ProtectedRoute>
+                          <DefinitionList />
+                        </ProtectedRoute>
+                      } />
                       <Route path="/runs/:id" element={
                         <ProtectedRoute>
                           <WorkflowDetails />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/definitions" element={
-                        <ProtectedRoute>
-                          <NotImplemented />
                         </ProtectedRoute>
                       } />
                       <Route path="/agents" element={

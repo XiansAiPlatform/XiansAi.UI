@@ -27,13 +27,14 @@ export const useApi = () => {
     });
 
     return {
-      generateCertificate: async (name) => {
+      generateCertificate: async (name, password) => {
         try {
           const response = await fetch(`${apiBaseUrl}/api/client/certificates/generate`, {
             method: 'POST',
             headers: await createAuthHeaders(),
             body: JSON.stringify({
               fileName: name,
+              password: password
             })
           });
 

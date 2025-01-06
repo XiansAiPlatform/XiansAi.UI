@@ -8,47 +8,46 @@ const WorkflowViewer = ({ workflowData }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const mermaidDiagram = `
-  flowchart TD
-      classDef startEvent fill:#9acd32,stroke:#666,stroke-width:2px;
-      classDef endEvent fill:#ff6347,stroke:#666,stroke-width:2px;
-      classDef task fill:white,stroke:#4488cc,stroke-width:2px;
-      classDef gateway fill:#ffd700,stroke:#666,stroke-width:2px;
-      classDef loop fill:#87ceeb,stroke:#666,stroke-width:2px;
-      classDef subprocess fill:white,stroke:#666,stroke-width:2px;
+flowchart TD
+          classDef startEvent fill:#9acd32,stroke:#666,stroke-width:2px;
+          classDef endEvent fill:#ff6347,stroke:#666,stroke-width:2px;
+          classDef task fill:white,stroke:#4488cc,stroke-width:2px;
+          classDef gateway fill:#ffd700,stroke:#666,stroke-width:2px;
+          classDef loop fill:#87ceeb,stroke:#666,stroke-width:2px;
+          classDef subprocess fill:white,stroke:#666,stroke-width:2px;
       
-      Start(((Start Flow<br>●))) --> ScrapeLinks>Scrape News Links]
-      ScrapeLinks --> ForEachLoop
+          Start(((Start Flow<br>●))) --> ScrapeNewsLinks>Scrape News Links]
+          ScrapeNewsLinks --> ForEachLoop
       
-      subgraph LoopProcess
-          ForEachLoop((For Each<br>↻))
-          ForEachLoop --> |Next Link| ScrapeDetails>Scrape News Details]
-          ScrapeDetails --> SearchCompany>Google Search Company URL]
-          SearchCompany --> CheckISV{Is ISV Company? <br> Yes/No}
-          
-          CheckISV -->|Yes| AddCompany>Add to isvCompanies]
-          CheckISV -->|No| Delay
-          AddCompany --> Delay>Delay 10s]
-          
-          Delay --> ForEachLoop
-      end
+          subgraph LoopProcess
+              ForEachLoop((For Each<br>↻))
+              ForEachLoop --> |Next Link| ScrapeNewsDetails>Scrape News Details]
+              ScrapeNewsDetails --> CheckCompany{Check Company<br>Company Name Exists?}
+              
+              CheckCompany -->|Yes| SearchForWebsite>Search For Website]
+              CheckCompany -->|No| ForEachLoop
       
-      LoopProcess -->|Done| Return>Return Results]
-      Return --> End(((End Flow<br>⬤)))
+              SearchForWebsite --> CheckISV{Is ISV Company?<br>Yes/No}
+              
+              CheckISV -->|Yes| AddCompany>Add to isvCompanies]
+              CheckISV -->|No| ForEachLoop
+          end
       
-      subgraph Input Parameters
-          Input1[sourceLink]
-          Input2[prompt]
-      end
+          LoopProcess -->|Done| Return>Return Results]
+          Return --> End(((End Flow<br>⬤)))
       
-      Input1 -.-> Start
-      Input2 -.-> Start
+          subgraph Input Parameters
+              Input1[sourceLink]
+          end
       
-      class Start startEvent
-      class End endEvent
-      class ForEachLoop loop
-      class CheckISV gateway
-      class Init,ScrapeLinks,ScrapeDetails,SearchCompany,AddCompany,Delay,Return task
-      class Parameters,Config,LoopProcess subprocess
+          Input1 -.-> Start
+      
+          class Start startEvent
+          class End endEvent
+          class ForEachLoop loop
+          class CheckCompany,CheckISV gateway
+          class ScrapeNewsLinks,ScrapeNewsDetails,SearchForWebsite,AddCompany,Return task
+          class Parameters,LoopProcess subprocess
   `;
 
   return (
