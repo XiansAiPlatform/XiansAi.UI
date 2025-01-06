@@ -1,0 +1,123 @@
+.definition-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+
+/* Add separator between stats */
+.definition-stat:not(:last-child)::after {
+  content: "•";
+  margin: 0 var(--spacing-sm);
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.visualize-btn,
+.start-btn {
+  text-transform: none !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+  min-width: 120px !important;
+}
+
+.visualize-btn:hover,
+.start-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Add smooth transitions */
+.MuiButton-root,
+.MuiIconButton-root {
+  transition: all 0.2s ease-in-out !important;
+}
+
+.definition-row {
+  cursor: pointer;
+  transition: var(--transition-fast);
+  border-radius: var(--radius-lg);
+}
+
+.definition-row:hover {
+  background-color: var(--bg-hover);
+}
+
+.definition-toggle-cell {
+  width: 48px;
+  border-bottom: none;
+  padding-left: var(--spacing-md);
+}
+
+.definition-toggle-button {
+  transition: var(--transition-fast);
+  background-color: var(--bg-light);
+}
+
+.definition-toggle-button:hover {
+  background-color: var(--bg-hover);
+}
+
+.definition-toggle-button.open {
+  transform: rotate(-180deg);
+}
+
+.definition-content-cell {
+  border-bottom: none;
+  padding-right: var(--spacing-md);
+}
+
+.definition-content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+}
+
+.definition-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.visualize-btn {
+  border-radius: var(--radius-md);
+  background-color: var(--bg-light);
+  color: var(--text-primary);
+}
+
+.visualize-btn:hover {
+  background-color: var(--bg-hover);
+}
+
+.start-btn {
+  border-radius: var(--radius-md);
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.start-btn .MuiButton-startIcon {
+  color: #fff;
+}
+
+.start-btn:hover {
+  background-color: var(--primary-dark);
+  color: #000;
+}
+
+.start-btn:hover .MuiButton-startIcon {
+  color: #000;
+}
+
+.definition-collapse-cell {
+  padding-bottom: 0;
+  padding-top: 0;
+  border-bottom: var(--border-color) !important;
+}
+
+.definition-collapse-content {
+  margin: var(--spacing-md);
+}

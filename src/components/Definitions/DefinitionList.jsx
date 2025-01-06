@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, CircularProgress, Typography } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
+  const { setLoading } = useLoading();
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
@@ -31,15 +32,7 @@ const DefinitionList = () => {
     };
 
     fetchDefinitions();
-  }, [definitionsApi]);
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" p={4}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  }, [definitionsApi, setLoading]);
 
   if (error) {
     return (

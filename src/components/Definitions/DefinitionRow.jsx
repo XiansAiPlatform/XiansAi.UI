@@ -7,29 +7,45 @@ import DefinitionParameters from './DefinitionParameters';
 import { useSlider } from '../../contexts/SliderContext';
 import MermaidDiagram from '../WorkflowDetails/MermaidDiagram';
 import NewWorkflowForm from '../WorkflowList/NewWorkflowForm';
+import { useLoading } from '../../contexts/LoadingContext';
+import './Definitions.css';
 
 const DefinitionRow = ({ definition, isOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
+  const { setLoading } = useLoading();
 
-  const handleStartNew = () => {
+  const handleStartNew = async () => {
     const formContent = (
       <NewWorkflowForm 
         workflowType={definition.typeName}
         parameterInfo={definition.parameters}
-        onSuccess={() => {
-          // Close the slider after successful submission
-          closeSlider();
+        onSuccess={async () => {
+          setLoading(true);
+          try {
+            await closeSlider();
+          } finally {
+            setLoading(false);
+          }
         }}
-        onCancel={() => {
-          // Close the slider when cancelled
-          closeSlider();
+        onCancel={async () => {
+          setLoading(true);
+          try {
+            await closeSlider();
+          } finally {
+            setLoading(false);
+          }
         }}
       />
     );
-    openSlider(formContent, `Start New ${definition.typeName}`);
+    setLoading(true);
+    try {
+      await openSlider(formContent, `Start New ${definition.typeName}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleVisualize = () => {
+  const handleVisualize = async () => {
     const diagramContent = (
       <Box sx={{ 
         display: 'flex',
@@ -39,62 +55,51 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
         <MermaidDiagram diagram={definition.markdown} />
       </Box>
     );
-    openSlider(diagramContent, `${definition.typeName} Visualization`);
+    setLoading(true);
+    try {
+      await openSlider(diagramContent, `${definition.typeName} Visualization`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <TableRow 
         onClick={() => onToggle(definition.id)}
-        sx={{
-          '&:hover': {
-            backgroundColor: 'var(--bg-hover)',
-          },
-          transition: 'var(--transition-fast)',
-          cursor: 'pointer',
-        }}
+        className="definition-row"
       >
-        <TableCell sx={{ width: '48px', borderBottom: 'none' }}>
+        <TableCell className="definition-toggle-cell">
           <IconButton 
             size="small" 
             onClick={(e) => {
               e.stopPropagation();
               onToggle(definition.id);
             }}
-            sx={{
-              transition: 'var(--transition-fast)',
-              transform: isOpen ? 'rotate(-180deg)' : 'rotate(0)',
-            }}
+            className={`definition-toggle-button ${isOpen ? 'open' : ''}`}
           >
             <KeyboardArrowDownIcon />
           </IconButton>
         </TableCell>
-        <TableCell sx={{ borderBottom: 'none' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <TableCell className="definition-content-cell">
+          <div className="definition-content-wrapper">
             <Box>
               <Typography 
                 variant="subtitle1" 
-                sx={{ 
-                  fontWeight: 'var(--font-weight-medium)',
-                  color: 'var(--primary)',
-                }}
+                className="definition-title"
               >
                 {definition.typeName}
               </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: 'var(--text-secondary)',
-                  display: 'flex',
-                  gap: 'var(--spacing-sm)',
-                  mt: 'var(--spacing-xs)',
-                }}
-              >
-                <span>Activities: {definition.activities.length}</span>
-                <span>•</span>
-                <span>Inputs: {definition.parameters.length}</span>
-                <span>•</span>
-                <span>Created: {new Date(definition.createdAt).toLocaleDateString()}</span>
+              <Typography variant="caption">
+                <span className="definition-stat">
+                  <span className="stat-value">{definition.activities.length}</span> Activities
+                </span>
+                <span className="definition-stat">
+                  <span className="stat-value">{definition.parameters.length}</span> Inputs
+                </span>
+                <span className="definition-stat">
+                  Created {new Date(definition.createdAt).toLocaleDateString()}
+                </span>
               </Typography>
             </Box>
             <Stack direction="row" spacing={1}>
@@ -103,17 +108,10 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
                   e.stopPropagation();
                   handleVisualize();
                 }}
-                className="button-base"
+                className="button-base visualize-btn"
                 size="small"
                 variant="text"
                 startIcon={<VisibilityIcon />}
-                sx={{
-                  borderRadius: 'var(--radius-md)',
-                  color: 'var(--primary)',
-                  '&:hover': {
-                    backgroundColor: 'var(--primary-lighter)',
-                  }
-                }}
               >
                 Visualize
               </Button>
@@ -122,44 +120,32 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
                   e.stopPropagation();
                   handleStartNew();
                 }}
-                className="button-base"
+                className="button-base start-btn"
                 size="small"
-                variant="outlined"
+                variant="contained"
                 startIcon={<PlayArrowIcon />}
-                sx={{
-                  borderRadius: 'var(--radius-md)',
-                  borderColor: 'var(--primary)',
-                  color: 'var(--primary)',
-                  transition: 'var(--transition-fast)',
-                  '& .MuiButton-startIcon': {
-                    color: 'var(--primary)',
-                  },
-                  '&:hover': {
-                    borderColor: 'var(--primary)',
-                    backgroundColor: 'var(--primary-lighter)',
-                  }
-                }}
               >
                 Start New
               </Button>
             </Stack>
-          </Box>
+          </div>
         </TableCell>
       </TableRow>
-      <TableRow>
-        <TableCell 
-          style={{ paddingBottom: 0, paddingTop: 0 }} 
-          colSpan={2}
-          sx={{ borderBottom: isOpen ? 'var(--border-color)' : 'none' }}
-        >
-          <Collapse in={isOpen} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 'var(--spacing-md)' }}>
-              <DefinitionActivities activities={definition.activities} />
-              <DefinitionParameters parameters={definition.parameters} />
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
+      {isOpen && (
+        <TableRow>
+          <TableCell 
+            colSpan={2}
+            className="definition-collapse-cell"
+          >
+            <Collapse in={isOpen} timeout="auto" unmountOnExit>
+              <div className="definition-collapse-content">
+                <DefinitionActivities activities={definition.activities} />
+                <DefinitionParameters parameters={definition.parameters} />
+              </div>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      )}
     </>
   );
 };
