@@ -12,7 +12,6 @@ import { useApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
-import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowList.css';
 import { Link } from 'react-router-dom';
 

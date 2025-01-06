@@ -22,12 +22,6 @@ const NAV_ITEMS = [
     isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
   {
-    to: '/agents',
-    icon: <SmartToyOutlinedIcon />,
-    label: 'Agents',
-    isSelected: (pathname) => pathname === '/agents' || pathname.startsWith('/agents/'),
-  },
-  {
     to: '/instructions',
     icon: <DescriptionOutlinedIcon />,
     label: 'Instructions',
@@ -50,14 +44,31 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
       component={Link}
       to={to}
       className={`nav-item ${selected ? 'selected' : ''}`}
+      sx={{
+        mb: 1,
+        transition: 'var(--transition-fast)',
+        '&:hover': {
+          transform: 'translateX(4px)'
+        }
+      }}
     >
-      <ListItemIcon className="nav-item-icon">
+      <ListItemIcon 
+        sx={{ 
+          minWidth: '40px',
+          color: selected ? 'var(--primary)' : 'var(--text-secondary)'
+        }}
+      >
         {icon}
       </ListItemIcon>
       <ListItemText
         primary={label}
-        primaryTypographyProps={{
-          className: "nav-item-text"
+        sx={{
+          '& .MuiTypography-root': {
+            fontSize: 'var(--text-sm)',
+            fontWeight: selected ? 'var(--font-weight-bold)' : 'var(--font-weight-medium)',
+            color: selected ? 'var(--primary)' : 'var(--text-primary)',
+            fontFamily: 'var(--font-family)'
+          }
         }}
       />
     </ListItem>
@@ -69,21 +80,7 @@ const LeftNav = () => {
 
   return (
     <Box className="nav">
-      <Link to="/" style={{ textDecoration: 'none' }}>
-        <Box className="nav-logo">
-          
-          <Typography variant="h5" className="nav-logo-text">
-            <span style={{ color: 'var(--primary)' }}>Xians</span>
-            <span style={{ color: 'var(--secondary)' }}>.ai</span>
-          </Typography>
-        </Box>
-      </Link>
-      
-      <Typography variant="subtitle2" className="nav-section-title">
-        
-      </Typography>
-
-      <List>
+      <List sx={{ pt: 2 }}>
         {NAV_ITEMS.map((item) => (
           <NavItem
             key={item.to}

@@ -224,16 +224,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
                     Inputs & Outputs
                   </Typography>
                 </IconButton>
-                <IconButton
-                  size="small"
-                  className="timeline-action-button"
-                  title="View Agent"
-                >
-                  <SmartToyOutlinedIcon fontSize="small" />
-                  <Typography variant="caption" sx={{ ml: 1 }}>
-                    Agent
-                  </Typography>
-                </IconButton>
+ 
                 <IconButton
                   size="small"
                   className="timeline-action-button"

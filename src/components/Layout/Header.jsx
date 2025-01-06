@@ -5,6 +5,8 @@ import { useAuth0 } from '@auth0/auth0-react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
+import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import { Link } from 'react-router-dom';
 
 const Header = ({ pageTitle = "" }) => {
   const { user, logout } = useAuth0();
@@ -32,100 +34,187 @@ const Header = ({ pageTitle = "" }) => {
   };
 
   return (
-    <Box className="header">
-      <Box className="header-content" sx={{ display: 'flex', alignItems: 'center' }}>
-        {pageTitle}
-      </Box>
-      
+    <Box className="header" sx={{
+      borderBottom: '1px solid',
+      borderColor: 'divider',
+      backgroundColor: 'background.paper',
+      position: 'sticky',
+      top: 0,
+      zIndex: 1100,
+      width: '100vw',
+    }}>
       <Box className="header-content" sx={{ 
         display: 'flex', 
         alignItems: 'center',
-        gap: '16px'
+        padding: '12px 24px',
+        justifyContent: 'space-between',
+        margin: '0 auto',
       }}>
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center',
-          gap: '8px'
+          gap: 2 
         }}>
-          <BusinessIcon sx={{ 
-            color: 'text.secondary',
-            fontSize: '20px'
-          }} />
-          <FormControl size="small">
-            <Select
-              value={selectedOrg}
-              onChange={handleOrgChange}
-              displayEmpty
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontWeight: 700,
+                letterSpacing: '-0.5px',
+                fontSize: '1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <SmartToyOutlinedIcon sx={{ color: 'primary.main', fontSize: '28px' }} />
+              <span style={{ color: 'var(--primary)' }}>Xians</span>
+              <span style={{ color: 'var(--accent)' }}>.ai</span>
+            </Typography>
+          </Link>
+          
+          {pageTitle && (
+            <>
+              <Box sx={{ color: 'text.secondary', mx: 2 }}>/</Box>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600,
+                color: 'text.primary'
+              }}>
+                {pageTitle}
+              </Typography>
+            </>
+          )}
+        </Box>
+        
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          gap: '20px'
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: '8px',
+            backgroundColor: 'action.hover',
+            padding: '4px 8px',
+            borderRadius: '8px',
+          }}>
+            <BusinessIcon sx={{ 
+              color: 'text.secondary',
+              fontSize: '20px'
+            }} />
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <Select
+                value={selectedOrg}
+                onChange={handleOrgChange}
+                displayEmpty
+                sx={{
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                  color: 'text.secondary',
+                  '& .MuiSelect-select': {
+                    padding: '4px 8px',
+                  },
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    border: 'none'
+                  }
+                }}
+              >
+                <MenuItem disabled value="">
+                  Select Organization
+                </MenuItem>
+                {organizations.map((org, index) => (
+                  <MenuItem key={index} value={org}>
+                    {org}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          <Avatar
+            onClick={handleMenu}
+            className="header-avatar"
+            src={user?.picture}
+            alt={user?.name || 'User'}
+            sx={{
+              cursor: 'pointer',
+              width: 36,
+              height: 36,
+              transition: 'transform 0.2s',
+              border: '2px solid',
+              borderColor: 'primary.main',
+              '&:hover': {
+                transform: 'scale(1.05)'
+              }
+            }}
+          >
+            {!user?.picture && (user?.name?.charAt(0) || 'U')}
+          </Avatar>
+          
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            keepMounted
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            PaperProps={{
+              className: "header-menu-paper",
+              sx: {
+                mt: 1.5,
+                minWidth: 220,
+                boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+                '& .MuiMenu-list': {
+                  padding: '8px',
+                },
+              }
+            }}
+          >
+            <Box className="header-user-info" sx={{
+              padding: '12px 16px',
+              borderBottom: '1px solid',
+              borderColor: 'divider',
+            }}>
+              <Typography variant="subtitle1" sx={{ 
+                fontWeight: 600,
+                color: 'text.primary'
+              }}>
+                {user?.name}
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                {user?.email}
+              </Typography>
+            </Box>
+            <MenuItem 
+              onClick={handleLogout}
               sx={{
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                color: 'text.secondary',
-                '& .MuiSelect-select': {
-                  padding: '4px 8px',
+                margin: '8px 0',
+                gap: '12px',
+                borderRadius: '6px',
+                '&:hover': {
+                  backgroundColor: 'action.hover',
                 }
               }}
             >
-              <MenuItem disabled value="">
-                Select Organization
-              </MenuItem>
-              {organizations.map((org, index) => (
-                <MenuItem key={index} value={org}>
-                  {org}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <LogoutIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+              <Typography sx={{ color: 'text.primary' }}>Logout</Typography>
+            </MenuItem>
+          </Menu>
         </Box>
-
-        <Avatar
-          onClick={handleMenu}
-          className="header-avatar"
-          src={user?.picture}
-          alt={user?.name || 'User'}
-          sx={{
-            cursor: 'pointer',
-            width: 36,
-            height: 36,
-            transition: 'transform 0.2s',
-            '&:hover': {
-              transform: 'scale(1.05)'
-            }
-          }}
-        >
-          {!user?.picture && (user?.name?.charAt(0) || 'U')}
-        </Avatar>
-        <Menu
-          id="menu-appbar"
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          keepMounted
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          PaperProps={{
-            className: "header-menu-paper"
-          }}
-        >
-          <Box className="header-user-info">
-            <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>{name}</Typography>
-            <Typography variant="caption" color="text.secondary">
-              {user?.email}
-            </Typography>
-          </Box>
-          <MenuItem 
-            onClick={handleLogout}
-            className="header-logout"
-          >
-            <LogoutIcon fontSize="small" />
-            <Typography>Logout</Typography>
-          </MenuItem>
-        </Menu>
       </Box>
     </Box>
   );
