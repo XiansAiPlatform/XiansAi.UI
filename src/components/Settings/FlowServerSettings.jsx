@@ -98,7 +98,7 @@ const FlowServerSettings = () => {
   return (
     <Paper className="ca-certificates-paper">
       <Typography variant="h6" gutterBottom>
-        Flow Server Configuration
+        Flow Server Configurations
       </Typography>
 
       {isSettingsLoading ? (
@@ -134,8 +134,8 @@ const FlowServerSettings = () => {
 
           <Box className="code-container" sx={{ mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="subtitle2">
-                Example Configuration
+              <Typography variant="body2">
+              View example Flow Runner configurations
               </Typography>
               <IconButton
                 onClick={() => setShowExample(!showExample)}

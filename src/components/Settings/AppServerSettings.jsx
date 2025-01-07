@@ -75,13 +75,13 @@ const AppServerSettings = () => {
   return (
     <Paper className="ca-certificates-paper">
       <Typography variant="h6" gutterBottom>
-        App Server
+        App Server Configurations
       </Typography>
 
       <Box className="code-container">
         <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
           <Typography variant="body2">
-            View example Flow Runner configuration
+            View example Flow Runner configurations
           </Typography>
           <IconButton
             aria-label="toggle code example"
