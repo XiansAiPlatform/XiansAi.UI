@@ -78,9 +78,11 @@
 }
 
 .definition-title {
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
+    color: var(--text-primary) !important;
+    letter-spacing: var(--letter-spacing-tight);
+    font-family: var(--font-family) !important;
+    font-weight: var(--font-weight-normal) !important;
+    font-size: var(--text-lg) !important;
 }
 
 .visualize-btn {

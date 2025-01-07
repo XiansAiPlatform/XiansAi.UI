@@ -14,6 +14,14 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
 
+  const formatTypeName = (typeName) => {
+    return typeName
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/_/g, ' ')
+      .trim()
+      .replace(/^\w/, c => c.toUpperCase());
+  };
+
   const handleStartNew = async () => {
     const formContent = (
       <NewWorkflowForm 
@@ -85,10 +93,10 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
           <div className="definition-content-wrapper">
             <Box>
               <Typography 
-                variant="subtitle1" 
+                
                 className="definition-title"
               >
-                {definition.typeName}
+                {formatTypeName(definition.typeName)}
               </Typography>
               <Typography variant="caption">
                 <span className="definition-stat">

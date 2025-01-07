@@ -394,6 +394,22 @@
   color: var(--status-total-color);
 }
 
+.run-item-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.workflow-type {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.workflow-id {
+  font-size: 0.85rem;
+  color: #666;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .stats-container {

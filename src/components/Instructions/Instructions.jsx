@@ -7,6 +7,9 @@ import {
   List,
   Fab,
   CircularProgress,
+  Grid,
+  ListItem,
+  Divider,
 } from '@mui/material';
 import { Add} from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -19,6 +22,7 @@ const Instructions = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { openSlider, closeSlider } = useSlider();
   const instructionsApi = useInstructionsApi();
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     const fetchInstructions = async () => {
@@ -97,6 +101,25 @@ const Instructions = () => {
     }
   };
 
+  const handleVersionToggle = (instructionId) => {
+    const isExpanding = expandedId !== instructionId;
+    setExpandedId(expandedId === instructionId ? null : instructionId);
+    
+    // If expanding, scroll to the instruction after a short delay
+    if (isExpanding) {
+      setTimeout(() => {
+        const element = document.querySelector('.instruction-item-expanded');
+        if (element) {
+          element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest'
+          });
+        }
+      }, 100); // Small delay to allow for the DOM update
+    }
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 6, mb: 6 }}>
@@ -142,67 +165,54 @@ const Instructions = () => {
           </Fab>
         </Box>
         
-        <Paper 
-          elevation={0}
-          sx={{
-            overflow: 'hidden',
-            borderRadius: 'var(--radius-lg)',
-            backgroundColor: 'var(--bg-paper)',
-            backdropFilter: 'blur(8px)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            px: 2,
-            '&:hover': {
-              borderColor: 'rgba(0, 0, 0, 0.12)',
-              boxShadow: 'var(--shadow-sm)'
-            }
-          }}
-        >
-          {isLoading ? (
-            <Box sx={{ p: 6, textAlign: 'center' }}>
-              <CircularProgress />
-            </Box>
-          ) : instructions.length > 0 ? (
-            <List
-              sx={{
-                '& .MuiListItem-root': {
-                  px: 0,
-                  width: '100%',
-                },
-                '& > *:not(:last-child)': {
-                  mb: 0.5
-                }
-              }}
-            >
-              {instructions.map((instruction) => (
-                <InstructionItem
+        {isLoading ? (
+          <Box sx={{ p: 6, textAlign: 'center' }}>
+            <CircularProgress />
+          </Box>
+        ) : instructions.length > 0 ? (
+          <div className={`instructions-grid ${expandedId ? 'has-expanded' : ''}`}>
+            {instructions
+              // Sort the instructions to bring expanded one to top
+              .sort((a, b) => {
+                if (a.id === expandedId) return -1;
+                if (b.id === expandedId) return 1;
+                return 0;
+              })
+              .map((instruction) => (
+                <div 
                   key={instruction.id}
-                  instruction={instruction}
-                  onUpdateInstruction={handleUpdateInstruction}
-                  onDeleteAllInstruction={handleDeleteAllInstruction}
-                  onDeleteOneInstruction={handleDeleteOneInstruction}
-                />
+                  className={instruction.id === expandedId ? 'instruction-item-expanded' : ''}
+                >
+                  <InstructionItem
+                    instruction={instruction}
+                    onUpdateInstruction={handleUpdateInstruction}
+                    onDeleteAllInstruction={handleDeleteAllInstruction}
+                    onDeleteOneInstruction={handleDeleteOneInstruction}
+                    isExpanded={expandedId === instruction.id}
+                    onToggleExpand={() => handleVersionToggle(instruction.id)}
+                  />
+                </div>
               ))}
-            </List>
-          ) : (
-            <Box
-              sx={{
-                p: 6,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                color: 'var(--text-secondary)'
-              }}
-            >
-              <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
-                No instructions yet
-              </Typography>
-              <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
-                Create your first instruction by clicking the + button above. Instructions help customize the AI's behavior and responses.
-              </Typography>
-            </Box>
-          )}
-        </Paper>
+          </div>
+        ) : (
+          <Box
+            sx={{
+              p: 6,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              color: 'var(--text-secondary)'
+            }}
+          >
+            <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
+              No instructions yet
+            </Typography>
+            <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
+              Create your first instruction by clicking the + button above. Instructions help customize the AI's behavior and responses.
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Container>
   );

@@ -8,7 +8,8 @@ import {
   Chip,
   Collapse,
   Tooltip,
-  Paper
+  Paper,
+  Typography
 } from '@mui/material';
 import { Delete, KeyboardArrowDown } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -21,10 +22,11 @@ const InstructionItem = ({
   instruction,
   onUpdateInstruction,
   onDeleteAllInstruction,
-  onDeleteOneInstruction
+  onDeleteOneInstruction,
+  isExpanded,
+  onToggleExpand
 }) => {
   const { openSlider, closeSlider } = useSlider();
-  const [expanded, setExpanded] = useState(false);
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
   const [deleteOneDialogOpen, setDeleteOneDialogOpen] = useState(false);
   const [versions, setVersions] = useState([]);
@@ -34,7 +36,7 @@ const InstructionItem = ({
 
   useEffect(() => {
     const fetchVersions = async () => {
-      if (expanded) {
+      if (isExpanded) {
         setIsLoading(true);
         try {
           const response = await instructionsApi.getInstructionVersions(instruction.name);
@@ -48,7 +50,7 @@ const InstructionItem = ({
     };
 
     fetchVersions();
-  }, [expanded, instruction, instructionsApi]);
+  }, [isExpanded, instruction, instructionsApi]);
 
   const handleEdit = () => {
     openSlider(
@@ -102,7 +104,7 @@ const InstructionItem = ({
 
   const handleVersions = (e) => {
     e.stopPropagation();
-    setExpanded(!expanded);
+    onToggleExpand();
   };
 
   const handleDeleteOne = (versionToDelete) => {
@@ -144,132 +146,95 @@ const InstructionItem = ({
     return `${versionDate.toLocaleDateString()} ${versionDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
   };
 
+  const formatInstructionName = (name) => {
+    return name.replace(/([A-Z])/g, ' $1').trim();
+  };
+
   return (
     <>
-      <Box 
-        className={`instruction-item ${expanded ? 'instruction-item-expanded' : ''}`}
-        sx={{ width: '100%' }}
-      >
-        <ListItem 
-          onClick={handleView}
-          component={Paper}
-          elevation={0}
-          className="instruction-list-item"
-          disableGutters
-          sx={{
-            '& .MuiListItemText-primary': {
-              color: 'var(--text-primary)',
-              fontWeight: 'var(--font-weight-medium)'
-            },
-            '& .MuiListItemText-secondary': {
-              fontSize: '0.75rem',
-              color: 'var(--text-secondary)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1
-            }
-          }}
+      <Box className="instruction-card">
+        <Box 
+          onClick={handleView} 
+          sx={{ cursor: 'pointer' }}
         >
-          <ListItemText 
-            primary={instruction.name}
-            secondary={
-              <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                {`v.${instruction.version?.substring(0, 7) || 'draft'}`}
-                <Box 
-                  component="span" 
-                  sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    '&:hover': { textDecoration: 'underline' }
-                  }}
+          <Box className="card-header">
+            <Typography variant="h6" className="instruction-name">
+              {formatInstructionName(instruction.name)}
+            </Typography>
+            
+            <Box className="card-actions">
+              <Tooltip title="Delete All Versions" placement="top">
+                <IconButton 
+                  size="small"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleVersions(e);
+                    handleDeleteAllClick(e);
                   }}
+                  className="delete-btn"
                 >
-                  {` • All versions `}
-                  <KeyboardArrowDown 
-                    fontSize="small" 
-                    sx={{
-                      transform: expanded ? 'rotate(180deg)' : 'none',
-                      transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      fontSize: '1rem'
-                    }}
-                  />
-                </Box>
-              </Box>
-            }
-          />
-          
-          <Box className="instruction-metadata" sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            mr: 6
-          }}>
+                  <Delete fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
+
+          <Box className="card-metadata">
             <Chip 
               size="small" 
               label={instruction.type || 'No Type'} 
               className="type-chip"
             />
           </Box>
+        </Box>
 
-          <ListItemSecondaryAction>
-            <Tooltip title="Delete All Versions" placement="top">
-              <IconButton 
-                size="small"
-                onClick={handleDeleteAllClick}
-                className="delete-btn"
-              >
-                <Delete fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </ListItemSecondaryAction>
-        </ListItem>
-        
-        <Collapse in={expanded} timeout="auto">
-          <Paper 
-            elevation={0}
-            className="version-history"
-            sx={{
-              bgcolor: 'var(--bg-main)',
-              '& .version-chip': {
-                bgcolor: 'var(--bg-hover)',
-                color: 'var(--text-secondary)'
-              },
-              '& .version-chip-current': {
-                bgcolor: 'var(--primary-light)',
-                color: 'var(--primary)'
-              }
+        <Box className="version-section">
+          <Box 
+            className="version-info"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleVersions(e);
             }}
           >
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', p: 1 }}>
-              {isLoading ? (
-                <Chip size="small" label="Loading..." className="version-chip" />
-              ) : (
-                versions.map((version) => {
-                  const latestVersion = versions.reduce((latest, current) => 
-                    new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
-                  );
-                  
-                  return (
-                    <Chip
-                      key={version.id}
-                      size="small"
-                      label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
-                      className={`version-chip ${version.id === latestVersion.id ? 'version-chip-current' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleVersionSelect(version);
-                      }}
-                    />
-                  );
-                })
-              )}
+            <Box className="version-header">
+              <Typography variant="caption">
+                Current Version: v.{instruction.version?.substring(0, 7) || 'draft'}
+              </Typography>
+              <KeyboardArrowDown 
+                fontSize="small" 
+                className={`version-arrow ${isExpanded ? 'expanded' : ''}`}
+              />
             </Box>
-          </Paper>
-        </Collapse>
+          </Box>
+
+          <Collapse in={isExpanded} timeout="auto">
+            <Box className="version-history">
+              <Box className="version-chips">
+                {isLoading ? (
+                  <Chip size="small" label="Loading..." className="version-chip" />
+                ) : (
+                  versions.map((version) => {
+                    const isLatest = version.id === versions.reduce((latest, current) => 
+                      new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
+                    ).id;
+                    
+                    return (
+                      <Chip
+                        key={version.id}
+                        size="small"
+                        label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
+                        className={`version-chip ${isLatest ? 'version-chip-current' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleVersionSelect(version);
+                        }}
+                      />
+                    );
+                  })
+                )}
+              </Box>
+            </Box>
+          </Collapse>
+        </Box>
       </Box>
 
       <ConfirmationDialog

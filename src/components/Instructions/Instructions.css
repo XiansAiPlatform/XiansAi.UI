@@ -1,236 +1,264 @@
-/* Layout */
-.container {
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+/* Grid Container - Updated */
+.instructions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  padding: 0.5rem;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Add a class for expanded state */
+.instructions-grid.has-expanded {
+  display: block;
+}
+
+.instructions-grid.has-expanded > div {
   margin-bottom: 1.5rem;
+  max-width: 100%;
 }
 
-/* List Styles */
-.instructions-list {
-  padding: 0.75rem;
-}
-
-.instructions-list .MuiListItem-root {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  width: auto;
-  margin: 0;
-}
-
-.instructions-list > *:not(:last-child) {
-  margin-bottom: 0.25rem;
-}
-
-/* Instruction Item */
-.instruction-item {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 0.5rem;
-}
-
-.instruction-item:hover {
-  transform: translateY(-2px);
-}
-
-/* Separate List Item Style */
-.instruction-list-item.MuiPaper-root {
-  border-radius: var(--radius-lg) !important;
-  background-color: var(--bg-paper) !important;
-  border: 1px solid var(--border-color) !important;
-  box-shadow: var(--shadow-sm) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  padding: 1rem !important;
-  backdrop-filter: blur(8px);
-  padding-right: 3rem !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.instruction-list-item.MuiPaper-root:hover {
-  background-color: var(--bg-main) !important;
-  border-color: rgba(0, 0, 0, 0.12) !important;
-  box-shadow: var(--shadow-md) !important;
-}
-
-.instruction-item-expanded .instruction-list-item.MuiPaper-root {
-  border-bottom-left-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  border-bottom: none !important;
-}
-
-/* Viewer Content Style */
-.instruction-item-content {
+/* Card Layout */
+.instruction-card {
+  position: relative;
+  background: var(--bg-paper);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  transition: var(--transition-normal);
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  width: 100%;
 }
 
-/* Item Header */
-.instruction-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+.instruction-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-color-hover);
 }
 
-.instruction-title {
-  font-size: 1.1rem;
-  font-weight: var(--font-weight-semibold);
+/* Card Header */
+.card-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.instruction-name {
   color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-lg);
+  line-height: 1.4;
   letter-spacing: var(--letter-spacing-tight);
+  padding-right: 2.5rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  word-spacing: .1em;
 }
 
-.instruction-metadata {
+/* Add a pseudo-element for breaking at capital letters */
+.instruction-name::before {
+  content: attr(data-text);
+  display: block;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+/* Card Metadata */
+.card-metadata {
   display: flex;
-  gap: 0.75rem;
   align-items: center;
-  margin-top: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 /* Chips and Tags */
 .type-chip {
-  border-radius: var(--radius-md);
-  background-color: var(--bg-hover);
-  color: var(--text-secondary);
+  background-color: var(--primary-lighter);
+  color: var(--primary);
   font-weight: var(--font-weight-medium);
   padding: 0.25rem 0.75rem;
-  height: 24px;
-}
-
-.type-chip:hover {
-  background-color: rgba(0, 0, 0, 0.12);
-}
-
-.version-chip {
   border-radius: var(--radius-md);
-  background-color: var(--bg-hover);
+  font-size: var(--text-sm);
+}
+
+/* Version section container */
+.version-section {
+  margin-top: 1rem;
+  background-color: var(--bg-main);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+/* Version info header */
+.version-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background-color: var(--bg-paper);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.version-info:hover {
+  background-color: var(--primary-lighter);
+  color: var(--primary);
+}
+
+/* Version text and arrow container */
+.version-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.version-header .MuiTypography-caption {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: inherit;
+}
+
+/* Version arrow icon */
+.version-arrow {
+  font-size: 1.25rem !important;
+  transition: transform var(--transition-fast) !important;
+  color: inherit;
+}
+
+.version-arrow.expanded {
+  transform: rotate(180deg);
+}
+
+/* Version history content */
+.version-history {
+  padding: 1rem;
+  background-color: var(--bg-main);
+}
+
+.version-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Version chips */
+.version-chip {
+  background-color: var(--bg-paper);
+  color: var(--text-secondary);
   padding: 0.25rem 0.75rem;
-  height: 24px;
-  font-size: 0.8125rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  border: 1px solid var(--border-color);
+  transition: var(--transition-fast);
+  cursor: pointer;
 }
 
 .version-chip:hover {
-  background-color: rgba(0, 0, 0, 0.12);
+  background-color: var(--primary-lighter);
+  color: var(--primary);
+  border-color: var(--primary-light);
+  transform: translateY(-1px);
 }
 
 .version-chip-current {
-  background-color: var(--primary-light);
+  background-color: var(--primary-lighter);
   color: var(--primary);
-  font-weight: var(--font-weight-medium);
-}
-
-/* Buttons */
-.version-toggle-btn {
-  margin-left: 0.25rem;
-  padding: 4px;
-  border-radius: 6px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.version-toggle-btn:hover {
-  background-color: rgba(0, 0, 0, 0.08);
+  border-color: var(--primary-light);
 }
 
 /* Delete Button */
 .delete-btn {
+  opacity: 0;
   position: absolute !important;
-  right: 1.25rem !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  border-radius: 8px !important;
-  padding: 8px !important;
+  right: 0 !important;
+  top: 0 !important;
+  padding: 6px !important;
   color: var(--text-secondary) !important;
-  background-color: transparent !important;
+  transition: var(--transition-normal) !important;
+  z-index: 1;
+}
+
+.instruction-card:hover .delete-btn {
+  opacity: 1;
 }
 
 .delete-btn:hover {
   background-color: var(--error-light) !important;
   color: var(--error-main) !important;
-  transform: translateY(-50%) scale(1.1) !important;
-}
-
-.delete-btn svg {
-  font-size: 1.25rem !important;
-}
-
-/* Version History Panel */
-.version-history.MuiPaper-root {
-  padding: 1.25rem;
-  border-radius: 0 0 16px 16px !important;
-  background-color: var(--bg-main) !important;
-  border: 1px solid var(--border-color) !important;
-  border-top: none !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.version-history.MuiPaper-root:hover {
-  background-color: var(--bg-paper) !important;
-  border-color: rgba(0, 0, 0, 0.23) !important;
-  box-shadow: var(--shadow-sm) !important;
-}
-
-.version-history .version-chip {
-  margin: 0.25rem;
-  transition: all 0.2s ease;
-}
-
-.version-history .version-chip:hover {
-  transform: scale(1.05);
-  cursor: pointer;
 }
 
 /* Content Viewer */
 .content-viewer {
-  padding: 1rem;
-  background-color: rgba(0, 0, 0, 0.04);
-  border-radius: 0.5rem;
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-top: 1rem;
 }
 
 .content-viewer pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-/* Instruction Viewer Specific Styles */
-.instruction-item {
-  padding: .5rem;
-}
-
-.instruction-header-container {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-}
-
-.instruction-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.instruction-name-field {
-  margin-bottom: 1rem;
-}
-
-.instruction-metadata {
-  margin-bottom: 1rem;
-}
-
-.content-viewer {
-  border: 1px solid rgba(0, 0, 0, 0.23);
-  border-radius: 4px;
-  padding: 1rem;
-}
-
-.content-viewer pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-primary);
   margin: 0;
-  font-family: monospace;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+}
+
+/* Expanded State */
+.instruction-item-expanded .instruction-card {
+  border-color: var(--primary-light);
+  background-color: var(--bg-main);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+}
+
+/* Expanded state styling */
+.instruction-item-expanded {
+  animation: slideToTop 0.3s ease-out forwards;
+}
+
+.instruction-item-expanded .instruction-card {
+  border-color: var(--primary-light);
+  background-color: var(--bg-main);
+  box-shadow: var(--shadow-md);
+}
+
+/* Animation for sliding to top */
+@keyframes slideToTop {
+  from {
+    transform: translateY(0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Add smooth transition for non-expanded items */
+.instructions-grid.has-expanded > div {
+  transition: all 0.3s ease-out;
+}
+
+/* Highlight expanded version section */
+.instruction-item-expanded .version-section {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Additional visual emphasis for expanded state */
+.instruction-item-expanded .instruction-name {
+  color: var(--primary);
 }

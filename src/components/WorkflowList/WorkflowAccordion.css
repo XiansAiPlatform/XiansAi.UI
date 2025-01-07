@@ -1,0 +1,59 @@
+.workflow-accordion {
+  margin: var(--spacing-md) 0;
+}
+
+.workflow-header-content {
+  width: 100%;
+  padding: var(--spacing-sm) 0;
+}
+
+.workflow-title-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.workflow-type-title {
+  color: var(--text-primary) !important;
+  letter-spacing: var(--letter-spacing-tight);
+  font-family: var(--font-family) !important;
+  font-weight: var(--font-weight-normal) !important;
+  font-size: var(--text-lg) !important;
+}
+
+.status-indicators {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--text-sm);
+}
+
+.total-indicator {
+  color: var(--status-total-color);
+  background-color: var(--status-total-bg);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-medium);
+}
+
+.running-indicator {
+  color: var(--status-running-color);
+  background-color: var(--status-running-bg);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-xl);
+  font-weight: var(--font-weight-medium);
+}
+
+.expand-icon {
+  color: var(--text-secondary);
+  font-size: var(--text-2xl);
+  transition: var(--transition-normal);
+}
+
+.workflow-accordion-details {
+  padding: var(--spacing-md);
+  background-color: var(--bg-paper);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-sm);
+} 

@@ -12,6 +12,7 @@ import AddIcon from '@mui/icons-material/Add';
 import WorkflowRunItem from './WorkflowRunItem';
 import RightSlider from '../Layout/RightSlider';
 import NewWorkflowForm from './NewWorkflowForm';
+import './WorkflowAccordion.css';
 
 const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
   const [showNewWorkflowForm, setShowNewWorkflowForm] = useState(false);
@@ -44,14 +45,38 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
         className="workflow-accordion"
         onChange={(_, expanded) => setIsExpanded(expanded)}
         disableGutters
+        sx={{
+          boxShadow: 'none',
+          backgroundColor: 'transparent',
+          '&:before': {
+            display: 'none',
+          },
+        }}
       >
         <AccordionSummary 
           expandIcon={<ExpandMoreIcon className="expand-icon" />}
           className="workflow-accordion-header"
+          sx={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            margin: '8px 0',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            '&:hover': {
+              backgroundColor: '#f8f9fa',
+            },
+          }}
         >
           <div className="workflow-header-content">
             <div className="workflow-title-section">
-              <Typography className="workflow-type-title">
+              <Typography 
+                className="workflow-type-title"
+                variant="h5"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '1.5rem',
+                  color: '#1a1a1a',
+                }}
+              >
                 {formatWorkflowType(type)}
               </Typography>
               <div className="status-indicators">
