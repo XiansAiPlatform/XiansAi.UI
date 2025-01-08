@@ -2,20 +2,9 @@ import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@m
 import { tableStyles } from './styles';
 
 const DefinitionParameters = ({ parameters }) => (
-  <>
-    <Typography 
-      variant="h6" 
-      gutterBottom 
-      component="div" 
-      sx={{ 
-        mt: 4,
-        mb: 2,
-        fontSize: 'var(--text-base)',
-        fontWeight: 'var(--font-weight-medium)',
-        color: 'var(--text-primary)',
-      }}
-    >
-      Input Parameters
+  <div className="definition-section">
+    <Typography variant="h6" className="section-title">
+      Flow Inputs <span className="section-count">({parameters.length})</span>
     </Typography>
     <Table size="small" sx={tableStyles.nestedTable}>
       <TableHead>
@@ -37,7 +26,7 @@ const DefinitionParameters = ({ parameters }) => (
         ))}
       </TableBody>
     </Table>
-  </>
+  </div>
 );
 
 export default DefinitionParameters; 

@@ -2,5 +2,5 @@
   "domain": "flowmaxer.eu.auth0.com",
   "clientId": "gKpFhcYt8T7dburrl0qgN3oipdxe9y9O",
   "audience": "https://flowmaxer.ai/engine",
-  "apiBaseUrl": "http://localhost:5257"
+  "apiBaseUrl": "http://localhost:5000"
 }

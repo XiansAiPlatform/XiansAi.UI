@@ -48,6 +48,18 @@ const DefinitionList = () => {
 
   return (
     <Box sx={tableStyles.container}>
+      <Typography 
+            variant="h4" 
+            component="h1"
+            sx={{
+              fontWeight: 'var(--font-weight-semibold)',
+              letterSpacing: 'var(--letter-spacing-tight)',
+              color: 'var(--text-primary)',
+              mb: 4
+            }}
+          >
+            Flow Definitions
+      </Typography>
       <TableContainer component={Paper} sx={tableStyles.tableContainer}>
         <Table sx={{ minWidth: 650 }}>
           <TableBody>

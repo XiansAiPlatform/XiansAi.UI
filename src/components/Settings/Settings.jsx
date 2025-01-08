@@ -8,10 +8,18 @@ const Settings = () => {
   return (
     <Container maxWidth="lg">
       <Box className="settings-container">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Settings
+      <Typography 
+            variant="h4" 
+            component="h1"
+            sx={{
+              fontWeight: 'var(--font-weight-semibold)',
+              letterSpacing: 'var(--letter-spacing-tight)',
+              color: 'var(--text-primary)',
+              mb: 4
+            }}
+          >
+            Settings
         </Typography>
-              
         <Alert severity="info" className="info-alert">
           These settings are required for your flow server to run.
           <br />

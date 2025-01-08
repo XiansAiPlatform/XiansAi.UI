@@ -9,6 +9,7 @@ import MermaidDiagram from '../WorkflowDetails/MermaidDiagram';
 import NewWorkflowForm from '../WorkflowList/NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
+import DefinitionAgents from './DefinitionAgents';
 
 const DefinitionRow = ({ definition, isOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
@@ -147,6 +148,7 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
           >
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <div className="definition-collapse-content">
+                <DefinitionAgents activities={definition.activities} />
                 <DefinitionActivities activities={definition.activities} />
                 <DefinitionParameters parameters={definition.parameters} />
               </div>

@@ -410,6 +410,11 @@
   color: #666;
 }
 
+.text-subtle {
+  color: #666;  /* or any other muted color that matches your design */
+  font-size: 0.9em;
+}
+
 /* Responsive adjustments */
 @media (max-width: 600px) {
   .stats-container {

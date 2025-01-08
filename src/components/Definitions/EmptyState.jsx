@@ -16,10 +16,10 @@ const EmptyState = () => (
     }}
   >
     <Typography variant="h6" sx={{ color: 'var(--text-primary)' }}>
-      No Flow Definitions Found
+      Flow Definitions
     </Typography>
     <Typography variant="body1" sx={{ color: 'var(--text-secondary)', maxWidth: '600px' }}>
-      Flow definitions are automatically created when flows are run for the first time or when they are modified. 
+      Flow definitions are automatically created when flows are run for the first time or when the flow code is modified. 
       To create definitions, please run your flows through the Flow Runner.
     </Typography>
   </Box>

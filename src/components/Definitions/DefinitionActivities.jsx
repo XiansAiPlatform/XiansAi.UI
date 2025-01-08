@@ -2,24 +2,15 @@ import { Table, TableBody, TableCell, TableHead, TableRow, Typography, Box } fro
 import { tableStyles } from './styles';
 
 const DefinitionActivities = ({ activities }) => (
-  <>
-    <Typography 
-      variant="h6" 
-      gutterBottom 
-      component="div"
-      sx={{ 
-        fontSize: 'var(--text-base)',
-        fontWeight: 'var(--font-weight-medium)',
-        color: 'var(--text-primary)',
-      }}
-    >
-      Activities
+  <div className="definition-section">
+    <Typography variant="h6" className="section-title">
+      Flow Activities <span className="section-count">({activities.length})</span>
     </Typography>
     <Table size="small" sx={tableStyles.nestedTable}>
       <TableHead>
         <TableRow>
           <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Activity Name</TableCell>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Docker Image</TableCell>
+          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Agent</TableCell>
           <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Instructions</TableCell>
           <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Parameters</TableCell>
         </TableRow>
@@ -30,7 +21,14 @@ const DefinitionActivities = ({ activities }) => (
             <TableCell>{activity.activityName}</TableCell>
             <TableCell>
               {activity.dockerImage ? (
-                <Typography component="code" sx={tableStyles.codeBlock}>
+                <Typography component="code" variant="body2"
+                sx={{ 
+                  backgroundColor: 'var(--primary-light)',
+                  padding: 'var(--spacing-xs) var(--spacing-sm)',
+                  borderRadius: 'var(--radius-sm)',
+                  display: 'inline-block',
+                  width: 'fit-content'
+                }}>
                   {activity.dockerImage}
                 </Typography>
               ) : (
@@ -77,7 +75,7 @@ const DefinitionActivities = ({ activities }) => (
         ))}
       </TableBody>
     </Table>
-  </>
+  </div>
 );
 
 export default DefinitionActivities; 
