@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
   IconButton,
   Box,
   Chip,
   Collapse,
   Tooltip,
-  Paper,
   Typography
 } from '@mui/material';
 import { Delete, KeyboardArrowDown } from '@mui/icons-material';

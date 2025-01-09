@@ -2,14 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
-  Paper, 
   Container,
-  List,
   Fab,
   CircularProgress,
-  Grid,
-  ListItem,
-  Divider,
 } from '@mui/material';
 import { Add} from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';

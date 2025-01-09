@@ -26,6 +26,7 @@ const FlowServerSettings = () => {
 
   useEffect(() => {
     fetchSettings();
+    // eslint-disable-next-line
   }, []);
 
   const fetchSettings = async () => {

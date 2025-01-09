@@ -5,14 +5,12 @@ import { useAuth0 } from '@auth0/auth0-react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { Link } from 'react-router-dom';
 
 const Header = ({ pageTitle = "" }) => {
   const { user, logout } = useAuth0();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
-  const [name] = React.useState('');
 
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;

@@ -3,7 +3,6 @@ import { Typography, IconButton, Box, Tooltip, Dialog, DialogTitle, DialogConten
 import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } from '@mui/lab';
 import InputIcon from '@mui/icons-material/Input';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
 import Chip from '@mui/material/Chip';

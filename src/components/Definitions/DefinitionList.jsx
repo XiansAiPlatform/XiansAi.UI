@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, TableRow, TableCell, Collapse } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';

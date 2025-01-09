@@ -7,7 +7,6 @@ import { handleApiError } from '../../utils/errorHandler';
 import { useApi } from '../../services/workflow-api';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
-import WorkflowViewer from './WorkflowViewer';
 
 const WorkflowDetails = () => {
   const { id } = useParams();
