@@ -6,6 +6,6 @@ export function getConfig() {
     domain: configJson.domain,
     clientId: configJson.clientId,
     audience: configJson.audience,
-    apiBaseUrl: configJson.apiBaseUrl
+    apiBaseUrl: process.env.REACT_APP_API_URL || configJson.apiBaseUrl 
   };
 }
