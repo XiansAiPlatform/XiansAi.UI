@@ -4,8 +4,9 @@ import LeftNav from './LeftNav';
 import Header from './Header';
 import RightSlider from './RightSlider';
 import { useSlider } from '../../contexts/SliderContext';
+import { Outlet } from 'react-router-dom';
 
-const Layout = ({ children }) => {
+const Layout = () => {
   const { isOpen, closeSlider, sliderContent, sliderTitle } = useSlider();
 
   return (
@@ -14,7 +15,7 @@ const Layout = ({ children }) => {
         <LeftNav />
         <Header />
         <Box className="layout-main">
-          {children}
+          <Outlet />
         </Box>
         {isOpen && (
           <Box className="layout-slider">

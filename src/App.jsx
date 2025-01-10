@@ -21,7 +21,7 @@ import Settings from './components/Settings/Settings';
 import Instructions from './components/Instructions/Instructions';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import DefinitionList from './components/Definitions/DefinitionList';
-
+import Home from './components/Home/Home';
 function App() {
   const config = getConfig();
 
@@ -50,14 +50,14 @@ function App() {
               <LoadingProvider>
                 <SliderProvider>
                   <Toaster />
-                  <Layout>
-                    <Routes>
-                      <Route path="/callback" element={<Callback />} />
-                      <Route path="/" element={
-                        <ProtectedRoute>
-                          <WorkflowList />
-                        </ProtectedRoute>
-                      } />
+                  <Routes>
+                    <Route path="/callback" element={<Callback />} />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    } />
+                    <Route element={<Layout />}>
                       <Route path="/runs" element={
                         <ProtectedRoute>
                           <WorkflowList />
@@ -88,8 +88,8 @@ function App() {
                           <Settings />
                         </ProtectedRoute>
                       } />                                                                      
-                    </Routes>
-                  </Layout>
+                    </Route>
+                  </Routes>
                 </SliderProvider>
               </LoadingProvider>
             </ThemeProvider>
