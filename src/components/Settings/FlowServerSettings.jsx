@@ -32,6 +32,7 @@ const FlowServerSettings = () => {
   const fetchSettings = async () => {
     try {
       const flowServerSettings = await api.getFlowServerSettings();
+      console.log('flowServerSettings', flowServerSettings);
       setSettings(flowServerSettings);
     } catch (error) {
       toast.error('Failed to fetch Flow Server settings');
@@ -111,7 +112,7 @@ const FlowServerSettings = () => {
           <Box className="server-url-container" sx={{ mb: 3 }}>
             <TextField
               label="Flow Server URL"
-              value={settings?.url || 'Not configured'}
+              value={settings?.flowServerUrl || 'Not configured'}
               fullWidth
               InputProps={{ 
                 readOnly: true,
@@ -123,7 +124,7 @@ const FlowServerSettings = () => {
 
             <TextField
               label="Flow Server Namespace"
-              value={settings?.ns || 'Not configured'}
+              value={settings?.flowServerNamespace || 'Not configured'}
               fullWidth
               InputProps={{ 
                 readOnly: true,
