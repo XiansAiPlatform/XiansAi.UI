@@ -14,19 +14,19 @@ export default function Home() {
     const featureTabs = [
         {
             title: "Flow Visualization",
-            description: "Design and visualize complex AI workflows with our intuitive flow visualizer. See how your agents interact, and monitor data flow between tasks.",
+            description: "Design and monitor complex AI workflows with intuitive visualization tools. Track agent interactions and data flows in real-time for complete operational visibility.",
             image: "/images/visualizer.png",
             icon: <RiFlowChart className="home-tab-icon" />
         },
         {
             title: "Execution Monitoring",
-            description: "Track your AI workflows in real-time with comprehensive monitoring tools. Get detailed insights into agent performance, task completion status, and system metrics all in one place.",
+            description: "Monitor AI workflows in real-time with comprehensive execution details. Get instant insights into agent performance, task status, and system health from a unified dashboard.",
             image: "/images/monitoring.png",
             icon: <FiCpu className="home-tab-icon" />
         },
         {
             title: "Agent Training",
-            description: "Fine-tune and train your AI agents for specific tasks using our specialized training interface. Improve agent performance through iterative learning and detailed feedback loops.",
+            description: "Optimize AI agents for specific business tasks through our specialized training interface. Enhance performance through iterative learning and structured feedback loops.",
             image: "/images/training.png",
             icon: <RiRobot2Fill className="home-tab-icon" />
         }
@@ -169,8 +169,9 @@ var newBlogPosts = new List<string>();`
                     <div className="home-cta-buttons" >
                         <button className="home-btn home-btn-secondary" onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}>Documentation</button>
                     </div>
-                    <p className="home-hero-subtitle">We help engineers to
-                        build intelligent and resilient business workflows that works, even while you sleep.</p>
+                    <p className="home-hero-subtitle">
+                        Build intelligent, resilient business workflows that operate reliably at scale - even while you sleep.
+                    </p>
                     <div className="code-sample">
                         <code>
                             {'>'} dotnet add package XiansAi.Lib
@@ -249,9 +250,9 @@ var newBlogPosts = new List<string>();`
             <section className="home-features">
                 <div className="home-features-grid">
                     <div className="home-feature-card-large">
-                        <h3>Avoid Vendor Lock-In<br/> Bring Your Own Agents</h3>
-                        <p>Build autonomous agents from Xians.ai or from any other provider or build your own. 
-                        If the agents can run in a container, they can run in Xians.ai.</p>
+                        <h3>Avoid Vendor Lock-In with Open Architecture</h3>
+                        <p>Deploy AI agents from any source - whether from Xians.ai, other providers, or your own development team. 
+                        Any containerized agent integrates seamlessly with our platform.</p>
                         <div className="home-tech-logos">
                             <img src="/images/docker-logo.png" alt="Docker" className="home-tech-logo" />
                             <img src="/images/kubernetes-logo.png"  alt="Kubernetes" className="home-tech-logo" />
@@ -259,14 +260,11 @@ var newBlogPosts = new List<string>();`
                     </div>
 
                     <div className="home-feature-card-medium">
-                        <h3>Enterprise Grade Robustness</h3>
-                        <p>Build reliable distributed agentic workflows without 
-                            worrying about infrastructure complexity.
-                            <br/>
-                            Focus on your business logic while we handle durability, 
-                            scalability and fault-tolerance behind the scenes. 
-                            We use <u><a className="home-feature-link" href="https://temporal.io" target="_blank" rel="noopener noreferrer">Temporal</a></u>
-                            {' '}to ensure your workflows stay robust.</p>
+                        <h3>Enterprise-Grade Reliability</h3>
+                        <p>Build dependable AI workflows without infrastructure complexity. 
+                        Focus on business logic while we handle durability, scalability, and fault tolerance. 
+                        Powered by <u><a className="home-feature-link" href="https://temporal.io" target="_blank" rel="noopener noreferrer">Temporal</a></u> 
+                        {' '}for proven reliability.</p>
                         <div className="home-feature-code">
                             <div className="home-feature-languages">
                                 {['Durable', 'Event Driven', 'Scalable', 'Fault Tolerant', 'Persistent State'].map((tab, index) => (
@@ -310,12 +308,12 @@ var newBlogPosts = new List<string>();`
                     </div>
 
                     <div className="home-feature-card-large">
-                        <h3>Blend Deterministic Execution with AI's Autonomous Capabilities</h3>
+                        <h3>Balance AI Autonomy with Control</h3>
                         <ul className="home-code-demo-points">
-                            <li>Not all parts of a business workflow is autonomous.</li>
-                            <li>For example, you wont let your new recruit to change your sales process every morning.</li>
-                            <li>Bringing AI autonomy into your business should be a gradual process.</li>
-                            <li>You can mix and match deterministic and autonomous capabilities with Xians.ai.</li>
+                            <li>Maintain control over critical business processes</li>
+                            <li>Implement AI automation strategically after review</li>
+                            <li>Keep human oversight in workflow designing</li>
+                            <li>Blend autonomy and orchestration seamlessly</li>
                         </ul>
                     </div>
                 </div>
@@ -341,15 +339,21 @@ var newBlogPosts = new List<string>();`
             <footer className="home-footer">
                 <div className="home-footer-content">
                     <div className="home-footer-left">
-                        <span>© {new Date().getFullYear()} Xians.ai. All rights reserved.</span>
+                        <div className="home-footer-logo">
+                            <span className="home-logo-flow">Xians</span>
+                            <span className="footer-logo-ai">.ai</span>
+                        </div>
+                        <span className="home-footer-copyright">© {new Date().getFullYear()} Xians.ai. All rights reserved.</span>
                     </div>
                     <div className="home-footer-right">
-                        <a href="/" className="home-footer-link">Privacy Policy</a>
-                        <a href="/" className="home-footer-link">Terms of Service</a>
-                        <a href="https://github.com/xiansaiplatform" target="_blank" rel="noopener noreferrer" className="home-footer-link">
-                            <BiLogoGithub className="home-footer-icon" />
-                            GitHub
-                        </a>
+                        <div className="home-footer-links">
+                            <a href="/" className="home-footer-link">Privacy Policy</a>
+                            <a href="/" className="home-footer-link">Terms of Service</a>
+                            <a href="https://github.com/xiansaiplatform" target="_blank" rel="noopener noreferrer" className="home-footer-link">
+                                <BiLogoGithub className="home-footer-icon" />
+                                GitHub
+                            </a>
+                        </div>
                     </div>
                 </div>
             </footer>
