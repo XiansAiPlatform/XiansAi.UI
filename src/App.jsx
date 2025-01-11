@@ -22,14 +22,17 @@ import Instructions from './components/Instructions/Instructions';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import DefinitionList from './components/Definitions/DefinitionList';
 import Home from './components/Home/Home';
+import Login from './auth/Login';
+
 function App() {
   const config = getConfig();
 
   const onRedirectCallback = (appState) => {
     var history = createBrowserHistory();
     history.push(
-      appState && appState.returnTo ? appState.returnTo : '/callback'
+      appState && appState.returnTo ? appState.returnTo : '/runs'
     );
+    window.location.href = '/runs';
   };
   const providerConfig = {
     domain: config.domain,
@@ -52,6 +55,7 @@ function App() {
                   <Toaster />
                   <Routes>
                     <Route path="/callback" element={<Callback />} />
+                    <Route path="/login" element={<Login />} />
                     <Route path="/" element={
                       <ProtectedRoute>
                         <Home />

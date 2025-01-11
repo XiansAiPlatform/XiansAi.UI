@@ -13,9 +13,9 @@ const Callback = () => {
       showError(error.message);
       return;
     }
-    
+    console.log(isAuthenticated);
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/runs');
     }
   }, [isAuthenticated, navigate, error, showError]);
 
