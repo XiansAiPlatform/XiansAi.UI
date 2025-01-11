@@ -143,24 +143,26 @@ var newBlogPosts = new List<string>();`
     return (
         <div className="home-container">
             <header className="home-header">
-                <div className="home-logo-container">
-                    <div className="home-logo">
-                        <span className="home-logo-flow">Xians</span>
-                        <span className="home-logo-ai">.ai</span>
+                <div className="home-header-content">
+                    <div className="home-logo-container">
+                        <div className="home-logo">
+                            <span className="home-logo-flow">Xians</span>
+                            <span className="home-logo-ai">.ai</span>
+                        </div>
+                        <a href="https://99x.io" target="_blank" rel="noopener noreferrer" className="home-logo-sub">
+                            <span className="home-logo-by">by</span>
+                            <img src="/images/99xlogo.svg" alt="99x" className="home-logo-99x" />
+                        </a>
                     </div>
-                    <a href="https://99x.io" target="_blank" rel="noopener noreferrer" className="home-logo-sub">
-                        <span className="home-logo-by">by</span>
-                        <img src="/images/99xlogo.svg" alt="99x" className="home-logo-99x" />
-                    </a>
-                </div>
-                <div className="home-auth-buttons">
-                    <button className="home-btn home-btn-secondary" onClick={() => window.location.href = '/login'}>
-                        Login
-                    </button>
-                    <button className="home-btn home-btn-primary" onClick={() => window.open('/login')}>
-                        <BiLogoGithub />
-                        Sign up with GitHub
-                    </button>
+                    <div className="home-auth-buttons">
+                        <button className="home-btn home-btn-secondary" onClick={() => window.location.href = '/login'}>
+                            Login
+                        </button>
+                        <button className="home-btn home-btn-primary" onClick={() => window.open('/login')}>
+                            <BiLogoGithub />
+                            Sign up with GitHub
+                        </button>
+                    </div>
                 </div>
             </header>
 

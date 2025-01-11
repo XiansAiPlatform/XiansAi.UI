@@ -445,11 +445,31 @@ body {
   top: 0;
   z-index: 100;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   border-bottom: 1px solid var(--home-border);
   backdrop-filter: blur(8px);
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Update header content wrapper */
+.home-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 1rem;
+}
+
+/* Remove these as they're no longer needed */
+.home-header::before,
+.home-logo-container,
+.home-auth-buttons {
+  max-width: none;
+  margin: 0;
+  width: auto;
+  position: static;
 }
 
 .home-logo-container {
