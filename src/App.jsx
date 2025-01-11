@@ -57,9 +57,7 @@ function App() {
                     <Route path="/callback" element={<Callback />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/" element={
-                      <ProtectedRoute>
                         <Home />
-                      </ProtectedRoute>
                     } />
                     <Route element={<Layout />}>
                       <Route path="/runs" element={

@@ -154,9 +154,11 @@ var newBlogPosts = new List<string>();`
                     </a>
                 </div>
                 <div className="home-auth-buttons">
-                    <button className="home-btn home-btn-secondary" onClick={() => window.location.href = '/login'}>Login</button>
+                    <button className="home-btn home-btn-secondary" onClick={() => window.location.href = '/login'}>
+                        Login
+                    </button>
                     <button className="home-btn home-btn-primary" onClick={() => window.open('/login')}>
-                        <BiLogoGithub className="home-btn-icon" />
+                        <BiLogoGithub />
                         Sign up with GitHub
                     </button>
                 </div>

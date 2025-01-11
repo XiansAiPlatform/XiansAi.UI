@@ -18,6 +18,25 @@
   --home-glow: rgba(139, 92, 246, 0.3);
   --home-glow-strong: rgba(139, 92, 246, 0.5);
   --home-border: rgba(139, 92, 246, 0.15);
+  
+  /* Add typography variables */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Fira Code', 'Roboto Mono', monospace;
+  
+  /* Add spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+}
+
+/* Apply improved typography */
+body {
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .home-container {
@@ -25,6 +44,7 @@
   overflow-x: hidden;
   background: var(--home-bg-dark);
   color: var(--home-text-primary);
+  animation: fadeIn 0.3s ease-in;
 }
 
 .home-hero {
@@ -35,7 +55,14 @@
   justify-content: center;
   text-align: center;
   padding: 2rem;
-  background: linear-gradient(135deg, var(--home-bg-dark), var(--home-bg-darker));
+  background: 
+    radial-gradient(circle at top right, 
+      rgba(139, 92, 246, 0.1), 
+      transparent 50%),
+    radial-gradient(circle at bottom left, 
+      rgba(139, 92, 246, 0.05), 
+      transparent 50%),
+    var(--home-bg-dark);
   position: relative;
   overflow: hidden;
 }
@@ -44,13 +71,16 @@
 .home-hero::before {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at center, var(--home-primary-transparent) 0%, transparent 70%);
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--home-primary),
+    transparent
+  );
 }
 
 .home-hero-content {
@@ -63,9 +93,11 @@
 .home-hero h1 {
   font-size: 3.5rem;
   margin-bottom: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--home-text-primary);
   text-shadow: 0 0 10px var(--home-glow);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
 .home-hero-subtitle {
@@ -82,38 +114,62 @@
 }
 
 .home-btn {
-  padding: 0.8rem 1.5rem;
+  padding: 0.7rem 1.4rem;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.5s;
+}
+
+.home-btn:active::after {
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .home-btn-primary {
   background: var(--home-primary);
-  color: var(--home-bg-dark);
+  color: white;
   border: none;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 0 15px var(--home-glow);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 8px var(--home-glow);
 }
 
 .home-btn-primary:hover {
   background: var(--home-primary-hover);
-  box-shadow: 0 0 20px var(--home-glow-strong);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--home-glow-strong);
 }
 
 .home-btn-secondary {
   background: transparent;
-  color: var(--home-primary);
-  border: 2px solid var(--home-primary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  color: var(--home-text-secondary);
+  border: 1.5px solid var(--home-border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .home-btn-secondary:hover {
   background: var(--home-primary-transparent);
+  border-color: var(--home-primary);
+  color: var(--home-text-primary);
 }
 
 .home-code-sample {
@@ -241,10 +297,17 @@
 
 .home-feature-card {
   padding: 2.5rem;
-  background: var(--home-bg-dark);
+  background: linear-gradient(135deg, 
+    rgba(255,255,255,0.05) 0%, 
+    rgba(255,255,255,0.02) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 
+    0 4px 24px -1px rgba(0,0,0,0.2),
+    0 0 1px 0 rgba(0,0,0,0.16);
   border-radius: 16px;
   transition: all 0.3s ease;
-  border: 1px solid var(--home-border);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -253,8 +316,10 @@
 
 .home-feature-card:hover {
   transform: translateY(-5px);
+  box-shadow: 
+    0 8px 32px -1px rgba(0,0,0,0.2),
+    0 0 1px 0 rgba(0,0,0,0.16);
   border-color: var(--home-primary);
-  box-shadow: 0 0 30px var(--home-glow);
 }
 
 .home-feature-icon {
@@ -268,8 +333,9 @@
   font-size: 2.5rem;
   margin-bottom: 1.5rem;
   color: var(--home-text-primary);
-  font-weight: 600;
-  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
 .home-feature-card p {
@@ -372,8 +438,8 @@
 }
 
 .home-header {
-  background: rgba(3, 7, 18, 0.95);
-  padding: 1rem 2rem;
+  background: rgba(3, 7, 18, 0.98);
+  padding: 1.2rem 2.5rem;
   position: fixed;
   width: 100%;
   top: 0;
@@ -382,25 +448,30 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--home-border);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .home-logo-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  gap: 0.3rem;
 }
 
 .home-logo {
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: 1.8rem;
+  font-weight: 800;
   display: flex;
   align-items: center;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .home-logo-flow {
-  color: var(--home-primary);
-  text-shadow: 0 0 10px var(--home-glow);
+  background: linear-gradient(135deg, var(--home-primary) 0%, var(--home-primary-hover) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
 }
 
 .home-logo-ai {
@@ -452,6 +523,7 @@
 .home-auth-buttons {
   display: flex;
   gap: 1rem;
+  align-items: center;
 } 
 
 .home-feature-showcase {
@@ -665,16 +737,26 @@
 }
 
 .home-code-block {
-  margin: 0 !important;
-  border-radius: 0 0 8px 8px !important;
-  padding: 1rem !important;
-  overflow-x: auto;
-  background: var(--home-bg-dark);
-  color: var(--home-text-primary);
-  font-family: 'Fira Code', monospace;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  background: linear-gradient(135deg, 
+    var(--home-bg-darker) 0%, 
+    rgba(30, 41, 59, 0.8) 100%
+  );
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: var(--space-lg);
 }
+
+.home-code-block pre {
+  font-family: var(--font-mono);
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+/* Add syntax highlighting colors */
+.token.comment { color: #6b7280; }
+.token.keyword { color: #93c5fd; }
+.token.string { color: #86efac; }
+.token.function { color: #c084fc; }
 
 @media (max-width: 1024px) {
   .home-code-demo-content {
@@ -916,3 +998,234 @@
         justify-content: center;
     }
 } 
+
+/* Update existing media query and add new responsive styles */
+@media (max-width: 768px) {
+  .home-header {
+    padding: 1rem;
+  }
+
+  .home-logo {
+    font-size: 1.5rem;
+  }
+
+  .home-logo-sub {
+    display: none; /* Hide "by 99x" on mobile */
+  }
+
+  .home-auth-buttons {
+    gap: 0.5rem;
+  }
+
+  .home-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  /* Adjust hero section for mobile */
+  .home-hero {
+    padding: 1rem;
+    padding-top: 5rem;
+    min-height: 70vh;
+  }
+
+  .home-hero h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+
+  .home-hero-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .code-sample {
+    font-size: 0.9rem;
+    padding: 0.8rem;
+    overflow-x: auto;
+  }
+}
+
+/* Add extra small screen sizes */
+@media (max-width: 480px) {
+  .home-header {
+    padding: 0.8rem;
+  }
+
+  .home-logo {
+    font-size: 1.3rem;
+  }
+
+  .home-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .home-btn-primary {
+    padding-left: 0.8rem;
+    padding-right: 1rem;
+  }
+
+  .home-hero h1 {
+    font-size: 1.8rem;
+  }
+
+  .home-hero-subtitle {
+    font-size: 1rem;
+  }
+
+  /* Stack auth buttons on very small screens */
+  .home-auth-buttons {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.8rem;
+    background: rgba(3, 7, 18, 0.98);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--home-border);
+    justify-content: center;
+    z-index: 100;
+  }
+
+  /* Add padding to main container to account for fixed bottom buttons */
+  .home-container {
+    padding-bottom: 4rem;
+  }
+}
+
+/* Add landscape orientation handling */
+@media (max-height: 480px) and (orientation: landscape) {
+  .home-header {
+    padding: 0.6rem 1rem;
+  }
+
+  .home-hero {
+    min-height: 100vh;
+    padding-top: 4rem;
+  }
+
+  .home-auth-buttons {
+    position: relative;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  .home-container {
+    padding-bottom: 0;
+  }
+}
+
+/* Improve tablet responsiveness */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .home-header {
+    padding: 1rem 2rem;
+  }
+
+  .home-logo {
+    font-size: 1.6rem;
+  }
+
+  .home-btn {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .home-hero h1 {
+    font-size: 2.8rem;
+  }
+
+  .home-hero-subtitle {
+    font-size: 1.3rem;
+  }
+} 
+
+/* Add smooth page transitions */
+.home-container {
+  animation: fadeIn 0.3s ease-in;
+}
+
+/* Add animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Add staggered animations to hero content */
+.home-hero-content > * {
+  animation: slideUp 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+.home-hero-content h1 { animation-delay: 0.1s; }
+.home-hero-content .home-hero-subtitle { animation-delay: 0.2s; }
+.home-hero-content .home-cta-buttons { animation-delay: 0.3s; }
+.home-hero-content .code-sample { animation-delay: 0.4s; } 
+
+/* Improve link interactions */
+.home-feature-link {
+  position: relative;
+  text-decoration: none;
+}
+
+.home-feature-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--home-primary);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s ease;
+}
+
+.home-feature-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Add pulse effect to CTA buttons */
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 var(--home-glow); }
+  70% { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.home-btn-primary {
+  animation: pulse 2s infinite;
+} 
+
+/* Add these classes and use Intersection Observer in JS */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-in > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.stagger-in.visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-in.visible > *:nth-child(1) { transition-delay: 0.1s; }
+.stagger-in.visible > *:nth-child(2) { transition-delay: 0.2s; }
+.stagger-in.visible > *:nth-child(3) { transition-delay: 0.3s; } 
