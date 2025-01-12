@@ -5,8 +5,10 @@ import { BiLogoGithub } from 'react-icons/bi';
 import { RiRobot2Fill, RiFlowChart } from 'react-icons/ri';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function Home() {
+    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
     const [activeTab, setActiveTab] = useState(0);
     const [activeCodeTab, setActiveCodeTab] = useState('flow');
     const [activeFeatureTab, setActiveFeatureTab] = useState(0);
@@ -155,13 +157,30 @@ var newBlogPosts = new List<string>();`
                         </a>
                     </div>
                     <div className="home-auth-buttons">
-                        <button className="home-btn home-btn-secondary" onClick={() => window.location.href = '/login'}>
-                            Login
-                        </button>
-                        <button className="home-btn home-btn-primary" onClick={() => window.open('/login')}>
-                            <BiLogoGithub />
-                            Sign up with GitHub
-                        </button>
+                        {isAuthenticated ? (
+                            <button 
+                                className="home-btn home-btn-secondary" 
+                                onClick={() => logout({ returnTo: window.location.origin })}
+                            >
+                                Logout
+                            </button>
+                        ) : (
+                            <>
+                                <button 
+                                    className="home-btn home-btn-secondary" 
+                                    onClick={() => loginWithRedirect()}
+                                >
+                                    Login
+                                </button>
+                                <button 
+                                    className="home-btn home-btn-primary" 
+                                    onClick={() => loginWithRedirect()}
+                                >
+                                    <BiLogoGithub />
+                                    Sign up with GitHub
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
@@ -329,11 +348,26 @@ var newBlogPosts = new List<string>();`
                     <h2>Ready to Get Started?</h2>
                     <p>Begin building intelligent workflows with Xians.ai today</p>
                     <div className="home-get-started-buttons">
-                        <button className="home-btn home-btn-primary" onClick={() => window.open('/login')}>
-                            <BiLogoGithub className="home-btn-icon" />
-                            Sign up with GitHub
-                        </button>
-                        <button className="home-btn home-btn-secondary" onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}>
+                        {isAuthenticated ? (
+                            <button 
+                                className="home-btn home-btn-primary" 
+                                onClick={() => window.location.href = '/dashboard'}
+                            >
+                                Go to Dashboard
+                            </button>
+                        ) : (
+                            <button 
+                                className="home-btn home-btn-primary" 
+                                onClick={() => loginWithRedirect()}
+                            >
+                                <BiLogoGithub className="home-btn-icon" />
+                                Sign up with GitHub
+                            </button>
+                        )}
+                        <button 
+                            className="home-btn home-btn-secondary" 
+                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}
+                        >
                             Read the Docs
                         </button>
                     </div>

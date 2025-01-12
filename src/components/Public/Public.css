@@ -1903,11 +1903,11 @@ body {
 
 .register-form-wrapper {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;  /* Increased to accommodate 2 columns */
   background: var(--home-bg-darker);
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.03);
-  padding: 4rem;
+  padding: 3rem;
   position: relative;
   z-index: 1;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -1925,7 +1925,7 @@ body {
 }
 
 .register-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 0.5rem;
   text-align: center;
   color: var(--home-text-primary);
@@ -1934,82 +1934,8 @@ body {
 }
 
 .register-step {
-  margin-bottom: 4rem;
+  margin-bottom: 3rem;
   text-align: center;
-  color: var(--home-text-secondary);
-  font-size: 1rem;
-  font-weight: 400;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-/* Update Selection Cards */
-.register-selection-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 2rem;
-  margin: 0 auto;
-  max-width: 900px;
-}
-
-.register-selection-card {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 2.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.register-selection-card:hover {
-  background: rgba(255, 255, 255, 0.02);
-  transform: translateY(-2px);
-}
-
-.register-selection-card.active {
-  background: rgba(139, 92, 246, 0.05);
-  border-color: var(--home-primary);
-}
-
-.register-selection-icon {
-  color: var(--home-text-secondary);
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  opacity: 0.8;
-  transition: all 0.2s ease;
-}
-
-.register-selection-card:hover .register-selection-icon,
-.register-selection-card.active .register-selection-icon {
-  color: var(--home-primary);
-  opacity: 1;
-}
-
-.register-selection-title {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: var(--home-text-primary);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-}
-
-.register-selection-description {
-  font-size: 1rem;
-  color: var(--home-text-secondary);
-  line-height: 1.6;
-  font-weight: 300;
-}
-
-/* Form Elements */
-.register-form-group {
-  margin-bottom: 2rem;
-}
-
-.register-label {
-  display: block;
-  margin-bottom: 0.75rem;
   color: var(--home-text-secondary);
   font-size: 0.875rem;
   font-weight: 400;
@@ -2017,15 +1943,37 @@ body {
   text-transform: uppercase;
 }
 
+/* Two column form layout */
+.register-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.register-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.register-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--home-text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .register-input,
 .register-select {
   width: 100%;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   color: var(--home-text-primary);
-  font-size: 1rem;
+  font-size: 0.875rem;
   transition: all 0.2s ease;
 }
 
@@ -2036,76 +1984,46 @@ body {
   outline: none;
 }
 
-/* Buttons */
 .register-button-container {
   display: flex;
-  gap: 1rem;
   justify-content: flex-end;
-  margin-top: 3rem;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.register-button {
-  padding: 0.875rem 2rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  transition: all 0.2s ease;
-}
-
-.register-button-primary {
-  background: var(--home-primary);
-  color: white;
-  border: none;
-}
-
-.register-button-primary:hover {
-  background: var(--home-primary-hover);
-  transform: translateY(-1px);
-}
-
-.register-button-secondary {
-  background: transparent;
-  color: var(--home-text-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.register-button-secondary:hover {
-  border-color: var(--home-text-primary);
-  color: var(--home-text-primary);
-  transform: translateY(-1px);
-}
-
-/* Responsive Styles */
-@media (max-width: 1024px) {
-  .register-form-wrapper {
-    padding: 3rem;
-  }
-}
-
+/* Responsive adjustments */
 @media (max-width: 768px) {
   .register-form-wrapper {
     padding: 2rem;
+    margin: 1rem;
+    border-radius: 16px;
   }
 
-  .register-selection-container {
+  .register-form-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
 
   .register-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
+  }
+
+  .register-step {
+    margin-bottom: 2rem;
   }
 
   .register-button-container {
-    flex-direction: column;
+    flex-direction: column-reverse;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
   }
 
   .register-button {
     width: 100%;
   }
-} 
+}
 
 /* Logo Styles */
 .register-logo {
@@ -2212,12 +2130,25 @@ h1, h2, h3 {
 
 .home-btn-primary, .register-button-primary {
   background: var(--home-primary);
-  box-shadow: none;
+  color: var(--home-text-primary); /* White text */
+  border: none;
+}
+
+.home-btn-primary:hover {
+  background: var(--home-primary-hover);
+  transform: translateY(-1px);
 }
 
 .home-btn-secondary, .register-button-secondary {
   background: transparent;
+  color: var(--home-text-secondary); /* Light gray text */
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-btn-secondary:hover, .register-button-secondary:hover {
+  border-color: var(--home-text-primary);
+  color: var(--home-text-primary); /* White text on hover */
+  transform: translateY(-1px);
 }
 
 /* Refined card styles */
@@ -2300,4 +2231,119 @@ h1, h2, h3 {
 .home-footer-link {
   font-weight: 300;
   letter-spacing: 0.05em;
+}
+
+/* Selection Cards for Step 1 */
+.register-selection-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.register-selection-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-selection-card:hover {
+  background: rgba(139, 92, 246, 0.05);
+  transform: translateY(-2px);
+  border-color: rgba(139, 92, 246, 0.2);
+  box-shadow: 
+    0 8px 30px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(139, 92, 246, 0.1);
+}
+
+.register-selection-card.active {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: var(--home-primary);
+  box-shadow: 
+    0 8px 30px rgba(139, 92, 246, 0.15),
+    0 0 0 1px rgba(139, 92, 246, 0.2);
+}
+
+.register-selection-icon {
+  color: var(--home-text-secondary);
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.register-selection-card:hover .register-selection-icon,
+.register-selection-card.active .register-selection-icon {
+  color: var(--home-primary);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.register-selection-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--home-text-primary);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.register-selection-description {
+  font-size: 1rem;
+  color: var(--home-text-secondary);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Responsive styles for selection cards */
+@media (max-width: 768px) {
+  .register-selection-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 0 1rem;
+  }
+
+  .register-selection-card {
+    padding: 2rem;
+  }
+
+  .register-selection-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .register-selection-title {
+    font-size: 1.25rem;
+  }
+
+  .register-selection-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-selection-card {
+    padding: 1.5rem;
+  }
+
+  .register-selection-icon {
+    font-size: 1.75rem;
+  }
+
+  .register-selection-title {
+    font-size: 1.1rem;
+  }
+
+  .register-selection-description {
+    font-size: 0.85rem;
+  }
 }

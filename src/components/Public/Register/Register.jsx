@@ -120,51 +120,60 @@ export default function Register() {
 
         {step === 2 && formData.joinExisting === false && (
           <form onSubmit={handleSubmit}>
-            <div className="register-form-group">
-              <label className="register-label">Tenant Name</label>
-              <input
-                type="text"
-                name="tenantName"
-                value={formData.tenantName}
-                onChange={handleChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="register-form-group">
-              <label className="register-label">Company URL</label>
-              <input
-                type="url"
-                name="companyUrl"
-                value={formData.companyUrl}
-                onChange={handleChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="register-form-group">
-              <label className="register-label">Company Email</label>
-              <input
-                type="email"
-                name="companyEmail"
-                value={formData.companyEmail}
-                onChange={handleChange}
-                required
-                className="register-input"
-              />
-            </div>
-            <div className="register-form-group">
-              <label className="register-label">Subscription</label>
-              <select
-                name="subscription"
-                value={formData.subscription}
-                onChange={handleChange}
-                className="register-select"
-              >
-                <option value="Free">Free</option>
-                <option value="Standard">Standard</option>
-                <option value="Enterprise">Enterprise</option>
-              </select>
+            <div className="register-form-grid">
+              <div>
+                <div className="register-form-group">
+                  <label className="register-label">Tenant Name</label>
+                  <input
+                    type="text"
+                    name="tenantName"
+                    value={formData.tenantName}
+                    onChange={handleChange}
+                    required
+                    className="register-input"
+                    placeholder="Enter tenant name"
+                  />
+                </div>
+                <div className="register-form-group">
+                  <label className="register-label">Company URL</label>
+                  <input
+                    type="url"
+                    name="companyUrl"
+                    value={formData.companyUrl}
+                    onChange={handleChange}
+                    required
+                    className="register-input"
+                    placeholder="https://"
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="register-form-group">
+                  <label className="register-label">Company Email</label>
+                  <input
+                    type="email"
+                    name="companyEmail"
+                    value={formData.companyEmail}
+                    onChange={handleChange}
+                    required
+                    className="register-input"
+                    placeholder="your@company.com"
+                  />
+                </div>
+                <div className="register-form-group">
+                  <label className="register-label">Subscription</label>
+                  <select
+                    name="subscription"
+                    value={formData.subscription}
+                    onChange={handleChange}
+                    className="register-select"
+                  >
+                    <option value="Free">Free</option>
+                    <option value="Standard">Standard</option>
+                    <option value="Enterprise">Enterprise</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div className="register-button-container">
               <button
