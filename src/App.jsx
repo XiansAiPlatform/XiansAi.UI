@@ -21,9 +21,9 @@ import Settings from './components/Settings/Settings';
 import Instructions from './components/Instructions/Instructions';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import DefinitionList from './components/Definitions/DefinitionList';
-import Home from './components/Home/Home';
+import Home from './components/Public/Home/Home';
 import Login from './auth/Login';
-
+import Register from './components/Public/Register/Register';
 function App() {
   const config = getConfig();
 
@@ -56,9 +56,8 @@ function App() {
                   <Routes>
                     <Route path="/callback" element={<Callback />} />
                     <Route path="/login" element={<Login />} />
-                    <Route path="/" element={
-                        <Home />
-                    } />
+                    <Route path="/" element={ <Home /> } />
+                    <Route path="/register" element={<Register />} />
                     <Route element={<Layout />}>
                       <Route path="/runs" element={
                         <ProtectedRoute>
@@ -84,12 +83,12 @@ function App() {
                         <ProtectedRoute>
                           <Instructions />
                         </ProtectedRoute>
-                      } />    
+                      } />
                       <Route path="/settings" element={
                         <ProtectedRoute>
                           <Settings />
                         </ProtectedRoute>
-                      } />                                                                      
+                      } />
                     </Route>
                   </Routes>
                 </SliderProvider>

@@ -1782,3 +1782,296 @@ body {
     margin-bottom: 1rem;
   }
 } 
+
+/* Register Form Styles */
+.register-container {
+  min-height: 100vh;
+  width: 100%;
+  background: var(--home-bg-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.register-form-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  background: var(--home-bg-darker);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 4rem;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.register-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+  text-decoration: none;
+  opacity: 0.9;
+  transition: opacity 0.2s ease;
+}
+
+.register-title {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  color: var(--home-text-primary);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+.register-step {
+  margin-bottom: 4rem;
+  text-align: center;
+  color: var(--home-text-secondary);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Update Selection Cards */
+.register-selection-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin: 0 auto;
+  max-width: 900px;
+}
+
+.register-selection-card {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 2.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-selection-card:hover {
+  background: rgba(255, 255, 255, 0.02);
+  transform: translateY(-2px);
+}
+
+.register-selection-card.active {
+  background: rgba(139, 92, 246, 0.05);
+  border-color: var(--home-primary);
+}
+
+.register-selection-icon {
+  color: var(--home-text-secondary);
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.register-selection-card:hover .register-selection-icon,
+.register-selection-card.active .register-selection-icon {
+  color: var(--home-primary);
+  opacity: 1;
+}
+
+.register-selection-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--home-text-primary);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.register-selection-description {
+  font-size: 1rem;
+  color: var(--home-text-secondary);
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+/* Form Elements */
+.register-form-group {
+  margin-bottom: 2rem;
+}
+
+.register-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  color: var(--home-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.register-input,
+.register-select {
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--home-text-primary);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.register-input:focus,
+.register-select:focus {
+  border-color: var(--home-primary);
+  background: rgba(139, 92, 246, 0.05);
+  outline: none;
+}
+
+/* Buttons */
+.register-button-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 3rem;
+}
+
+.register-button {
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+}
+
+.register-button-primary {
+  background: var(--home-primary);
+  color: white;
+  border: none;
+}
+
+.register-button-primary:hover {
+  background: var(--home-primary-hover);
+  transform: translateY(-1px);
+}
+
+.register-button-secondary {
+  background: transparent;
+  color: var(--home-text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.register-button-secondary:hover {
+  border-color: var(--home-text-primary);
+  color: var(--home-text-primary);
+  transform: translateY(-1px);
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .register-form-wrapper {
+    padding: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .register-form-wrapper {
+    padding: 2rem;
+  }
+
+  .register-selection-container {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .register-title {
+    font-size: 2rem;
+  }
+
+  .register-button-container {
+    flex-direction: column;
+  }
+
+  .register-button {
+    width: 100%;
+  }
+} 
+
+/* Logo Styles */
+.register-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.register-logo-flow {
+  color: var(--home-text-primary);
+}
+
+.register-logo-ai {
+  color: var(--home-primary);
+}
+
+.register-logo-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.register-logo-by {
+  color: var(--home-text-secondary);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.register-logo-99x {
+  height: 14px;
+  width: auto;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+/* Logo Hover Effects */
+.register-logo-container:hover {
+  opacity: 1;
+}
+
+.register-logo-container:hover .register-logo-99x {
+  opacity: 1;
+}
+
+/* Update responsive styles for logo */
+@media (max-width: 768px) {
+  .register-logo {
+    font-size: 1.75rem;
+  }
+  
+  .register-logo-container {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-logo {
+    font-size: 1.5rem;
+  }
+  
+  .register-logo-by {
+    font-size: 0.7rem;
+  }
+  
+  .register-logo-99x {
+    height: 12px;
+  }
+} 

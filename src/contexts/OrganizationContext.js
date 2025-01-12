@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useNotification } from './NotificationContext';
+import { useNavigate } from 'react-router-dom';
 
 const OrganizationContext = createContext();
 const STORAGE_KEY = 'selectedOrganization';
@@ -11,7 +12,7 @@ export function OrganizationProvider({ children }) {
   const [isOrgLoading, setIsOrgLoading] = useState(true);
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const { showError } = useNotification();
-
+  const navigate = useNavigate();
   useEffect(() => {
     const initializeOrg = async () => {
       if (!isAuthenticated) return;
@@ -22,7 +23,12 @@ export function OrganizationProvider({ children }) {
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
         const orgInfo = decodedToken['https://flowmaxer.ai/tenants'];
         const orgs = Array.isArray(orgInfo) ? orgInfo : [];
-        setOrganizations(orgs);
+        if (orgs.length > 0) {
+          setOrganizations(orgs);
+        } else {
+          navigate('/register');
+          return;
+        }
 
         // Get stored org or use first available
         const storedOrg = localStorage.getItem(STORAGE_KEY);

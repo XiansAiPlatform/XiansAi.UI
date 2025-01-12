@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Home.css';
+import '../Public.css';
 import { FiCpu } from 'react-icons/fi';
 import { BiLogoGithub } from 'react-icons/bi';
 import { RiRobot2Fill, RiFlowChart } from 'react-icons/ri';
