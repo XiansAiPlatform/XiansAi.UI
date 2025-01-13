@@ -158,12 +158,20 @@ var newBlogPosts = new List<string>();`
                     </div>
                     <div className="home-auth-buttons">
                         {isAuthenticated ? (
-                            <button 
-                                className="home-btn home-btn-secondary" 
-                                onClick={() => logout({ returnTo: window.location.origin })}
-                            >
-                                Logout
-                            </button>
+                            <>
+                                <button 
+                                    className="home-btn home-btn-primary" 
+                                    onClick={() => window.location.href = '/runs'}
+                                >
+                                    Enter Application
+                                </button>
+                                <button 
+                                    className="home-btn home-btn-secondary" 
+                                    onClick={() => logout({ returnTo: window.location.origin })}
+                                >
+                                    Logout
+                                </button>
+                            </>
                         ) : (
                             <>
                                 <button 
@@ -189,8 +197,13 @@ var newBlogPosts = new List<string>();`
                 <div className="home-hero-content">
                     <h1>Reinvent Your Business with AI Workflows</h1>
 
-                    <div className="home-cta-buttons" >
-                        <button className="home-btn home-btn-secondary" onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}>Documentation</button>
+                    <div className="home-cta-buttons">
+                        <button 
+                            className="home-btn home-btn-secondary" 
+                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}
+                        >
+                            Documentation
+                        </button>
                     </div>
                     <p className="home-hero-subtitle">
                         Build intelligent, resilient business workflows that operate reliably at scale - even while you sleep.
@@ -348,14 +361,7 @@ var newBlogPosts = new List<string>();`
                     <h2>Ready to Get Started?</h2>
                     <p>Begin building intelligent workflows with Xians.ai today</p>
                     <div className="home-get-started-buttons">
-                        {isAuthenticated ? (
-                            <button 
-                                className="home-btn home-btn-primary" 
-                                onClick={() => window.location.href = '/dashboard'}
-                            >
-                                Go to Dashboard
-                            </button>
-                        ) : (
+                        {!isAuthenticated && (
                             <button 
                                 className="home-btn home-btn-primary" 
                                 onClick={() => loginWithRedirect()}

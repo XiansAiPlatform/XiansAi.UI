@@ -1,11 +1,10 @@
-import configJson from "./config.json";
 
 export function getConfig() {
 
   return {
-    domain: configJson.domain,
-    clientId: configJson.clientId,
-    audience: configJson.audience,
+    domain: process.env.REACT_APP_AUTH0_DOMAIN,
+    clientId: process.env.REACT_APP_AUTH0_CLIENT_ID,
+    audience: process.env.REACT_APP_AUTH0_AUDIENCE,
     apiBaseUrl: process.env.REACT_APP_API_URL
   };
 }
