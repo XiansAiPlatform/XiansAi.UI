@@ -28,7 +28,6 @@ export default function Register() {
 
   const [emailError, setEmailError] = useState('');
   const [showVerification, setShowVerification] = useState(false);
-  const [verificationCode, setVerificationCode] = useState('');
   const [verificationError, setVerificationError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [verificationDigits, setVerificationDigits] = useState(['', '', '', '', '', '']);
@@ -160,7 +159,7 @@ export default function Register() {
         const isValid = await registrationApi.validateVerificationCode(formData.joinEmail, code);
         if (isValid) {
           console.log('Verification successful');
-          // TODO: Add your post-verification logic here
+          window.location.href = '/logout';
         } else {
           setVerificationError('Invalid verification code');
         }
@@ -179,7 +178,6 @@ export default function Register() {
     const newDigits = [...verificationDigits];
     newDigits[index] = value;
     setVerificationDigits(newDigits);
-    setVerificationCode(newDigits.join(''));
     setVerificationError('');
 
     // Auto-focus next input
@@ -204,7 +202,6 @@ export default function Register() {
         newDigits[i] = pastedData[i];
       }
       setVerificationDigits(newDigits);
-      setVerificationCode(pastedData);
       setVerificationError('');
       // Focus the last input after pasting
       digitRefs[5].current?.focus();

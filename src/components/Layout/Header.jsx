@@ -27,8 +27,11 @@ const Header = ({ pageTitle = "" }) => {
   };
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin });
-    handleClose();
+    logout({   
+      logoutParams: {
+        returnTo: window.location.origin + '/login'
+      }
+    });
   };
 
   return (

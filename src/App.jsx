@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Auth0Provider } from '@auth0/auth0-react';
 import { NotificationProvider } from './contexts/NotificationContext';
 import WorkflowList from './components/WorkflowList/WorkflowList';
 import WorkflowDetails from './components/WorkflowDetails/WorkflowDetails';
@@ -10,8 +9,6 @@ import { LoadingProvider } from './contexts/LoadingContext';
 import Toaster from './components/Toaster/Toaster';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Callback from './auth/Callback';
-import { getConfig } from "./config";
-import { createBrowserHistory } from "history";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import NotImplemented from './components/NotImplemented/NotImplemented';
@@ -24,29 +21,30 @@ import DefinitionList from './components/Definitions/DefinitionList';
 import Home from './components/Public/Home/Home';
 import Login from './auth/Login';
 import Register from './components/Public/Register/Register';
-function App() {
-  const config = getConfig();
+import { useAuth0 } from "@auth0/auth0-react";
 
-  const onRedirectCallback = (appState) => {
-    var history = createBrowserHistory();
-    history.push(
-      appState && appState.returnTo ? appState.returnTo : '/runs'
-    );
-    window.location.href = '/runs';
-  };
-  const providerConfig = {
-    domain: config.domain,
-    clientId: config.clientId,
-    onRedirectCallback,
-    authorizationParams: {
-      redirect_uri: window.location.origin,
-      ...(config.audience ? { audience: config.audience } : null),
-    },
+function App() {
+  const { isLoading, error, logout } = useAuth0();
+
+  if (error) {
+    console.error(error);
+    return <div>Oops... {error.message}</div>;
+  }
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const handleLogout = () => {
+    logout({ 
+      logoutParams: {
+        returnTo: window.location.origin + '/login'
+      }
+    });
   };
 
   return (
     <BrowserRouter>
-      <Auth0Provider {...providerConfig}>
         <NotificationProvider>
           <OrganizationProvider>
             <ThemeProvider theme={theme}>
@@ -58,6 +56,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/" element={ <Home /> } />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
                     <Route element={<Layout />}>
                       <Route path="/runs" element={
                         <ProtectedRoute>
@@ -97,9 +96,16 @@ function App() {
           </OrganizationProvider>
         </NotificationProvider>
         <ToastContainer />
-      </Auth0Provider>
     </BrowserRouter>
   );
+}
+
+function LogoutHandler({ onLogout }) {
+  React.useEffect(() => {
+    onLogout();
+  }, [onLogout]);
+
+  return null;
 }
 
 export default App; 

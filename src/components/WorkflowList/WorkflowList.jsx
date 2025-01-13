@@ -64,8 +64,10 @@ const WorkflowList = () => {
     setLoading(true);
     try {
       const runs = await fetchWorkflowRuns();
-      setStats(calculateStats(runs));
-      setWorkflows(groupWorkflows(runs));
+      if (runs && runs.length > 0) {
+        setStats(calculateStats(runs));
+        setWorkflows(groupWorkflows(runs));
+      } 
     } catch (error) {
       // Error already handled in the api.js file
       console.error('Error loading workflows:', error);

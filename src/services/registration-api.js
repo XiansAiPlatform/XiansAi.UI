@@ -41,8 +41,12 @@ export const useApi = () => {
             throw new Error(errorData.message || 'Failed to validate verification code');
           }
           const data = await response.json();
-          console.log(data);
-          return data.isValid;
+          if (response.status === 200) {
+            console.log(data);
+            return data.isValid;
+          } else {
+            throw new Error(data.message || 'Failed to validate verification code');
+          }
         } catch (error) {
           console.error('Failed to validate verification code:', error);
           throw handleApiError(error, 'Failed to validate verification code');
@@ -62,8 +66,11 @@ export const useApi = () => {
             const errorData = await response.json();
             throw new Error(errorData.message || 'Failed to send verification code');
           }
-
-          return response.json();
+          if (response.status === 200) {
+            return response.json();
+          } else {
+            throw new Error(response.json().message || 'Failed to send verification code');
+          }
         } catch (error) {
           console.error('Failed to send verification code:', error);
           throw handleApiError(error, 'Failed to send verification code');
