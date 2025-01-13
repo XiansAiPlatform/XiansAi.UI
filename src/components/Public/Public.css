@@ -2347,3 +2347,87 @@ h1, h2, h3 {
     font-size: 0.85rem;
   }
 }
+
+.register-selection-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.register-input-error {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.05) !important;
+}
+
+.register-error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.register-error-message::before {
+  content: "⚠";
+  font-size: 1rem;
+}
+
+.register-verification-message {
+  background: rgba(139, 92, 246, 0.1);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  color: var(--home-text-secondary);
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.register-verification-message::before {
+  content: "📧";
+  font-size: 1rem;
+}
+
+/* Style for disabled email input */
+.register-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.register-verification-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.register-verification-digit {
+  width: 40px;
+  height: 48px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.register-verification-digit:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  outline: none;
+}
+
+.register-verification-digit.register-input-error {
+  border-color: #dc2626;
+}
+
+.register-verification-digit::-webkit-inner-spin-button,
+.register-verification-digit::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

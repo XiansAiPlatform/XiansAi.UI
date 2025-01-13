@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FiPlusCircle } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
+import { useApi } from '../../../services/registration-api';
 
 export default function Register() {
   const navigate = useNavigate();
   const location = useLocation();
+  const registrationApi = useApi();
   
   // Get step from URL or default to 1
   const getStepFromUrl = () => {
@@ -21,7 +23,52 @@ export default function Register() {
     companyEmail: '',
     subscription: 'Free',
     joinExisting: null,
+    joinEmail: '',
   });
+
+  const [emailError, setEmailError] = useState('');
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationError, setVerificationError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [verificationDigits, setVerificationDigits] = useState(['', '', '', '', '', '']);
+  const digitRefs = [
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null),
+    React.useRef(null)
+  ];
+
+  // Add email validation function
+  const validateCompanyEmail = (email) => {
+    const commonDomains = [
+      'gmail.com',
+      'yahoo.com',
+      'hotmail.com',
+      'outlook.com',
+      'aol.com',
+      'icloud.com',
+      'mail.com'
+    ];
+    
+    const domain = email.split('@')[1]?.toLowerCase();
+    
+    if (!email) {
+      return 'Email is required';
+    }
+    
+    if (!email.includes('@')) {
+      return 'Please enter a valid email address';
+    }
+    
+    if (commonDomains.includes(domain)) {
+      return 'Please use your company email address';
+    }
+    
+    return '';
+  };
 
   // Sync state with URL whenever location changes
   useEffect(() => {
@@ -62,10 +109,106 @@ export default function Register() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
+    const newValue = type === 'checkbox' ? checked : value;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: newValue
+    }));
+
+    // Clear email error when user types
+    if (name === 'joinEmail') {
+      setEmailError('');
+    }
+  };
+
+  const handleJoinSubmit = async (e) => {
+    e.preventDefault();
+    const error = validateCompanyEmail(formData.joinEmail);
+    
+    if (error) {
+      setEmailError(error);
+      return;
+    }
+    
+    if (!showVerification) {
+      setIsLoading(true);
+      try {
+        await registrationApi.sendVerificationCode(formData.joinEmail);
+        setEmailError('');
+        setVerificationError('');
+        setShowVerification(true);
+        // Reset verification digits when showing new input
+        setVerificationDigits(['', '', '', '', '', '']);
+        // Focus the first input after a short delay to allow for render
+        setTimeout(() => digitRefs[0].current?.focus(), 50);
+      } catch (error) {
+        setEmailError(error.message || 'Failed to send verification code');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Handle verification code submission
+      if (verificationDigits.some(digit => !digit)) {
+        setVerificationError('Please enter all 6 digits');
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        const code = verificationDigits.join('');
+        const isValid = await registrationApi.validateVerificationCode(formData.joinEmail, code);
+        if (isValid) {
+          console.log('Verification successful');
+          // TODO: Add your post-verification logic here
+        } else {
+          setVerificationError('Invalid verification code');
+        }
+      } catch (error) {
+        setVerificationError(error.message || 'Invalid verification code');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handleDigitChange = (index, value) => {
+    // Only allow numbers
+    if (value && !/^\d+$/.test(value)) return;
+
+    const newDigits = [...verificationDigits];
+    newDigits[index] = value;
+    setVerificationDigits(newDigits);
+    setVerificationCode(newDigits.join(''));
+    setVerificationError('');
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      digitRefs[index + 1].current?.focus();
+    }
+  };
+
+  const handleDigitKeyDown = (index, e) => {
+    // Handle backspace
+    if (e.key === 'Backspace' && !verificationDigits[index] && index > 0) {
+      digitRefs[index - 1].current?.focus();
+    }
+  };
+
+  const handleDigitPaste = (index, e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (pastedData.length === 6) {
+      const newDigits = [...verificationDigits];
+      for (let i = 0; i < 6; i++) {
+        newDigits[i] = pastedData[i];
+      }
+      setVerificationDigits(newDigits);
+      setVerificationCode(pastedData);
+      setVerificationError('');
+      // Focus the last input after pasting
+      digitRefs[5].current?.focus();
+    }
   };
 
   return (
@@ -92,18 +235,6 @@ export default function Register() {
         {step === 1 && (
           <div className="register-selection-container">
             <div
-              className={`register-selection-card ${formData.joinExisting === false ? 'active' : ''}`}
-              onClick={() => handleSelection(false)}
-            >
-              <div className="register-selection-icon">
-                <FiPlusCircle />
-              </div>
-              <div className="register-selection-title">Create New Account</div>
-              <div className="register-selection-description">
-                Start fresh with a new account. Perfect for new users or new projects.
-              </div>
-            </div>
-            <div
               className={`register-selection-card ${formData.joinExisting === true ? 'active' : ''}`}
               onClick={() => handleSelection(true)}
             >
@@ -113,6 +244,17 @@ export default function Register() {
               <div className="register-selection-title">Join Existing Account</div>
               <div className="register-selection-description">
                 Join an existing account with your team. Ideal for collaboration.
+              </div>
+            </div>
+            <div
+              className={`register-selection-card disabled ${formData.joinExisting === false ? 'active' : ''}`}
+            >
+              <div className="register-selection-icon">
+                <FiPlusCircle />
+              </div>
+              <div className="register-selection-title">Create New Account</div>
+              <div className="register-selection-description">
+                Start fresh with a new account. Perfect for new users or new projects.
               </div>
             </div>
           </div>
@@ -194,10 +336,53 @@ export default function Register() {
         )}
 
         {step === 2 && formData.joinExisting === true && (
-          <div>
-            <p className="register-message">
-              Request to join an existing tenant
-            </p>
+          <form onSubmit={handleJoinSubmit}>
+            <div className="register-form-group">
+              <label className="register-label">Company Email</label>
+              <input
+                type="email"
+                name="joinEmail"
+                value={formData.joinEmail}
+                onChange={handleChange}
+                className={`register-input ${emailError ? 'register-input-error' : ''}`}
+                placeholder="your@company.com"
+                required
+                disabled={showVerification}
+              />
+              {emailError && (
+                <div className="register-error-message">{emailError}</div>
+              )}
+            </div>
+            
+            {showVerification && (
+              <div className="register-form-group">
+                <div className="register-verification-message">
+                  We've sent a verification code to {formData.joinEmail}
+                </div>
+                <label className="register-label">Verification Code</label>
+                <div className="register-verification-inputs">
+                  {verificationDigits.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={digitRefs[index]}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleDigitChange(index, e.target.value)}
+                      onKeyDown={(e) => handleDigitKeyDown(index, e)}
+                      onPaste={(e) => handleDigitPaste(index, e)}
+                      className={`register-verification-digit ${verificationError ? 'register-input-error' : ''}`}
+                      required
+                      autoFocus={index === 0}
+                    />
+                  ))}
+                </div>
+                {verificationError && (
+                  <div className="register-error-message">{verificationError}</div>
+                )}
+              </div>
+            )}
+            
             <div className="register-button-container">
               <button
                 type="button"
@@ -209,11 +394,12 @@ export default function Register() {
               <button
                 type="submit"
                 className="register-button register-button-primary"
+                disabled={isLoading}
               >
-                Submit Request
+                {isLoading ? 'Sending...' : (showVerification ? 'Verify & Submit' : 'Send Verification Code')}
               </button>
             </div>
-          </div>
+          </form>
         )}
       </div>
     </div>
