@@ -24,7 +24,6 @@ const providerConfig = {
   clientId: config.clientId,
   onRedirectCallback,
   cacheLocation: 'localstorage',
-  useRefreshTokens: true,
   authorizationParams: {
     redirect_uri: window.location.origin,
     audience: config.audience

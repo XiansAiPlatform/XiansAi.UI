@@ -12,6 +12,11 @@
   --status-total-color: #424242;
 }
 
+.owner-tag.current-user {
+  background-color: rgba(255, 255, 0, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
 /* Common card styles - can be reused for similar components */
 .card-base {
   border: 1px solid var(--border-color);

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
+  const [filter, setFilter] = useState('all');
+  const { user } = useAuth0();
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
@@ -16,6 +19,16 @@ const DefinitionList = () => {
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
   };
+
+  const handleFilterChange = (event, newFilter) => {
+    if (newFilter !== null) {
+      setFilter(newFilter);
+    }
+  };
+
+  const filteredDefinitions = definitions.filter(def => 
+    filter === 'all' || (filter === 'mine' && def.owner === user?.sub)
+  );
 
   useEffect(() => {
     const fetchDefinitions = async () => {
@@ -48,22 +61,32 @@ const DefinitionList = () => {
 
   return (
     <Box sx={tableStyles.container}>
-      <Typography 
-            variant="h4" 
-            component="h1"
-            sx={{
-              fontWeight: 'var(--font-weight-semibold)',
-              letterSpacing: 'var(--letter-spacing-tight)',
-              color: 'var(--text-primary)',
-              mb: 4
-            }}
-          >
-            Flow Definitions
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography 
+          variant="h4" 
+          component="h1"
+          sx={{
+            fontWeight: 'var(--font-weight-semibold)',
+            letterSpacing: 'var(--letter-spacing-tight)',
+            color: 'var(--text-primary)',
+          }}
+        >
+          Flow Definitions
+        </Typography>
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
+          onChange={handleFilterChange}
+          size="small"
+        >
+          <ToggleButton value="all">All Definitions</ToggleButton>
+          <ToggleButton value="mine">My Definitions</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
       <TableContainer component={Paper} sx={tableStyles.tableContainer}>
         <Table sx={{ minWidth: 650 }}>
           <TableBody>
-            {definitions.map((definition) => (
+            {filteredDefinitions.map((definition) => (
               <DefinitionRow 
                 key={definition.id} 
                 definition={definition}

@@ -24,7 +24,6 @@ export function OrganizationProvider({ children }) {
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
         const orgInfo = decodedToken['https://xians.ai/tenants'];
         const orgs = Array.isArray(orgInfo) ? orgInfo : [];
-        console.log("orgs", orgs);
 
         if (orgs.length > 0) {
           setOrganizations(orgs);

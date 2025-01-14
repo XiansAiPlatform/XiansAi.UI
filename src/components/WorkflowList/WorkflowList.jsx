@@ -5,7 +5,9 @@ import {
   Box,
   Stack,
   Paper,
-  Button
+  Button,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import { useApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -13,6 +15,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
 import { Link } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const INITIAL_STATS = {
   running: 0,
@@ -33,6 +36,8 @@ const STATUS_CONFIG = [
 const WorkflowList = () => {  
   const [workflows, setWorkflows] = useState({});
   const [stats, setStats] = useState(INITIAL_STATS);
+  const [filter, setFilter] = useState('all');
+  const { user } = useAuth0();
 
   const { setLoading, isLoading } = useLoading();
   const { fetchWorkflowRuns } = useApi();
@@ -49,7 +54,11 @@ const WorkflowList = () => {
   }, []);
 
   const groupWorkflows = useCallback((runs) => {
-    return runs
+    const filteredRuns = runs.filter(run => 
+      filter === 'all' || (filter === 'mine' && run.owner === user?.sub)
+    );
+    
+    return filteredRuns
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
       .reduce((acc, run) => {
         if (!acc[run.workflowType]) {
@@ -58,7 +67,7 @@ const WorkflowList = () => {
         acc[run.workflowType].push(run);
         return acc;
       }, {});
-  }, []);
+  }, [filter, user?.sub]);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
@@ -94,6 +103,12 @@ const WorkflowList = () => {
     return Object.keys(workflows).length > 0;
   }, [workflows]);
 
+  const handleFilterChange = (event, newFilter) => {
+    if (newFilter !== null) {
+      setFilter(newFilter);
+    }
+  };
+
   return (
     <Container>
       <Paper 
@@ -118,10 +133,32 @@ const WorkflowList = () => {
         </Stack>
       </Paper>
 
-      <HeaderSection 
-        isLoading={isLoading}
-        onRefresh={loadWorkflows}
-      />
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'flex-end',
+        mb: 2,
+        gap: 2
+      }}>
+        <Button
+          onClick={loadWorkflows}
+          disabled={isLoading}
+          className={`button-refresh ${isLoading ? 'loading' : ''}`}
+          startIcon={<RefreshIcon />}
+        >
+          <span>Refresh</span>
+        </Button>
+
+        <ToggleButtonGroup
+          value={filter}
+          exclusive
+          onChange={handleFilterChange}
+          size="small"
+        >
+          <ToggleButton value="all">All Flow Runs</ToggleButton>
+          <ToggleButton value="mine">My Flow Runs</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       {hasWorkflows ? (
         Object.entries(workflows).map(([type, runs]) => (
@@ -168,25 +205,6 @@ const StatusBox = ({ label, value, className }) => (
   <Box className={`status-box ${className}`}>
     <Typography className="status-value">{value}</Typography>
     <Typography className="status-label">{label}</Typography>
-  </Box>
-);
-
-const HeaderSection = ({ isLoading, onRefresh }) => (
-  <Box sx={{ 
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
-    mb: 2 
-  }}>
-    <Typography variant="h4"></Typography>
-    <Button
-      onClick={onRefresh}
-      disabled={isLoading}
-      className={`button-refresh ${isLoading ? 'loading' : ''}`}
-      startIcon={<RefreshIcon />}
-    >
-      <span>Refresh</span>
-    </Button>
   </Box>
 );
 

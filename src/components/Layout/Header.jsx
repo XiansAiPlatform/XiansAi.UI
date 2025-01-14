@@ -6,6 +6,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link } from 'react-router-dom';
+import PersonIcon from '@mui/icons-material/Person';
 
 const Header = ({ pageTitle = "" }) => {
   const { user, logout } = useAuth0();
@@ -142,7 +143,7 @@ const Header = ({ pageTitle = "" }) => {
             onClick={handleMenu}
             className="header-avatar"
             src={user?.picture}
-            alt={user?.name || 'User'}
+            alt={user?.nickname || 'User'}
             sx={{
               cursor: 'pointer',
               width: 36,
@@ -155,14 +156,14 @@ const Header = ({ pageTitle = "" }) => {
               }
             }}
           >
-            {!user?.picture && (user?.name?.charAt(0) || 'U')}
+            {!user?.picture && (user?.nickname?.charAt(0) || 'U')}
           </Avatar>
           
           <Menu
             id="menu-appbar"
             anchorEl={anchorEl}
             anchorOrigin={{
-              vertical: 'top',
+              vertical: 'bottom',
               horizontal: 'right',
             }}
             keepMounted
@@ -173,45 +174,62 @@ const Header = ({ pageTitle = "" }) => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
             PaperProps={{
-              className: "header-menu-paper",
+              elevation: 2,
               sx: {
-                mt: 1.5,
+                mt: 2.5,
                 minWidth: 220,
-                boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.1)',
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
                 '& .MuiMenu-list': {
-                  padding: '8px',
+                  padding: '4px',
                 },
               }
             }}
           >
-            <Box className="header-user-info" sx={{
-              padding: '12px 16px',
+            <Box sx={{
+              p: 2,
+              pb: 1.5,
               borderBottom: '1px solid',
               borderColor: 'divider',
             }}>
               <Typography variant="subtitle1" sx={{ 
                 fontWeight: 600,
-                color: 'text.primary'
+                color: 'text.primary',
+                mb: 0.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
               }}>
-                {user?.name}
+                <PersonIcon fontSize="small" />
+                {(user?.nickname || user?.name)?.toUpperCase()}
               </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              <Typography variant="body2" sx={{ 
+                color: 'text.secondary',
+                mb: 0.5
+              }}>
+                {user?.sub}
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                color: 'text.secondary',
+                wordBreak: 'break-all'
+              }}>
                 {user?.email}
               </Typography>
             </Box>
             <MenuItem 
               onClick={handleLogout}
               sx={{
-                margin: '8px 0',
-                gap: '12px',
-                borderRadius: '6px',
+                m: 0.5,
+                p: 1.5,
+                gap: 1.5,
+                borderRadius: 1,
                 '&:hover': {
                   backgroundColor: 'action.hover',
                 }
               }}
             >
               <LogoutIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-              <Typography sx={{ color: 'text.primary' }}>Logout</Typography>
+              <Typography variant="body2">Logout</Typography>
             </MenuItem>
           </Menu>
         </Box>

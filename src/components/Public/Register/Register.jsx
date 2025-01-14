@@ -381,13 +381,15 @@ export default function Register() {
             )}
             
             <div className="register-button-container">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="register-button register-button-secondary"
-              >
-                Back
-              </button>
+              {!isLoading && (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="register-button register-button-secondary"
+                >
+                  Back
+                </button>
+              )}
               <button
                 type="submit"
                 className="register-button register-button-primary"

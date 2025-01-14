@@ -10,10 +10,12 @@ import NewWorkflowForm from '../WorkflowList/NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
 import DefinitionAgents from './DefinitionAgents';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const DefinitionRow = ({ definition, isOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
+  const { user } = useAuth0();
 
   const formatTypeName = (typeName) => {
     return typeName
@@ -74,6 +76,8 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
 
   const hasMarkdown = definition.markdown && definition.markdown.trim().length > 0;
 
+  const isCurrentUser = user?.sub === definition.owner;
+
   return (
     <>
       <TableRow 
@@ -110,6 +114,15 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
                 </span>
                 <span className="definition-stat">
                   Created {new Date(definition.createdAt).toLocaleDateString()}
+                </span>
+                <span className="definition-stat">
+                  Owner: <span style={{ 
+                    color: isCurrentUser ? 'var(--primary)' : 'inherit',
+                    fontWeight: isCurrentUser ? 600 : 'inherit'
+                  }}>
+                    {definition.owner || 'Unknown'} 
+                    {isCurrentUser && ' (me)'}
+                  </span>
                 </span>
               </Typography>
             </Box>

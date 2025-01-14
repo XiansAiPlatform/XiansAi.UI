@@ -2,8 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
 import { formatDistanceToNow, formatDistance } from 'date-fns';
+import { useAuth0 } from '@auth0/auth0-react';
 
 const WorkflowRunItem = ({ run }) => {
+  const { user } = useAuth0();
   const formattedTime = formatDistanceToNow(new Date(run.startTime), { addSuffix: true });
   
   const formatWorkflowType = (type) => {
@@ -32,7 +34,20 @@ const WorkflowRunItem = ({ run }) => {
               <span className="run-duration"> • Duration: {getDuration()}</span>
             </span>
           </div>
-          <div className="workflow-id">ID: {run.id}</div>
+          <div className="workflow-id">
+            ID: {run.id}
+            {run.owner && (
+              <span className="owner-info">
+                • Owner: <span style={{ 
+                    color: run.owner === user?.sub ? 'var(--primary)' : 'inherit',
+                    fontWeight: run.owner === user?.sub ? 600 : 'inherit'
+                  }}>
+                  {run.owner}
+                  {run.owner === user?.sub && ' (me)'}
+                </span>
+              </span>
+            )}
+          </div>
         </div>
       </div>
       <StatusChip status={run.status.toLowerCase()} label={run.status} />
