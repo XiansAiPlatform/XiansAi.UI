@@ -218,7 +218,7 @@ body {
     rgba(139, 92, 246, 0.8),
     transparent
   );
-  animation: shimmer 2s infinite;
+  animation: gradientHeartbeat 1.5s ease-in-out infinite;
 }
 
 .code-sample::after {
@@ -236,9 +236,13 @@ body {
 
 
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+@keyframes gradientHeartbeat {
+  0% { opacity: 0.3; }
+  25% { opacity: 1; }
+  35% { opacity: 0.3; }
+  45% { opacity: 0.8; }
+  55% { opacity: 0.3; }
+  100% { opacity: 0.3; }
 }
 
 /* Update responsive styles */

@@ -201,7 +201,7 @@ var newBlogPosts = new List<string>();`
                     <div className="home-cta-buttons">
                         <button 
                             className="home-btn home-btn-secondary" 
-                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}
+                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/', '_blank')}
                         >
                             Documentation
                         </button>

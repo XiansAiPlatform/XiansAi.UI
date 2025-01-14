@@ -8,12 +8,12 @@
       "type": "image/x-icon"
     },
     {
-      "src": "images/Xians-Ai-Logo.png",
+      "src": "images/logo.png" ,
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "images/Xians-Ai-Logo.png",
+      "src": "images/logo.png",
       "type": "image/png",
       "sizes": "512x512"
     }
