@@ -9,6 +9,9 @@ In the project directory, you can run:
 ```bash
 npm install
 npm start
+
+# To run with production configuration
+npm run build
 ```
 
 Runs the app in the development mode.\

@@ -22,7 +22,7 @@ export function OrganizationProvider({ children }) {
         setIsOrgLoading(true);
         const token = await getAccessTokenSilently();
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const orgInfo = decodedToken['https://flowmaxer.ai/tenants'];
+        const orgInfo = decodedToken['https://xians.ai/tenants'];
         const orgs = Array.isArray(orgInfo) ? orgInfo : [];
         console.log("orgs", orgs);
 

@@ -39,6 +39,23 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.preview-tag {
+  font-size: 0.7rem;
+  background-color: var(--home-glow-strong);
+  color: white;
+  padding: 4px 6px;
+  margin-left: 8px;
+  border-radius: 4px;
+  margin-left: 16px;
+  margin-bottom: -2px;
+  text-transform: uppercase;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: flex-end;
+  vertical-align: bottom;
+  box-shadow: 0 0 12px var(--home-glow);
+}
+
 .home-container {
   max-width: 100%;
   overflow-x: hidden;
