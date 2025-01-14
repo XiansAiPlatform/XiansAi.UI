@@ -7,12 +7,14 @@ const DefinitionParameters = ({ parameters }) => (
       Flow Inputs <span className="section-count">({parameters.length})</span>
     </Typography>
     <Table size="small" sx={tableStyles.nestedTable}>
-      <TableHead>
-        <TableRow>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Name</TableCell>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Type</TableCell>
-        </TableRow>
-      </TableHead>
+      {parameters.length > 0 && (
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Name</TableCell>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Type</TableCell>
+          </TableRow>
+        </TableHead>
+      )}
       <TableBody>
         {parameters.map((param, index) => (
           <TableRow key={index}>

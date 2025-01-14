@@ -7,14 +7,16 @@ const DefinitionActivities = ({ activities }) => (
       Flow Activities <span className="section-count">({activities.length})</span>
     </Typography>
     <Table size="small" sx={tableStyles.nestedTable}>
-      <TableHead>
-        <TableRow>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Activity Name</TableCell>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Agent</TableCell>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Instructions</TableCell>
-          <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Parameters</TableCell>
-        </TableRow>
-      </TableHead>
+      {activities.length > 0 && (
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Activity Name</TableCell>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Agent</TableCell>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Instructions</TableCell>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Parameters</TableCell>
+          </TableRow>
+        </TableHead>
+      )}
       <TableBody>
         {activities.map((activity, index) => (
           <TableRow key={index}>

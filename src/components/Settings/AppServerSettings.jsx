@@ -133,7 +133,7 @@ const AppServerSettings = () => {
           />
           
           <TextField
-            label="Password"
+            label="Select a Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

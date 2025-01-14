@@ -1,4 +1,4 @@
-import { TableRow, TableCell, IconButton, Box, Typography, Button, Stack, Collapse } from '@mui/material';
+import { TableRow, TableCell, IconButton, Box, Typography, Button, Stack, Collapse, Tooltip } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -72,6 +72,8 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
     }
   };
 
+  const hasMarkdown = definition.markdown && definition.markdown.trim().length > 0;
+
   return (
     <>
       <TableRow 
@@ -111,19 +113,24 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
                 </span>
               </Typography>
             </Box>
-            <Stack direction="row" spacing={1}>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleVisualize();
-                }}
-                className="button-base visualize-btn"
-                size="small"
-                variant="text"
-                startIcon={<VisibilityIcon />}
-              >
-                Visualize
-              </Button>
+            <Stack direction="row" spacing={1} sx={{ marginRight: 2 }}>
+              <Tooltip title={!hasMarkdown ? 'Flow code not available' : ''}>
+                <span>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVisualize();
+                    }}
+                    className="button-base visualize-btn"
+                    size="small"
+                    variant="text"
+                    startIcon={<VisibilityIcon />}
+                    disabled={!hasMarkdown}
+                  >
+                    Visualize
+                  </Button>
+                </span>
+              </Tooltip>
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
