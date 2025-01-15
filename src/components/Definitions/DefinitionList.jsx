@@ -26,9 +26,9 @@ const DefinitionList = () => {
     }
   };
 
-  const filteredDefinitions = definitions.filter(def => 
-    filter === 'all' || (filter === 'mine' && def.owner === user?.sub)
-  );
+  const filteredDefinitions = definitions
+    .filter(def => filter === 'all' || (filter === 'mine' && def.owner === user?.sub))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   useEffect(() => {
     const fetchDefinitions = async () => {
@@ -86,11 +86,12 @@ const DefinitionList = () => {
       <TableContainer component={Paper} sx={tableStyles.tableContainer}>
         <Table sx={{ minWidth: 650 }}>
           <TableBody>
-            {filteredDefinitions.map((definition) => (
+            {filteredDefinitions.map((definition, index) => (
               <DefinitionRow 
                 key={definition.id} 
                 definition={definition}
                 isOpen={openDefinitionId === definition.id}
+                previousRowOpen={index > 0 && openDefinitionId === filteredDefinitions[index - 1].id}
                 onToggle={handleToggle}
               />
             ))}

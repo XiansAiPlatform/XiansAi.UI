@@ -5,6 +5,7 @@ import {
   Container,
   Fab,
   CircularProgress,
+  TextField,
 } from '@mui/material';
 import { Add} from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -18,6 +19,12 @@ const Instructions = () => {
   const { openSlider, closeSlider } = useSlider();
   const instructionsApi = useInstructionsApi();
   const [expandedId, setExpandedId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredInstructions = instructions.filter(instruction => 
+    instruction.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    instruction.content.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchInstructions = async () => {
@@ -160,13 +167,30 @@ const Instructions = () => {
           </Fab>
         </Box>
         
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search instructions..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{
+            mb: 3,
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'var(--background-paper)',
+              '&:hover fieldset': {
+                borderColor: 'var(--border-color)',
+              },
+            },
+          }}
+        />
+        
         {isLoading ? (
           <Box sx={{ p: 6, textAlign: 'center' }}>
             <CircularProgress />
           </Box>
-        ) : instructions.length > 0 ? (
+        ) : filteredInstructions.length > 0 ? (
           <div className={`instructions-grid ${expandedId ? 'has-expanded' : ''}`}>
-            {instructions
+            {filteredInstructions
               // Sort the instructions to bring expanded one to top
               .sort((a, b) => {
                 if (a.id === expandedId) return -1;
@@ -201,10 +225,12 @@ const Instructions = () => {
             }}
           >
             <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
-              No instructions yet
+              {searchQuery ? 'No matching instructions found' : 'No instructions yet'}
             </Typography>
             <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
-              Create your first instruction by clicking the + button above. Instructions help customize the AI's behavior and responses.
+              {searchQuery 
+                ? 'Try adjusting your search terms or clear the search to see all instructions.'
+                : 'Create your first instruction by clicking the + button above. Instructions help customize the AI\'s behavior and responses.'}
             </Typography>
           </Box>
         )}

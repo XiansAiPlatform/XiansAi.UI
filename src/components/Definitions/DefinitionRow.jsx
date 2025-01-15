@@ -11,11 +11,14 @@ import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
 import DefinitionAgents from './DefinitionAgents';
 import { useAuth0 } from '@auth0/auth0-react';
+import { formatDistanceToNow } from 'date-fns';
 
-const DefinitionRow = ({ definition, isOpen, onToggle }) => {
+const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
   const { user } = useAuth0();
+
+  console.log(definition);
 
   const formatTypeName = (typeName) => {
     return typeName
@@ -78,11 +81,24 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
 
   const isCurrentUser = user?.sub === definition.owner;
 
+  const formatCreatedTime = (date) => {
+    try {
+      return `Created ${formatDistanceToNow(new Date(date), { addSuffix: true })}`;
+    } catch (error) {
+      return 'Created at unknown time';
+    }
+  };
+
   return (
     <>
       <TableRow 
         onClick={() => onToggle(definition.id)}
         className="definition-row"
+        sx={{ 
+          '&:last-child td, &:last-child th': { border: 0 },
+          borderTop: previousRowOpen ? '1px solid rgba(224, 224, 224, 1)' : 'none',
+          borderBottom: isOpen ? '1px solid rgba(224, 224, 224, 1)' : 'inherit',
+        }}
       >
         <TableCell className="definition-toggle-cell">
           <IconButton 
@@ -113,7 +129,7 @@ const DefinitionRow = ({ definition, isOpen, onToggle }) => {
                   <span className="stat-value">{definition.parameters.length}</span> Inputs
                 </span>
                 <span className="definition-stat">
-                  Created {new Date(definition.createdAt).toLocaleDateString()}
+                  {formatCreatedTime(definition.createdAt)}
                 </span>
                 <span className="definition-stat">
                   Owner: <span style={{ 
