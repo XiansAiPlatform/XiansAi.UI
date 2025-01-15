@@ -2452,3 +2452,8 @@ h1, h2, h3 {
   -webkit-appearance: none;
   margin: 0;
 }
+
+.code-sample code {
+    padding-top: 8px;
+    display: block;
+}

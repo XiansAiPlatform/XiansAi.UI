@@ -336,8 +336,8 @@ var newBlogPosts = new List<string>();`
 [Agents("xiansai-agent/llm-completion")]  
 [Agents("xiansai-agent/web-scraper")]  
 [Agents("xiansai-agent/web-search")]  
-[Agents("xiansai-agent/ms-teams-chat")]  
-[Agents("xiansai-agent/0365-planner")]  
+[Agents("xiansai-agent/ms-teams")]  
+[Agents("xiansai-agent/O365-planner")]  
 // And many more...
 `}
                             </SyntaxHighlighter>
@@ -373,7 +373,7 @@ var newBlogPosts = new List<string>();`
                         )}
                         <button 
                             className="home-btn home-btn-secondary" 
-                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.Website/getting-started/setting-up/', '_blank')}
+                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/', '_blank')}
                         >
                             Read the Docs
                         </button>
@@ -394,7 +394,7 @@ var newBlogPosts = new List<string>();`
                         <div className="home-footer-links">
                             <a href="/" className="home-footer-link">Privacy Policy</a>
                             <a href="/" className="home-footer-link">Terms of Service</a>
-                            <a href="https://github.com/xiansaiplatform" target="_blank" rel="noopener noreferrer" className="home-footer-link">
+                            <a href="https://github.com/XiansAiPlatform" target="_blank" rel="noopener noreferrer" className="home-footer-link">
                                 <BiLogoGithub className="home-footer-icon" />
                                 GitHub
                             </a>
