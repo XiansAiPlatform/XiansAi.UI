@@ -45,16 +45,18 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
       className={`nav-item ${selected ? 'selected' : ''}`}
       sx={{
         mb: 1,
-        transition: 'var(--transition-fast)',
+        transition: 'all 0.2s ease-in-out',
         '&:hover': {
-          transform: 'translateX(4px)'
+          transform: 'translateX(4px)',
+          backgroundColor: 'var(--bg-hover)'
         }
       }}
     >
       <ListItemIcon 
         sx={{ 
-          minWidth: '40px',
-          color: selected ? 'var(--primary)' : 'var(--text-secondary)'
+          minWidth: '32px',
+          color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
+          opacity: selected ? 1 : 0.8
         }}
       >
         {icon}
@@ -64,9 +66,10 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
         sx={{
           '& .MuiTypography-root': {
             fontSize: 'var(--text-sm)',
-            fontWeight: selected ? 'var(--font-weight-bold)' : 'var(--font-weight-medium)',
-            color: selected ? 'var(--primary)' : 'var(--text-primary)',
-            fontFamily: 'var(--font-family)'
+            fontWeight: selected ? 'var(--font-weight-medium)' : 'var(--font-weight-regular)',
+            color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
+            fontFamily: 'var(--font-family)',
+            letterSpacing: '0.2px'
           }
         }}
       />

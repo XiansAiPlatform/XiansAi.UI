@@ -36,50 +36,31 @@ const Header = ({ pageTitle = "" }) => {
   };
 
   return (
-    <Box className="header" sx={{
-      borderBottom: '1px solid',
-      borderColor: 'divider',
-      backgroundColor: 'background.paper',
-      position: 'sticky',
-      top: 0,
-      zIndex: 1100,
-      width: '100vw',
-    }}>
-      <Box className="header-content" sx={{ 
-        display: 'flex', 
-        alignItems: 'center',
-        padding: '12px 24px',
-        justifyContent: 'space-between',
-        margin: '0 auto',
-      }}>
+    <Box className="header">
+      <Box className="header-content">
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center',
           gap: 2 
         }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography 
-              variant="h5" 
-              sx={{ 
-                fontWeight: 700,
-                letterSpacing: '-0.5px',
-                fontSize: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              <span style={{ color: 'var(--primary)' }}>Xians</span>
-              <span style={{ color: 'var(--accent)' }}>.ai</span>
+          <Link to="/" className="logo-link">
+            <Typography className="logo-text">
+              <span className="logo-text-primary">Xians</span>
+              <span className="logo-text-accent">.ai</span>
             </Typography>
           </Link>
           
           {pageTitle && (
             <>
-              <Box sx={{ color: 'text.secondary', mx: 2 }}>/</Box>
+              <Box sx={{ 
+                color: 'text.secondary', 
+                mx: 2,
+                opacity: 0.6 
+              }}>/</Box>
               <Typography variant="h6" sx={{ 
-                fontWeight: 600,
-                color: 'text.primary'
+                fontWeight: 500,
+                color: 'text.primary',
+                opacity: 0.9
               }}>
                 {pageTitle}
               </Typography>
@@ -96,13 +77,18 @@ const Header = ({ pageTitle = "" }) => {
             display: 'flex', 
             alignItems: 'center',
             gap: '8px',
-            backgroundColor: 'action.hover',
+            backgroundColor: 'var(--bg-paper)',
             padding: '4px 8px',
-            borderRadius: '8px',
+            borderRadius: 'var(--radius-lg)',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: 'var(--bg-hover)'
+            }
           }}>
             <BusinessIcon sx={{ 
               color: 'text.secondary',
-              fontSize: '20px'
+              fontSize: '20px',
+              opacity: 0.8
             }} />
             <FormControl size="small" sx={{ minWidth: 180 }}>
               <Select
@@ -117,12 +103,6 @@ const Header = ({ pageTitle = "" }) => {
                     padding: '4px 8px',
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                     border: 'none'
                   }
                 }}
@@ -141,20 +121,9 @@ const Header = ({ pageTitle = "" }) => {
 
           <Avatar
             onClick={handleMenu}
-            className="header-avatar"
+            className="user-avatar"
             src={user?.picture}
             alt={user?.nickname || 'User'}
-            sx={{
-              cursor: 'pointer',
-              width: 36,
-              height: 36,
-              transition: 'transform 0.2s',
-              border: '2px solid',
-              borderColor: 'primary.main',
-              '&:hover': {
-                transform: 'scale(1.05)'
-              }
-            }}
           >
             {!user?.picture && (user?.nickname?.charAt(0) || 'U')}
           </Avatar>
@@ -166,7 +135,6 @@ const Header = ({ pageTitle = "" }) => {
               vertical: 'bottom',
               horizontal: 'right',
             }}
-            keepMounted
             transformOrigin={{
               vertical: 'top',
               horizontal: 'right',
@@ -174,61 +142,27 @@ const Header = ({ pageTitle = "" }) => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
             PaperProps={{
-              elevation: 2,
-              sx: {
-                mt: 2.5,
-                minWidth: 220,
-                overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
-                '& .MuiMenu-list': {
-                  padding: '4px',
-                },
-              }
+              className: 'user-menu-paper'
             }}
           >
-            <Box sx={{
-              p: 2,
-              pb: 1.5,
-              borderBottom: '1px solid',
-              borderColor: 'divider',
-            }}>
-              <Typography variant="subtitle1" sx={{ 
-                fontWeight: 600,
-                color: 'text.primary',
-                mb: 0.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}>
+            <Box className="user-info">
+              <Typography className="user-info-name">
                 <PersonIcon fontSize="small" />
                 {(user?.nickname || user?.name)?.toUpperCase()}
               </Typography>
-              <Typography variant="body2" sx={{ 
-                color: 'text.secondary',
-                mb: 0.5
-              }}>
+              <Typography className="user-info-sub">
                 {user?.sub}
               </Typography>
-              <Typography variant="body2" sx={{ 
-                color: 'text.secondary',
-                wordBreak: 'break-all'
-              }}>
+              <Typography className="user-info-email">
                 {user?.email}
               </Typography>
             </Box>
+            
             <MenuItem 
               onClick={handleLogout}
-              sx={{
-                m: 0.5,
-                p: 1.5,
-                gap: 1.5,
-                borderRadius: 1,
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                }
-              }}
+              className="user-menu-item logout"
             >
-              <LogoutIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+              <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} />
               <Typography variant="body2">Logout</Typography>
             </MenuItem>
           </Menu>

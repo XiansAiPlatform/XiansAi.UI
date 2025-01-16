@@ -357,28 +357,25 @@
 
 /* Updated refresh button styles */
 .button-refresh {
-  background: white !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  box-shadow: 
-    0 2px 8px -2px rgba(0, 0, 0, 0.05),
-    0 1px 4px -2px rgba(0, 0, 0, 0.02) !important;
+  background: var(--bg-paper) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
   border-radius: var(--radius-lg) !important;
   padding: 8px 16px !important;
   color: var(--text-secondary) !important;
   transition: all 0.2s ease-in-out !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
 }
 
 .button-refresh:hover {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(0, 0, 0, 0.2) !important;
-  transform: translateY(-1px);
-  box-shadow: 
-    0 4px 12px -2px rgba(0, 0, 0, 0.08),
-    0 2px 6px -2px rgba(0, 0, 0, 0.03) !important;
+  background: var(--bg-hover) !important;
+  transform: translateX(2px);
+  border-color: var(--border-color-hover) !important;
 }
 
 .button-refresh:active {
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 .button-refresh.loading {
@@ -387,16 +384,51 @@
 }
 
 .button-refresh .MuiSvgIcon-root {
-  font-size: 1.2rem;
-  transition: transform 0.2s ease-in-out;
+  font-size: 1.125rem;
+  opacity: 0.8;
+  transition: all 0.3s ease-in-out;
 }
 
 .button-refresh:hover .MuiSvgIcon-root {
-  transform: rotate(180deg);
+  transform: rotate(90deg);
+  opacity: 1;
 }
 
 .button-refresh.loading .MuiSvgIcon-root {
   animation: spin 1s linear infinite;
+}
+
+/* Toggle button group styling */
+.MuiToggleButtonGroup-root {
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  background: var(--bg-paper) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.MuiToggleButtonGroup-root .MuiToggleButton-root {
+  border: none !important;
+  color: var(--text-secondary) !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  padding: 6px 16px !important;
+  text-transform: none !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.MuiToggleButtonGroup-root .MuiToggleButton-root:hover {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-primary) !important;
+}
+
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected {
+  background-color: var(--bg-selected) !important;
+  color: var(--primary) !important;
+}
+
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected:hover {
+  background-color: var(--bg-selected-hover) !important;
 }
 
 @keyframes spin {

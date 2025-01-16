@@ -16,17 +16,23 @@
   box-sizing: border-box;
 }
 
-/* Add a wrapper to create the background effect */
+/* Update wrapper to create split background */
 .layout-wrapper {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--bg-main);
+  background: linear-gradient(
+    to right,
+    var(--bg-paper) 0%,
+    var(--bg-paper) calc((100% - 1440px) / 2 + 240px),
+    var(--bg-main) calc((100% - 1440px) / 2 + 240px),
+    var(--bg-main) 100%
+  );
   z-index: -1;
   overflow-y: auto;
-  overflow-x: hidden; /* Prevent wrapper overflow */
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
 }
@@ -45,6 +51,9 @@
   padding: 0;
   z-index: 100;
   margin-left: calc(-50vw + 50%);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-paper);
+  backdrop-filter: blur(8px);
 }
 
 /* Update header content styles */
@@ -58,20 +67,50 @@
   grid-template-areas: "logo controls";
   box-sizing: border-box;
   margin: 0 auto;
-  background-color: var(--bg-main);
 }
 
-/* Add styles for logo and controls sections */
-.header-content > :first-child {
-  grid-area: logo;
+/* Organization selector styling */
+.header-content .MuiSelect-select {
+  transition: all 0.2s ease-in-out;
+  border-radius: var(--radius-lg);
 }
 
-.header-content > :last-child {
-  grid-area: controls;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 20px;
+.header-content .MuiSelect-root:hover {
+  background-color: var(--bg-hover);
+}
+
+/* Avatar styling */
+.header-avatar {
+  border: 2px solid transparent !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.header-avatar:hover {
+  border-color: var(--primary) !important;
+  transform: scale(1.05);
+}
+
+/* Menu styling */
+.header-menu-paper {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid var(--border-color);
+  backdrop-filter: blur(8px);
+}
+
+.header-user-info {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-menu-item {
+  border-radius: var(--radius-md);
+  margin: 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.header-menu-item:hover {
+  background-color: var(--bg-hover);
 }
 
 /* Update layout-main styles */
@@ -153,14 +192,15 @@
 /* Left Navigation Styles */
 .nav {
   grid-area: nav;
-  padding: 0 16px;
+  padding: 0 20px;
   border-right: 1px solid var(--border-color);
   box-sizing: border-box;
+  background-color: var(--bg-paper);
 }
 
 /* Add padding to the List container */
 .nav .MuiList-root {
-  padding-top: var(--spacing-lg);
+  padding-top: var(--spacing-xl);
 }
 
 .nav-logo {
@@ -197,35 +237,39 @@
 }
 
 .nav-item {
-  border-radius: var(--radius-sm);
-  margin-bottom: var(--spacing-xs);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-sm);
+  padding: 8px 12px;
 }
 
 .nav-item:hover {
-  background-color: var(--primary-light);
+  background-color: var(--bg-hover);
+  transform: translateX(4px);
 }
 
 .nav-item.selected {
-  background-color: var(--primary-lighter);
+  background-color: var(--bg-selected);
 }
 
 .nav-item.selected .nav-item-icon,
 .nav-item.selected .nav-item-text {
-  color: #6366f1;
+  color: var(--text-primary);
 }
 
 .nav-item-icon {
-  min-width: 40px;
+  min-width: 32px;
+  opacity: 0.8;
 }
 
 .nav-item-text {
   font-family: var(--font-family);
   font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.2px;
 }
 
 .nav-item.selected .nav-item-text {
-  font-weight: 600;
+  font-weight: var(--font-weight-medium);
 }
 
 body {
@@ -261,4 +305,136 @@ body {
 .nav-logo-text {
   font-weight: 700 !important;
   letter-spacing: -0.5px;
+}
+
+/* Logo styling */
+.logo-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease-in-out;
+  position: relative;
+  isolation: isolate;
+}
+
+.logo-link:hover {
+  transform: translateX(2px);
+}
+
+.logo-link:hover .logo-text-primary::after {
+  width: 100%;
+  opacity: 0.15;
+}
+
+.logo-text {
+  font-family: var(--font-family);
+  font-weight: 800;
+  letter-spacing: -1px;
+  font-size: 1.625rem;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.logo-text-primary {
+  color: var(--primary);
+  position: relative;
+}
+
+.logo-text-primary::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  width: 0;
+  height: 4px;
+  background: var(--primary);
+  opacity: 0;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out;
+}
+
+.logo-text-accent {
+  color: var(--text-primary);
+  opacity: 0.85;
+  font-weight: 700;
+  margin-left: -1px;
+}
+
+/* Avatar and menu styling */
+.user-avatar {
+  cursor: pointer;
+  width: 36px !important;
+  height: 36px !important;
+  border: 2px solid transparent !important;
+  transition: all 0.2s ease-in-out !important;
+  background-color: var(--primary) !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
+}
+
+.user-avatar:hover {
+  border-color: var(--primary) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.user-menu-paper {
+  margin-top: 12px !important;
+  min-width: 260px !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-sm) !important;
+  backdrop-filter: blur(8px);
+}
+
+.user-info {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.user-info-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.user-info-sub {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.user-info-email {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  word-break: break-all;
+  opacity: 0.8;
+}
+
+.user-menu-item {
+  margin: 4px !important;
+  padding: 12px !important;
+  border-radius: var(--radius-md) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.user-menu-item:hover {
+  background-color: var(--bg-hover) !important;
+  transform: translateX(2px);
+}
+
+.user-menu-item.logout {
+  color: var(--error-main);
+}
+
+.user-menu-item .MuiSvgIcon-root {
+  font-size: 1.25rem;
+  opacity: 0.8;
 }
