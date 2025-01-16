@@ -355,9 +355,57 @@
   opacity: 0.7;
 }
 
-/* Update refresh button styles */
-.refresh-button {
-  composes: button-refresh;
+/* Updated refresh button styles */
+.button-refresh {
+  background: white !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 
+    0 2px 8px -2px rgba(0, 0, 0, 0.05),
+    0 1px 4px -2px rgba(0, 0, 0, 0.02) !important;
+  border-radius: var(--radius-lg) !important;
+  padding: 8px 16px !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.button-refresh:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.2) !important;
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 12px -2px rgba(0, 0, 0, 0.08),
+    0 2px 6px -2px rgba(0, 0, 0, 0.03) !important;
+}
+
+.button-refresh:active {
+  transform: translateY(0);
+}
+
+.button-refresh.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.button-refresh .MuiSvgIcon-root {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease-in-out;
+}
+
+.button-refresh:hover .MuiSvgIcon-root {
+  transform: rotate(180deg);
+}
+
+.button-refresh.loading .MuiSvgIcon-root {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* NewWorkflowForm styles */
