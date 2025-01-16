@@ -66,7 +66,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
         alignItems: 'center',
         justifyContent: 'center'
       }}>
-        <MermaidDiagram diagram={definition.markdown} />
+        <MermaidDiagram diagram={definition.markdown} source={definition.source} />
       </Box>
     );
     setLoading(true);

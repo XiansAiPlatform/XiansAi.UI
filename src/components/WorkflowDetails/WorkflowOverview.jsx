@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Typography, 
   Box, 
@@ -18,6 +18,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { useApi } from '../../services/workflow-api';
 import './WorkflowDetails.css';
 import { useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 
 const WorkflowOverview = ({ workflowId, onActionComplete }) => {
@@ -26,6 +27,7 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
   const api = useApi();
+  const { user } = useAuth0();
   
   // Replace the old useEffect with a new one to fetch workflow data
   useEffect(() => {
@@ -94,16 +96,74 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
     </MenuItem>
   ] : [];
 
+  // Add helper function to calculate duration
+  const calculateDuration = (startTime, endTime) => {
+    if (!startTime) return 'N/A';
+    
+    const start = new Date(startTime);
+    const end = endTime ? new Date(endTime) : new Date();
+    const diff = end - start;
+    
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m`;
+    }
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    if (minutes > 1) {
+      return `${minutes} minutes`;
+    }
+    if (minutes === 1) {
+      return '1 minute';
+    }
+    if (seconds >= 0) {
+      return 'Less than a minute';
+    }
+    return 'Just now';
+  };
+
+  const isOwner = useMemo(() => {
+    return workflow?.owner === user?.sub;
+  }, [workflow?.owner, user?.sub]);
+
   return (
     <Paper 
       elevation={0} 
       className="overview-paper"
+      sx={{
+        padding: 3,
+        borderRadius: 2,
+        background: 'linear-gradient(to right bottom, #ffffff, #fafafa)'
+      }}
     >
-      <Box className="header-container">
+      <Box 
+        className="header-container"
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 3
+        }}
+      >
         <Box className="header-left">
-          <Box className="overview-header-content">
-            <Box className="overview-title-row">
-              <Typography className="overview-title">
+          <Box 
+            className="overview-header-content"
+            sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+          >
+            <Box 
+              className="overview-title-row"
+              sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+            >
+              <Typography 
+                className="overview-title"
+                variant="h5"
+                sx={{ fontWeight: 600 }}
+              >
                 {workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}
               </Typography>
               <StatusChip 
@@ -111,14 +171,57 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
                 status={workflow?.status?.toUpperCase()}
               />
             </Box>
-            <Typography className="overview-subtitle">
-              {workflow?.id || 'N/A'}
-            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+              <Typography 
+                sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
+              >
+                ID: {workflow?.id || 'N/A'}
+              </Typography>
+              <Typography 
+                sx={{ 
+                  fontSize: '0.875rem',
+                  color: isOwner ? 'primary.main' : 'text.secondary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  fontWeight: isOwner ? 500 : 400,
+                }}
+              >
+                Owner: {workflow?.owner || 'N/A'}
+                {isOwner && (
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: '0.75rem',
+                      bgcolor: 'primary.main',
+                      color: 'white',
+                      px: 1,
+                      py: 0.25,
+                      borderRadius: 1,
+                      ml: 1
+                    }}
+                  >
+                    Me
+                  </Typography>
+                )}
+              </Typography>
+              <Typography 
+                sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
+              >
+                Type: {workflow?.workflowType || 'N/A'}
+              </Typography>
+            </Box>
           </Box>
         </Box>
         
         <Button
           id="actions-button"
+          variant="outlined"
+          sx={{
+            borderRadius: 2,
+            textTransform: 'none',
+            minWidth: 100
+          }}
           aria-controls={open ? 'actions-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}
@@ -143,29 +246,59 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
         </Menu>
       </Box>
 
-      <Box className="overview-grid">
+      <Box 
+        className="overview-grid"
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 3,
+          '& .overview-grid-item': {
+            background: '#f5f5f5',
+            padding: 2,
+            borderRadius: 2,
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              background: '#f0f0f0',
+              transform: 'translateY(-2px)'
+            }
+          }
+        }}
+      >
         <Box className="overview-grid-item">
-          <Typography className="overview-label" variant="subtitle2">
-            Workflow Type
+          <Typography 
+            className="overview-label" 
+            variant="subtitle2"
+            sx={{ color: 'text.secondary', marginBottom: 1 }}
+          >
+            Start Time
           </Typography>
-          <Typography variant="body1">
-            {workflow?.workflowType || 'N/A'}
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            {workflow?.startTime ? new Date(workflow.startTime).toLocaleString() : 'N/A'}
           </Typography>
         </Box>
 
         <Box className="overview-grid-item">
-          <Typography className="overview-label" variant="subtitle2">
-            Start Time
+          <Typography 
+            className="overview-label" 
+            variant="subtitle2"
+            sx={{ color: 'text.secondary', marginBottom: 1 }}
+          >
+            Duration
           </Typography>
-          <Typography variant="body1">
-            {workflow?.startTime ? new Date(workflow.startTime).toLocaleString() : 'N/A'}
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            {calculateDuration(workflow?.startTime, workflow?.closeTime)}
           </Typography>
         </Box>
+
         <Box className="overview-grid-item">
-          <Typography className="overview-label" variant="subtitle2">
+          <Typography 
+            className="overview-label" 
+            variant="subtitle2"
+            sx={{ color: 'text.secondary', marginBottom: 1 }}
+          >
             End Time
           </Typography>
-          <Typography variant="body1">
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
             {workflow?.closeTime ? new Date(workflow.closeTime).toLocaleString() : 'In Progress'}
           </Typography>
         </Box>
