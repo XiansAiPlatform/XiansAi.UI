@@ -30,6 +30,8 @@ const InstructionItem = ({
   const [versionToDelete, setVersionToDelete] = useState(null);
   const instructionsApi = useInstructionsApi();
 
+  console.log(instruction);
+
   useEffect(() => {
     const fetchVersions = async () => {
       if (isExpanded) {
@@ -154,9 +156,16 @@ const InstructionItem = ({
           sx={{ cursor: 'pointer' }}
         >
           <Box className="card-header">
-            <Typography variant="h6" className="instruction-name">
-              {formatInstructionName(instruction.name)}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Typography variant="h6" className="instruction-name">
+                {formatInstructionName(instruction.name)}
+              </Typography>
+              <Chip 
+                size="small" 
+                label={instruction.type || 'No Type'} 
+                className="type-chip"
+              />
+            </Box>
             
             <Box className="card-actions">
               <Tooltip title="Delete All Versions" placement="top">
@@ -173,14 +182,6 @@ const InstructionItem = ({
               </Tooltip>
             </Box>
           </Box>
-
-          <Box className="card-metadata">
-            <Chip 
-              size="small" 
-              label={instruction.type || 'No Type'} 
-              className="type-chip"
-            />
-          </Box>
         </Box>
 
         <Box className="version-section">
@@ -192,9 +193,16 @@ const InstructionItem = ({
             }}
           >
             <Box className="version-header">
-              <Typography variant="caption">
-                Current Version: v.{instruction.version?.substring(0, 7) || 'draft'}
-              </Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                  Current Version: <span style={{ color: 'var(--text-primary)' }}>v.{instruction.version?.substring(0, 7) || 'draft'}</span>
+                </Typography>
+                {instruction.createdAt && (
+                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                    Created: <span style={{ color: 'var(--text-primary)' }}>{formatDate(instruction.createdAt)}</span>
+                  </Typography>
+                )}
+              </Box>
               <KeyboardArrowDown 
                 fontSize="small" 
                 className={`version-arrow ${isExpanded ? 'expanded' : ''}`}

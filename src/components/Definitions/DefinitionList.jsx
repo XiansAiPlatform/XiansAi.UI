@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';
@@ -15,6 +15,7 @@ const DefinitionList = () => {
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
   const { setLoading } = useLoading();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
@@ -26,8 +27,27 @@ const DefinitionList = () => {
     }
   };
 
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
   const filteredDefinitions = definitions
-    .filter(def => filter === 'all' || (filter === 'mine' && def.owner === user?.sub))
+    .filter(def => {
+      const matchesFilter = filter === 'all' || (filter === 'mine' && def.owner === user?.sub);
+      const searchLower = searchQuery.toLowerCase();
+      const nameLower = def.typeName?.toLowerCase() || '';
+      const matchesSearch = searchQuery === '' || nameLower.includes(searchLower);
+      
+      console.log({
+        name: def.name,
+        searchQuery,
+        nameLower,
+        searchLower,
+        matchesSearch
+      });
+      
+      return matchesFilter && matchesSearch;
+    })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   useEffect(() => {
@@ -73,15 +93,29 @@ const DefinitionList = () => {
         >
           Flow Definitions
         </Typography>
-        <ToggleButtonGroup
-          value={filter}
-          exclusive
-          onChange={handleFilterChange}
-          size="small"
-        >
-          <ToggleButton value="all">All Definitions</ToggleButton>
-          <ToggleButton value="mine">My Definitions</ToggleButton>
-        </ToggleButtonGroup>
+        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+          <TextField
+            size="small"
+            placeholder="Search definitions..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            sx={{
+              width: '250px',
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 'var(--radius-md)',
+              }
+            }}
+          />
+          <ToggleButtonGroup
+            value={filter}
+            exclusive
+            onChange={handleFilterChange}
+            size="small"
+          >
+            <ToggleButton value="all">All Definitions</ToggleButton>
+            <ToggleButton value="mine">My Definitions</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </Box>
       <TableContainer component={Paper} sx={tableStyles.tableContainer}>
         <Table sx={{ minWidth: 650 }}>

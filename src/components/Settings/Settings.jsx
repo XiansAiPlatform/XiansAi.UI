@@ -24,8 +24,7 @@ const Settings = () => {
           These settings are required for your flow server to run.
           <br />
           Configure the certificate and key paths in the Flow Runner settings.
-          <br />
-          See the example below.
+
         </Alert>
         <CACertificates />
         <FlowServerSettings />

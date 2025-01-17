@@ -5,12 +5,8 @@ import {
   TextField, 
   Button, 
   Box,
-  Collapse,
-  IconButton,
   CircularProgress
 } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
@@ -19,7 +15,6 @@ const FlowServerSettings = () => {
   const [certName, setCertName] = useState('FlowServerCert');
   const [keyName, setKeyName] = useState('FlowServerPrivateKey');
   const [isLoading, setIsLoading] = useState(false);
-  const [showExample, setShowExample] = useState(false);
   const [settings, setSettings] = useState(null);
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const api = useApi();
@@ -80,23 +75,6 @@ const FlowServerSettings = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const exampleCode = `
-// Example Flow Runner configuration
-{
-    var config = new Config
-    {
-        FlowServerUrl = "${settings?.flowServerUrl || '<flow-server-url>'}",
-        FlowServerNamespace = "${settings?.namespace || '<namespace>'}",
-        FlowServerCertPath = "<path-to-flow-server-cert>",
-        FlowServerPrivateKeyPath = "<path-to-flow-server-key>",
-        ... // other settings
-    };
-
-    FlowRunnerService runner = new FlowRunnerService(config);
-}`;
-
-  const lineCount = exampleCode.split('\n').length;
-
   return (
     <Paper className="ca-certificates-paper">
       <Typography variant="h6" gutterBottom>
@@ -132,34 +110,6 @@ const FlowServerSettings = () => {
               }}
               className="app-server-url"
             />
-          </Box>
-
-          <Box className="code-container" sx={{ mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="body2">
-              View example Flow Runner configurations
-              </Typography>
-              <IconButton
-                onClick={() => setShowExample(!showExample)}
-                size="small"
-              >
-                {showExample ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-              </IconButton>
-            </Box>
-            
-            <Collapse in={showExample}>
-              <TextField
-                multiline
-                rows={lineCount}
-                fullWidth
-                variant="outlined"
-                value={exampleCode}
-                InputProps={{ 
-                  readOnly: true,
-                  sx: { fontFamily: 'monospace' }
-                }}
-              />
-            </Collapse>
           </Box>
 
           <Typography variant="subtitle1" gutterBottom>

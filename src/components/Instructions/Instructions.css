@@ -1,18 +1,18 @@
 /* Grid Container */
 .instructions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   width: 100%;
 }
 
 /* Add a class for expanded state */
 .instructions-grid.has-expanded {
-  display: block;
+  display: flex;
 }
 
 .instructions-grid.has-expanded > div {
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   max-width: 100%;
 }
 
@@ -22,9 +22,8 @@
   background: var(--bg-paper);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
-  padding: 24px;
+  padding: 16px;
   transition: all 0.2s ease-in-out;
-  height: 100%;
   display: flex;
   flex-direction: column;
   box-shadow: var(--shadow-sm);
@@ -37,30 +36,21 @@
 
 /* Card Header */
 .card-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: flex-start;
+  display: flex;
+  align-items: center;
   gap: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   position: relative;
 }
 
 .instruction-name {
-  color: var(--text-primary);
-  font-weight: var(--font-weight-medium);
-  font-size: var(--text-lg);
-  line-height: 1.4;
-  letter-spacing: -0.5px;
+  flex: 1;
   padding-right: 40px;
 }
 
 /* Card Metadata */
 .card-metadata {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 /* Version section */

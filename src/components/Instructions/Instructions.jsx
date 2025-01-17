@@ -104,22 +104,7 @@ const Instructions = () => {
   };
 
   const handleVersionToggle = (instructionId) => {
-    const isExpanding = expandedId !== instructionId;
     setExpandedId(expandedId === instructionId ? null : instructionId);
-    
-    // If expanding, scroll to the instruction after a short delay
-    if (isExpanding) {
-      setTimeout(() => {
-        const element = document.querySelector('.instruction-item-expanded');
-        if (element) {
-          element.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-            inline: 'nearest'
-          });
-        }
-      }, 100); // Small delay to allow for the DOM update
-    }
   };
 
   return (
@@ -142,47 +127,44 @@ const Instructions = () => {
           >
             Instructions
           </Typography>
-          <Fab 
-            color="primary" 
-            size="medium" 
-            onClick={handleAdd}
-            sx={{ 
-              zIndex: 1,
-              bgcolor: 'var(--primary)',
-              boxShadow: 'var(--shadow-sm)',
-              '&:hover': {
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+            <TextField
+              size="small"
+              placeholder="Search instructions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{
+                width: '250px',
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 'var(--radius-md)',
+                }
+              }}
+            />
+            <Fab 
+              color="primary" 
+              size="medium" 
+              onClick={handleAdd}
+              sx={{ 
+                zIndex: 1,
                 bgcolor: 'var(--primary)',
-                opacity: 0.9,
-                transform: 'scale(1.05)',
-                boxShadow: 'var(--shadow-md)'
-              },
-              '&:active': {
-                bgcolor: 'var(--primary)',
-                opacity: 0.8,
-              },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-            }}
-          >
-            <Add />
-          </Fab>
+                boxShadow: 'var(--shadow-sm)',
+                '&:hover': {
+                  bgcolor: 'var(--primary)',
+                  opacity: 0.9,
+                  transform: 'scale(1.05)',
+                  boxShadow: 'var(--shadow-md)'
+                },
+                '&:active': {
+                  bgcolor: 'var(--primary)',
+                  opacity: 0.8,
+                },
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              <Add />
+            </Fab>
+          </Box>
         </Box>
-        
-        <TextField
-          fullWidth
-          variant="outlined"
-          placeholder="Search instructions..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{
-            mb: 3,
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: 'var(--background-paper)',
-              '&:hover fieldset': {
-                borderColor: 'var(--border-color)',
-              },
-            },
-          }}
-        />
         
         {isLoading ? (
           <Box sx={{ p: 6, textAlign: 'center' }}>
@@ -191,12 +173,6 @@ const Instructions = () => {
         ) : filteredInstructions.length > 0 ? (
           <div className={`instructions-grid ${expandedId ? 'has-expanded' : ''}`}>
             {filteredInstructions
-              // Sort the instructions to bring expanded one to top
-              .sort((a, b) => {
-                if (a.id === expandedId) return -1;
-                if (b.id === expandedId) return 1;
-                return 0;
-              })
               .map((instruction) => (
                 <div 
                   key={instruction.id}

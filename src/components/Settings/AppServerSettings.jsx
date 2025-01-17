@@ -4,12 +4,8 @@ import {
   Typography, 
   TextField, 
   Button, 
-  Box,
-  Collapse,
-  IconButton
+  Box
 } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
@@ -21,26 +17,8 @@ const AppServerSettings = () => {
   const [certName, setCertName] = useState('AppServerCert');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showExample, setShowExample] = useState(false);
   const api = useApi();
   const { apiBaseUrl } = getConfig();
-
-  const exampleCode = `
-// Example Flow Runner configuration
-{
-        var config = new Config
-        {
-            AppServerUrl = <app-server-url>,
-            AppServerCertPath = <path-to-app-server-cert-downloaded-from-here>,
-            AppServerCertPwd = <pwd-used-to-generate-certificate>,
-            ... // other settings
-        };
-
-        FlowRunnerService runner = new FlowRunnerService(config);
-}`;
-
-  // Calculate number of lines in the example code
-  const lineCount = exampleCode.split('\n').length;
 
   const downloadCertificate = async () => {
     if (!certName || !password) {
@@ -77,36 +55,6 @@ const AppServerSettings = () => {
       <Typography variant="h6" gutterBottom>
         App Server Configurations
       </Typography>
-
-      <Box className="code-container">
-        <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 1 }}>
-          <Typography variant="body2">
-            View example Flow Runner configurations
-          </Typography>
-          <IconButton
-            aria-label="toggle code example"
-            onClick={() => setShowExample(!showExample)}
-            size="small"
-          >
-            {showExample ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </Box>
-        
-        <Collapse in={showExample}>
-          <TextField
-            multiline
-            rows={lineCount}
-            fullWidth
-            variant="outlined"
-            value={exampleCode}
-            InputProps={{ 
-              readOnly: true,
-              className: 'readonly-code-input'
-            }}
-            className="code-example"
-          />
-        </Collapse>
-      </Box>
 
       <Box className="server-url-container">
         <TextField
