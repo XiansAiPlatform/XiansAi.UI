@@ -150,20 +150,52 @@ const InstructionItem = ({
 
   return (
     <>
-      <Box className="instruction-card">
+      <Box 
+        className="instruction-card"
+        sx={{
+          borderRadius: 2,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+          transition: 'box-shadow 0.2s ease-in-out',
+          '&:hover': {
+            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+          },
+          mb: 2,
+          border: '1px solid',
+          borderColor: 'divider'
+        }}
+      >
         <Box 
           onClick={handleView} 
-          sx={{ cursor: 'pointer' }}
+          sx={{ 
+            cursor: 'pointer',
+            p: 2,
+            '&:hover': {
+              bgcolor: 'action.hover'
+            }
+          }}
         >
           <Box className="card-header">
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Typography variant="h6" className="instruction-name">
+              <Typography 
+                variant="h6" 
+                className="instruction-name"
+                sx={{
+                  fontWeight: 500,
+                  fontSize: '1.1rem',
+                  color: 'text.primary'
+                }}
+              >
                 {formatInstructionName(instruction.name)}
               </Typography>
               <Chip 
                 size="small" 
                 label={instruction.type || 'No Type'} 
                 className="type-chip"
+                sx={{
+                  bgcolor: 'primary.light',
+                  color: 'primary.dark',
+                  fontWeight: 500
+                }}
               />
             </Box>
             
@@ -176,6 +208,12 @@ const InstructionItem = ({
                     handleDeleteAllClick(e);
                   }}
                   className="delete-btn"
+                  sx={{
+                    color: 'error.main',
+                    '&:hover': {
+                      bgcolor: 'error.lighter'
+                    }
+                  }}
                 >
                   <Delete fontSize="small" />
                 </IconButton>
@@ -184,37 +222,98 @@ const InstructionItem = ({
           </Box>
         </Box>
 
-        <Box className="version-section">
+        <Box 
+          className="version-section"
+          sx={{ 
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            bgcolor: 'background.neutral'
+          }}
+        >
           <Box 
             className="version-info"
             onClick={(e) => {
               e.stopPropagation();
               handleVersions(e);
             }}
+            sx={{
+              p: 1.5,
+              cursor: 'pointer',
+              '&:hover': {
+                bgcolor: 'action.hover'
+              }
+            }}
           >
             <Box className="version-header">
               <Box sx={{ display: 'flex', gap: 2 }}>
-                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                  Current Version: <span style={{ color: 'var(--text-primary)' }}>v.{instruction.version?.substring(0, 7) || 'draft'}</span>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  Current Version: 
+                  <span style={{ 
+                    color: 'var(--text-primary)',
+                    fontWeight: 500 
+                  }}>
+                    v.{instruction.version?.substring(0, 7) || 'draft'}
+                  </span>
                 </Typography>
                 {instruction.createdAt && (
-                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                    Created: <span style={{ color: 'var(--text-primary)' }}>{formatDate(instruction.createdAt)}</span>
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: 'text.secondary',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 0.5
+                    }}
+                  >
+                    Created: 
+                    <span style={{ 
+                      color: 'var(--text-primary)',
+                      fontWeight: 500 
+                    }}>
+                      {formatDate(instruction.createdAt)}
+                    </span>
                   </Typography>
                 )}
               </Box>
               <KeyboardArrowDown 
                 fontSize="small" 
                 className={`version-arrow ${isExpanded ? 'expanded' : ''}`}
+                sx={{
+                  transition: 'transform 0.2s ease',
+                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                }}
               />
             </Box>
           </Box>
 
           <Collapse in={isExpanded} timeout="auto">
-            <Box className="version-history">
-              <Box className="version-chips">
+            <Box 
+              className="version-history"
+              sx={{ p: 2, bgcolor: 'background.paper' }}
+            >
+              <Box 
+                className="version-chips"
+                sx={{ 
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1
+                }}
+              >
                 {isLoading ? (
-                  <Chip size="small" label="Loading..." className="version-chip" />
+                  <Chip 
+                    size="small" 
+                    label="Loading..." 
+                    className="version-chip"
+                    sx={{ bgcolor: 'action.hover' }}
+                  />
                 ) : (
                   versions.map((version) => {
                     const isLatest = version.id === versions.reduce((latest, current) => 
@@ -227,6 +326,15 @@ const InstructionItem = ({
                         size="small"
                         label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
                         className={`version-chip ${isLatest ? 'version-chip-current' : ''}`}
+                        sx={{
+                          cursor: 'pointer',
+                          bgcolor: isLatest ? 'primary.lighter' : 'background.neutral',
+                          color: isLatest ? 'primary.dark' : 'text.primary',
+                          fontWeight: isLatest ? 500 : 400,
+                          '&:hover': {
+                            bgcolor: isLatest ? 'primary.light' : 'action.hover'
+                          }
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleVersionSelect(version);

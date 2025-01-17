@@ -6,8 +6,6 @@
   --status-completed-color: #1b5e20;
   --status-terminated-bg: #ffcdd2;
   --status-terminated-color: #b71c1c;
-  --status-canceled-bg: #ffe0b2;
-  --status-canceled-color: #e65100;
   --status-total-bg: #f5f5f5;
   --status-total-color: #424242;
 }
@@ -305,27 +303,43 @@
   composes: card-base;
   margin: var(--spacing-lg) 0 var(--spacing-xl);
   padding: var(--spacing-lg);
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.98) !important;
+  backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.9);
   box-shadow: 
-    0 8px 32px -4px rgba(0, 0, 0, 0.1),
-    0 4px 16px -4px rgba(0, 0, 0, 0.06) !important;
+    0 12px 36px -8px rgba(0, 0, 0, 0.12),
+    0 8px 24px -12px rgba(0, 0, 0, 0.08) !important;
+  border-radius: var(--radius-xl) !important;
+}
+
+.stats-container .MuiStack-root {
+  gap: var(--spacing-md) !important;
 }
 
 .status-box {
   composes: card-base;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  flex: 1;
   min-width: 160px;
+  height: 100px;
   text-align: left;
-  transition: all var(--transition-normal);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  justify-content: center;
+  gap: var(--spacing-sm);
+  cursor: default;
+}
+
+.status-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 24px -4px rgba(0, 0, 0, 0.1),
+    0 4px 12px -2px rgba(0, 0, 0, 0.08);
 }
 
 .status-box::before {
@@ -333,18 +347,20 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 6px;
   height: 100%;
   background: currentColor;
-  opacity: 0.3;
+  opacity: 0.4;
+  border-radius: 3px;
 }
 
 .status-value {
-  font-size: var(--text-4xl) !important;
+  font-size: var(--text-5xl) !important;
   font-weight: var(--font-weight-bold) !important;
   margin: 0 !important;
   line-height: 1 !important;
   position: relative;
+  letter-spacing: -0.02em !important;
 }
 
 .status-label {
@@ -352,7 +368,7 @@
   text-transform: uppercase !important;
   letter-spacing: var(--letter-spacing-wider) !important;
   font-weight: var(--font-weight-medium) !important;
-  opacity: 0.7;
+  opacity: 0.85;
 }
 
 /* Updated refresh button styles */
@@ -459,59 +475,38 @@
 
 /* Status-specific styles */
 .status-box.running {
-  background: linear-gradient(135deg, 
-    color-mix(in srgb, var(--status-running-bg) 40%, white),
-    color-mix(in srgb, var(--status-running-bg) 15%, white));
+  background: linear-gradient(145deg, 
+    color-mix(in srgb, var(--status-running-bg) 50%, white),
+    color-mix(in srgb, var(--status-running-bg) 20%, white));
   color: var(--status-running-color);
+  animation: subtle-pulse 3s infinite ease-in-out;
 }
 
 .status-box.completed {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--status-completed-bg) 40%, white),
-    color-mix(in srgb, var(--status-completed-bg) 15%, white));
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--status-completed-bg) 50%, white),
+    color-mix(in srgb, var(--status-completed-bg) 20%, white));
   color: var(--status-completed-color);
 }
 
 .status-box.terminated {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--status-terminated-bg) 40%, white),
-    color-mix(in srgb, var(--status-terminated-bg) 15%, white));
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--status-terminated-bg) 50%, white),
+    color-mix(in srgb, var(--status-terminated-bg) 20%, white));
   color: var(--status-terminated-color);
 }
 
-.status-box.canceled {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--status-canceled-bg) 40%, white),
-    color-mix(in srgb, var(--status-canceled-bg) 15%, white));
-  color: var(--status-canceled-color);
-}
-
 .status-box.total {
-  background: linear-gradient(135deg,
-    color-mix(in srgb, var(--status-total-bg) 40%, white),
-    color-mix(in srgb, var(--status-total-bg) 15%, white));
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--status-total-bg) 50%, white),
+    color-mix(in srgb, var(--status-total-bg) 20%, white));
   color: var(--status-total-color);
 }
 
-.run-item-title {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.workflow-type {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.workflow-id {
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.text-subtle {
-  color: #666;  /* or any other muted color that matches your design */
-  font-size: 0.9em;
+@keyframes subtle-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
 
 /* Responsive adjustments */
@@ -519,11 +514,14 @@
   .stats-container {
     padding: var(--spacing-md);
     margin: var(--spacing-md) 0;
+    border-radius: var(--radius-lg) !important;
   }
 
   .status-box {
     padding: var(--spacing-md);
-    min-width: 140px;
+    min-width: 100%;
+    height: 80px;
+    border-radius: var(--radius-lg);
   }
 
   .status-value {
@@ -532,6 +530,10 @@
 
   .status-label {
     font-size: var(--text-xs) !important;
+  }
+
+  .status-box:hover {
+    transform: none;
   }
 }
 

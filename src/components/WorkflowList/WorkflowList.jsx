@@ -21,7 +21,6 @@ const INITIAL_STATS = {
   running: 0,
   completed: 0,
   terminated: 0,
-  canceled: 0,
   total: 0
 };
 
@@ -29,7 +28,6 @@ const STATUS_CONFIG = [
   { label: 'Total', value: 'total', className: 'total' },
   { label: 'Running', value: 'running', className: 'running' },
   { label: 'Completed', value: 'completed', className: 'completed' },
-  { label: 'Canceled', value: 'canceled', className: 'canceled' },
   { label: 'Terminated', value: 'terminated', className: 'terminated' }
 ];
 
@@ -46,7 +44,9 @@ const WorkflowList = () => {
     return runs.reduce((acc, run) => {
       acc.total++;
       const status = run.status.toUpperCase();
-      if (acc[status.toLowerCase()] !== undefined) {
+      if (status === 'TERMINATED' || status === 'CANCELED') {
+        acc.terminated++;
+      } else if (acc[status.toLowerCase()] !== undefined) {
         acc[status.toLowerCase()]++;
       }
       return acc;
