@@ -26,31 +26,32 @@ const WorkflowRunItem = ({ run }) => {
       className="workflow-run-item"
     >
       <div className="run-item-content">
-        <div className="run-item-title">
-          <div className="workflow-type">
+        <div className="run-item-header">
+          <div className="workflow-type-badge">
             {formatWorkflowType(run.workflowType)}
-            <span className="run-time-info text-subtle">
-              • Started {formattedTime}
-              <span className="run-duration"> • Duration: {getDuration()}</span>
-            </span>
           </div>
-          <div className="workflow-id">
-            ID: {run.id}
-            {run.owner && (
-              <span className="owner-info">
-                • Owner: <span style={{ 
-                    color: run.owner === user?.sub ? 'var(--primary)' : 'inherit',
-                    fontWeight: run.owner === user?.sub ? 600 : 'inherit'
-                  }}>
-                  {run.owner}
-                  {run.owner === user?.sub && ' (me)'}
-                </span>
+          <StatusChip status={run.status.toLowerCase()} label={run.status} />
+        </div>
+        
+        <div className="run-item-details">
+          <div className="run-metadata">
+            <span className="run-id">ID: {run.id}</span>
+            <span className="metadata-separator">•</span>
+            <span className="run-time">Started {formattedTime}</span>
+            <span className="metadata-separator">•</span>
+            <span className="run-duration">Duration: {getDuration()}</span>
+          </div>
+          
+          {run.owner && (
+            <div className="owner-info">
+              Owner: <span className={`owner-name ${run.owner === user?.sub ? 'current-user' : ''}`}>
+                {run.owner}
+                {run.owner === user?.sub && ' (me)'}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
-      <StatusChip status={run.status.toLowerCase()} label={run.status} />
     </Link>
   );
 };
