@@ -27,7 +27,7 @@ const WorkflowRunItem = ({ run }) => {
     >
       <div className="run-item-content">
         <div className="run-item-header">
-          <div className="workflow-type-badge">
+          <div>
             {formatWorkflowType(run.workflowType)}
           </div>
           <StatusChip status={run.status.toLowerCase()} label={run.status} />
@@ -36,7 +36,8 @@ const WorkflowRunItem = ({ run }) => {
         <div className="run-item-details">
           <div className="run-metadata">
             <span className="run-id">ID: {run.id}</span>
-            <span className="metadata-separator">•</span>
+          </div>
+          <div className="run-metadata">
             <span className="run-time">Started {formattedTime}</span>
             <span className="metadata-separator">•</span>
             <span className="run-duration">Duration: {getDuration()}</span>
