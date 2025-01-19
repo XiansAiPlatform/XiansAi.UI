@@ -568,8 +568,30 @@ body {
   align-items: center;
   width: 100%;
   max-width: 1400px;
-  padding: 0 1rem;
+  padding: 0;
   gap: 1rem;
+}
+
+.home-nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Adjust spacing as needed */
+}
+
+.home-nav {
+    margin-right: 20px; /* Adjust spacing as needed */
+}
+
+.home-nav-link {
+    text-decoration: none;
+    color: var(--home-text-primary);
+    margin-right: 10px; /* Adjust spacing as needed */
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.home-nav-link:hover {
+    color: var(--home-primary-hover);
 }
 
 /* Remove these as they're no longer needed */
@@ -2476,6 +2498,28 @@ h1, h2, h3 {
   max-width: 1400px;
   padding: 0;
   gap: 1rem;
+}
+
+.home-nav-auth {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Adjust spacing as needed */
+}
+
+.home-nav {
+    margin-right: 20px; /* Adjust spacing as needed */
+}
+
+.home-nav-link {
+    text-decoration: none;
+    color: var(--home-text-primary);
+    margin-right: 10px; /* Adjust spacing as needed */
+    font-size: 1rem;
+    transition: color 0.3s ease;
+}
+
+.home-nav-link:hover {
+    color: var(--home-primary-hover);
 }
 
 /* Adjust logo container for mobile */

@@ -157,39 +157,46 @@ var newBlogPosts = new List<string>();`
                             <img src="/images/99xlogo.svg" alt="99x" className="home-logo-99x" />
                         </a>
                     </div>
-                    <div className="home-auth-buttons">
-                        {isAuthenticated ? (
-                            <>
-                                <button 
-                                    className="home-btn home-btn-primary" 
-                                    onClick={() => window.location.href = '/runs'}
-                                >
-                                    Enter Application
-                                </button>
-                                <button 
-                                    className="home-btn home-btn-secondary" 
-                                    onClick={() => logout({ returnTo: window.location.origin })}
-                                >
-                                    Logout
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                <button 
-                                    className="home-btn home-btn-secondary" 
-                                    onClick={() => loginWithRedirect()}
-                                >
-                                    Login
-                                </button>
-                                <button 
-                                    className="home-btn home-btn-primary" 
-                                    onClick={() => loginWithRedirect()}
-                                >
-                                    <BiLogoGithub />
-                                    Sign up with GitHub
-                                </button>
-                            </>
-                        )}
+                    <div className="home-nav-auth">
+                        <nav className="home-nav">
+                            <a href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/" target="_blank" rel="noopener noreferrer" className="home-nav-link">
+                                Documentation
+                            </a>
+                        </nav>
+                        <div className="home-auth-buttons">
+                            {isAuthenticated ? (
+                                <>
+                                    <button 
+                                        className="home-btn home-btn-primary" 
+                                        onClick={() => window.location.href = '/runs'}
+                                    >
+                                        Enter Application
+                                    </button>
+                                    <button 
+                                        className="home-btn home-btn-secondary" 
+                                        onClick={() => logout({ returnTo: window.location.origin })}
+                                    >
+                                        Logout
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <button 
+                                        className="home-btn home-btn-secondary" 
+                                        onClick={() => loginWithRedirect()}
+                                    >
+                                        Login
+                                    </button>
+                                    <button 
+                                        className="home-btn home-btn-primary" 
+                                        onClick={() => loginWithRedirect()}
+                                    >
+                                        <BiLogoGithub />
+                                        Sign up with GitHub
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </header>

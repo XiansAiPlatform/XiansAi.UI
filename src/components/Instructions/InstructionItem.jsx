@@ -145,7 +145,7 @@ const InstructionItem = ({
   };
 
   const formatInstructionName = (name) => {
-    return name.replace(/([A-Z])/g, ' $1').trim();
+    return name.trim();
   };
 
   return (

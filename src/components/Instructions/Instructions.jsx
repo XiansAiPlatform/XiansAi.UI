@@ -30,7 +30,9 @@ const Instructions = () => {
     const fetchInstructions = async () => {
       try {
         const data = await instructionsApi.getLatestInstructions();
-        setInstructions(data);
+        // Sort instructions by createdAt in descending order
+        const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setInstructions(sortedData);
       } catch (error) {
         console.error('Failed to fetch instructions:', error);
         // TODO: Add error handling/notification
