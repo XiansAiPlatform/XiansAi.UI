@@ -15,14 +15,18 @@ const InstructionViewer = ({ instruction, onEdit = () => {}, onDelete = () => {}
     switch (instruction.type) {
       case 'json':
         return (
-          <pre>
+          <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
             {JSON.stringify(JSON.parse(instruction.content), null, 2)}
           </pre>
         );
       case 'markdown':
         return <ReactMarkdown>{instruction.content}</ReactMarkdown>;
       default:
-        return <pre>{instruction.content}</pre>;
+        return (
+          <pre style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}>
+            {instruction.content}
+          </pre>
+        );
     }
   };
 
@@ -160,6 +164,8 @@ const InstructionViewer = ({ instruction, onEdit = () => {}, onDelete = () => {}
           backgroundColor: 'var(--bg-main)',
           border: '1px solid var(--border-color)',
           borderRadius: 'var(--radius-md)',
+          wordWrap: 'break-word',
+          overflowWrap: 'break-word',
           '& pre': {
             fontFamily: 'var(--font-mono)'
           }

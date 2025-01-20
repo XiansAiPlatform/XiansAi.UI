@@ -53,7 +53,8 @@ const Instructions = () => {
             await instructionsApi.createInstruction(newInstruction);
             // Fetch fresh data after creating
             const updatedInstructions = await instructionsApi.getLatestInstructions();
-            setInstructions(updatedInstructions);
+            const sortedInstructions = updatedInstructions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            setInstructions(sortedInstructions);
             closeSlider();
           } catch (error) {
             console.error('Failed to create instruction:', error);
@@ -71,7 +72,8 @@ const Instructions = () => {
       await instructionsApi.createInstruction(updatedInstruction);
       // Fetch fresh data after updating
       const updatedInstructions = await instructionsApi.getLatestInstructions();
-      setInstructions(updatedInstructions);
+      const sortedInstructions = updatedInstructions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setInstructions(sortedInstructions);
       closeSlider();
     } catch (error) {
       console.error('Failed to update instruction:', error);
@@ -85,7 +87,8 @@ const Instructions = () => {
       if (success) {
         // Fetch fresh data after deletion
         const updatedInstructions = await instructionsApi.getLatestInstructions();
-        setInstructions(updatedInstructions);
+        const sortedInstructions = updatedInstructions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setInstructions(sortedInstructions);
         closeSlider();
       }
     } catch (error) {
@@ -95,13 +98,13 @@ const Instructions = () => {
   };
 
   const handleDeleteOneInstruction = async (instruction) => {
-
     var success = instructionsApi.deleteInstruction(instruction.id);
     if (success) {
-        // Fetch fresh data after creating
-        const updatedInstructions = await instructionsApi.getLatestInstructions();
-        setInstructions(updatedInstructions);
-        closeSlider();
+      // Fetch fresh data after creating
+      const updatedInstructions = await instructionsApi.getLatestInstructions();
+      const sortedInstructions = updatedInstructions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setInstructions(sortedInstructions);
+      closeSlider();
     }
   };
 
