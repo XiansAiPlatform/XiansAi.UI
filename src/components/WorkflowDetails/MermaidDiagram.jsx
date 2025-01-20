@@ -24,6 +24,7 @@ const MermaidDiagram = ({ diagram, source }) => {
       <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 2 }}>
         <Tab label="Diagram View" />
         <Tab label="Code View" />
+        <Tab label="Mermaid Text" />
       </Tabs>
 
       {activeTab === 0 ? (
@@ -42,7 +43,7 @@ const MermaidDiagram = ({ diagram, source }) => {
         }}>
           <div ref={diagramRef} className="mermaid">{diagram}</div>
         </Box>
-      ) : (
+      ) : activeTab === 1 ? (
         <Box sx={{ py: 4, px: 3 }}>
           <SyntaxHighlighter
             language="mermaid"
@@ -55,6 +56,18 @@ const MermaidDiagram = ({ diagram, source }) => {
           >
             {source}
           </SyntaxHighlighter>
+        </Box>
+      ) : (
+        <Box sx={{ py: 4, px: 3 }}>
+          <pre style={{ 
+            width: '100%',
+            fontSize: '0.85rem',
+            padding: '1.5rem',
+            backgroundColor: '#f5f5f5',
+            borderRadius: '4px'
+          }}>
+            {diagram}
+          </pre>
         </Box>
       )}
     </Box>
