@@ -64,7 +64,10 @@ const MermaidDiagram = ({ diagram, source }) => {
             fontSize: '0.85rem',
             padding: '1.5rem',
             backgroundColor: '#f5f5f5',
-            borderRadius: '4px'
+            borderRadius: '4px',
+            overflow: 'auto',  // Ensures scrollbars appear if needed
+            whiteSpace: 'pre-wrap',  // Ensures text wraps within the box
+            wordWrap: 'break-word'  // Breaks long words to fit within the box
           }}>
             {diagram}
           </pre>
