@@ -152,6 +152,7 @@ const InstructionItem = ({
     <>
       <Box 
         className="instruction-card"
+        onClick={handleView}
         sx={{
           borderRadius: 2,
           boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
@@ -161,20 +162,12 @@ const InstructionItem = ({
           },
           mb: 2,
           border: '1px solid',
-          borderColor: 'divider'
+          borderColor: 'divider',
+          cursor: 'pointer',
         }}
       >
-        <Box 
-          onClick={handleView} 
-          sx={{ 
-            cursor: 'pointer',
-            p: 2,
-            '&:hover': {
-              bgcolor: 'action.hover'
-            }
-          }}
-        >
-          <Box className="card-header">
+        <Box>
+          <Box className="card-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Typography 
                 variant="h6" 
@@ -197,9 +190,66 @@ const InstructionItem = ({
                   fontWeight: 500
                 }}
               />
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 0.5,
+                  cursor: 'pointer'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleVersions(e);
+                }}
+              >
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  Current Version: 
+                  <span style={{ 
+                    color: 'var(--text-primary)',
+                    fontWeight: 500 
+                  }}>
+                    v.{instruction.version?.substring(0, 7) || 'draft'}
+                  </span>
+                </Typography>
+                <KeyboardArrowDown 
+                  fontSize="small" 
+                  className={`version-arrow ${isExpanded ? 'expanded' : ''}`}
+                  sx={{
+                    transition: 'transform 0.2s ease',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}
+                />
+              </Box>
+              {instruction.createdAt && (
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}
+                >
+                  Created: 
+                  <span style={{ 
+                    color: 'var(--text-primary)',
+                    fontWeight: 500 
+                  }}>
+                    {formatDate(instruction.createdAt)}
+                  </span>
+                </Typography>
+              )}
             </Box>
             
-            <Box className="card-actions">
+            <Box className="card-actions" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Tooltip title="Delete All Versions" placement="top">
                 <IconButton 
                   size="small"
@@ -222,131 +272,58 @@ const InstructionItem = ({
           </Box>
         </Box>
 
-        <Box 
-          className="version-section"
-          sx={{ 
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'background.neutral'
-          }}
-        >
+        <Collapse in={isExpanded} timeout="auto">
           <Box 
-            className="version-info"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleVersions(e);
-            }}
-            sx={{
-              p: 1.5,
-              cursor: 'pointer',
-              '&:hover': {
-                bgcolor: 'action.hover'
-              }
-            }}
+            className="version-history"
+            sx={{ p: 2, bgcolor: 'background.paper' }}
           >
-            <Box className="version-header">
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Typography 
-                  variant="caption" 
-                  sx={{ 
-                    color: 'text.secondary',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 0.5
-                  }}
-                >
-                  Current Version: 
-                  <span style={{ 
-                    color: 'var(--text-primary)',
-                    fontWeight: 500 
-                  }}>
-                    v.{instruction.version?.substring(0, 7) || 'draft'}
-                  </span>
-                </Typography>
-                {instruction.createdAt && (
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      color: 'text.secondary',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    Created: 
-                    <span style={{ 
-                      color: 'var(--text-primary)',
-                      fontWeight: 500 
-                    }}>
-                      {formatDate(instruction.createdAt)}
-                    </span>
-                  </Typography>
-                )}
-              </Box>
-              <KeyboardArrowDown 
-                fontSize="small" 
-                className={`version-arrow ${isExpanded ? 'expanded' : ''}`}
-                sx={{
-                  transition: 'transform 0.2s ease',
-                  transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
-                }}
-              />
+            <Box 
+              className="version-chips"
+              sx={{ 
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 1
+              }}
+            >
+              {isLoading ? (
+                <Chip 
+                  size="small" 
+                  label="Loading..." 
+                  className="version-chip"
+                  sx={{ bgcolor: 'action.hover' }}
+                />
+              ) : (
+                versions.map((version) => {
+                  const isLatest = version.id === versions.reduce((latest, current) => 
+                    new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
+                  ).id;
+                  
+                  return (
+                    <Chip
+                      key={version.id}
+                      size="small"
+                      label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
+                      className={`version-chip ${isLatest ? 'version-chip-current' : ''}`}
+                      sx={{
+                        cursor: 'pointer',
+                        bgcolor: isLatest ? 'primary.lighter' : 'background.neutral',
+                        color: isLatest ? 'primary.dark' : 'text.primary',
+                        fontWeight: isLatest ? 500 : 400,
+                        '&:hover': {
+                          bgcolor: isLatest ? 'primary.light' : 'action.hover'
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleVersionSelect(version);
+                      }}
+                    />
+                  );
+                })
+              )}
             </Box>
           </Box>
-
-          <Collapse in={isExpanded} timeout="auto">
-            <Box 
-              className="version-history"
-              sx={{ p: 2, bgcolor: 'background.paper' }}
-            >
-              <Box 
-                className="version-chips"
-                sx={{ 
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 1
-                }}
-              >
-                {isLoading ? (
-                  <Chip 
-                    size="small" 
-                    label="Loading..." 
-                    className="version-chip"
-                    sx={{ bgcolor: 'action.hover' }}
-                  />
-                ) : (
-                  versions.map((version) => {
-                    const isLatest = version.id === versions.reduce((latest, current) => 
-                      new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest
-                    ).id;
-                    
-                    return (
-                      <Chip
-                        key={version.id}
-                        size="small"
-                        label={`v.${version.version.substring(0, 7)} - ${formatDate(version.createdAt)}`}
-                        className={`version-chip ${isLatest ? 'version-chip-current' : ''}`}
-                        sx={{
-                          cursor: 'pointer',
-                          bgcolor: isLatest ? 'primary.lighter' : 'background.neutral',
-                          color: isLatest ? 'primary.dark' : 'text.primary',
-                          fontWeight: isLatest ? 500 : 400,
-                          '&:hover': {
-                            bgcolor: isLatest ? 'primary.light' : 'action.hover'
-                          }
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVersionSelect(version);
-                        }}
-                      />
-                    );
-                  })
-                )}
-              </Box>
-            </Box>
-          </Collapse>
-        </Box>
+        </Collapse>
       </Box>
 
       <ConfirmationDialog
