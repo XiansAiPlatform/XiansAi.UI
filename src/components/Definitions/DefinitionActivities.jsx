@@ -76,7 +76,7 @@ const DefinitionActivities = ({ activities }) => {
                 </Typography>
                 {activity.parameters?.length > 0 && (
                   <Typography variant="caption" sx={{ color: 'var(--text-secondary)', marginLeft: 'var(--spacing-sm)' }}>
-                    -- Parameters: {activity.parameters.map(param => param.name).join(', ')}
+                    Parameters: {activity.parameters.map(param => param.name).join(', ')}
                   </Typography>
                 )}
               </TableCell>
@@ -101,8 +101,8 @@ const DefinitionActivities = ({ activities }) => {
                             {name}
                           </Typography>
                           {type && (
-                            <Typography variant="caption" sx={{ color: 'var(--text-secondary)', marginLeft: 'var(--spacing-sm)' }}>
-                              type: {type.replace(']', '')}
+                            <Typography variant="caption" sx={{ color: 'var(--text-secondary)', marginLeft: 'var(--spacing-sm)', display: 'block' }}>
+                              Type: {type.replace(']', '')}
                             </Typography>
                           )}
                         </Box>
@@ -115,7 +115,7 @@ const DefinitionActivities = ({ activities }) => {
                   </Typography>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ verticalAlign: 'top' }}>
                 {activity.instructions?.length > 0 ? (
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
                     {activity.instructions.map((instruction, idx) => (
