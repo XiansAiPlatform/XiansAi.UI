@@ -12,11 +12,13 @@ import './Definitions.css';
 import DefinitionAgents from './DefinitionAgents';
 import { useAuth0 } from '@auth0/auth0-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useTheme } from '@mui/material/styles';
 
 const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
   const { user } = useAuth0();
+  const theme = useTheme();
 
   const formatTypeName = (typeName) => {
     return typeName
@@ -96,6 +98,8 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
           '&:last-child td, &:last-child th': { border: 0 },
           borderTop: previousRowOpen ? '1px solid rgba(224, 224, 224, 1)' : 'none',
           borderBottom: isOpen ? '1px solid rgba(224, 224, 224, 1)' : 'inherit',
+          backgroundColor: isOpen ? theme.palette.action.hover : 'inherit',
+          transition: 'background-color 0.3s',
         }}
       >
         <TableCell className="definition-toggle-cell">
