@@ -18,8 +18,6 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
   const { setLoading } = useLoading();
   const { user } = useAuth0();
 
-  console.log(definition);
-
   const formatTypeName = (typeName) => {
     return typeName
       .replace(/([A-Z])/g, ' $1')

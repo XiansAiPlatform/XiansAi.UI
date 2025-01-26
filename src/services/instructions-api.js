@@ -51,6 +51,26 @@ export const useInstructionsApi = () => {
         }
       },
 
+      getInstructionByName: async (name) => {
+        try {
+          const headers = await createAuthHeaders();
+          const encodedName = encodeURIComponent(name);
+          const response = await fetch(`${apiBaseUrl}/api/client/instructions/latest/${encodedName}`, {
+            method: 'GET',
+            headers
+          });
+
+          if (!response.ok) {
+            throw await handleApiError(response);
+          }
+
+          return await response.json();
+        } catch (error) {
+          console.error('Error fetching instruction by name:', error);
+          throw error;
+        }
+      },
+
       getInstruction: async (id) => {
         try {
           const headers = await createAuthHeaders();
