@@ -27,6 +27,27 @@ export const useApi = () => {
     });
 
     return {
+      generateApiKey: async () => {
+        try {
+          const response = await fetch(`${apiBaseUrl}/api/client/certificates/generate/base64`, {
+            method: 'POST',
+            headers: await createAuthHeaders(),
+            body: JSON.stringify({
+              fileName: 'AppServerApiKey',
+            })
+          }); 
+
+          if (!response.ok) {
+            throw new Error('Failed to generate API key');
+          }
+
+          return response.json();
+        } catch (error) {
+          console.error('Failed to generate API key:', error);
+          throw handleApiError(error, 'Failed to generate API key');
+        }
+      },
+
       generateCertificate: async (name, password) => {
         try {
           const response = await fetch(`${apiBaseUrl}/api/client/certificates/generate`, {
