@@ -99,6 +99,24 @@ export const useApi = () => {
         }
       },
 
+      getFlowServerApiKey: async () => {
+        try {
+          const response = await fetch(`${apiBaseUrl}/api/client/certificates/flowserver/base64`, {
+            method: 'GET',
+            headers: await createAuthHeaders(),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch Flow Server API key');
+          }
+
+          return response.json();
+        } catch (error) {
+          console.error('Failed to fetch Flow Server API key:', error);
+          throw handleApiError(error, 'Failed to fetch Flow Server API key');
+        }
+      },
+
       getFlowServerCertFile: async (fileName) => {
         try {
           const response = await fetch(`${apiBaseUrl}/api/client/certificates/flowserver/cert?fileName=${encodeURIComponent(fileName)}`, {

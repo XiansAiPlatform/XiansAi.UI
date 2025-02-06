@@ -5,7 +5,9 @@ import {
   TextField, 
   Button, 
   Box,
-  CircularProgress
+  CircularProgress,
+  Tabs,
+  Tab
 } from '@mui/material';
 import { useApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
@@ -17,6 +19,8 @@ const FlowServerSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [settings, setSettings] = useState(null);
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+  const [apiKey, setApiKey] = useState('');
   const api = useApi();
 
   useEffect(() => {
@@ -58,6 +62,19 @@ const FlowServerSettings = () => {
       
     } catch (error) {
       toast.error(`Failed to generate files: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateApiKey = async () => {
+    setIsLoading(true);
+    try {
+      const response = await api.getFlowServerApiKey();
+      setApiKey(response.apiKey);
+      toast.success('API Key generated successfully');
+    } catch (error) {
+      toast.error(`Failed to generate API key: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -112,42 +129,76 @@ const FlowServerSettings = () => {
             />
           </Box>
 
-          <Typography variant="subtitle1" gutterBottom>
-            Download Certificates
-          </Typography>
-
-          <Box component="form" sx={{ mt: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-              <TextField
-                label="Certificate Name"
-                value={certName}
-                onChange={(e) => setCertName(e.target.value)}
-                fullWidth
-                required
-                disabled={isLoading}
-                className="input-field"
-              />
-              
-              <TextField
-                label="Private Key Name"
-                value={keyName}
-                onChange={(e) => setKeyName(e.target.value)}
-                fullWidth
-                required
-                disabled={isLoading}
-                className="input-field"
-              />
-            </Box>
-
-            <Button
-              variant="contained"
-              onClick={generateNewFiles}
-              disabled={isLoading || !certName || !keyName}
-              className="submit-button"
-            >
-              {isLoading ? 'Generating...' : 'Download Files'}
-            </Button>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
+              <Tab label="With API Keys" />
+              <Tab label="With Certificates" />
+            </Tabs>
           </Box>
+
+          {activeTab === 0 ? (
+            <Box className="form-container">
+              <TextField
+                label="API Key"
+                value={apiKey}
+                fullWidth
+                multiline
+                rows={3}
+                InputProps={{ readOnly: true }}
+                className="input-field"
+                sx={{ mb: 2 }}
+              />
+              <Button
+                variant="contained"
+                onClick={generateApiKey}
+                disabled={isLoading}
+                className="submit-button"
+                size="small"
+                sx={{ alignSelf: 'flex-start' }}
+              >
+                {isLoading ? 'Generating...' : 'Generate New API Key'}
+              </Button>
+            </Box>
+          ) : (
+            <Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Download Certificates
+              </Typography>
+
+              <Box component="form" sx={{ mt: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                  <TextField
+                    label="Certificate Name"
+                    value={certName}
+                    onChange={(e) => setCertName(e.target.value)}
+                    fullWidth
+                    required
+                    disabled={isLoading}
+                    className="input-field"
+                  />
+                  
+                  <TextField
+                    label="Private Key Name"
+                    value={keyName}
+                    onChange={(e) => setKeyName(e.target.value)}
+                    fullWidth
+                    required
+                    disabled={isLoading}
+                    className="input-field"
+                  />
+                </Box>
+
+                <Button
+                  variant="contained"
+                  onClick={generateNewFiles}
+                  disabled={isLoading || !certName || !keyName}
+                  className="submit-button"
+                >
+                  {isLoading ? 'Generating...' : 'Download Files'}
+                </Button>
+              </Box>
+            </Box>
+          )}
         </>
       )}
     </Paper>
