@@ -59,7 +59,7 @@ const AppServerSettings = () => {
     try {
       const response = await api.generateApiKey();
       console.log(response);
-      setApiKey(response.apiKey);
+      setApiKey(response.certificate);
       toast.success('API Key generated successfully');
     } catch (error) {
       toast.error(`Failed to generate API key: ${error.message}`);
