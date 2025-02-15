@@ -57,7 +57,7 @@ const AppServerSettings = () => {
   const generateApiKey = async () => {
     setIsLoading(true);
     try {
-      const response = await api.getFlowServerApiKey();
+      const response = await api.generateApiKey();
       console.log(response);
       setApiKey(response.apiKey);
       toast.success('API Key generated successfully');
