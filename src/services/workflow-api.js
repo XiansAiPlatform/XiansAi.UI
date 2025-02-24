@@ -27,6 +27,27 @@ export const useApi = () => {
       'X-Tenant-Id': selectedOrg || '',
     });
 
+    const getTimeRangeParams = (timeFilter) => {
+      const now = new Date();
+      const endTime = now.toISOString();
+      let startTime;
+
+      switch (timeFilter) {
+        case '7days':
+          startTime = new Date(now.setDate(now.getDate() - 7)).toISOString();
+          break;
+        case '30days':
+          startTime = new Date(now.setDate(now.getDate() - 30)).toISOString();
+          break;
+        case 'all':
+        default:
+          startTime = null;
+          break;
+      }
+
+      return { startTime, endTime };
+    };
+
     return {
       getWorkflow: async (workflowId) => {
         try {
@@ -39,14 +60,24 @@ export const useApi = () => {
           handleApiError(error, 'Failed to fetch workflow');
         }
       },
-      fetchWorkflowRuns: async () => {
+      fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all') => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/client/workflows`, {
+          const { startTime, endTime } = getTimeRangeParams(timeFilter);
+          const queryParams = new URLSearchParams();
+          
+          if (startTime) {
+            queryParams.append('startTime', startTime);
+            queryParams.append('endTime', endTime);
+          }
+          if (ownerFilter === 'mine') {
+            queryParams.append('owner', 'current');
+          }
+
+          const response = await fetch(`${apiBaseUrl}/api/client/workflows?${queryParams}`, {
             headers: await createAuthHeaders()
           });
 
           if (!response.ok) {
-            // Get the error message from the server if available
             let serverError = '';
             try {
               const errorData = await response.json();
