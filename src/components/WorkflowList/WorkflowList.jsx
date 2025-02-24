@@ -156,8 +156,8 @@ const WorkflowList = () => {
           onChange={handleFilterChange}
           size="small"
         >
-          <ToggleButton value="mine">My Runs</ToggleButton>
-          <ToggleButton value="all">All Runs</ToggleButton>
+          <ToggleButton value="mine">Mine</ToggleButton>
+          <ToggleButton value="all">All</ToggleButton>
         </ToggleButtonGroup>
 
         <ToggleButtonGroup
