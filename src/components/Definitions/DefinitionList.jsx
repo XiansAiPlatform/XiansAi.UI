@@ -9,13 +9,14 @@ import { useAuth0 } from '@auth0/auth0-react';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('mine');
   const { user } = useAuth0();
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
   const { setLoading } = useLoading();
   const [searchQuery, setSearchQuery] = useState('');
+  const [timeFilter, setTimeFilter] = useState('7days');
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
@@ -29,6 +30,12 @@ const DefinitionList = () => {
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
+  };
+
+  const handleTimeFilterChange = (event, newTimeFilter) => {
+    if (newTimeFilter !== null) {
+      setTimeFilter(newTimeFilter);
+    }
   };
 
   const filteredDefinitions = definitions
@@ -54,7 +61,7 @@ const DefinitionList = () => {
     const fetchDefinitions = async () => {
       try {
         setLoading(true);
-        const data = await definitionsApi.getDefinitions();
+        const data = await definitionsApi.getDefinitions(timeFilter, filter);
         setDefinitions(data);
       } catch (err) {
         setError(err.message);
@@ -65,7 +72,7 @@ const DefinitionList = () => {
     };
 
     fetchDefinitions();
-  }, [definitionsApi, setLoading]);
+  }, [definitionsApi, setLoading, timeFilter, filter]);
 
   if (error) {
     return (
@@ -107,13 +114,23 @@ const DefinitionList = () => {
             }}
           />
           <ToggleButtonGroup
+            value={timeFilter}
+            exclusive
+            onChange={handleTimeFilterChange}
+            size="small"
+          >
+            <ToggleButton value="7days">Last 7 Days</ToggleButton>
+            <ToggleButton value="30days">Last 30 Days</ToggleButton>
+            <ToggleButton value="all">All Time</ToggleButton>
+          </ToggleButtonGroup>
+          <ToggleButtonGroup
             value={filter}
             exclusive
             onChange={handleFilterChange}
             size="small"
           >
-            <ToggleButton value="all">All Definitions</ToggleButton>
-            <ToggleButton value="mine">My Definitions</ToggleButton>
+            <ToggleButton value="all">All</ToggleButton>
+            <ToggleButton value="mine">Mine</ToggleButton>
           </ToggleButtonGroup>
         </Box>
       </Box>

@@ -34,7 +34,8 @@ const STATUS_CONFIG = [
 const WorkflowList = () => {  
   const [workflows, setWorkflows] = useState({});
   const [stats, setStats] = useState(INITIAL_STATS);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('mine');
+  const [timeFilter, setTimeFilter] = useState('7days');
   const { user } = useAuth0();
 
   const { setLoading, isLoading } = useLoading();
@@ -54,11 +55,8 @@ const WorkflowList = () => {
   }, []);
 
   const groupWorkflows = useCallback((runs) => {
-    const filteredRuns = runs.filter(run => 
-      filter === 'all' || (filter === 'mine' && run.owner === user?.sub)
-    );
-    
-    return filteredRuns
+    return runs
+      .filter(run => filter === 'all' || (filter === 'mine' && run.owner === user?.sub))
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
       .reduce((acc, run) => {
         if (!acc[run.workflowType]) {
@@ -72,20 +70,17 @@ const WorkflowList = () => {
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
     try {
-      const runs = await fetchWorkflowRuns();
+      const runs = await fetchWorkflowRuns(timeFilter, filter);
       if (runs && runs.length > 0) {
         setStats(calculateStats(runs));
         setWorkflows(groupWorkflows(runs));
       } 
     } catch (error) {
-      // Error already handled in the api.js file
       console.error('Error loading workflows:', error);
     } finally {
       setLoading(false);
     }
-  // In order to stop recursive calls:
-  // eslint-disable-next-line react-hooks/exhaustive-deps 
-  }, [calculateStats, groupWorkflows, setLoading]);
+  }, [calculateStats, groupWorkflows, setLoading, fetchWorkflowRuns, timeFilter, filter]);
 
   useEffect(() => {
     loadWorkflows();
@@ -106,6 +101,12 @@ const WorkflowList = () => {
   const handleFilterChange = (event, newFilter) => {
     if (newFilter !== null) {
       setFilter(newFilter);
+    }
+  };
+
+  const handleTimeFilterChange = (event, newTimeFilter) => {
+    if (newTimeFilter !== null) {
+      setTimeFilter(newTimeFilter);
     }
   };
 
@@ -155,8 +156,19 @@ const WorkflowList = () => {
           onChange={handleFilterChange}
           size="small"
         >
-          <ToggleButton value="all">All Runs</ToggleButton>
-          <ToggleButton value="mine">My Runs</ToggleButton>
+          <ToggleButton value="mine">Mine</ToggleButton>
+          <ToggleButton value="all">All</ToggleButton>
+        </ToggleButtonGroup>
+
+        <ToggleButtonGroup
+          value={timeFilter}
+          exclusive
+          onChange={handleTimeFilterChange}
+          size="small"
+        >
+          <ToggleButton value="7days">Last 7 Days</ToggleButton>
+          <ToggleButton value="30days">Last 30 Days</ToggleButton>
+          <ToggleButton value="all">All Time</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
