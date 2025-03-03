@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1>Reinvent Your Business with AI Workflows</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Agent Orchestrator for Professional Developers</h1>
 
                     <div className="home-cta-buttons">
                         <button 
@@ -214,7 +214,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                        Build intelligent, resilient business workflows that operate reliably at scale - even while you sleep.
+                    Let your AI workflows do the work — intelligent and always on, so you can focus on what matters.
                     </p>
                     <div className="code-sample">
                         <code>
