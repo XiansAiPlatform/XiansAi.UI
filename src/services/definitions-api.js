@@ -13,7 +13,7 @@ const getTimeRangeParams = (timeFilter) => {
 
   switch (timeFilter) {
     case '7days':
-      startTime = new Date(now.setDate(now.getDate() - 1)).toISOString();
+      startTime = new Date(now.setDate(now.getDate() - 7)).toISOString();
       break;
     case '30days':
       startTime = new Date(now.setDate(now.getDate() - 30)).toISOString();
