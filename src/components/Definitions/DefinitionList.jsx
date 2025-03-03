@@ -83,7 +83,14 @@ const DefinitionList = () => {
   }
 
   if (!definitions.length) {
-    return <EmptyState />;
+    return <EmptyState 
+      searchQuery={searchQuery}
+      onSearchChange={handleSearchChange}
+      timeFilter={timeFilter}
+      onTimeFilterChange={handleTimeFilterChange}
+      filter={filter}
+      onFilterChange={handleFilterChange}
+    />;
   }
 
   return (
