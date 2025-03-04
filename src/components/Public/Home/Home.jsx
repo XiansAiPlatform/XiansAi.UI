@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1 style={{ wordSpacing: '0.2em' }}>Agent Orchestrator for Professional Developers</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Multi-Agent Orchestrator for Engineers</h1>
 
                     <div className="home-cta-buttons">
                         <button 
@@ -214,7 +214,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                    Let your AI workflows do the work — intelligent and always on, so you can focus on what matters.
+                    Let your AI flows do the work — intelligent and robust, so you can focus on what matters.
                     </p>
                     <div className="code-sample">
                         <code>
