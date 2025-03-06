@@ -105,7 +105,7 @@ const DefinitionList = () => {
             color: 'var(--text-primary)',
           }}
         >
-          Flow Definitions
+          Agent Definitions
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <TextField

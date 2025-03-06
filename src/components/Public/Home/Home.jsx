@@ -15,7 +15,7 @@ export default function Home() {
 
     const featureTabs = [
         {
-            title: "Flow Visualization",
+            title: "Agent Visualization",
             description: "Design and monitor complex AI workflows with intuitive visualization tools. Track agent interactions and data flows in real-time for complete operational visibility.",
             image: "/images/visualizer.png",
             icon: <RiFlowChart className="home-tab-icon" />

@@ -11,19 +11,19 @@ const NAV_ITEMS = [
   {
     to: '/runs',
     icon: <AirIcon />,
-    label: 'Flow Runs',
+    label: 'Agent Runs',
     isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
   },
   {
     to: '/definitions',
     icon: <CodeOutlinedIcon />,
-    label: 'Definitions',
+    label: 'Agent Definitions',
     isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
   {
     to: '/instructions',
     icon: <DescriptionOutlinedIcon />,
-    label: 'Instructions',
+    label: 'Knowledge',
     isSelected: (pathname) => pathname === '/instructions' || pathname.startsWith('/instructions/'),
   },
   {

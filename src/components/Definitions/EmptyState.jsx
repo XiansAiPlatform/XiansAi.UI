@@ -19,7 +19,7 @@ const EmptyState = ({
           color: 'var(--text-primary)',
         }}
       >
-        Flow Definitions
+        Agent Definitions
       </Typography>
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
         <TextField
@@ -69,11 +69,11 @@ const EmptyState = ({
       }}
     >
       <Typography variant="h6" sx={{ color: 'var(--text-primary)' }}>
-        No Flow Definitions Found
+        No Agent Definitions Found
       </Typography>
       <Typography variant="body1" sx={{ color: 'var(--text-secondary)', maxWidth: '600px' }}>
-        Flow definitions are automatically created when flows are run for the first time or when the flow code is modified. 
-        To create definitions, please run your flows through the Flow Runner.
+        Agent definitions are automatically created when flows are run for the first time or when the flow code is modified. 
+        To create definitions, please run your flows through the Agent Runner.
       </Typography>
     </Box>
   </Box>

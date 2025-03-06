@@ -31,7 +31,7 @@ const DefinitionActivities = ({ activities }) => {
   return (
     <div className="definition-section">
       <Typography variant="h6" className="section-title">
-        Flow Activities <span className="section-count">({activities.length})</span>
+        Agent Activities <span className="section-count">({activities.length})</span>
       </Typography>
       <Table size="small" sx={tableStyles.nestedTable}>
         {activities.length > 0 && (
@@ -44,7 +44,7 @@ const DefinitionActivities = ({ activities }) => {
                 padding: 'var(--spacing-sm)',
                 borderBottom: '2px solid var(--primary-dark)'
               }}>
-                Activity Name
+                Action
               </TableCell>
               <TableCell sx={{ 
                 fontWeight: 'bold', 
@@ -53,7 +53,7 @@ const DefinitionActivities = ({ activities }) => {
                 padding: 'var(--spacing-sm)',
                 borderBottom: '2px solid var(--primary-dark)'
               }}>
-                Agents
+                Tools
               </TableCell>
               <TableCell sx={{ 
                 fontWeight: 'bold', 
@@ -62,7 +62,7 @@ const DefinitionActivities = ({ activities }) => {
                 padding: 'var(--spacing-sm)',
                 borderBottom: '2px solid var(--primary-dark)'
               }}>
-                Instructions
+                Knowledge
               </TableCell>
             </TableRow>
           </TableHead>

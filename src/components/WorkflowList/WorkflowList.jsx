@@ -205,7 +205,7 @@ const WorkflowList = () => {
             variant="contained"
             color="primary"
           >
-            Go to Flow Definitions
+            Go to Agent Definitions
           </Button>
         </Paper>
       )}

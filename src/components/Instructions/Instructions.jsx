@@ -130,7 +130,7 @@ const Instructions = () => {
               color: 'var(--text-primary)'
             }}
           >
-            Instructions
+            Knowledge Base
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField

@@ -4,7 +4,7 @@ import { tableStyles } from './styles';
 const DefinitionParameters = ({ parameters }) => (
   <div className="definition-section">
     <Typography variant="h6" className="section-title">
-      Flow Inputs <span className="section-count">({parameters.length})</span>
+      Agent Inputs <span className="section-count">({parameters.length})</span>
     </Typography>
     <Table size="small" sx={tableStyles.nestedTable}>
       {parameters.length > 0 && (

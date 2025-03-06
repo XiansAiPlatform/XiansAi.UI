@@ -227,12 +227,12 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
                 <IconButton
                   size="small"
                   className="timeline-action-button"
-                  title="View Instructions"
+                  title="View Knowledge"
                   onClick={handleInstructionClick}
                 >
                   <DescriptionOutlinedIcon fontSize="small" />
                   <Typography variant="caption" sx={{ ml: 1 }}>
-                    Instructions
+                    Knowledge
                   </Typography>
                 </IconButton>
               </Box>
@@ -297,7 +297,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
             gap: 1 
           }}>
             <DescriptionOutlinedIcon sx={{ color: 'primary.main' }} />
-            Instructions
+            Knowledge
           </Box>
         </ModernDialogTitle>
         <ModernDialogContent>
