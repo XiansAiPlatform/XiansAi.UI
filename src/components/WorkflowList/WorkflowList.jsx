@@ -23,12 +23,6 @@ const INITIAL_STATS = {
   total: 0
 };
 
-const STATUS_CONFIG = [
-  { label: 'Total', value: 'total', className: 'total' },
-  { label: 'Running', value: 'running', className: 'running' },
-  { label: 'Completed', value: 'completed', className: 'completed' },
-  { label: 'Terminated', value: 'terminated', className: 'terminated' }
-];
 
 const WorkflowList = () => {  
   const [workflows, setWorkflows] = useState({});
@@ -91,14 +85,6 @@ const WorkflowList = () => {
   useEffect(() => {
     loadWorkflows();
   }, [loadWorkflows]);
-
-  const statusDisplayConfig = useMemo(() => {
-    return STATUS_CONFIG.map(({ label, value, className }) => ({
-      label,
-      value: stats[value] > 0 ? stats[value] : '-',
-      className
-    }));
-  }, [stats]);
 
   const hasWorkflows = useMemo(() => {
     return Object.keys(workflows).length > 0;
