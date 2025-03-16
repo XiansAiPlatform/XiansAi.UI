@@ -16,7 +16,7 @@ const DefinitionList = () => {
   const definitionsApi = useDefinitionsApi();
   const { setLoading } = useLoading();
   const [searchQuery, setSearchQuery] = useState('');
-  const [timeFilter, setTimeFilter] = useState('7days');
+  const [timeFilter, setTimeFilter] = useState('all');
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);

@@ -60,7 +60,7 @@ export const useApi = () => {
           handleApiError(error, 'Failed to fetch workflow');
         }
       },
-      fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all') => {
+      fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all', statusFilter = 'all') => {
         try {
           const { startTime, endTime } = getTimeRangeParams(timeFilter);
           const queryParams = new URLSearchParams();
@@ -71,6 +71,9 @@ export const useApi = () => {
           }
           if (ownerFilter === 'mine') {
             queryParams.append('owner', 'current');
+          }
+          if (statusFilter !== 'all') {
+            queryParams.append('status', statusFilter);
           }
 
           const response = await fetch(`${apiBaseUrl}/api/client/workflows?${queryParams}`, {

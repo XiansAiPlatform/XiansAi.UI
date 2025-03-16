@@ -3,7 +3,6 @@ import {
   Container, 
   Typography, 
   Box,
-  Stack,
   Paper,
   Button,
   ToggleButton,
@@ -34,8 +33,9 @@ const STATUS_CONFIG = [
 const WorkflowList = () => {  
   const [workflows, setWorkflows] = useState({});
   const [stats, setStats] = useState(INITIAL_STATS);
-  const [filter, setFilter] = useState('mine');
-  const [timeFilter, setTimeFilter] = useState('7days');
+  const [ownerFilter, setOwnerFilter] = useState('mine');
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('running');
   const { user } = useAuth0();
 
   const { setLoading, isLoading } = useLoading();
@@ -56,7 +56,7 @@ const WorkflowList = () => {
 
   const groupWorkflows = useCallback((runs) => {
     return runs
-      .filter(run => filter === 'all' || (filter === 'mine' && run.owner === user?.sub))
+      .filter(run => ownerFilter === 'all' || (ownerFilter === 'mine' && run.owner === user?.sub))
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
       .reduce((acc, run) => {
         const groupKey = `${run.workflowType}:${run.assignment}`;
@@ -66,22 +66,27 @@ const WorkflowList = () => {
         acc[groupKey].push(run);
         return acc;
       }, {});
-  }, [filter, user?.sub]);
+  }, [ownerFilter, user?.sub]);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
     try {
-      const runs = await fetchWorkflowRuns(timeFilter, filter);
+      const runs = await fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
       if (runs && runs.length > 0) {
         setStats(calculateStats(runs));
         setWorkflows(groupWorkflows(runs));
-      } 
+      } else {
+        setWorkflows({});
+        setStats(INITIAL_STATS);
+      }
     } catch (error) {
       console.error('Error loading workflows:', error);
+      setWorkflows({});
+      setStats(INITIAL_STATS);
     } finally {
       setLoading(false);
     }
-  }, [calculateStats, groupWorkflows, setLoading, fetchWorkflowRuns, timeFilter, filter]);
+  }, [calculateStats, groupWorkflows, setLoading, fetchWorkflowRuns, timeFilter, ownerFilter, statusFilter]);
 
   useEffect(() => {
     loadWorkflows();
@@ -99,9 +104,9 @@ const WorkflowList = () => {
     return Object.keys(workflows).length > 0;
   }, [workflows]);
 
-  const handleFilterChange = (event, newFilter) => {
-    if (newFilter !== null) {
-      setFilter(newFilter);
+  const handleOwnerFilterChange = (event, newOwnerFilter) => {
+    if (newOwnerFilter !== null) {
+      setOwnerFilter(newOwnerFilter);
     }
   };
 
@@ -111,66 +116,98 @@ const WorkflowList = () => {
     }
   };
 
+  const handleStatusFilterChange = (event, newStatusFilter) => {
+    if (newStatusFilter !== null) {
+      setStatusFilter(newStatusFilter);
+    }
+  };
+
   return (
     <Container>
-      <Paper 
-        elevation={0}
-        className="stats-container"
-      >
-        <Stack 
-          direction={{ xs: 'column', sm: 'row' }} 
-          spacing={{ xs: 2, sm: 3 }}
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ width: '100%' }}
-        >
-          {statusDisplayConfig.map(({ label, value, className }) => (
-            <StatusBox 
-              key={label}
-              label={label}
-              value={value}
-              className={className}
-            />
-          ))}
-        </Stack>
-      </Paper>
-
       <Box sx={{ 
         display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'flex-end',
-        mb: 2,
-        gap: 2
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        mb: 3,
+        mt: 2
       }}>
+        <Typography 
+          variant="h4" 
+          component="h1"
+          sx={{
+            fontWeight: 'var(--font-weight-semibold)',
+            letterSpacing: 'var(--letter-spacing-tight)',
+            color: 'var(--text-primary)',
+          }}
+        >
+          Agent Runs
+        </Typography>
+        
         <Button
           onClick={loadWorkflows}
           disabled={isLoading}
           className={`button-refresh ${isLoading ? 'loading' : ''}`}
           startIcon={<RefreshIcon />}
+          size="small"
         >
           <span>Refresh</span>
         </Button>
+      </Box>
 
-        <ToggleButtonGroup
-          value={filter}
-          exclusive
-          onChange={handleFilterChange}
-          size="small"
-        >
-          <ToggleButton value="mine">Mine</ToggleButton>
-          <ToggleButton value="all">All</ToggleButton>
-        </ToggleButtonGroup>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        mb: 3,
+        flexWrap: 'wrap',
+        gap: 2
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2,
+          flexWrap: 'wrap'
+        }}>
+          <ToggleButtonGroup
+            value={ownerFilter}
+            exclusive
+            onChange={handleOwnerFilterChange}
+            size="small"
+          >
+            <ToggleButton value="mine">Mine</ToggleButton>
+            <ToggleButton value="all">All</ToggleButton>
+          </ToggleButtonGroup>
 
-        <ToggleButtonGroup
-          value={timeFilter}
-          exclusive
-          onChange={handleTimeFilterChange}
-          size="small"
-        >
-          <ToggleButton value="7days">Last 7 Days</ToggleButton>
-          <ToggleButton value="30days">Last 30 Days</ToggleButton>
-          <ToggleButton value="all">All Time</ToggleButton>
-        </ToggleButtonGroup>
+          <ToggleButtonGroup
+            value={statusFilter}
+            exclusive
+            onChange={handleStatusFilterChange}
+            size="small"
+          >
+            <ToggleButton value="all" className="total">
+              All {stats.total > 0 && `(${stats.total})`}
+            </ToggleButton>
+            <ToggleButton value="running" className="running">
+              Running {stats.running > 0 && `(${stats.running})`}
+            </ToggleButton>
+            <ToggleButton value="completed" className="completed">
+              Completed {stats.completed > 0 && `(${stats.completed})`}
+            </ToggleButton>
+            <ToggleButton value="terminated" className="terminated">
+              Terminated {stats.terminated > 0 && `(${stats.terminated})`}
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          <ToggleButtonGroup
+            value={timeFilter}
+            exclusive
+            onChange={handleTimeFilterChange}
+            size="small"
+          >
+            <ToggleButton value="7days">Last 7 Days</ToggleButton>
+            <ToggleButton value="30days">Last 30 Days</ToggleButton>
+            <ToggleButton value="all">All Time</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
       </Box>
 
       {hasWorkflows ? (
@@ -217,12 +254,5 @@ const WorkflowList = () => {
     </Container>
   );
 };
-
-const StatusBox = ({ label, value, className }) => (
-  <Box className={`status-box ${className}`}>
-    <Typography className="status-value">{value}</Typography>
-    <Typography className="status-label">{label}</Typography>
-  </Box>
-);
 
 export default WorkflowList; 
