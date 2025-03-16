@@ -30,7 +30,7 @@ export const useApi = () => {
       // validate verification code
       validateVerificationCode: async (email, code) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/client/register/verification/validate`, {
+          const response = await fetch(`${apiBaseUrl}/api/public/register/verification/validate`, {
             method: 'POST',
             headers: await createAuthHeaders(),
             body: JSON.stringify({ Email: email, Code: code })
@@ -56,7 +56,7 @@ export const useApi = () => {
       // Send verification code
       sendVerificationCode: async (email) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/client/register/verification/send`, {
+          const response = await fetch(`${apiBaseUrl}/api/public/register/verification/send`, {
             method: 'POST',
             headers: await createAuthHeaders(),
             body: JSON.stringify(email)
