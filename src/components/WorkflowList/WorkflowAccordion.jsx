@@ -57,7 +57,7 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
             },
           }}
         >
-          <div className="workflow-header-content">
+          <div className="workflow-header-content" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="workflow-title-section">
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography 
@@ -74,24 +74,6 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
                   }}
                 >
                   <span>{formatWorkflowType(type)}</span>
-                  <span style={{
-                    fontSize: '1rem',
-                    color: '#666',
-                    backgroundColor: '#f5f5f5',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}>
-                    <span style={{ opacity: 0.75 }}>Assignment: </span>
-                    <span style={{ 
-                      marginLeft: '4px', 
-                      fontWeight: 600,
-                      color: '#444'
-                    }}>
-                      {assignment}
-                    </span>
-                  </span>
                 </Typography>
               </div>
               <div className="status-indicators">
@@ -105,6 +87,26 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
                 )}
               </div>
             </div>
+            
+            <span style={{
+              fontSize: '.75rem',
+              color: '#666',
+              backgroundColor: '#f5f5f5',
+              padding: '4px 8px',
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              marginRight: '16px',
+            }}>
+              <span style={{ opacity: 0.75 }}>Assignment: </span>
+              <span style={{ 
+                marginLeft: '4px', 
+                fontWeight: 600,
+                color: '#444'
+              }}>
+                {assignment}
+              </span>
+            </span>
           </div>
         </AccordionSummary>
         <AccordionDetails className="workflow-accordion-details">
