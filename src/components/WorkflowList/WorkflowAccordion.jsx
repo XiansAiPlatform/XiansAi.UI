@@ -12,7 +12,7 @@ import RightSlider from '../Layout/RightSlider';
 import NewWorkflowForm from './NewWorkflowForm';
 import './WorkflowAccordion.css';
 
-const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
+const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted, isMobile }) => {
   const [showNewWorkflowForm, setShowNewWorkflowForm] = useState(false);
 
   const formatWorkflowType = (type) => {
@@ -55,17 +55,32 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
             '&:hover': {
               backgroundColor: '#f8f9fa',
             },
+            padding: isMobile ? '8px 12px' : '12px 16px',
           }}
         >
-          <div className="workflow-header-content" style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div className="workflow-title-section">
+          <div className="workflow-header-content" style={{ 
+            width: '100%', 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            justifyContent: 'space-between', 
+            alignItems: isMobile ? 'flex-start' : 'center',
+            gap: isMobile ? '8px' : '0'
+          }}>
+            <div className="workflow-title-section" style={{
+              display: 'flex',
+              flexDirection: isMobile ? 'row' : 'row',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: isMobile ? '8px' : '16px',
+              width: '100%'
+            }}>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography 
                   className="workflow-type-title"
-                  variant="h5"
+                  variant={isMobile ? "h6" : "h5"}
                   sx={{
                     fontWeight: 600,
-                    fontSize: '1.5rem',
+                    fontSize: isMobile ? '1.1rem' : '1.5rem',
                     color: '#1a1a1a',
                     marginBottom: '4px',
                     display: 'flex',
@@ -76,7 +91,12 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
                   <span>{formatWorkflowType(type)}</span>
                 </Typography>
               </div>
-              <div className="status-indicators">
+              <div className="status-indicators" style={{
+                display: 'flex',
+                gap: isMobile ? '8px' : '16px',
+                marginLeft: '0',
+                flexWrap: 'nowrap'
+              }}>
                 <div className="total-indicator">
                   {runs.length} total
                 </div>
@@ -96,7 +116,10 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
               borderRadius: '6px',
               display: 'flex',
               alignItems: 'center',
-              marginRight: '16px',
+              marginRight: isMobile ? '0' : '16px',
+              marginTop: isMobile ? '4px' : '0',
+              alignSelf: isMobile ? 'flex-start' : 'center',
+              maxWidth: isMobile ? 'fit-content' : 'auto'
             }}>
               <span style={{ opacity: 0.75 }}>Assignment: </span>
               <span style={{ 
@@ -109,10 +132,16 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
             </span>
           </div>
         </AccordionSummary>
-        <AccordionDetails className="workflow-accordion-details">
-          <List>
+        <AccordionDetails className="workflow-accordion-details" sx={{
+          padding: isMobile ? '8px' : '16px'
+        }}>
+          <List sx={{ padding: 0 }}>
             {runs.map((run, index) => (
-              <WorkflowRunItem key={`${run.runId}-${index}`} run={run} />
+              <WorkflowRunItem 
+                key={`${run.runId}-${index}`} 
+                run={run} 
+                isMobile={isMobile}
+              />
             ))}
           </List>
         </AccordionDetails>
@@ -124,6 +153,7 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
             workflowType={type}
             onSuccess={handleWorkflowSuccess}
             onCancel={() => setShowNewWorkflowForm(false)}
+            isMobile={isMobile}
           />
         </RightSlider>
       )}

@@ -8,11 +8,13 @@ import {
   Alert,
   CircularProgress,
   Paper,
+  IconButton
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { useApi } from '../../services/workflow-api';
 import './WorkflowList.css';
 
-const NewWorkflowForm = ({ workflowType, parameterInfo, onSuccess, onCancel }) => {
+const NewWorkflowForm = ({ workflowType, parameterInfo, onSuccess, onCancel, isMobile }) => {
   const navigate = useNavigate();
   const [parameters, setParameters] = useState(
     parameterInfo ? 
@@ -50,11 +52,37 @@ const NewWorkflowForm = ({ workflowType, parameterInfo, onSuccess, onCancel }) =
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">
+    <Box component="form" onSubmit={handleSubmit} sx={{ 
+      p: isMobile ? 2 : 3,
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 3,
+        position: 'relative'
+      }}>
+        <Typography variant={isMobile ? "h6" : "h5"} sx={{ pr: isMobile ? 4 : 0 }}>
           Start New {workflowType.replace(/([A-Z])/g, ' $1').trim()}
         </Typography>
+        
+        {isMobile && (
+          <IconButton 
+            aria-label="close" 
+            onClick={onCancel}
+            sx={{ 
+              position: 'absolute',
+              right: -8,
+              top: -8
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        )}
       </Box>
 
       {error && (
@@ -63,41 +91,59 @@ const NewWorkflowForm = ({ workflowType, parameterInfo, onSuccess, onCancel }) =
         </Alert>
       )}
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ 
+        mb: 3, 
+        flex: 1,
+        overflowY: 'auto'
+      }}>
         {parameterInfo && parameterInfo.map((param, index) => (
           <Paper
             key={param.name}
             elevation={0}
             className="parameter-paper"
+            sx={{
+              p: isMobile ? 1.5 : 2,
+              mb: 2
+            }}
           >
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
               <TextField
                 fullWidth
                 multiline
-                rows={2}
+                rows={isMobile ? 3 : 2}
                 value={parameters[param.name]}
                 onChange={(e) => handleParameterChange(param.name, e.target.value)}
                 placeholder={param.name}
                 label={`${param.name} (${param.type})`}
                 sx={{ flex: 1 }}
+                size={isMobile ? "small" : "medium"}
               />
             </Box>
           </Paper>
         ))}
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-        <Button
-          variant="outlined"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Cancel
-        </Button>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        justifyContent: 'flex-end',
+        mt: 'auto',
+        flexDirection: isMobile ? 'column' : 'row'
+      }}>
+        {!isMobile && (
+          <Button
+            variant="outlined"
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+        )}
         <Button
           type="submit"
           variant="contained"
           disabled={loading}
+          fullWidth={isMobile}
           startIcon={loading && <CircularProgress size={20} />}
         >
           Start Workflow

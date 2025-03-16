@@ -6,7 +6,9 @@ import {
   Paper,
   Button,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  useMediaQuery,
+  IconButton
 } from '@mui/material';
 import { useApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -31,6 +33,8 @@ const WorkflowList = () => {
   const [timeFilter, setTimeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('running');
   const { user } = useAuth0();
+  const isMobile = useMediaQuery('(max-width:768px)');
+  const isSmallMobile = useMediaQuery('(max-width:480px)');
 
   const { setLoading, isLoading } = useLoading();
   const { fetchWorkflowRuns } = useApi();
@@ -109,16 +113,18 @@ const WorkflowList = () => {
   };
 
   return (
-    <Container>
+    <Container className="workflow-list-container" disableGutters={isMobile} maxWidth={isMobile ? false : "lg"}>
       <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between',
         alignItems: 'center',
-        mb: 3,
-        mt: 2
+        flexDirection: 'row',
+        mb: isMobile ? 2 : 3,
+        mt: isMobile ? 0.5 : 2,
+        px: isMobile ? 2 : 0
       }}>
         <Typography 
-          variant="h4" 
+          variant={isMobile ? "h5" : "h4"} 
           component="h1"
           sx={{
             fontWeight: 'var(--font-weight-semibold)',
@@ -129,45 +135,90 @@ const WorkflowList = () => {
           Agent Runs
         </Typography>
         
-        <Button
-          onClick={loadWorkflows}
-          disabled={isLoading}
-          className={`button-refresh ${isLoading ? 'loading' : ''}`}
-          startIcon={<RefreshIcon />}
-          size="small"
-        >
-          <span>Refresh</span>
-        </Button>
+        {isMobile ? (
+          <IconButton
+            onClick={loadWorkflows}
+            disabled={isLoading}
+            className={isLoading ? 'loading' : ''}
+            size="medium"
+            sx={{
+              backgroundColor: 'var(--bg-paper)',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-sm)',
+              color: 'var(--text-secondary)',
+              '&:hover': {
+                backgroundColor: 'var(--bg-hover)',
+              }
+            }}
+          >
+            <RefreshIcon className={isLoading ? 'spin-icon' : ''} />
+          </IconButton>
+        ) : (
+          <Button
+            onClick={loadWorkflows}
+            disabled={isLoading}
+            className={`button-refresh ${isLoading ? 'loading' : ''}`}
+            startIcon={<RefreshIcon />}
+            size="small"
+          >
+            <span>Refresh</span>
+          </Button>
+        )}
       </Box>
 
       <Box sx={{ 
         display: 'flex', 
-        justifyContent: 'flex-end',
-        alignItems: 'center',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
         mb: 3,
-        flexWrap: 'wrap',
-        gap: 2
+        flexDirection: 'column',
+        gap: 1.5,
+        px: isMobile ? 2 : 0,
+        width: '100%',
+        overflowX: 'auto'
       }}>
         <Box sx={{ 
           display: 'flex', 
-          gap: 2,
-          flexWrap: 'wrap'
+          gap: 1,
+          flexWrap: isSmallMobile ? 'wrap' : 'nowrap',
+          width: '100%'
         }}>
           <ToggleButtonGroup
             value={ownerFilter}
             exclusive
             onChange={handleOwnerFilterChange}
             size="small"
+            sx={{ flexGrow: isSmallMobile ? 1 : 0 }}
           >
             <ToggleButton value="mine">Mine</ToggleButton>
             <ToggleButton value="all">All</ToggleButton>
           </ToggleButtonGroup>
 
           <ToggleButtonGroup
+            value={timeFilter}
+            exclusive
+            onChange={handleTimeFilterChange}
+            size="small"
+            sx={{ flexGrow: isSmallMobile ? 1 : 0 }}
+          >
+            <ToggleButton value="7days">7 Days</ToggleButton>
+            <ToggleButton value="30days">30 Days</ToggleButton>
+            <ToggleButton value="all">All</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+
+        <Box sx={{ width: '100%', overflowX: 'auto' }}>
+          <ToggleButtonGroup
             value={statusFilter}
             exclusive
             onChange={handleStatusFilterChange}
             size="small"
+            sx={{ 
+              minWidth: isMobile ? 'max-content' : 'auto',
+              '& .MuiToggleButton-root': {
+                px: isMobile ? 1 : 2
+              }
+            }}
           >
             <ToggleButton value="all" className="total">
               All {stats.total > 0 && `(${stats.total})`}
@@ -182,61 +233,53 @@ const WorkflowList = () => {
               Terminated {stats.terminated > 0 && `(${stats.terminated})`}
             </ToggleButton>
           </ToggleButtonGroup>
-
-          <ToggleButtonGroup
-            value={timeFilter}
-            exclusive
-            onChange={handleTimeFilterChange}
-            size="small"
-          >
-            <ToggleButton value="7days">Last 7 Days</ToggleButton>
-            <ToggleButton value="30days">Last 30 Days</ToggleButton>
-            <ToggleButton value="all">All Time</ToggleButton>
-          </ToggleButtonGroup>
         </Box>
       </Box>
 
-      {hasWorkflows ? (
-        Object.entries(workflows).map(([groupKey, runs]) => {
-          const [type, assignment] = groupKey.split(':');
-          return (
-            <WorkflowAccordion
-              key={groupKey}
-              type={type}
-              assignment={assignment}
-              runs={runs}
-              onWorkflowStarted={loadWorkflows}
-            />
-          );
-        })
-      ) : (
-        <Paper 
-          elevation={0}
-          className="empty-state-container"
-          sx={{ 
-            textAlign: 'center', 
-            py: 8, 
-            px: 4,
-            borderRadius: 3,
-            bgcolor: 'background.paper' 
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            {isLoading ? 'Loading...' : 'Find Your Flow Runs here'}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-            To get started, <Link to="/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
-          </Typography>
-          <Button
-            component={Link}
-            to="/definitions"
-            variant="contained"
-            color="primary"
+      <Box sx={{ px: isMobile ? 2 : 0 }}>
+        {hasWorkflows ? (
+          Object.entries(workflows).map(([groupKey, runs]) => {
+            const [type, assignment] = groupKey.split(':');
+            return (
+              <WorkflowAccordion
+                key={groupKey}
+                type={type}
+                assignment={assignment}
+                runs={runs}
+                onWorkflowStarted={loadWorkflows}
+                isMobile={isMobile}
+              />
+            );
+          })
+        ) : (
+          <Paper 
+            elevation={0}
+            className="empty-state-container"
+            sx={{ 
+              textAlign: 'center', 
+              py: isMobile ? 4 : 8, 
+              px: isMobile ? 2 : 4,
+              borderRadius: 3,
+              bgcolor: 'background.paper' 
+            }}
           >
-            Go to Agent Definitions
-          </Button>
-        </Paper>
-      )}
+            <Typography variant="h6" gutterBottom>
+              {isLoading ? 'Loading...' : 'Find Your Flow Runs here'}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+              To get started, <Link to="/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
+            </Typography>
+            <Button
+              component={Link}
+              to="/definitions"
+              variant="contained"
+              color="primary"
+            >
+              Go to Agent Definitions
+            </Button>
+          </Paper>
+        )}
+      </Box>
     </Container>
   );
 };
