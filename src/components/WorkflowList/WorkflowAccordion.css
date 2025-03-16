@@ -9,9 +9,11 @@
 
 .workflow-title-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0; /* Prevents flex items from overflowing */
 }
 
 .workflow-type-title {
@@ -27,6 +29,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   font-size: var(--text-sm);
+  flex-wrap: wrap;
 }
 
 .total-indicator {
@@ -69,9 +72,8 @@
   }
   
   .workflow-title-section {
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
     gap: var(--spacing-sm);
   }
   

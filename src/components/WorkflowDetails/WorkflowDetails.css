@@ -410,4 +410,91 @@
   background-color: rgba(255, 255, 0, 0.03) !important;
   border: 1px solid rgba(25, 118, 210, 0.3) !important; /* Using MUI primary color */
   box-shadow: 0 1px 2px rgba(25, 118, 210, 0.1) !important;
+}
+
+/* Mobile optimizations */
+@media (max-width: 600px) {
+  .paper-container {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-sm);
+  }
+  
+  .header-container {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .action-button {
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+    font-size: 0.8125rem !important;
+  }
+  
+  .overview-title-small.MuiTypography-root {
+    font-size: 1.25rem;
+  }
+  
+  .timeline-item-content {
+    padding: var(--spacing-sm);
+  }
+  
+  .timeline-data-content {
+    font-size: 0.85rem;
+    max-height: 150px;
+    overflow-y: auto;
+  }
+  
+  .timeline-item-header {
+    flex-wrap: wrap;
+  }
+  
+  .timeline-actions {
+    margin-left: 0;
+    margin-top: var(--spacing-xs);
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  /* Container adjustments */
+  .MuiContainer-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* Timeline adjustments */
+  .MuiTimelineItem-root {
+    padding-left: 8px !important;
+  }
+
+  .MuiTimelineContent-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+
+  /* Overview paper adjustments */
+  .overview-paper {
+    padding: var(--spacing-md) !important;
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* Grid items in overview */
+  .overview-grid-item {
+    padding: var(--spacing-md) !important;
+  }
+
+  /* Status chip adjustments */
+  .MuiChip-root {
+    height: 24px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Button text adjustments */
+  .MuiButton-root .MuiTypography-button {
+    display: none;
+  }
+
+  /* Improve touch targets */
+  .MuiIconButton-root {
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
 } 

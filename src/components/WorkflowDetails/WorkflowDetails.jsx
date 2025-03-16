@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Container, CircularProgress, Box } from '@mui/material';
+import { Container, CircularProgress, Box, useMediaQuery, useTheme, Typography } from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
@@ -19,6 +19,8 @@ const WorkflowDetails = () => {
   const [onActionComplete, setOnActionComplete] = useState(false);
   const api = useApi();
   const { id, runId } = useParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     const fetchWorkflow = async () => {
@@ -67,16 +69,30 @@ const WorkflowDetails = () => {
   }
 
   return (
-    <Container ref={containerRef} sx={{ height: '100%', overflow: 'auto' }}>
+    <Container 
+      ref={containerRef} 
+      sx={{ 
+        height: '100%', 
+        overflow: 'auto',
+        padding: isMobile ? '16px 8px' : '24px',
+        maxWidth: '100%'
+      }}
+    >
       {workflow && (
         <>
-          <WorkflowOverview workflowId={workflow.id} runId={workflow.runId} onActionComplete={onActionComplete} />
+          <WorkflowOverview 
+            workflowId={workflow.id} 
+            runId={workflow.runId} 
+            onActionComplete={onActionComplete}
+            isMobile={isMobile} 
+          />
           {/* <WorkflowViewer workflowData={workflow} /> */}
           <ActivityTimeline 
             workflowId={workflow.id}
             runId={workflow.runId}
             openSlider={openSlider}
             onWorkflowComplete={handleWorkflowComplete}
+            isMobile={isMobile}
           />
         </>
       )}

@@ -37,37 +37,55 @@ const WorkflowRunItem = ({ run, isMobile }) => {
     >
       <div className="run-item-content" style={{ width: isMobile ? '100%' : 'auto' }}>
         <div className="run-item-header" style={{
-          flexDirection: isMobile ? 'column' : 'row',
-          alignItems: isMobile ? 'flex-start' : 'center',
-          gap: isMobile ? '8px' : '0'
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          marginBottom: isMobile ? '8px' : '4px'
         }}>
-          <div style={{ marginBottom: isMobile ? '4px' : '0' }}>
+          <div style={{ 
+            fontSize: isMobile ? '14px' : '16px',
+            fontWeight: 500
+          }}>
             {formatWorkflowType(run.workflowType)}
           </div>
-          <StatusChip status={run.status.toLowerCase()} label={run.status} />
+          <StatusChip 
+            status={run.status.toLowerCase()} 
+            label={run.status} 
+            size={isMobile ? "small" : "medium"}
+          />
         </div>
         
         <div className="run-item-details">
           <div className="run-metadata" style={{
-            flexDirection: isMobile ? 'column' : 'row',
-            alignItems: isMobile ? 'flex-start' : 'center',
-            gap: isMobile ? '4px' : '8px'
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: '4px'
           }}>
             <span className="run-id">ID: {displayId}</span>
-            {!isMobile && <span className="metadata-separator">•</span>}
-            <span className="run-time">Started {formattedTime}</span>
-            {!isMobile && <span className="metadata-separator">•</span>}
-            <span className="run-duration">Duration: {getDuration()}</span>
-          </div>
-          
-          {run.owner && (
-            <div className="owner-info" style={{ marginTop: isMobile ? '8px' : '4px' }}>
-              Owner: <span className={`owner-name ${run.owner === user?.sub ? 'current-user' : ''}`}>
-                {isMobile ? (run.owner === user?.sub ? 'me' : run.owner.substring(0, 10) + '...') : run.owner}
-                {!isMobile && run.owner === user?.sub && ' (me)'}
-              </span>
+            
+            <div style={{ 
+              display: 'flex', 
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: isMobile ? 'flex-start' : 'center',
+              gap: isMobile ? '4px' : '8px'
+            }}>
+              <span className="run-time">Started {formattedTime}</span>
+              {!isMobile && <span className="metadata-separator">•</span>}
+              
+              <span className="run-duration">Duration: {getDuration()}</span>
+              {!isMobile && run.owner && <span className="metadata-separator">•</span>}
+              
+              {run.owner && (
+                <span className={`owner-name ${run.owner === user?.sub ? 'current-user' : ''}`}>
+                  Owner: {isMobile ? (run.owner === user?.sub ? 'me' : run.owner.substring(0, 10) + '...') : run.owner}
+                  {!isMobile && run.owner === user?.sub && ' (me)'}
+                </span>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </Link>

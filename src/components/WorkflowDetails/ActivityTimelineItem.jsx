@@ -1,11 +1,9 @@
 import React from 'react';
-import { Typography, IconButton, Box, Tooltip, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText } from '@mui/material';
+import { Typography, IconButton, Box, Tooltip, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText, Button } from '@mui/material';
 import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } from '@mui/lab';
-import InputIcon from '@mui/icons-material/Input';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
-import Chip from '@mui/material/Chip';
 import { useSlider } from '../../contexts/SliderContext';
 import { useActivitiesApi } from '../../services/activities-api';
 import { useInstructionsApi } from '../../services/instructions-api';
@@ -13,6 +11,7 @@ import InstructionViewer from '../Instructions/InstructionViewer';
 import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useLoading } from '../../contexts/LoadingContext';
+import CloseIcon from '@mui/icons-material/Close';
 
 const ArrowDot = ({ ascending }) => {
   const theme = useTheme();
@@ -94,13 +93,27 @@ const NoInstructionsBox = styled(Box)(({ theme }) => ({
   margin: theme.spacing(1),
 }));
 
-const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlighted, workflowId }) => {
+const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlighted, workflowId, isMobile }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [instructions, setInstructions] = React.useState([]);
   const { openSlider } = useSlider();
   const activitiesApi = useActivitiesApi();
   const instructionsApi = useInstructionsApi();
   const { setLoading } = useLoading();
+
+  // Helper function to format timestamp
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    
+    const date = new Date(timestamp);
+    return date.toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  };
 
   const handleInstructionClick = async () => {
     setLoading(true);
@@ -175,130 +188,200 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
   const inputs = event.Inputs ? formatText(JSON.stringify(event.Inputs)) : null;
   const outputs = event.Result ? formatText(JSON.stringify(event.Result)) : null;
 
+  // Render the timeline item with mobile optimizations
   return (
-    <TimelineItem className="timeline-item">
-      <TimelineSeparator>
-        <Box className="arrow-dot-container">
-          <ArrowDot ascending={sortAscending} />
-        </Box>
-        <TimelineConnector />
-      </TimelineSeparator>
-      <TimelineContent className="timeline-content">
-        <Box 
+    <>
+      <TimelineItem className="timeline-item">
+        <TimelineSeparator>
+          <Box className="arrow-dot-container">
+            <ArrowDot ascending={sortAscending} />
+          </Box>
+          <TimelineConnector />
+        </TimelineSeparator>
+        <TimelineContent 
           className={`timeline-item-content ${isHighlighted ? 'highlighted' : ''}`}
-          data-highlighted={isHighlighted}
-          data-event-id={event.ID}
+          sx={{ 
+            padding: isMobile ? '12px 8px' : '16px',
+            margin: isMobile ? '4px 0' : '8px 0'
+          }}
         >
           <Box className="timeline-item-container">
-            <Box className="timeline-item-header">
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h6">
-                  {event.ActivityId ? `${event.ActivityId}.` : ''} {event.ActivityName}
-                </Typography>
-                {isHighlighted && (
-                  <Chip 
-                    label="New" 
-                    size="small" 
-                    color="primary" 
-                    sx={{ 
-                      height: '20px',
-                      fontSize: '0.75rem',
-                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                      color: 'primary.main',
-                      ml: 1
-                    }} 
-                  />
-                )}
-              </Box>
+            <Box 
+              className="timeline-item-header"
+              sx={{ 
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                gap: isMobile ? 1 : 2,
+                width: '100%',
+                justifyContent: 'space-between',
+                marginTop: isMobile ? 1 : 3,
+              }}
+            >
+              <Typography 
+                variant="subtitle1" 
+                sx={{ 
+                  fontWeight: 500,
+                  fontSize: isMobile ? '0.9rem' : '1rem',
+                  flex: isMobile ? '1 1 100%' : '0 1 auto',
+                  marginRight: isMobile ? 0 : 2,
+                  wordBreak: 'break-word'
+                }}
+              >
+                {event.ActivityName || 'Unknown Activity'}
+              </Typography>
               
-              <Box className="timeline-actions">
-                <IconButton
-                  onClick={() => onShowDetails(event)}
-                  size="small"
-                  className="timeline-action-button"
-                  title="View Inputs & Outputs"
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1,
+                flexWrap: isMobile ? 'wrap' : 'nowrap',
+                width: isMobile ? '100%' : 'auto',
+                justifyContent: isMobile ? 'space-between' : 'flex-end',
+                alignSelf: isMobile ? 'stretch' : 'center',
+                flex: isMobile ? '1 1 100%' : '0 0 auto'
+              }}>
+                
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'text.secondary',
+                    fontSize: isMobile ? '0.7rem' : '0.75rem',
+                    whiteSpace: 'nowrap',
+                    minWidth: isMobile ? 'auto' : '140px',
+                    textAlign: isMobile ? 'left' : 'right'
+                  }}
                 >
-                  <InputIcon fontSize="small" />
-                  <Typography variant="caption" sx={{ ml: 1 }}>
-                    Inputs & Outputs
-                  </Typography>
-                </IconButton>
- 
-                <IconButton
-                  size="small"
-                  className="timeline-action-button"
-                  title="View Knowledge"
-                  onClick={handleInstructionClick}
-                >
-                  <DescriptionOutlinedIcon fontSize="small" />
-                  <Typography variant="caption" sx={{ ml: 1 }}>
-                    Knowledge
-                  </Typography>
-                </IconButton>
+                  {formatTimestamp(event.StartedTime)}
+                </Typography>
               </Box>
             </Box>
 
-            <Typography variant="body2" color="textSecondary">
-              Started: {new Date(event.StartedTime).toLocaleString()}
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              Ended: {new Date(event.EndedTime).toLocaleString()}
-            </Typography>
-
-            {/* Updated Inputs display */}
+            {/* Input and output data */}
             {inputs && (
-              <Box className="timeline-data-container">
-                <Typography variant="subtitle2" color="primary">
-                  Inputs:
-                </Typography>
-                <Tooltip title={JSON.stringify(event.Inputs, null, 2)}>
-                  <Typography 
-                    variant="body2" 
+              <Box className="timeline-data-container" sx={{ mt: 1 }}>
+                <Tooltip title="View inputs">
+                  <Box 
                     onClick={() => onShowDetails(event)}
-                    className="timeline-data-content"
+                    sx={{ display: 'flex', alignItems: 'center', mb: 0.5, cursor: 'pointer' }}
                   >
-                    {inputs}
-                  </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                      Inputs
+                    </Typography>
+                  </Box>
                 </Tooltip>
+                <Typography 
+                  className="timeline-data-content"
+                  variant="body2"
+                  onClick={() => onShowDetails(event)}
+                  sx={{ 
+                    fontSize: isMobile ? '0.75rem' : '0.8125rem',
+                    maxHeight: isMobile ? '100px' : '150px',
+                    overflowY: 'auto',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {inputs}
+                </Typography>
               </Box>
             )}
 
-            {/* Updated Outputs display */}
             {outputs && (
-              <Box className="timeline-data-container">
-                <Typography variant="subtitle2" color="primary">
-                  Outputs:
-                </Typography>
-                <Tooltip title={JSON.stringify(event.Result, null, 2)}>
-                  <Typography 
-                    variant="body2" 
+              <Box className="timeline-data-container" sx={{ mt: 1 }}>
+                <Tooltip title="View outputs">
+                  <Box 
                     onClick={() => onShowDetails(event)}
-                    className="timeline-data-content"
+                    sx={{ display: 'flex', alignItems: 'center', mb: 0.5, cursor: 'pointer' }}
                   >
-                    {outputs}
-                  </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                      Outputs
+                    </Typography>
+                  </Box>
                 </Tooltip>
+                <Typography 
+                  className="timeline-data-content"
+                  variant="body2"
+                  onClick={() => onShowDetails(event)}
+                  sx={{ 
+                    fontSize: isMobile ? '0.75rem' : '0.8125rem',
+                    maxHeight: isMobile ? '100px' : '150px',
+                    overflowY: 'auto',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {outputs}
+                </Typography>
               </Box>
             )}
-          </Box>
-        </Box>
-      </TimelineContent>
 
-      <ModernDialog 
-        open={isDialogOpen} 
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                justifyContent: 'flex-end', 
+                mt: 1,
+                gap: 1,
+                flexWrap: isMobile ? 'wrap' : 'nowrap',
+                width: isMobile ? '100%' : 'auto'
+              }}
+            >
+              <Button
+                onClick={handleInstructionClick}
+                size={isMobile ? "small" : "medium"}
+                startIcon={<DescriptionOutlinedIcon fontSize={isMobile ? "small" : "medium"} />}
+                sx={{ 
+                  padding: isMobile ? '4px 8px' : '6px 12px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  textTransform: 'none',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.08)'
+                  }
+                }}
+              >
+                Knowledge
+              </Button>
+              
+              <Button
+                onClick={() => onShowDetails(event)}
+                size={isMobile ? "small" : "medium"}
+                startIcon={<InfoOutlinedIcon fontSize={isMobile ? "small" : "medium"} />}
+                sx={{ 
+                  padding: isMobile ? '4px 8px' : '6px 12px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  textTransform: 'none',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.08)'
+                  }
+                }}
+              >
+                In/Out
+              </Button>
+            </Box>
+          </Box>
+        </TimelineContent>
+      </TimelineItem>
+      
+      {/* Instructions Dialog */}
+      <ModernDialog
+        open={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
         maxWidth="sm"
         fullWidth
       >
         <ModernDialogTitle>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            gap: 1 
-          }}>
-            <DescriptionOutlinedIcon sx={{ color: 'primary.main' }} />
-            Knowledge
-          </Box>
+          Instructions
+          <IconButton
+            aria-label="close"
+            onClick={() => setIsDialogOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </ModernDialogTitle>
         <ModernDialogContent>
           {instructions.length > 0 ? (
@@ -310,11 +393,14 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
                   onClick={() => showInstruction(instruction)}
                 >
                   <ListItemText 
-                    primary={instruction.name}
+                    primary={instruction.name} 
+                    secondary={instruction.description}
                     primaryTypographyProps={{
-                      sx: {
-                        fontWeight: 500,
-                      }
+                      fontWeight: 500,
+                      fontSize: isMobile ? '0.875rem' : '1rem'
+                    }}
+                    secondaryTypographyProps={{
+                      fontSize: isMobile ? '0.75rem' : '0.875rem'
                     }}
                   />
                 </ModernListItem>
@@ -322,20 +408,12 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
             </List>
           ) : (
             <NoInstructionsBox>
-              <Typography sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                gap: 1,
-                fontWeight: 500
-              }}>
-                <InfoOutlinedIcon sx={{ fontSize: 20 }} />
-                No instructions applied for this activity
-              </Typography>
+              <Typography variant="body1">No instructions available</Typography>
             </NoInstructionsBox>
           )}
         </ModernDialogContent>
       </ModernDialog>
-    </TimelineItem>
+    </>
   );
 };
 

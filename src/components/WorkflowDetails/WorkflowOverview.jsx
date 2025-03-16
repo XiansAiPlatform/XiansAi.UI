@@ -21,7 +21,7 @@ import { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 
-const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
+const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [workflow, setWorkflow] = useState(null);
   const open = Boolean(anchorEl);
@@ -142,7 +142,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
       elevation={0} 
       className="overview-paper"
       sx={{
-        padding: 3,
+        padding: isMobile ? 2 : 3,
         borderRadius: 2,
         background: 'linear-gradient(to right bottom, #ffffff, #fafafa)'
       }}
@@ -151,51 +151,108 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
         className="header-container"
         sx={{
           display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 3
+          alignItems: 'stretch',
+          marginBottom: isMobile ? 2 : 3,
+          gap: isMobile ? 2 : 0
         }}
       >
-        <Box className="header-left">
+        {/* Top row with title and actions button */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start',
+          width: '100%',
+          mb: 1
+        }}>
+          <Typography 
+            className="overview-title"
+            variant="h5"
+            sx={{ 
+              fontWeight: 600,
+              fontSize: isMobile ? '1.25rem' : '1.5rem'
+            }}
+          >
+            {workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}
+          </Typography>
+          
+          <Button
+            id="actions-button"
+            variant="outlined"
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              minWidth: isMobile ? 'auto' : 100,
+              padding: isMobile ? '4px 12px' : '6px 16px',
+              ml: 2
+            }}
+            aria-controls={open ? 'actions-menu' : undefined}
+            aria-haspopup="true"
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+            startIcon={<MoreVertIcon />}
+            disabled={!isRunning}
+            className="overview-action-button action-button"
+          >
+            Actions
+          </Button>
+        </Box>
+
+        {/* Status and details section */}
+        <Box className="header-left" sx={{ width: '100%' }}>
           <Box 
             className="overview-header-content"
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
             <Box 
               className="overview-title-row"
-              sx={{ display: 'flex', alignItems: 'center', gap: 2 }}
+              sx={{ 
+                display: 'flex', 
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'flex-start' : 'center', 
+                gap: isMobile ? 1 : 2 
+              }}
             >
-              <Typography 
-                className="overview-title"
-                variant="h5"
-                sx={{ fontWeight: 600 }}
-              >
-                {workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}
-              </Typography>
               <StatusChip 
                 label={workflow?.status || 'N/A'}
                 status={getStatusString(workflow?.status).toUpperCase()}
               />
             </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
+              gap: 0.5,
+              fontSize: isMobile ? '0.8125rem' : '0.875rem'
+            }}>
               <Typography 
-                sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
+                sx={{ 
+                  color: 'text.secondary', 
+                  fontSize: 'inherit',
+                  wordBreak: 'break-word'
+                }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {workflow?.id || 'N/A'}
               </Typography>
               <Typography 
-                sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
+                sx={{ 
+                  color: 'text.secondary', 
+                  fontSize: 'inherit',
+                  wordBreak: 'break-word'
+                }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run ID:</Box> {workflow?.runId || 'N/A'}
               </Typography>
               <Typography 
                 sx={{ 
-                  fontSize: '0.875rem',
+                  fontSize: 'inherit',
                   color: isOwner ? 'primary.main' : 'text.secondary',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 0.5,
                   fontWeight: isOwner ? 500 : 400,
+                  flexWrap: 'wrap'
                 }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Owner:</Box> {workflow?.owner || 'N/A'}
@@ -217,32 +274,17 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
                 )}
               </Typography>
               <Typography 
-                sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
+                sx={{ 
+                  color: 'text.secondary', 
+                  fontSize: 'inherit',
+                  wordBreak: 'break-word'
+                }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {workflow?.workflowType || 'N/A'}
               </Typography>
             </Box>
           </Box>
         </Box>
-        
-        <Button
-          id="actions-button"
-          variant="outlined"
-          sx={{
-            borderRadius: 2,
-            textTransform: 'none',
-            minWidth: 100
-          }}
-          aria-controls={open ? 'actions-menu' : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? 'true' : undefined}
-          onClick={handleClick}
-          startIcon={<MoreVertIcon />}
-          disabled={!isRunning}
-          className="overview-action-button action-button"
-        >
-          Actions
-        </Button>
         
         <Menu
           id="actions-menu"
@@ -261,11 +303,11 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
         className="overview-grid"
         sx={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: 3,
+          gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: isMobile ? 1.5 : 3,
           '& .overview-grid-item': {
             background: '#f5f5f5',
-            padding: 2,
+            padding: isMobile ? 1 : 2,
             borderRadius: 2,
             transition: 'all 0.2s ease-in-out',
             '&:hover': {
@@ -275,15 +317,25 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
           }
         }}
       >
-        <Box className="overview-grid-item">
+        <Box className="overview-grid-item" sx={{ gridColumn: isMobile ? 'span 2' : 'auto' }}>
           <Typography 
             className="overview-label" 
             variant="subtitle2"
-            sx={{ color: 'text.secondary', marginBottom: 1 }}
+            sx={{ 
+              color: 'text.secondary', 
+              marginBottom: isMobile ? 0.5 : 1,
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
+            }}
           >
             Start Time
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              fontWeight: 500,
+              fontSize: isMobile ? '0.8rem' : '1rem'
+            }}
+          >
             {workflow?.startTime ? new Date(workflow.startTime).toLocaleString() : 'N/A'}
           </Typography>
         </Box>
@@ -292,11 +344,21 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
           <Typography 
             className="overview-label" 
             variant="subtitle2"
-            sx={{ color: 'text.secondary', marginBottom: 1 }}
+            sx={{ 
+              color: 'text.secondary', 
+              marginBottom: isMobile ? 0.5 : 1,
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
+            }}
           >
             Duration
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              fontWeight: 500,
+              fontSize: isMobile ? '0.8rem' : '1rem'
+            }}
+          >
             {calculateDuration(workflow?.startTime, workflow?.closeTime)}
           </Typography>
         </Box>
@@ -305,11 +367,21 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
           <Typography 
             className="overview-label" 
             variant="subtitle2"
-            sx={{ color: 'text.secondary', marginBottom: 1 }}
+            sx={{ 
+              color: 'text.secondary', 
+              marginBottom: isMobile ? 0.5 : 1,
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
+            }}
           >
             End Time
           </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+          <Typography 
+            variant="body1" 
+            sx={{ 
+              fontWeight: 500,
+              fontSize: isMobile ? '0.8rem' : '1rem'
+            }}
+          >
             {workflow?.closeTime ? new Date(workflow.closeTime).toLocaleString() : 'In Progress'}
           </Typography>
         </Box>
