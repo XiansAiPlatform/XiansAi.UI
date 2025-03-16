@@ -5,28 +5,20 @@ import {
   AccordionDetails,
   Typography,
   List,
-  IconButton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import AddIcon from '@mui/icons-material/Add';
 import WorkflowRunItem from './WorkflowRunItem';
 import RightSlider from '../Layout/RightSlider';
 import NewWorkflowForm from './NewWorkflowForm';
 import './WorkflowAccordion.css';
 
-const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
+const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted }) => {
   const [showNewWorkflowForm, setShowNewWorkflowForm] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const formatWorkflowType = (type) => {
-    return type
+    return type 
       .replace(/([A-Z])/g, ' $1')
       .trim();
-  };
-
-  const handleStartNew = (e) => {
-    e.stopPropagation();
-    setShowNewWorkflowForm(true);
   };
 
   const handleWorkflowSuccess = () => {
@@ -43,7 +35,6 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
     <>
       <Accordion 
         className="workflow-accordion"
-        onChange={(_, expanded) => setIsExpanded(expanded)}
         disableGutters
         sx={{
           boxShadow: 'none',
@@ -68,17 +59,41 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
         >
           <div className="workflow-header-content">
             <div className="workflow-title-section">
-              <Typography 
-                className="workflow-type-title"
-                variant="h5"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: '1.5rem',
-                  color: '#1a1a1a',
-                }}
-              >
-                {formatWorkflowType(type)}
-              </Typography>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <Typography 
+                  className="workflow-type-title"
+                  variant="h5"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: '1.5rem',
+                    color: '#1a1a1a',
+                    marginBottom: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span>{formatWorkflowType(type)}</span>
+                  <span style={{
+                    fontSize: '1rem',
+                    color: '#666',
+                    backgroundColor: '#f5f5f5',
+                    padding: '4px 8px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}>
+                    <span style={{ opacity: 0.75 }}>Assignment: </span>
+                    <span style={{ 
+                      marginLeft: '4px', 
+                      fontWeight: 600,
+                      color: '#444'
+                    }}>
+                      {assignment}
+                    </span>
+                  </span>
+                </Typography>
+              </div>
               <div className="status-indicators">
                 <div className="total-indicator">
                   {runs.length} total
@@ -90,23 +105,12 @@ const WorkflowAccordion = ({ type, runs, onWorkflowStarted }) => {
                 )}
               </div>
             </div>
-            {isExpanded && false && (
-              <IconButton
-                onClick={handleStartNew}
-                className="start-new-button"
-                size="small"
-                title="Start New Workflow"
-              >
-                <AddIcon />
-                <span>Start New</span>
-              </IconButton>
-            )}
           </div>
         </AccordionSummary>
         <AccordionDetails className="workflow-accordion-details">
           <List>
             {runs.map((run, index) => (
-              <WorkflowRunItem key={`${run.id}-${index}`} run={run} />
+              <WorkflowRunItem key={`${run.runId}-${index}`} run={run} />
             ))}
           </List>
         </AccordionDetails>

@@ -9,7 +9,6 @@ import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
 
 const WorkflowDetails = () => {
-  const { id } = useParams();
   const location = useLocation();
   const [workflow, setWorkflow] = useState(location.state?.workflow);
   const [loading, setLoading] = useState(!location.state?.workflow);
@@ -19,12 +18,13 @@ const WorkflowDetails = () => {
   const containerRef = useRef(null);
   const [onActionComplete, setOnActionComplete] = useState(false);
   const api = useApi();
+  const { id, runId } = useParams();
 
   useEffect(() => {
     const fetchWorkflow = async () => {
       if (!workflow) {
         try {
-          const data = await api.getWorkflow(id);
+          const data = await api.getWorkflow(id, runId);
           setWorkflow(data);
         } catch (error) {
           const errorMessage = handleApiError(error, 'Failed to load workflow');
@@ -37,7 +37,7 @@ const WorkflowDetails = () => {
     };
 
     fetchWorkflow();
-  }, [id, workflow, showError, api]);
+  }, [id, runId, workflow, showError, api]);
 
   const handleWorkflowComplete = () => {
     setOnActionComplete(prev => !prev); // Toggle to trigger useEffect
@@ -70,10 +70,11 @@ const WorkflowDetails = () => {
     <Container ref={containerRef} sx={{ height: '100%', overflow: 'auto' }}>
       {workflow && (
         <>
-          <WorkflowOverview workflowId={workflow.id} onActionComplete={onActionComplete} />
+          <WorkflowOverview workflowId={workflow.id} runId={workflow.runId} onActionComplete={onActionComplete} />
           {/* <WorkflowViewer workflowData={workflow} /> */}
           <ActivityTimeline 
-            workflowId={id}
+            workflowId={workflow.id}
+            runId={workflow.runId}
             openSlider={openSlider}
             onWorkflowComplete={handleWorkflowComplete}
           />

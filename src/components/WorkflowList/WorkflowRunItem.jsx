@@ -22,7 +22,7 @@ const WorkflowRunItem = ({ run }) => {
 
   return (
     <Link 
-      to={`/runs/${run.id}`} 
+      to={`/runs/${run.id}/${run.runId}`} 
       className="workflow-run-item"
     >
       <div className="run-item-content">

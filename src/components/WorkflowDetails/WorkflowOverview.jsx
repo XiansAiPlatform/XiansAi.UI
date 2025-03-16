@@ -21,7 +21,7 @@ import { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 
-const WorkflowOverview = ({ workflowId, onActionComplete }) => {
+const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [workflow, setWorkflow] = useState(null);
   const open = Boolean(anchorEl);
@@ -35,7 +35,7 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
       if (!workflowId) return;
       
       try {
-        const workflowData = await api.getWorkflow(workflowId);
+        const workflowData = await api.getWorkflow(workflowId, runId);
         setWorkflow(workflowData);
       } catch (error) {
         showError('Failed to fetch workflow details');
@@ -61,7 +61,13 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
     }
   }, [onActionComplete, workflowId, api, showError]);
 
-  const isRunning = workflow?.status?.toUpperCase() === 'RUNNING';
+  // Add a helper function to safely convert status to string
+  const getStatusString = (status) => {
+    if (status === null || status === undefined) return '';
+    return String(status);
+  };
+
+  const isRunning = getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -168,14 +174,19 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
               </Typography>
               <StatusChip 
                 label={workflow?.status || 'N/A'}
-                status={workflow?.status?.toUpperCase()}
+                status={getStatusString(workflow?.status).toUpperCase()}
               />
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
               <Typography 
                 sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
               >
-                ID: {workflow?.id || 'N/A'}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {workflow?.id || 'N/A'}
+              </Typography>
+              <Typography 
+                sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
+              >
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run ID:</Box> {workflow?.runId || 'N/A'}
               </Typography>
               <Typography 
                 sx={{ 
@@ -187,7 +198,7 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
                   fontWeight: isOwner ? 500 : 400,
                 }}
               >
-                Owner: {workflow?.owner || 'N/A'}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Owner:</Box> {workflow?.owner || 'N/A'}
                 {isOwner && (
                   <Typography
                     component="span"
@@ -208,7 +219,7 @@ const WorkflowOverview = ({ workflowId, onActionComplete }) => {
               <Typography 
                 sx={{ color: 'text.secondary', fontSize: '0.875rem' }}
               >
-                Type: {workflow?.workflowType || 'N/A'}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {workflow?.workflowType || 'N/A'}
               </Typography>
             </Box>
           </Box>

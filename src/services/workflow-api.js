@@ -49,9 +49,9 @@ export const useApi = () => {
     };
 
     return {
-      getWorkflow: async (workflowId) => {
+      getWorkflow: async (workflowId, runId) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}`, {
+          const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/${runId}`, {
             headers: await createAuthHeaders()
           });
           return response.json();

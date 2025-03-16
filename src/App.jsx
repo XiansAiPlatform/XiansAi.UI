@@ -68,7 +68,7 @@ function App() {
                           <DefinitionList />
                         </ProtectedRoute>
                       } />
-                      <Route path="/runs/:id" element={
+                      <Route path="/runs/:id/:runId" element={
                         <ProtectedRoute>
                           <WorkflowDetails />
                         </ProtectedRoute>

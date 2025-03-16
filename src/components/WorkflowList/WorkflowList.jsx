@@ -44,7 +44,7 @@ const WorkflowList = () => {
   const calculateStats = useCallback((runs) => {
     return runs.reduce((acc, run) => {
       acc.total++;
-      const status = run.status.toUpperCase();
+      const status = (run.status || '').toUpperCase();
       if (status === 'TERMINATED' || status === 'CANCELED') {
         acc.terminated++;
       } else if (acc[status.toLowerCase()] !== undefined) {
@@ -59,10 +59,11 @@ const WorkflowList = () => {
       .filter(run => filter === 'all' || (filter === 'mine' && run.owner === user?.sub))
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
       .reduce((acc, run) => {
-        if (!acc[run.workflowType]) {
-          acc[run.workflowType] = [];
+        const groupKey = `${run.workflowType}:${run.assignment}`;
+        if (!acc[groupKey]) {
+          acc[groupKey] = [];
         }
-        acc[run.workflowType].push(run);
+        acc[groupKey].push(run);
         return acc;
       }, {});
   }, [filter, user?.sub]);
@@ -173,14 +174,18 @@ const WorkflowList = () => {
       </Box>
 
       {hasWorkflows ? (
-        Object.entries(workflows).map(([type, runs]) => (
-          <WorkflowAccordion
-            key={type}
-            type={type}
-            runs={runs}
-            onWorkflowStarted={loadWorkflows}
-          />
-        ))
+        Object.entries(workflows).map(([groupKey, runs]) => {
+          const [type, assignment] = groupKey.split(':');
+          return (
+            <WorkflowAccordion
+              key={groupKey}
+              type={type}
+              assignment={assignment}
+              runs={runs}
+              onWorkflowStarted={loadWorkflows}
+            />
+          );
+        })
       ) : (
         <Paper 
           elevation={0}
