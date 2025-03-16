@@ -16,6 +16,45 @@
   box-sizing: border-box;
 }
 
+/* Mobile responsive layout */
+@media (max-width: 768px) {
+  .layout-container {
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "header"
+      "main";
+  }
+  
+  .nav {
+    position: fixed;
+    left: -240px;
+    top: 64px;
+    bottom: 0;
+    width: 240px;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+  }
+  
+  .nav.open {
+    left: 0;
+  }
+  
+  .nav-overlay {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+  
+  .nav-overlay.open {
+    display: block;
+  }
+}
+
 /* Update wrapper to create split background */
 .layout-wrapper {
   position: fixed;
@@ -67,6 +106,48 @@
   grid-template-areas: "logo controls";
   box-sizing: border-box;
   margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas: "menu logo controls";
+    padding: 0 16px;
+  }
+  
+  .menu-button {
+    grid-area: menu;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+  }
+  
+  .logo-link {
+    grid-area: logo;
+  }
+  
+  .header-controls {
+    grid-area: controls;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-content {
+    padding: 0 8px;
+  }
+  
+  .logo-text-primary::after {
+    display: none;
+  }
+  
+  .user-info {
+    padding: 8px;
+  }
+  
+  .user-info-sub, .user-info-email {
+    display: none;
+  }
 }
 
 /* Organization selector styling */
@@ -125,6 +206,19 @@
   box-sizing: border-box;
 }
 
+@media (max-width: 768px) {
+  .layout-main {
+    padding: 16px;
+    margin-top: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout-main {
+    padding: 12px;
+  }
+}
+
 .layout-slider {
   position: absolute;
   right: 0;
@@ -135,6 +229,12 @@
   box-shadow: var(--shadow-md);
   z-index: 1100;
   height: 100%;
+}
+
+@media (max-width: 768px) {
+  .layout-slider {
+    width: 100%;
+  }
 }
 
 /* Header Styles */

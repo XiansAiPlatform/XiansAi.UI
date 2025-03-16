@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import LeftNav from './LeftNav';
 import Header from './Header';
@@ -8,12 +8,21 @@ import { Outlet } from 'react-router-dom';
 
 const Layout = () => {
   const { isOpen, closeSlider, sliderContent, sliderTitle } = useSlider();
+  const [isNavOpen, setIsNavOpen] = useState(false);
+
+  const toggleNav = () => {
+    setIsNavOpen(!isNavOpen);
+  };
+
+  const closeNav = () => {
+    setIsNavOpen(false);
+  };
 
   return (
     <Box className="layout-wrapper">
       <Box className="layout-container">
-        <LeftNav />
-        <Header />
+        <LeftNav isOpen={isNavOpen} onClose={closeNav} />
+        <Header toggleNav={toggleNav} isNavOpen={isNavOpen} />
         <Box className="layout-main">
           <Outlet />
         </Box>

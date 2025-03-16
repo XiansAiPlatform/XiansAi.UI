@@ -1,17 +1,28 @@
 import React from 'react';
-import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton } from '@mui/material';
 import './Layout.css'; // Import the CSS file
 import { useAuth0 } from '@auth0/auth0-react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
+import MenuIcon from '@mui/icons-material/Menu';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 
-const Header = ({ pageTitle = "" }) => {
+const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
   const { user, logout } = useAuth0();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;
@@ -38,6 +49,19 @@ const Header = ({ pageTitle = "" }) => {
   return (
     <Box className="header">
       <Box className="header-content">
+        {isMobile && (
+          <IconButton 
+            className="menu-button"
+            onClick={toggleNav}
+            size="medium"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+          >
+            <MenuIcon />
+          </IconButton>
+        )}
+        
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center',
@@ -50,7 +74,7 @@ const Header = ({ pageTitle = "" }) => {
             </Typography>
           </Link>
           
-          {pageTitle && (
+          {pageTitle && !isMobile && (
             <>
               <Box sx={{ 
                 color: 'text.secondary', 
@@ -68,10 +92,10 @@ const Header = ({ pageTitle = "" }) => {
           )}
         </Box>
         
-        <Box sx={{ 
+        <Box className="header-controls" sx={{ 
           display: 'flex', 
           alignItems: 'center',
-          gap: '20px'
+          gap: isMobile ? '12px' : '20px'
         }}>
           <Box sx={{ 
             display: 'flex', 
@@ -90,7 +114,7 @@ const Header = ({ pageTitle = "" }) => {
               fontSize: '20px',
               opacity: 0.8
             }} />
-            <FormControl size="small" sx={{ minWidth: 180 }}>
+            <FormControl size="small" sx={{ minWidth: isMobile ? 120 : 180 }}>
               <Select
                 value={selectedOrg}
                 onChange={handleOrgChange}

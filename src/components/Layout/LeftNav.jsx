@@ -35,7 +35,7 @@ const NAV_ITEMS = [
 ];
 
 // Reusable NavItem component
-const NavItem = ({ to, icon, label, isSelected, pathname }) => {
+const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick }) => {
   const selected = isSelected(pathname);
   
   return (
@@ -43,6 +43,7 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
       component={Link}
       to={to}
       className={`nav-item ${selected ? 'selected' : ''}`}
+      onClick={onNavItemClick}
       sx={{
         mb: 1,
         transition: 'all 0.2s ease-in-out',
@@ -77,21 +78,32 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
   );
 };
 
-const LeftNav = () => {
+const LeftNav = ({ isOpen, onClose }) => {
   const { pathname } = useLocation();
+  const isMobile = window.innerWidth <= 768;
+
+  const handleNavItemClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
 
   return (
-    <Box className="nav">
-      <List sx={{ pt: 2 }}>
-        {NAV_ITEMS.map((item) => (
-          <NavItem
-            key={item.to}
-            {...item}
-            pathname={pathname}
-          />
-        ))}
-      </List>
-    </Box>
+    <>
+      {isMobile && isOpen && <div className="nav-overlay open" onClick={onClose}></div>}
+      <Box className={`nav ${isOpen ? 'open' : ''}`}>
+        <List sx={{ pt: 2 }}>
+          {NAV_ITEMS.map((item) => (
+            <NavItem
+              key={item.to}
+              {...item}
+              pathname={pathname}
+              onNavItemClick={handleNavItemClick}
+            />
+          ))}
+        </List>
+      </Box>
+    </>
   );
 };
 
