@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Container, CircularProgress, Box, useMediaQuery, useTheme, Typography } from '@mui/material';
+import { Container, CircularProgress, Box, useMediaQuery, useTheme } from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
