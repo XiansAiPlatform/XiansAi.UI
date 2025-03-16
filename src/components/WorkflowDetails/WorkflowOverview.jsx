@@ -43,7 +43,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete }) => {
     };
 
     fetchWorkflow();
-  }, [workflowId, api, showError]);
+  }, [workflowId, runId, api, showError]);
 
   // Update the refresh useEffect
   useEffect(() => {
