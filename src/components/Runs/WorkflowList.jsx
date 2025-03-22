@@ -70,7 +70,6 @@ const WorkflowList = () => {
     setLoading(true);
     try {
       const runs = await fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
-      console.log('runs', runs);
       if (runs && runs.length > 0) {
         setStats(calculateStats(runs));
         setWorkflows(groupWorkflows(runs));
