@@ -6,9 +6,9 @@ import SortIcon from '@mui/icons-material/Sort';
 import ActivityTimelineItem from './ActivityTimelineItem';
 import ActivityDetailsView from './ActivityDetailsView';
 import './WorkflowDetails.css';
-import { useLoading } from '../../contexts/LoadingContext';
-import { useNotification } from '../../contexts/NotificationContext';
-import { useApi } from '../../services/workflow-api';
+import { useLoading } from '../../../contexts/LoadingContext';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useApi } from '../../../services/workflow-api';
 
 const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile }) => {
   const [events, setEvents] = useState([]);

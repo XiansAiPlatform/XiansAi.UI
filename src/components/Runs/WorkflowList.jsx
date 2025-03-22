@@ -221,7 +221,7 @@ const WorkflowList = () => {
             }}
           >
             <ToggleButton value="all" className="total">
-              All {stats.total > 0 && `(${stats.total})`}
+              All
             </ToggleButton>
             <ToggleButton value="running" className="running">
               Running {stats.running > 0 && `(${stats.running})`}

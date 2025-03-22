@@ -13,9 +13,9 @@ import {
   Stop as TerminateIcon,
   MoreVert as MoreVertIcon
 } from '@mui/icons-material';
-import StatusChip from '../Common/StatusChip';
-import { useNotification } from '../../contexts/NotificationContext';
-import { useApi } from '../../services/workflow-api';
+import StatusChip from '../../Common/StatusChip';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useApi } from '../../../services/workflow-api';
 import './WorkflowDetails.css';
 import { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';

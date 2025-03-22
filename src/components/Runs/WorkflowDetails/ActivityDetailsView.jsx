@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import JsonViewer from '../JsonViewer/JsonViewer';
+import JsonViewer from '../../Common/JsonViewer/JsonViewer';
 
 const ActivityDetailsView = ({ activityDetails }) => (
   <Box>

@@ -4,13 +4,13 @@ import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } f
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
-import { useSlider } from '../../contexts/SliderContext';
-import { useActivitiesApi } from '../../services/activities-api';
-import { useInstructionsApi } from '../../services/instructions-api';
-import InstructionViewer from '../Instructions/InstructionViewer';
+import { useSlider } from '../../../contexts/SliderContext';
+import { useActivitiesApi } from '../../../services/activities-api';
+import { useInstructionsApi } from '../../../services/instructions-api';
+import InstructionViewer from '../../Instructions/InstructionViewer';
 import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { useLoading } from '../../contexts/LoadingContext';
+import { useLoading } from '../../../contexts/LoadingContext';
 import CloseIcon from '@mui/icons-material/Close';
 
 const ArrowDot = ({ ascending }) => {
