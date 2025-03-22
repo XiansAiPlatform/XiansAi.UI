@@ -20,11 +20,6 @@ const WorkflowRunItem = ({ run, isMobile }) => {
     return formatDistance(startDate, endDate, { includeSeconds: true });
   };
 
-  // Truncate ID for mobile view
-  const displayId = isMobile ? 
-    `${run.workflowId.substring(0, 8)}...` : 
-    run.workflowId;
-
   return (
     <Link 
       to={`/runs/${run.workflowId}/${run.runId}`} 
@@ -64,7 +59,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             alignItems: 'flex-start',
             gap: '4px'
           }}>
-            <span className="run-id">ID: {displayId}</span>
+
             
             <div style={{ 
               display: 'flex', 

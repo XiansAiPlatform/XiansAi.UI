@@ -8,6 +8,8 @@
   --status-terminated-color: #b71c1c;
   --status-total-bg: #f5f5f5;
   --status-total-color: #424242;
+  --status-continuedAsNew-bg: #e1bee7;
+  --status-continuedAsNew-color: #4a148c;
 }
 
 /* Responsive container */
@@ -15,6 +17,7 @@
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
+  position: relative;
 }
 
 .owner-tag.current-user {
@@ -36,6 +39,8 @@
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-sm);
   border-radius: var(--radius-lg) !important;
+  position: relative;
+  z-index: 1;
 }
 
 .workflow-accordion.MuiAccordion-root:before {
@@ -218,6 +223,54 @@
   animation: pulse 2s infinite ease-in-out;
 }
 
+.continuedAsNew-indicator {
+  height: 24px;
+  padding: 0 var(--spacing-md);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background-color: var(--status-continuedAsNew-bg);
+  color: var(--status-continuedAsNew-color);
+  border: 1px solid rgba(74, 20, 140, 0.2);
+  min-width: 70px;
+  justify-content: center;
+}
+
+.completed-indicator {
+  height: 24px;
+  padding: 0 var(--spacing-md);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background-color: var(--status-completed-bg);
+  color: var(--status-completed-color);
+  border: 1px solid rgba(27, 94, 32, 0.2);
+  min-width: 70px;
+  justify-content: center;
+}
+
+.terminated-indicator {
+  height: 24px;
+  padding: 0 var(--spacing-md);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background-color: var(--status-terminated-bg);
+  color: var(--status-terminated-color);
+  border: 1px solid rgba(183, 28, 28, 0.2);
+  min-width: 70px;
+  justify-content: center;
+}
+
 @keyframes pulse {
   0% {
     background-color: var(--status-running-bg);
@@ -251,11 +304,14 @@
   }
 
   .total-indicator,
-  .running-indicator {
-    height: 22px;
-    padding: 0 var(--spacing-sm);
+  .running-indicator,
+  .continuedAsNew-indicator,
+  .completed-indicator,
+  .terminated-indicator {
+    height: 20px;
     font-size: var(--text-xs);
     min-width: 60px;
+    padding: 0 var(--spacing-sm);
   }
 
   .workflow-accordion .MuiAccordionSummary-root {
@@ -270,7 +326,10 @@
   }
 
   .total-indicator,
-  .running-indicator {
+  .running-indicator,
+  .continuedAsNew-indicator,
+  .completed-indicator,
+  .terminated-indicator {
     flex: 1;
     min-width: 0;
     justify-content: center;
@@ -519,6 +578,8 @@
   overflow: hidden !important;
   background: var(--bg-paper) !important;
   box-shadow: var(--shadow-sm) !important;
+  position: relative;
+  z-index: 1;
 }
 
 .MuiToggleButtonGroup-root .MuiToggleButton-root {
@@ -537,12 +598,23 @@
 }
 
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected {
-  background-color: var(--bg-selected) !important;
-  color: var(--primary) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--shadow-xs) !important;
+  background-color: var(--bg-selected, #f0f7ff) !important;
+  font-weight: 600 !important;
 }
 
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected:hover {
-  background-color: var(--bg-selected-hover) !important;
+  background-color: var(--bg-selected-hover, #e6f0fa) !important;
+}
+
+/* These status-specific styles will be replaced by the more specific ones below */
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.running,
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.completed,
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.continuedAsNew,
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.terminated,
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.total {
+  /* Common styles reset */
 }
 
 @keyframes spin {
@@ -620,6 +692,13 @@
     color-mix(in srgb, var(--status-terminated-bg) 50%, white),
     color-mix(in srgb, var(--status-terminated-bg) 20%, white));
   color: var(--status-terminated-color);
+}
+
+.status-box.continuedAsNew {
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--status-continuedAsNew-bg) 50%, white),
+    color-mix(in srgb, var(--status-continuedAsNew-bg) 20%, white));
+  color: var(--status-continuedAsNew-color);
 }
 
 .status-box.total {
@@ -737,4 +816,103 @@
   .workflow-run-item {
     margin-bottom: 8px;
   }
+}
+
+/* Add class for filter controls */
+.filter-controls {
+  isolation: isolate;
+  background-color: var(--bg-default);
+  position: relative;
+  z-index: 5;
+}
+
+/* Ensure filters stay on top */
+.MuiToggleButtonGroup-root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Filter control specific styles */
+.filter-toggle-group {
+  overflow: visible !important;
+}
+
+.filter-toggle-group .MuiToggleButton-root {
+  position: relative;
+  transition: all 0.15s ease-in-out;
+  z-index: 0;
+}
+
+.filter-toggle-group .MuiToggleButton-root.Mui-selected {
+  transform: scale(1.05);
+  z-index: 1;
+  background-color: var(--primary-light, #e3f2fd) !important;
+  color: var(--primary, #1976d2) !important;
+  font-weight: 600 !important;
+}
+
+/* Status filter gets colored backgrounds */
+.status-filter .MuiToggleButton-root.Mui-selected.running {
+  background-color: rgba(184, 224, 255, 0.4) !important;
+  color: var(--status-running-color) !important;
+  font-weight: 600 !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.completed {
+  background-color: rgba(200, 230, 201, 0.4) !important;
+  color: var(--status-completed-color) !important;
+  font-weight: 600 !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.continuedAsNew {
+  background-color: rgba(225, 190, 231, 0.4) !important;
+  color: var(--status-continuedAsNew-color) !important;
+  font-weight: 600 !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.terminated {
+  background-color: rgba(255, 205, 210, 0.4) !important;
+  color: var(--status-terminated-color) !important;
+  font-weight: 600 !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.total {
+  background-color: rgba(245, 245, 245, 0.6) !important;
+  color: var(--status-total-color) !important;
+  font-weight: 600 !important;
+  position: relative;
+  box-shadow: none !important;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.running:hover {
+  background-color: rgba(184, 224, 255, 0.5) !important;
+  opacity: 1;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.completed:hover {
+  background-color: rgba(200, 230, 201, 0.5) !important;
+  opacity: 1;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.continuedAsNew:hover {
+  background-color: rgba(225, 190, 231, 0.5) !important;
+  opacity: 1;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.terminated:hover {
+  background-color: rgba(255, 205, 210, 0.5) !important;
+  opacity: 1;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.total:hover {
+  background-color: rgba(245, 245, 245, 0.8) !important;
+  opacity: 1;
 }

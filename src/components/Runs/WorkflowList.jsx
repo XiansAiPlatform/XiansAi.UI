@@ -22,6 +22,7 @@ const INITIAL_STATS = {
   running: 0,
   completed: 0,
   terminated: 0,
+  continuedAsNew: 0,
   total: 0
 };
 
@@ -30,7 +31,7 @@ const WorkflowList = () => {
   const [workflows, setWorkflows] = useState({});
   const [stats, setStats] = useState(INITIAL_STATS);
   const [ownerFilter, setOwnerFilter] = useState('mine');
-  const [timeFilter, setTimeFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
   const { user } = useAuth0();
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -45,6 +46,8 @@ const WorkflowList = () => {
       const status = (run.status || '').toUpperCase();
       if (status === 'TERMINATED' || status === 'CANCELED') {
         acc.terminated++;
+      } else if (status === 'CONTINUEDASNEW') {
+        acc.continuedAsNew++;
       } else if (acc[status.toLowerCase()] !== undefined) {
         acc[status.toLowerCase()]++;
       }
@@ -166,17 +169,22 @@ const WorkflowList = () => {
         )}
       </Box>
 
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'flex-start',
-        alignItems: 'flex-start',
-        mb: 3,
-        flexDirection: 'column',
-        gap: 1.5,
-        px: isMobile ? 2 : 0,
-        width: '100%',
-        overflowX: 'auto'
-      }}>
+      <Box 
+        className="filter-controls"
+        sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+          mb: 3,
+          flexDirection: 'column',
+          gap: 1.5,
+          px: isMobile ? 2 : 0,
+          width: '100%',
+          overflowX: 'auto',
+          position: 'relative',
+          zIndex: 10
+        }}
+      >
         <Box sx={{ 
           display: 'flex', 
           gap: 1,
@@ -188,7 +196,8 @@ const WorkflowList = () => {
             exclusive
             onChange={handleOwnerFilterChange}
             size="small"
-            sx={{ flexGrow: isSmallMobile ? 1 : 0 }}
+            className="filter-toggle-group owner-filter"
+            sx={{ flexGrow: isSmallMobile ? 1 : 0, zIndex: 2 }}
           >
             <ToggleButton value="mine">Mine</ToggleButton>
             <ToggleButton value="all">All</ToggleButton>
@@ -199,7 +208,8 @@ const WorkflowList = () => {
             exclusive
             onChange={handleTimeFilterChange}
             size="small"
-            sx={{ flexGrow: isSmallMobile ? 1 : 0 }}
+            className="filter-toggle-group time-filter"
+            sx={{ flexGrow: isSmallMobile ? 1 : 0, zIndex: 2 }}
           >
             <ToggleButton value="7days">7 Days</ToggleButton>
             <ToggleButton value="30days">30 Days</ToggleButton>
@@ -213,11 +223,13 @@ const WorkflowList = () => {
             exclusive
             onChange={handleStatusFilterChange}
             size="small"
+            className="filter-toggle-group status-filter"
             sx={{ 
               minWidth: isMobile ? 'max-content' : 'auto',
               '& .MuiToggleButton-root': {
                 px: isMobile ? 1 : 2
-              }
+              },
+              zIndex: 2
             }}
           >
             <ToggleButton value="all" className="total">
@@ -229,6 +241,9 @@ const WorkflowList = () => {
             <ToggleButton value="completed" className="completed">
               Completed {stats.completed > 0 && `(${stats.completed})`}
             </ToggleButton>
+            <ToggleButton value="continuedAsNew" className="continuedAsNew">
+              Continued As New {stats.continuedAsNew > 0 && `(${stats.continuedAsNew})`}
+            </ToggleButton>
             <ToggleButton value="terminated" className="terminated">
               Terminated {stats.terminated > 0 && `(${stats.terminated})`}
             </ToggleButton>
@@ -236,7 +251,7 @@ const WorkflowList = () => {
         </Box>
       </Box>
 
-      <Box sx={{ px: isMobile ? 2 : 0 }}>
+      <Box sx={{ px: isMobile ? 2 : 0, position: 'relative', zIndex: 1 }}>
         {hasWorkflows ? (
           Object.entries(workflows).map(([type, runs]) => {
             return (

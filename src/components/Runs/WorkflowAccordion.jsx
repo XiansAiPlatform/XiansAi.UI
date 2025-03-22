@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -11,6 +11,7 @@ import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowAccordion.css';
 
 const WorkflowAccordion = ({ type, runs, isMobile }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const formatWorkflowType = (type) => {
     return type 
@@ -20,23 +21,39 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
 
   const runningWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'running').length;
   const hasRunningWorkflows = runningWorkflowsCount > 0;
+  
+  const continuedAsNewWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'continuedasnew').length;
+  const hasContinuedAsNewWorkflows = continuedAsNewWorkflowsCount > 0;
+
+  const completedWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'completed').length;
+  const hasCompletedWorkflows = completedWorkflowsCount > 0;
+  
+  const terminatedWorkflowsCount = runs.filter(run => (run.status.toLowerCase() === 'terminated' || run.status.toLowerCase() === 'canceled')).length;
+  const hasTerminatedWorkflows = terminatedWorkflowsCount > 0;
 
   const uniqueAssignments = [...new Set(runs.map(run => run.assignment))];
   const assignmentText = uniqueAssignments.length > 1 
     ? `${uniqueAssignments.length} assignments` 
     : uniqueAssignments[0];
 
+  const handleChange = (event, expanded) => {
+    setIsExpanded(expanded);
+  };
+
   return (
     <>
       <Accordion 
         className="workflow-accordion"
         disableGutters
+        onChange={handleChange}
         sx={{
           boxShadow: 'none',
           backgroundColor: 'transparent',
           '&:before': {
             display: 'none',
           },
+          position: 'relative',
+          zIndex: 1
         }}
       >
         <AccordionSummary 
@@ -98,6 +115,21 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
                 {hasRunningWorkflows && (
                   <div className="running-indicator">
                     {runningWorkflowsCount} running
+                  </div>
+                )}
+                {isExpanded && hasContinuedAsNewWorkflows && (
+                  <div className="continuedAsNew-indicator">
+                    {continuedAsNewWorkflowsCount} continued
+                  </div>
+                )}
+                {isExpanded && hasCompletedWorkflows && (
+                  <div className="completed-indicator">
+                    {completedWorkflowsCount} completed
+                  </div>
+                )}
+                {isExpanded && hasTerminatedWorkflows && (
+                  <div className="terminated-indicator">
+                    {terminatedWorkflowsCount} terminated
                   </div>
                 )}
               </div>
