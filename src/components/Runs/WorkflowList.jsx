@@ -57,7 +57,7 @@ const WorkflowList = () => {
       .filter(run => ownerFilter === 'all' || (ownerFilter === 'mine' && run.owner === user?.sub))
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
       .reduce((acc, run) => {
-        const groupKey = `${run.workflowType}:${run.assignment}`;
+        const groupKey = run.agent;
         if (!acc[groupKey]) {
           acc[groupKey] = [];
         }
@@ -70,6 +70,7 @@ const WorkflowList = () => {
     setLoading(true);
     try {
       const runs = await fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
+      console.log('runs', runs);
       if (runs && runs.length > 0) {
         setStats(calculateStats(runs));
         setWorkflows(groupWorkflows(runs));
@@ -238,15 +239,12 @@ const WorkflowList = () => {
 
       <Box sx={{ px: isMobile ? 2 : 0 }}>
         {hasWorkflows ? (
-          Object.entries(workflows).map(([groupKey, runs]) => {
-            const [type, assignment] = groupKey.split(':');
+          Object.entries(workflows).map(([type, runs]) => {
             return (
               <WorkflowAccordion
-                key={groupKey}
+                key={type}
                 type={type}
-                assignment={assignment}
                 runs={runs}
-                onWorkflowStarted={loadWorkflows}
                 isMobile={isMobile}
               />
             );

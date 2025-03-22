@@ -10,7 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowAccordion.css';
 
-const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted, isMobile }) => {
+const WorkflowAccordion = ({ type, runs, isMobile }) => {
 
   const formatWorkflowType = (type) => {
     return type 
@@ -20,6 +20,11 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted, isMobile
 
   const runningWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'running').length;
   const hasRunningWorkflows = runningWorkflowsCount > 0;
+
+  const uniqueAssignments = [...new Set(runs.map(run => run.assignment))];
+  const assignmentText = uniqueAssignments.length > 1 
+    ? `${uniqueAssignments.length} assignments` 
+    : uniqueAssignments[0];
 
   return (
     <>
@@ -98,28 +103,36 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted, isMobile
               </div>
             </div>
             
-            <span style={{
-              fontSize: '.75rem',
-              color: '#666',
-              backgroundColor: '#f5f5f5',
-              padding: '4px 8px',
-              borderRadius: '6px',
-              display: 'flex',
-              alignItems: 'center',
-              marginRight: isMobile ? '0' : '16px',
-              marginTop: isMobile ? '4px' : '0',
-              alignSelf: isMobile ? 'flex-start' : 'center',
-              maxWidth: isMobile ? 'fit-content' : 'auto'
-            }}>
-              <span style={{ opacity: 0.75 }}>Assignment: </span>
-              <span style={{ 
-                marginLeft: '4px', 
-                fontWeight: 600,
-                color: '#444'
+            {uniqueAssignments.length > 0 && (
+              <span style={{
+                fontSize: '.75rem',
+                color: '#666',
+                backgroundColor: '#f5f5f5',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                marginRight: isMobile ? '0' : '16px',
+                marginTop: isMobile ? '4px' : '0',
+                alignSelf: isMobile ? 'flex-start' : 'center',
+                maxWidth: isMobile ? 'fit-content' : 'auto'
               }}>
-                {assignment}
+                {uniqueAssignments.length > 1 ? (
+                  <span style={{ opacity: 0.75 }}>{assignmentText}</span>
+                ) : (
+                  <>
+                    <span style={{ opacity: 0.75 }}>Assignment: </span>
+                    <span style={{ 
+                      marginLeft: '4px', 
+                      fontWeight: 600,
+                      color: '#444'
+                    }}>
+                      {assignmentText}
+                    </span>
+                  </>
+                )}
               </span>
-            </span>
+            )}
           </div>
         </AccordionSummary>
         <AccordionDetails className="workflow-accordion-details" sx={{
