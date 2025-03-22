@@ -22,12 +22,12 @@ const WorkflowRunItem = ({ run, isMobile }) => {
 
   // Truncate ID for mobile view
   const displayId = isMobile ? 
-    `${run.id.substring(0, 8)}...` : 
-    run.id;
+    `${run.workflowId.substring(0, 8)}...` : 
+    run.workflowId;
 
   return (
     <Link 
-      to={`/runs/${run.id}/${run.runId}`} 
+      to={`/runs/${run.workflowId}/${run.runId}`} 
       className="workflow-run-item"
       style={{
         padding: isMobile ? '12px' : '16px',

@@ -44,6 +44,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     setIsLoading(true);
     try {
       const workflowData = await api.getWorkflow(workflowId, runId);
+      console.log('workflowData', workflowData);
       if (workflowData) {
         setWorkflow(workflowData);
       }
@@ -86,7 +87,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
 
   const handleAction = async (action, force = false) => {
     try {
-      await api.executeWorkflowCancelAction(workflow.id, force);
+      await api.executeWorkflowCancelAction(workflow.workflowId, force);
       showSuccess('Termination requested. It may take a few minutes to complete.');
       
       // Wait a moment before fetching updated data
@@ -247,7 +248,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {getDisplayValue(workflow?.id)}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {getDisplayValue(workflow?.workflowId)}
               </Typography>
               <Typography 
                 sx={{ 
@@ -295,6 +296,24 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                 }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {getDisplayValue(workflow?.workflowType)}
+              </Typography>
+              <Typography 
+                sx={{ 
+                  color: 'text.secondary', 
+                  fontSize: 'inherit',
+                  wordBreak: 'break-word'
+                }}
+              >
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Parent Flow:</Box> {getDisplayValue(workflow?.parentId)}
+              </Typography>
+              <Typography 
+                sx={{ 
+                  color: 'text.secondary', 
+                  fontSize: 'inherit',
+                  wordBreak: 'break-word'
+                }}
+              >
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Parent Run:</Box> {getDisplayValue(workflow?.parentRunId)}
               </Typography>
             </Box>
           </Box>
