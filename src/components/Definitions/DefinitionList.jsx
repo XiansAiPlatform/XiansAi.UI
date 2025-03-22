@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Divider } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
 import { useAuth0 } from '@auth0/auth0-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
@@ -43,19 +44,68 @@ const DefinitionList = () => {
       const matchesFilter = filter === 'all' || (filter === 'mine' && def.owner === user?.sub);
       const searchLower = searchQuery.toLowerCase();
       const nameLower = def.typeName?.toLowerCase() || '';
-      const matchesSearch = searchQuery === '' || nameLower.includes(searchLower);
-      
-      console.log({
-        name: def.name,
-        searchQuery,
-        nameLower,
-        searchLower,
-        matchesSearch
-      });
+      const agentNameLower = def.agentName?.toLowerCase() || '';
+      const matchesSearch = searchQuery === '' || 
+                           nameLower.includes(searchLower) || 
+                           agentNameLower.includes(searchLower);
       
       return matchesFilter && matchesSearch;
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Group definitions by agent name
+  const groupDefinitionsByAgent = (definitions) => {
+    const grouped = {};
+    const latestFlowByAgent = {};
+    
+    definitions.forEach(def => {
+      const agentName = def.agentName || 'Ungrouped';
+      if (!grouped[agentName]) {
+        grouped[agentName] = [];
+        latestFlowByAgent[agentName] = new Date(0);
+      }
+      grouped[agentName].push(def);
+      
+      // Track the most recent flow creation/update date for each agent
+      const flowDate = new Date(def.createdAt);
+      if (flowDate > latestFlowByAgent[agentName]) {
+        latestFlowByAgent[agentName] = flowDate;
+      }
+    });
+    
+    // Sort agent names by their most recent flow date (descending)
+    const sortedAgentNames = Object.keys(grouped).sort((a, b) => {
+      // Special case for 'Ungrouped' - always keep at the end
+      if (a === 'Ungrouped') return 1;
+      if (b === 'Ungrouped') return -1;
+      
+      // Sort by most recent flow date (newest first)
+      return latestFlowByAgent[b] - latestFlowByAgent[a];
+    });
+    
+    return { grouped, sortedAgentNames, latestFlowByAgent };
+  };
+
+  const { grouped, sortedAgentNames, latestFlowByAgent } = groupDefinitionsByAgent(filteredDefinitions);
+
+  const formatLastUpdated = (date) => {
+    try {
+      return `Updated ${formatDistanceToNow(date, { addSuffix: false })} ago`;
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const isRecentlyUpdated = (date) => {
+    try {
+      const now = new Date();
+      const lastUpdated = new Date(date);
+      const diffInHours = Math.floor((now - lastUpdated) / (1000 * 60 * 60));
+      return diffInHours < 24;
+    } catch (error) {
+      return false;
+    }
+  };
 
   useEffect(() => {
     const fetchDefinitions = async () => {
@@ -110,7 +160,7 @@ const DefinitionList = () => {
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <TextField
             size="small"
-            placeholder="Search definitions..."
+            placeholder="Search by name or agent..."
             value={searchQuery}
             onChange={handleSearchChange}
             sx={{
@@ -141,21 +191,93 @@ const DefinitionList = () => {
           </ToggleButtonGroup>
         </Box>
       </Box>
-      <TableContainer component={Paper} sx={tableStyles.tableContainer}>
-        <Table sx={{ minWidth: 650 }}>
-          <TableBody>
-            {filteredDefinitions.map((definition, index) => (
-              <DefinitionRow 
-                key={definition.id} 
-                definition={definition}
-                isOpen={openDefinitionId === definition.id}
-                previousRowOpen={index > 0 && openDefinitionId === filteredDefinitions[index - 1].id}
-                onToggle={handleToggle}
-              />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+
+      {sortedAgentNames.map((agentName, groupIndex) => (
+        <Box key={agentName} sx={{ mb: 4 }}>
+          <Box 
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              mb: 2,
+              pb: 1,
+              borderBottom: groupIndex > 0 ? '1px solid var(--border-light)' : 'none'
+            }}
+          >
+            <Typography 
+              variant="h6" 
+              component="h2"
+              sx={{ 
+                fontWeight: 600,
+                color: 'var(--text-primary)',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              {agentName === 'Ungrouped' ? (
+                <>
+                  {agentName} <span style={{ fontWeight: 400, fontSize: '0.9em', color: 'var(--text-secondary)' }}>({grouped[agentName].length})</span>
+                </>
+              ) : (
+                <>
+                  {agentName} 
+                  <span style={{ fontWeight: 400, fontSize: '0.9em', color: 'var(--text-secondary)' }}>({grouped[agentName].length})</span>
+                  {isRecentlyUpdated(latestFlowByAgent[agentName]) && (
+                    <span style={{ 
+                      marginLeft: '8px', 
+                      backgroundColor: 'var(--success-light)', 
+                      color: 'var(--success)',
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                      fontSize: '0.7em',
+                      fontWeight: 600,
+                      textTransform: 'uppercase'
+                    }}>
+                      New
+                    </span>
+                  )}
+                </>
+              )}
+            </Typography>
+            {agentName !== 'Ungrouped' && (
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  ml: 2,
+                  color: 'var(--text-secondary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  '&:before': {
+                    content: '""',
+                    display: 'inline-block',
+                    width: '4px',
+                    height: '4px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--text-secondary)',
+                    marginRight: '8px'
+                  }
+                }}
+              >
+                {formatLastUpdated(latestFlowByAgent[agentName])}
+              </Typography>
+            )}
+          </Box>
+          <TableContainer component={Paper} sx={tableStyles.tableContainer}>
+            <Table sx={{ minWidth: 650 }}>
+              <TableBody>
+                {grouped[agentName].map((definition, index) => (
+                  <DefinitionRow 
+                    key={definition.id} 
+                    definition={definition}
+                    isOpen={openDefinitionId === definition.id}
+                    previousRowOpen={index > 0 && openDefinitionId === grouped[agentName][index - 1].id}
+                    onToggle={handleToggle}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      ))}
     </Box>
   );
 };
