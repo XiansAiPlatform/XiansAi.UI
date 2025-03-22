@@ -215,9 +215,7 @@ const WorkflowList = () => {
             <ToggleButton value="30days">30 Days</ToggleButton>
             <ToggleButton value="all">All</ToggleButton>
           </ToggleButtonGroup>
-        </Box>
 
-        <Box sx={{ width: '100%', overflowX: 'auto' }}>
           <ToggleButtonGroup
             value={statusFilter}
             exclusive
