@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Divider } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';
@@ -145,7 +145,14 @@ const DefinitionList = () => {
 
   return (
     <Box sx={tableStyles.container}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 4,
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: { xs: 2, md: 0 }
+      }}>
         <Typography 
           variant="h4" 
           component="h1"
@@ -157,111 +164,198 @@ const DefinitionList = () => {
         >
           Agent Definitions
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          alignItems: 'center',
+          flexDirection: { xs: 'column', sm: 'row' },
+          width: { xs: '100%', sm: 'auto' }
+        }}>
           <TextField
             size="small"
             placeholder="Search by name or agent..."
             value={searchQuery}
             onChange={handleSearchChange}
             sx={{
-              width: '250px',
+              width: { xs: '100%', sm: '250px' },
               '& .MuiOutlinedInput-root': {
                 borderRadius: 'var(--radius-md)',
               }
             }}
           />
-          <ToggleButtonGroup
-            value={timeFilter}
-            exclusive
-            onChange={handleTimeFilterChange}
-            size="small"
+          <Stack 
+            direction={{ xs: 'column', sm: 'row' }} 
+            spacing={2}
+            width={{ xs: '100%', sm: 'auto' }}
           >
-            <ToggleButton value="7days">Last 7 Days</ToggleButton>
-            <ToggleButton value="30days">Last 30 Days</ToggleButton>
-            <ToggleButton value="all">All Time</ToggleButton>
-          </ToggleButtonGroup>
-          <ToggleButtonGroup
-            value={filter}
-            exclusive
-            onChange={handleFilterChange}
-            size="small"
-          >
-            <ToggleButton value="all">All</ToggleButton>
-            <ToggleButton value="mine">Mine</ToggleButton>
-          </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={timeFilter}
+              exclusive
+              onChange={handleTimeFilterChange}
+              size="small"
+              sx={{ 
+                width: { xs: '100%', sm: 'auto' },
+                '& .MuiToggleButton-root': {
+                  borderColor: 'var(--border-light)',
+                  color: 'var(--text-secondary)',
+                  textTransform: 'none',
+                  '&.Mui-selected': {
+                    backgroundColor: 'var(--bg-selected)',
+                    color: 'var(--text-primary)',
+                    fontWeight: 500
+                  }
+                }
+              }}
+            >
+              <ToggleButton value="7days">Last 7 Days</ToggleButton>
+              <ToggleButton value="30days">Last 30 Days</ToggleButton>
+              <ToggleButton value="all">All Time</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={filter}
+              exclusive
+              onChange={handleFilterChange}
+              size="small"
+              sx={{ 
+                width: { xs: '100%', sm: 'auto' },
+                '& .MuiToggleButton-root': {
+                  borderColor: 'var(--border-light)',
+                  color: 'var(--text-secondary)',
+                  textTransform: 'none',
+                  '&.Mui-selected': {
+                    backgroundColor: 'var(--bg-selected)',
+                    color: 'var(--text-primary)',
+                    fontWeight: 500
+                  }
+                }
+              }}
+            >
+              <ToggleButton value="all">All</ToggleButton>
+              <ToggleButton value="mine">Mine</ToggleButton>
+            </ToggleButtonGroup>
+          </Stack>
         </Box>
       </Box>
 
       {sortedAgentNames.map((agentName, groupIndex) => (
-        <Box key={agentName} sx={{ mb: 4 }}>
+        <Box 
+          key={agentName} 
+          sx={{ 
+            mb: 4,
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            boxShadow: groupIndex < sortedAgentNames.length - 1 && agentName !== 'Ungrouped' && isRecentlyUpdated(latestFlowByAgent[agentName]) 
+              ? '0 0 0 1px var(--success-light)'
+              : 'none'
+          }}
+        >
           <Box 
             sx={{ 
               display: 'flex',
               alignItems: 'center',
-              mb: 2,
-              pb: 1,
-              borderBottom: groupIndex > 0 ? '1px solid var(--border-light)' : 'none'
+              flexWrap: 'wrap',
+              p: 2,
+              gap: 2,
+              backgroundColor: agentName !== 'Ungrouped' 
+                ? isRecentlyUpdated(latestFlowByAgent[agentName]) 
+                  ? 'var(--success-ultralight)'
+                  : 'var(--bg-subtle)'
+                : 'transparent',
+              borderTopLeftRadius: 'var(--radius-lg)',
+              borderTopRightRadius: 'var(--radius-lg)',
+              mb: 0,
+              position: 'relative',
+              '&:after': agentName !== 'Ungrouped' ? {
+                content: '""',
+                position: 'absolute',
+                bottom: 0,
+                left: 16,
+                right: 16,
+                height: '1px',
+                backgroundColor: 'var(--border-light)'
+              } : {}
             }}
           >
-            <Typography 
-              variant="h6" 
-              component="h2"
-              sx={{ 
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                display: 'flex',
-                alignItems: 'center'
-              }}
+            <Stack 
+              direction="row" 
+              spacing={1.5} 
+              alignItems="center"
+              sx={{ flex: 1 }}
             >
-              {agentName === 'Ungrouped' ? (
-                <>
-                  {agentName} <span style={{ fontWeight: 400, fontSize: '0.9em', color: 'var(--text-secondary)' }}>({grouped[agentName].length})</span>
-                </>
-              ) : (
-                <>
-                  {agentName} 
-                  <span style={{ fontWeight: 400, fontSize: '0.9em', color: 'var(--text-secondary)' }}>({grouped[agentName].length})</span>
-                  {isRecentlyUpdated(latestFlowByAgent[agentName]) && (
-                    <span style={{ 
-                      marginLeft: '8px', 
-                      backgroundColor: 'var(--success-light)', 
-                      color: 'var(--success)',
-                      padding: '2px 8px',
-                      borderRadius: '10px',
-                      fontSize: '0.7em',
-                      fontWeight: 600,
-                      textTransform: 'uppercase'
-                    }}>
-                      New
-                    </span>
-                  )}
-                </>
+              <Typography 
+                variant="h6" 
+                component="h2"
+                sx={{ 
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  fontSize: '1.1rem'
+                }}
+              >
+                {agentName}
+              </Typography>
+              
+              <Chip 
+                label={`${grouped[agentName].length} flow${grouped[agentName].length !== 1 ? 's' : ''}`}
+                size="small"
+                sx={{ 
+                  fontWeight: 500,
+                  backgroundColor: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-light)',
+                  height: '22px',
+                  fontSize: '0.75rem',
+                  borderRadius: '10px',
+                  '& .MuiChip-label': {
+                    px: 1
+                  }
+                }}
+              />
+              
+              {agentName !== 'Ungrouped' && isRecentlyUpdated(latestFlowByAgent[agentName]) && (
+                <Chip
+                  label="New"
+                  size="small"
+                  color="success"
+                  sx={{ 
+                    height: '22px',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(45deg, var(--success) 0%, var(--success-light) 100%)',
+                    color: 'white',
+                    '& .MuiChip-label': {
+                      px: 1
+                    }
+                  }}
+                />
               )}
-            </Typography>
+            </Stack>
+            
             {agentName !== 'Ungrouped' && (
               <Typography 
                 variant="caption" 
                 sx={{ 
-                  ml: 2,
                   color: 'var(--text-secondary)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&:before': {
-                    content: '""',
-                    display: 'inline-block',
-                    width: '4px',
-                    height: '4px',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--text-secondary)',
-                    marginRight: '8px'
-                  }
+                  fontSize: '0.75rem'
                 }}
               >
                 {formatLastUpdated(latestFlowByAgent[agentName])}
               </Typography>
             )}
           </Box>
-          <TableContainer component={Paper} sx={tableStyles.tableContainer}>
+          
+          <TableContainer 
+            component={Paper} 
+            elevation={0}
+            sx={{
+              ...tableStyles.tableContainer,
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              borderTop: 'none',
+              backgroundColor: 'white',
+              overflowX: 'auto'
+            }}
+          >
             <Table sx={{ minWidth: 650 }}>
               <TableBody>
                 {grouped[agentName].map((definition, index) => (

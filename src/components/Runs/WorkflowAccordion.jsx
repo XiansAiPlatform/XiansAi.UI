@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -8,24 +8,14 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WorkflowRunItem from './WorkflowRunItem';
-import RightSlider from '../Layout/RightSlider';
-import NewWorkflowForm from './NewWorkflowForm';
 import './WorkflowAccordion.css';
 
 const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted, isMobile }) => {
-  const [showNewWorkflowForm, setShowNewWorkflowForm] = useState(false);
 
   const formatWorkflowType = (type) => {
     return type 
       .replace(/([A-Z])/g, ' $1')
       .trim();
-  };
-
-  const handleWorkflowSuccess = () => {
-    setShowNewWorkflowForm(false);
-    if (onWorkflowStarted) {
-      onWorkflowStarted();
-    }
   };
 
   const runningWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'running').length;
@@ -146,17 +136,6 @@ const WorkflowAccordion = ({ type, assignment, runs, onWorkflowStarted, isMobile
           </List>
         </AccordionDetails>
       </Accordion>
-
-      {showNewWorkflowForm && (
-        <RightSlider onClose={() => setShowNewWorkflowForm(false)}>
-          <NewWorkflowForm
-            workflowType={type}
-            onSuccess={handleWorkflowSuccess}
-            onCancel={() => setShowNewWorkflowForm(false)}
-            isMobile={isMobile}
-          />
-        </RightSlider>
-      )}
     </>
   );
 };

@@ -153,14 +153,16 @@ export const useApi = () => {
         }
       },
 
-      startNewWorkflow: async (workflowType, parameters) => {
+      startNewWorkflow: async (workflowType, agentName, parameters, flowId = null) => {
         try {
           const response = await fetch(`${apiBaseUrl}/api/client/workflows`, {
             method: 'POST',
             headers: await createAuthHeaders(),
             body: JSON.stringify({
               WorkflowType: workflowType,
-              Parameters: parameters
+              AgentName: agentName,
+              Parameters: parameters,
+              WorkflowId: flowId
             })
           });
 

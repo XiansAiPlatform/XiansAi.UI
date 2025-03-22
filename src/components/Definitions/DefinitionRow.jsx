@@ -31,8 +31,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
   const handleStartNew = async () => {
     const formContent = (
       <NewWorkflowForm 
-        workflowType={definition.typeName}
-        parameterInfo={definition.parameters}
+        definition={definition}
         onSuccess={async () => {
           setLoading(true);
           try {

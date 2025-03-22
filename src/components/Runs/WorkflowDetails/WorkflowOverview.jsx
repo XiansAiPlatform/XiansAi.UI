@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { 
   Typography, 
   Box, 
@@ -16,6 +16,7 @@ import {
 import StatusChip from '../../Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useApi } from '../../../services/workflow-api';
+import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
 import { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -24,48 +25,54 @@ import { useAuth0 } from '@auth0/auth0-react';
 const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [workflow, setWorkflow] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
   const api = useApi();
   const { user } = useAuth0();
   
-  // Replace the old useEffect with a new one to fetch workflow data
-  useEffect(() => {
-    const fetchWorkflow = async () => {
-      if (!workflowId) return;
-      
-      try {
-        const workflowData = await api.getWorkflow(workflowId, runId);
-        setWorkflow(workflowData);
-      } catch (error) {
-        showError('Failed to fetch workflow details');
-      }
-    };
-
-    fetchWorkflow();
-  }, [workflowId, runId, api, showError]);
-
-  // Update the refresh useEffect
-  useEffect(() => {
-    if (onActionComplete && workflowId) {
-      const refreshWorkflow = async () => {
-        try {
-          const updatedWorkflow = await api.getWorkflow(workflowId);
-          setWorkflow(updatedWorkflow);
-        } catch (error) {
-          showError('Failed to refresh workflow details');
-        }
-      };
-
-      refreshWorkflow();
-    }
-  }, [onActionComplete, workflowId, api, showError]);
-
-  // Add a helper function to safely convert status to string
+  // Add a helper function to safely convert status to string (moved this up to avoid initialization error)
   const getStatusString = (status) => {
     if (status === null || status === undefined) return '';
     return String(status);
   };
+  
+  // Function to fetch workflow data (memoized with useCallback)
+  const fetchWorkflow = useCallback(async () => {
+    if (!workflowId) return;
+    
+    setIsLoading(true);
+    try {
+      const workflowData = await api.getWorkflow(workflowId, runId);
+      if (workflowData) {
+        setWorkflow(workflowData);
+      }
+    } catch (error) {
+      console.error('Failed to fetch workflow details:', error);
+      // Don't clear existing workflow data on error
+      showError('Failed to fetch workflow details');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [workflowId, runId, api, showError]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchWorkflow();
+  }, [fetchWorkflow]); // Now this is safe
+
+  // Refresh workflow data periodically if workflow is running
+  useInterval(
+    fetchWorkflow,
+    getStatusString(workflow?.status).toUpperCase() === 'RUNNING' ? 30000 : null
+  );
+
+  // Update the refresh useEffect when an action is completed
+  useEffect(() => {
+    if (onActionComplete) {
+      fetchWorkflow();
+    }
+  }, [onActionComplete, fetchWorkflow]); // Now this is safe
 
   const isRunning = getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
 
@@ -80,17 +87,18 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const handleAction = async (action, force = false) => {
     try {
       await api.executeWorkflowCancelAction(workflow.id, force);
+      showSuccess('Termination requested. It may take a few minutes to complete.');
       
-      // Fetch updated workflow data
-      const updatedWorkflow = await api.getWorkflow(workflow.id);
-      setWorkflow(updatedWorkflow);
-      
-      showSuccess('Termination requested. it may take a few minutes to complete.');
+      // Wait a moment before fetching updated data
+      setTimeout(() => {
+        fetchWorkflow();
+      }, 2000);
     } catch (error) {
       showError('An unexpected error occurred. Please check if the workflow is still running. Error: ' + error.message);
       console.error(`Error executing ${action}:`, error);
+    } finally {
+      handleClose();
     }
-    handleClose();
   };
 
   const menuItems = isRunning ? [
@@ -137,6 +145,12 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     return workflow?.owner === user?.sub;
   }, [workflow?.owner, user?.sub]);
 
+  // Get a display value that shows N/A only if workflow is null
+  const getDisplayValue = (value) => {
+    if (!workflow) return 'Loading...';
+    return value !== undefined && value !== null ? value : 'N/A';
+  };
+
   return (
     <Paper 
       elevation={0} 
@@ -174,7 +188,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               fontSize: isMobile ? '1.25rem' : '1.5rem'
             }}
           >
-            {workflow?.workflowType?.replace(/([A-Z])/g, ' $1').trim() || 'N/A'}
+            {getDisplayValue(workflow?.workflowType)?.replace(/([A-Z])/g, ' $1').trim()}
           </Typography>
           
           <Button
@@ -192,7 +206,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
             aria-expanded={open ? 'true' : undefined}
             onClick={handleClick}
             startIcon={<MoreVertIcon />}
-            disabled={!isRunning}
+            disabled={!isRunning || isLoading}
             className="overview-action-button action-button"
           >
             Actions
@@ -215,7 +229,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               }}
             >
               <StatusChip 
-                label={workflow?.status || 'N/A'}
+                label={getDisplayValue(workflow?.status)}
                 status={getStatusString(workflow?.status).toUpperCase()}
               />
             </Box>
@@ -233,7 +247,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {workflow?.id || 'N/A'}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {getDisplayValue(workflow?.id)}
               </Typography>
               <Typography 
                 sx={{ 
@@ -242,7 +256,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run ID:</Box> {workflow?.runId || 'N/A'}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run ID:</Box> {getDisplayValue(workflow?.runId)}
               </Typography>
               <Typography 
                 sx={{ 
@@ -255,8 +269,8 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   flexWrap: 'wrap'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Owner:</Box> {workflow?.owner || 'N/A'}
-                {isOwner && (
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Owner:</Box> {getDisplayValue(workflow?.owner)}
+                {isOwner && workflow && (
                   <Typography
                     component="span"
                     sx={{
@@ -280,7 +294,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {workflow?.workflowType || 'N/A'}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {getDisplayValue(workflow?.workflowType)}
               </Typography>
             </Box>
           </Box>
@@ -336,7 +350,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               fontSize: isMobile ? '0.8rem' : '1rem'
             }}
           >
-            {workflow?.startTime ? new Date(workflow.startTime).toLocaleString() : 'N/A'}
+            {workflow?.startTime ? new Date(workflow.startTime).toLocaleString() : (workflow ? 'N/A' : 'Loading...')}
           </Typography>
         </Box>
 
@@ -359,7 +373,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               fontSize: isMobile ? '0.8rem' : '1rem'
             }}
           >
-            {calculateDuration(workflow?.startTime, workflow?.closeTime)}
+            {workflow ? calculateDuration(workflow?.startTime, workflow?.closeTime) : 'Loading...'}
           </Typography>
         </Box>
 
@@ -382,7 +396,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               fontSize: isMobile ? '0.8rem' : '1rem'
             }}
           >
-            {workflow?.closeTime ? new Date(workflow.closeTime).toLocaleString() : 'In Progress'}
+            {workflow?.closeTime ? new Date(workflow.closeTime).toLocaleString() : (workflow ? 'In Progress' : 'Loading...')}
           </Typography>
         </Box>
       </Box>
