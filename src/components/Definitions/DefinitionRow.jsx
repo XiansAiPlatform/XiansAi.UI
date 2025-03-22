@@ -1,7 +1,10 @@
-import { TableRow, TableCell, IconButton, Box, Typography, Button, Stack, Collapse, Tooltip } from '@mui/material';
+import React, { useState } from 'react';
+import { TableRow, TableCell, IconButton, Box, Typography, Button, Stack, Collapse, Tooltip, Menu, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 import DefinitionActivities from './DefinitionActivities';
 import DefinitionParameters from './DefinitionParameters';
 import { useSlider } from '../../contexts/SliderContext';
@@ -13,12 +16,58 @@ import DefinitionAgents from './DefinitionAgents';
 import { useAuth0 } from '@auth0/auth0-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useTheme } from '@mui/material/styles';
+import { useDefinitionsApi } from '../../services/definitions-api';
 
-const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
+const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDeleteSuccess }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
   const { user } = useAuth0();
   const theme = useTheme();
+  const definitionsApi = useDefinitionsApi();
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const menuOpen = Boolean(menuAnchorEl);
+  
+  const handleMenuClick = (event) => {
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+  };
+  
+  const handleMenuClose = (event) => {
+    if (event) event.stopPropagation();
+    setMenuAnchorEl(null);
+  };
+  
+  const handleDeleteClick = (event) => {
+    event.stopPropagation();
+    handleMenuClose();
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = (event) => {
+    if (event) event.stopPropagation();
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeleteConfirm = async (event) => {
+    if (event) event.stopPropagation();
+    setDeleteDialogOpen(false);
+    
+    try {
+      setLoading(true);
+      await definitionsApi.deleteDefinition(definition.id);
+      
+      // Notify parent component that delete was successful
+      if (onDeleteSuccess) {
+        onDeleteSuccess(definition.id);
+      }
+    } catch (error) {
+      console.error('Failed to delete definition:', error);
+      // Handle error (could show a toast notification here)
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatTypeName = (typeName) => {
     return typeName
@@ -173,6 +222,49 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
               >
                 Start New
               </Button>
+              <IconButton
+                size="small"
+                onClick={handleMenuClick}
+                aria-controls={menuOpen ? "definition-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={menuOpen ? "true" : undefined}
+              >
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                id="definition-menu"
+                anchorEl={menuAnchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+                onClick={(e) => e.stopPropagation()}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem 
+                  onClick={handleDeleteClick}
+                  disabled={!isCurrentUser}
+                  sx={{
+                    opacity: isCurrentUser ? 1 : 0.5,
+                    '&.Mui-disabled': {
+                      color: 'text.disabled',
+                    }
+                  }}
+                >
+                  <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+                  Delete
+                  {!isCurrentUser && (
+                    <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
+                      (Not owner)
+                    </Typography>
+                  )}
+                </MenuItem>
+              </Menu>
             </Stack>
           </div>
         </TableCell>
@@ -193,6 +285,28 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
           </TableCell>
         </TableRow>
       )}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        onClick={(e) => e.stopPropagation()}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Delete Definition?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete "{formatTypeName(definition.typeName)}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteCancel}>Cancel</Button>
+          <Button onClick={handleDeleteConfirm} variant="contained" color="error" autoFocus>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

@@ -39,6 +39,12 @@ const DefinitionList = () => {
     }
   };
 
+  const handleDeleteSuccess = (deletedDefinitionId) => {
+    setDefinitions(prevDefinitions => 
+      prevDefinitions.filter(def => def.id !== deletedDefinitionId)
+    );
+  };
+
   const filteredDefinitions = definitions
     .filter(def => {
       const matchesFilter = filter === 'all' || (filter === 'mine' && def.owner === user?.sub);
@@ -365,6 +371,7 @@ const DefinitionList = () => {
                     isOpen={openDefinitionId === definition.id}
                     previousRowOpen={index > 0 && openDefinitionId === grouped[agentName][index - 1].id}
                     onToggle={handleToggle}
+                    onDeleteSuccess={handleDeleteSuccess}
                   />
                 ))}
               </TableBody>
