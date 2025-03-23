@@ -300,7 +300,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
             Are you sure you want to delete "{formatTypeName(definition.typeName)}"? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ padding: '16px 24px' }}>
           <Button onClick={handleDeleteCancel}>Cancel</Button>
           <Button onClick={handleDeleteConfirm} variant="contained" color="error" autoFocus>
             Delete
