@@ -26,7 +26,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       {}
   );
   const [runType, setRunType] = useState('unique'); // 'unique' or 'singleton'
-  const [flowId, setFlowId] = useState('');
+  const [flowId, setFlowId] = useState(definition ? `${definition.agentName}:${definition.typeName}` : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = useApi();

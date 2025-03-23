@@ -37,19 +37,24 @@ const WorkflowRunItem = ({ run, isMobile }) => {
           alignItems: 'center',
           justifyContent: 'space-between',
           width: '100%',
-          marginBottom: isMobile ? '8px' : '4px'
+          marginBottom: isMobile ? '8px' : '4px',
+          minHeight: isMobile ? '24px' : '32px'
         }}>
           <div style={{ 
             fontSize: isMobile ? '14px' : '16px',
-            fontWeight: 500
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center'
           }}>
             {formatWorkflowType(run.workflowType)}
           </div>
-          <StatusChip 
-            status={run.status.toLowerCase()} 
-            label={run.status} 
-            size={isMobile ? "small" : "medium"}
-          />
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <StatusChip 
+              status={run.status.toLowerCase()} 
+              label={run.status} 
+              size={isMobile ? "small" : "medium"}
+            />
+          </div>
         </div>
         
         <div className="run-item-details">
@@ -79,6 +84,15 @@ const WorkflowRunItem = ({ run, isMobile }) => {
                   {!isMobile && run.owner === user?.sub && ' (me)'}
                 </span>
               )}
+            </div>
+            
+            <div style={{ 
+              fontSize: '12px', 
+              color: 'rgba(0, 0, 0, 0.6)',
+              fontWeight: '400',
+              marginTop: '2px'
+            }}>
+              ID: {run.workflowId}
             </div>
           </div>
         </div>
