@@ -90,9 +90,9 @@ const DefinitionActivities = ({ activities }) => {
           <TableRow key={index}>
             <TableCell>{activity.activityName}</TableCell>
             <TableCell>
-              {activity.agentNames?.length > 0 ? (
-                activity.agentNames.map((agent, idx) => {
-                  const [name, type] = agent.split(' [');
+              {activity.agentToolNames?.length > 0 ? (
+                activity.agentToolNames.map((agentTool, idx) => {
+                  const [name, type] = agentTool.split(' [');
                   return (
                     <Box key={idx} sx={{ mb: 1 }}>
                       <Chip
@@ -113,7 +113,7 @@ const DefinitionActivities = ({ activities }) => {
                 })
               ) : (
                 <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                  No agents
+                  No tools
                 </Typography>
               )}
             </TableCell>
@@ -173,9 +173,9 @@ const DefinitionActivities = ({ activities }) => {
 
               <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>Tools:</Typography>
               <Box sx={{ mb: 2 }}>
-                {activity.agentNames?.length > 0 ? (
-                  activity.agentNames.map((agent, idx) => {
-                    const [name, type] = agent.split(' [');
+                {activity.agentToolNames?.length > 0 ? (
+                  activity.agentToolNames.map((agentTool, idx) => {
+                    const [name, type] = agentTool.split(' [');
                     return (
                       <Box key={idx} sx={{ mb: 1 }}>
                         <Chip
@@ -196,7 +196,7 @@ const DefinitionActivities = ({ activities }) => {
                   })
                 ) : (
                   <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                    No agents
+                    No tools
                   </Typography>
                 )}
               </Box>
