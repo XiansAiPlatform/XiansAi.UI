@@ -214,7 +214,6 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
         <Button 
           variant="contained" 
           type="submit" 
-          fullWidth
           disabled={(formData.type === 'json' && jsonError) || isSubmitting}
           sx={{
             bgcolor: 'var(--primary)',
@@ -233,7 +232,7 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
             }
           }}
         >
-          {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create Instruction' : 'Save New Version'}
+          {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
         </Button>
       </form>
     </Box>

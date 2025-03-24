@@ -69,7 +69,7 @@ const EmptyState = ({
       }}
     >
       <Typography variant="h6" sx={{ color: 'var(--text-primary)' }}>
-        No Agent Definitions Found
+        Your Agent Definitions
       </Typography>
       <Typography variant="body1" sx={{ color: 'var(--text-secondary)', maxWidth: '600px' }}>
         Agent definitions are automatically created when flows are run for the first time or when the flow code is modified. 

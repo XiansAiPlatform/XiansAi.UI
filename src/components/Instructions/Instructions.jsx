@@ -63,7 +63,7 @@ const Instructions = () => {
         }}
         onClose={closeSlider}
       />,
-      "Add Instruction"
+      "Add Knowledge"
     );
   };
 
