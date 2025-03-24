@@ -4,6 +4,12 @@
   --primary-light: #6366f115;
   --primary-lighter: #6366f108;
   
+  /* Success colors */
+  --success: #388e3c;
+  --success-light: #66bb6a;
+  --success-ultralight: #e8f5e9;
+  --success-rgb: 56, 142, 60;
+  
   /* Additional Colors */
   --error-main: #b71c1c;
   --error-light: rgba(183, 28, 28, 0.08);

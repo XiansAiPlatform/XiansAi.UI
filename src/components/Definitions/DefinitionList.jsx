@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { keyframes } from '@emotion/react';
 import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
@@ -7,6 +8,7 @@ import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
 import { useAuth0 } from '@auth0/auth0-react';
 import { formatDistanceToNow } from 'date-fns';
+import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
@@ -112,6 +114,19 @@ const DefinitionList = () => {
       return false;
     }
   };
+
+  // Define a keyframe animation for the pulsing effect
+  const pulse = keyframes`
+    0% {
+      box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(var(--success-rgb), 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0);
+    }
+  `;
 
   useEffect(() => {
     const fetchDefinitions = async () => {
@@ -294,9 +309,33 @@ const DefinitionList = () => {
                 sx={{ 
                   fontWeight: 600,
                   color: 'var(--text-primary)',
-                  fontSize: '1.1rem'
+                  fontSize: '1.1rem',
+                  display: 'flex',
+                  alignItems: 'center'
                 }}
               >
+                {agentName !== 'Ungrouped' && (
+                  <Box sx={{ 
+                    mr: 2, 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    backgroundColor: isRecentlyUpdated(latestFlowByAgent[agentName]) ? 'white' : 'white',
+                    borderRadius: '50%',
+                    p: '5px',
+                    boxShadow: isRecentlyUpdated(latestFlowByAgent[agentName]) 
+                      ? '0 0 0 1px var(--success)' 
+                      : '0 0 0 1px var(--border-light)',
+                    ...(isRecentlyUpdated(latestFlowByAgent[agentName]) && {
+                      animation: `${pulse} 2s infinite`,
+                    })
+                  }}>
+                    <AgentSvgIcon style={{ 
+                      width: '32px', 
+                      height: '32px', 
+                      opacity: isRecentlyUpdated(latestFlowByAgent[agentName]) ? 1 : 0.85 
+                    }} />
+                  </Box>
+                )}
                 {agentName}
               </Typography>
               
@@ -331,7 +370,8 @@ const DefinitionList = () => {
                     color: 'white',
                     '& .MuiChip-label': {
                       px: 1
-                    }
+                    },
+                    animation: `${pulse} 2s infinite`
                   }}
                 />
               )}

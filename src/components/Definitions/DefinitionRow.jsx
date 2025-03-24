@@ -101,7 +101,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
     );
     setLoading(true);
     try {
-      await openSlider(formContent, `Start New ${definition.typeName}`);
+      await openSlider(formContent, `Activate '${definition.typeName}'`);
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 variant="contained"
                 startIcon={<PlayArrowIcon />}
               >
-                Start New
+                Activate
               </Button>
               <IconButton
                 size="small"

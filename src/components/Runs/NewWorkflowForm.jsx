@@ -173,31 +173,37 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         flex: 1,
         overflowY: 'auto'
       }}>
-        {definition.parameters && definition.parameters.map((param, index) => (
-          <Paper
-            key={param.name}
-            elevation={0}
-            className="parameter-paper"
-            sx={{
-              p: isMobile ? 1.5 : 2,
-              mb: 2
-            }}
-          >
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-              <TextField
-                fullWidth
-                multiline
-                rows={isMobile ? 3 : 2}
-                value={parameters[param.name]}
-                onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                placeholder={param.name}
-                label={`${param.name} (${param.type})`}
-                sx={{ flex: 1 }}
-                size={isMobile ? "small" : "medium"}
-              />
-            </Box>
-          </Paper>
-        ))}
+        {definition.parameters && definition.parameters.length > 0 ? (
+          definition.parameters.map((param, index) => (
+            <Paper
+              key={param.name}
+              elevation={0}
+              className="parameter-paper"
+              sx={{
+                p: isMobile ? 1.5 : 2,
+                mb: 2
+              }}
+            >
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={isMobile ? 3 : 2}
+                  value={parameters[param.name]}
+                  onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                  placeholder={param.name}
+                  label={`${param.name} (${param.type})`}
+                  sx={{ flex: 1 }}
+                  size={isMobile ? "small" : "medium"}
+                />
+              </Box>
+            </Paper>
+          ))
+        ) : (
+          <Typography variant="body1" color="text.secondary" sx={{ p: 2, textAlign: 'left' }}>
+            No input parameters required for this workflow.
+          </Typography>
+        )}
       </Box>
 
       <Box sx={{ 

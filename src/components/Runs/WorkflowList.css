@@ -220,7 +220,6 @@
   border: 1px solid rgba(30, 73, 118, 0.2);
   min-width: 70px;
   justify-content: center;
-  animation: pulse 2s infinite ease-in-out;
 }
 
 .continuedAsNew-indicator {
@@ -577,7 +576,7 @@
   border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
   background: var(--bg-paper) !important;
-  box-shadow: var(--shadow-sm) !important;
+
   position: relative;
   z-index: 1;
 }
@@ -834,7 +833,7 @@
 
 /* Filter control specific styles */
 .filter-toggle-group {
-  overflow: visible !important;
+  /* Remove the overflow: visible that's causing the issue */
 }
 
 .filter-toggle-group .MuiToggleButton-root {
@@ -844,7 +843,8 @@
 }
 
 .filter-toggle-group .MuiToggleButton-root.Mui-selected {
-  transform: scale(1.05);
+  /* Remove transform scale which is causing the spill */
+  box-shadow: 0 0 0 1px var(--primary-light) inset !important;
   z-index: 1;
   background-color: var(--primary-light, #e3f2fd) !important;
   color: var(--primary, #1976d2) !important;
@@ -856,40 +856,40 @@
   background-color: rgba(184, 224, 255, 0.4) !important;
   color: var(--status-running-color) !important;
   font-weight: 600 !important;
-  position: relative;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 1px var(--status-running-bg) inset !important;
+  z-index: 1;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.completed {
   background-color: rgba(200, 230, 201, 0.4) !important;
   color: var(--status-completed-color) !important;
   font-weight: 600 !important;
-  position: relative;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 1px var(--status-completed-bg) inset !important;
+  z-index: 1;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.continuedAsNew {
   background-color: rgba(225, 190, 231, 0.4) !important;
   color: var(--status-continuedAsNew-color) !important;
   font-weight: 600 !important;
-  position: relative;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 1px var(--status-continuedAsNew-bg) inset !important;
+  z-index: 1;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.terminated {
   background-color: rgba(255, 205, 210, 0.4) !important;
   color: var(--status-terminated-color) !important;
   font-weight: 600 !important;
-  position: relative;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 1px var(--status-terminated-bg) inset !important;
+  z-index: 1;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.total {
   background-color: rgba(245, 245, 245, 0.6) !important;
   color: var(--status-total-color) !important;
   font-weight: 600 !important;
-  position: relative;
-  box-shadow: none !important;
+  box-shadow: 0 0 0 1px var(--status-total-bg) inset !important;
+  z-index: 1;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.running:hover {

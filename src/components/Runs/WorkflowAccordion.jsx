@@ -5,13 +5,54 @@ import {
   AccordionDetails,
   Typography,
   List,
+  Box,
+  keyframes,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowAccordion.css';
+import { ReactComponent as AgentActivatedSvgIcon } from '../../theme/agent-activated.svg';
 
 const WorkflowAccordion = ({ type, runs, isMobile }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Create a beacon effect animation
+  const beaconEffect = keyframes`
+    0% {
+      box-shadow: 0 0 0 0 rgba(184, 224, 255, 0.7);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(184, 224, 255, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(184, 224, 255, 0);
+    }
+  `;
+
+  // Add a CSS rule for the running agent icon
+  const runningAgentStyle = `
+    .running-agent-icon circle[fill="#f0f9ff"] {
+      fill: #e6f4ff;
+    }
+    .running-agent-icon rect[stroke="#3b82f6"] {
+      stroke: #1e4976;
+    }
+    .running-agent-icon circle[fill="#2563eb"] {
+      fill: #1e4976;
+    }
+    .running-agent-icon line[stroke="#3b82f6"] {
+      stroke: #1e4976;
+    }
+    .running-agent-icon rect[fill="#2563eb"] {
+      fill: #1e4976;
+    }
+    .running-agent-icon circle[stroke="#3b82f6"] {
+      stroke: #1e4976;
+    }
+    .running-agent-icon circle[stroke="#93c5fd"] {
+      stroke: #b8e0ff;
+    }
+  `;
 
   const formatWorkflowType = (type) => {
     return type 
@@ -100,6 +141,34 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
                     gap: '8px'
                   }}
                 >
+                  <Box 
+                    sx={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'white',
+                      border: 'none',
+                      borderRadius: '50%',
+                      p: '4px',
+                      mr: 1,
+                      width: '36px',
+                      height: '36px',
+                      boxShadow: 'none',
+                      ...(hasRunningWorkflows && {
+                        animation: `${beaconEffect} 2s infinite`,
+                        boxShadow: '0 0 0 1px #1e4976',
+                      })
+                    }}
+                  >
+                    <style>{hasRunningWorkflows ? runningAgentStyle : ''}</style>
+                    <AgentActivatedSvgIcon 
+                      className={hasRunningWorkflows ? 'running-agent-icon' : ''}
+                      style={{ 
+                        width: '28px', 
+                        height: '28px',
+                      }} 
+                    />
+                  </Box>
                   <span>{formatWorkflowType(type)}</span>
                 </Typography>
               </div>
