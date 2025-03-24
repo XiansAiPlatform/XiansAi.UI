@@ -200,9 +200,9 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                       e.stopPropagation();
                       handleVisualize();
                     }}
-                    className="button-base visualize-btn"
+                    className="button-base button-outlined-primary visualize-btn"
                     size="small"
-                    variant="text"
+                    variant="outlined"
                     startIcon={<VisibilityIcon />}
                     disabled={!hasMarkdown}
                   >
@@ -215,9 +215,10 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                   e.stopPropagation();
                   handleStartNew();
                 }}
-                className="button-base start-btn"
+                className="button-base button-primary start-btn"
                 size="small"
                 variant="contained"
+                color="primary"
                 startIcon={<PlayArrowIcon />}
               >
                 Activate

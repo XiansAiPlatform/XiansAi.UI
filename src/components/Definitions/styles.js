@@ -7,6 +7,10 @@ export const tableStyles = {
     boxShadow: 'none',
     borderRadius: 'var(--radius-lg)',
     overflowX: 'auto',
+    '& .MuiTable-root': {
+      borderCollapse: 'separate',
+      borderSpacing: 0
+    }
   },
   nestedTable: {
     backgroundColor: 'var(--bg-overlay)',

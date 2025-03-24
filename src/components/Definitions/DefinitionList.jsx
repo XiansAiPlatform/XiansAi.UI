@@ -265,15 +265,18 @@ const DefinitionList = () => {
             mb: 4,
             borderRadius: 'var(--radius-lg)',
             overflow: 'hidden',
-            boxShadow: groupIndex < sortedAgentNames.length - 1 && agentName !== 'Ungrouped' && isRecentlyUpdated(latestFlowByAgent[agentName]) 
-              ? '0 0 0 1px var(--success-light)'
+            boxShadow: agentName !== 'Ungrouped' && 'none',
+            border: agentName !== 'Ungrouped' ? isRecentlyUpdated(latestFlowByAgent[agentName]) 
+              ? '1px solid var(--border-color)'
+              : '1px solid var(--border-color)' 
               : 'none',
-            border: agentName !== 'Ungrouped' ? '1px solid var(--border-color)' : 'none',
             transition: 'var(--transition-fast)',
-            '&:hover': {
-              boxShadow: 'var(--shadow-sm)',
-              borderColor: 'var(--border-color-hover)'
-            }
+            ...(agentName !== 'Ungrouped' && {
+              '&:hover': {
+                boxShadow: 'var(--shadow-sm)',
+                borderColor: 'var(--border-color-hover)'
+              }
+            })
           }}
         >
           <Box 
@@ -284,7 +287,7 @@ const DefinitionList = () => {
               p: 2,
               gap: 2,
               backgroundColor: agentName !== 'Ungrouped' 
-                ? isRecentlyUpdated(latestFlowByAgent[agentName]) 
+                ? isRecentlyUpdated(latestFlowByAgent[agentName])
                   ? 'var(--success-ultralight)'
                   : 'var(--bg-subtle)'
                 : 'transparent',
@@ -405,11 +408,7 @@ const DefinitionList = () => {
               borderTopRightRadius: 0,
               borderTop: 'none',
               backgroundColor: 'white',
-              overflowX: 'auto',
-              '& .MuiTable-root': {
-                borderCollapse: 'separate',
-                borderSpacing: 0
-              }
+              overflowX: 'auto'
             }}
           >
             <Table sx={{ minWidth: 650 }}>
@@ -422,7 +421,6 @@ const DefinitionList = () => {
                     previousRowOpen={index > 0 && openDefinitionId === grouped[agentName][index - 1].id}
                     onToggle={handleToggle}
                     onDeleteSuccess={handleDeleteSuccess}
-                    isCurrentlySelected={openDefinitionId !== null && grouped[agentName].some(def => def.id === openDefinitionId)}
                   />
                 ))}
               </TableBody>
