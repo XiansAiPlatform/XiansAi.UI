@@ -119,7 +119,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
     );
     setLoading(true);
     try {
-      await openSlider(diagramContent, `${definition.typeName} Visualization`);
+      await openSlider(diagramContent, `Visualization of '${definition.typeName}'`);
     } finally {
       setLoading(false);
     }
