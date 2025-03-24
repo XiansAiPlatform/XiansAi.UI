@@ -82,7 +82,7 @@
     letter-spacing: var(--letter-spacing-tight);
     font-family: var(--font-family) !important;
     font-weight: var(--font-weight-normal) !important;
-    font-size: var(--text-lg) !important;
+    font-size: var(--text-md) !important;
 }
 
 .visualize-btn {

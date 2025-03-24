@@ -279,8 +279,30 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <div className="definition-collapse-content">
                 <DefinitionAgents activities={definition.activities} />
-                <DefinitionActivities activities={definition.activities} />
-                <DefinitionParameters parameters={definition.parameters} />
+                {definition.activities.length > 0 ? (
+                  <DefinitionActivities activities={definition.activities} />
+                ) : (
+                  <div className="definition-section">
+                    <Typography variant="h6" className="section-title">
+                      Agent Activities <span className="section-count">(0)</span>
+                    </Typography>
+                    <Box sx={{ padding: '8px 16px' }}>
+                      <Typography color="text.secondary" variant="body2">No activities to show</Typography>
+                    </Box>
+                  </div>
+                )}
+                {definition.parameters.length > 0 ? (
+                  <DefinitionParameters parameters={definition.parameters} />
+                ) : (
+                  <div className="definition-section">
+                    <Typography variant="h6" className="section-title">
+                      Agent Inputs <span className="section-count">(0)</span>
+                    </Typography>
+                    <Box sx={{ padding: '8px 16px' }}>
+                      <Typography color="text.secondary" variant="body2">No inputs to show</Typography>
+                    </Box>
+                  </div>
+                )}
               </div>
             </Collapse>
           </TableCell>

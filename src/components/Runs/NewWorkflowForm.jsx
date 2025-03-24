@@ -17,9 +17,11 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useApi } from '../../services/workflow-api';
 import './WorkflowList.css';
+import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
 const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   const navigate = useNavigate();
+  const { selectedOrg } = useSelectedOrg();
   const [parameters, setParameters] = useState(
     definition && definition.parameters ? 
       Object.fromEntries(definition.parameters.map(param => [param.name, ''])) : 
@@ -30,6 +32,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = useApi();
+  const tenantPrefix = `${selectedOrg}:`; // Using the actual tenant ID from context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,17 +152,83 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
               mb: 2
             }}
           >
-            <TextField
-              fullWidth
-              required
-              error={runType === 'singleton' && !flowId}
-              helperText={runType === 'singleton' && !flowId ? "Flow ID is required" : ""}
-              value={flowId}
-              onChange={(e) => setFlowId(e.target.value)}
-              label="Flow ID"
-              placeholder="Enter custom Flow ID"
-              size={isMobile ? "small" : "medium"}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Flow ID (with server prefix)
+              </Typography>
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'stretch', 
+                  width: '100%',
+                  border: '1px solid rgba(0, 0, 0, 0.23)',
+                  borderRadius: '4px',
+                  overflow: 'hidden',
+                  '&:hover': {
+                    border: '1px solid rgba(0, 0, 0, 0.87)'
+                  },
+                  '&:focus-within': {
+                    border: '2px solid #1976d2',
+                    padding: '0px'
+                  }
+                }}
+              >
+                <Box 
+                  sx={{ 
+                    bgcolor: 'action.hover', 
+                    px: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'text.secondary',
+                    typography: 'body2',
+                    fontWeight: 'medium',
+                    whiteSpace: 'nowrap',
+                    height: isMobile ? '40px' : '56px',
+                    boxSizing: 'border-box',
+                    borderRight: '1px solid rgba(0, 0, 0, 0.23)'
+                  }}
+                >
+                  {tenantPrefix}
+                </Box>
+                <TextField
+                  fullWidth
+                  required
+                  error={runType === 'singleton' && !flowId}
+                  helperText={runType === 'singleton' && !flowId ? "Flow ID is required" : ""}
+                  value={flowId}
+                  onChange={(e) => setFlowId(e.target.value)}
+                  placeholder="Enter custom Flow ID"
+                  size={isMobile ? "small" : "medium"}
+                  InputProps={{
+                    sx: { 
+                      border: 'none',
+                      '&:before': {
+                        display: 'none'
+                      },
+                      '&:after': {
+                        display: 'none'
+                      }
+                    }
+                  }}
+                  sx={{ 
+                    flex: 1,
+                    fieldset: {
+                      border: 'none'
+                    }
+                  }}
+                  variant="outlined"
+                />
+              </Box>
+              {(runType === 'singleton' && !flowId) && (
+                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, ml: 1.75 }}>
+                  Flow ID is required
+                </Typography>
+              )}
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                The server will automatically add "{tenantPrefix}" as a prefix to your Flow ID
+              </Typography>
+            </Box>
           </Paper>
         )}
       </Box>
