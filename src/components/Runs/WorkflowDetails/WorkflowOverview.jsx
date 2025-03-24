@@ -7,11 +7,14 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  ListItemText 
+  ListItemText,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import {
   Stop as TerminateIcon,
-  MoreVert as MoreVertIcon
+  MoreVert as MoreVertIcon,
+  ContentCopy as CopyIcon
 } from '@mui/icons-material';
 import StatusChip from '../../Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -26,6 +29,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const [anchorEl, setAnchorEl] = useState(null);
   const [workflow, setWorkflow] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
   const api = useApi();
@@ -152,6 +156,19 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     return value !== undefined && value !== null ? value : 'N/A';
   };
 
+  const handleCopyToClipboard = (text) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setCopySuccess(true);
+        showSuccess('Copied to clipboard');
+        setTimeout(() => setCopySuccess(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err);
+        showError('Failed to copy to clipboard');
+      });
+  };
+
   return (
     <Paper 
       elevation={0} 
@@ -245,16 +262,33 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                 sx={{ 
                   color: 'text.secondary', 
                   fontSize: 'inherit',
-                  wordBreak: 'break-word'
+                  wordBreak: 'break-word',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workflow Id:</Box> {getDisplayValue(workflow?.workflowId)}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workflow Id:</Box> 
+                {getDisplayValue(workflow?.workflowId)}
+                <Tooltip title="Copy to clipboard">
+                  <IconButton 
+                    size="small" 
+                    onClick={() => handleCopyToClipboard(workflow?.workflowId)}
+                    color={copySuccess ? "success" : "default"}
+                    sx={{ ml: 0.5, p: 0.5 }}
+                  >
+                    <CopyIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Typography>
               <Typography 
                 sx={{ 
                   color: 'text.secondary', 
                   fontSize: 'inherit',
-                  wordBreak: 'break-word'
+                  wordBreak: 'break-word',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5
                 }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run Id:</Box> {getDisplayValue(workflow?.runId)}
