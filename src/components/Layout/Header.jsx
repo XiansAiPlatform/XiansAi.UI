@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
 import './Layout.css'; // Import the CSS file
 import { useAuth0 } from '@auth0/auth0-react';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -50,16 +50,25 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
     <Box className="header">
       <Box className="header-content">
         {isMobile && (
-          <IconButton 
-            className="menu-button"
-            onClick={toggleNav}
-            size="medium"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-          >
-            <MenuIcon />
-          </IconButton>
+          <Tooltip title="Toggle menu">
+            <IconButton 
+              className="menu-button"
+              onClick={toggleNav}
+              size="medium"
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              sx={{
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  backgroundColor: 'var(--bg-hover)'
+                }
+              }}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
         )}
         
         <Box sx={{ 
@@ -79,12 +88,15 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
               <Box sx={{ 
                 color: 'text.secondary', 
                 mx: 2,
-                opacity: 0.6 
+                opacity: 0.4,
+                fontSize: '1.5rem',
+                fontWeight: 200
               }}>/</Box>
               <Typography variant="h6" sx={{ 
                 fontWeight: 500,
                 color: 'text.primary',
-                opacity: 0.9
+                opacity: 0.85,
+                letterSpacing: '0.2px'
               }}>
                 {pageTitle}
               </Typography>
@@ -97,61 +109,76 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
           alignItems: 'center',
           gap: isMobile ? '12px' : '20px'
         }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: 'var(--bg-paper)',
-            padding: '4px 8px',
-            borderRadius: 'var(--radius-lg)',
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-              backgroundColor: 'var(--bg-hover)'
-            }
-          }}>
-            <BusinessIcon sx={{ 
-              color: 'text.secondary',
-              fontSize: '20px',
-              opacity: 0.8
-            }} />
-            <FormControl size="small" sx={{ minWidth: isMobile ? 120 : 180 }}>
-              <Select
-                value={selectedOrg}
-                onChange={handleOrgChange}
-                displayEmpty
-                sx={{
-                  fontSize: '0.875rem',
-                  fontWeight: 500,
-                  color: 'text.secondary',
-                  '& .MuiSelect-select': {
-                    padding: '4px 8px',
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  }
-                }}
-              >
-                <MenuItem disabled value="">
-                  Select Organization
-                </MenuItem>
-                {organizations.map((org, index) => (
-                  <MenuItem key={index} value={org}>
-                    {org}
+          <Tooltip title="Select organization">
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: 'var(--bg-paper)',
+              padding: '4px 8px',
+              borderRadius: 'var(--radius-lg)',
+              transition: 'all 0.2s ease-in-out',
+              border: '1px solid transparent',
+              '&:hover': {
+                backgroundColor: 'var(--bg-hover)',
+                borderColor: 'var(--border-color)'
+              }
+            }}>
+              <BusinessIcon sx={{ 
+                color: 'text.secondary',
+                fontSize: '20px',
+                opacity: 0.7
+              }} />
+              <FormControl size="small" sx={{ minWidth: isMobile ? 120 : 180 }}>
+                <Select
+                  value={selectedOrg}
+                  onChange={handleOrgChange}
+                  displayEmpty
+                  sx={{
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    color: 'text.secondary',
+                    '& .MuiSelect-select': {
+                      padding: '4px 8px',
+                    },
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none'
+                    }
+                  }}
+                >
+                  <MenuItem disabled value="">
+                    Select Organization
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+                  {organizations.map((org, index) => (
+                    <MenuItem key={index} value={org}>
+                      {org}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Tooltip>
 
-          <Avatar
-            onClick={handleMenu}
-            className="user-avatar"
-            src={user?.picture}
-            alt={user?.nickname || 'User'}
-          >
-            {!user?.picture && (user?.nickname?.charAt(0) || 'U')}
-          </Avatar>
-          
+          <Tooltip title={user?.name || "Account"}>
+            <Avatar
+              onClick={handleMenu}
+              className="user-avatar"
+              src={user?.picture}
+              alt={user?.nickname || 'User'}
+              sx={{
+                border: '2px solid transparent',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  borderColor: 'var(--primary)',
+                  transform: 'scale(1.05)'
+                }
+              }}
+            >
+              {!user?.picture && <PersonIcon />}
+            </Avatar>
+          </Tooltip>
+
           <Menu
             id="menu-appbar"
             anchorEl={anchorEl}
@@ -159,6 +186,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
               vertical: 'bottom',
               horizontal: 'right',
             }}
+            keepMounted
             transformOrigin={{
               vertical: 'top',
               horizontal: 'right',
@@ -166,28 +194,54 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
             PaperProps={{
-              className: 'user-menu-paper'
+              className: "user-menu-paper",
+              elevation: 3,
+              sx: {
+                minWidth: 180,
+                mt: 1,
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.08))',
+                '&:before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                  borderLeft: '1px solid var(--border-color)',
+                  borderTop: '1px solid var(--border-color)',
+                },
+              }
             }}
           >
             <Box className="user-info">
-              <Typography className="user-info-name">
-                <PersonIcon fontSize="small" />
-                {(user?.nickname || user?.name)?.toUpperCase()}
+              <Typography className="user-info-name" variant="subtitle1">
+                {user?.name}
               </Typography>
-              <Typography className="user-info-sub">
-                {user?.sub}
-              </Typography>
-              <Typography className="user-info-email">
+              <Typography className="user-info-email" variant="caption">
                 {user?.email}
               </Typography>
             </Box>
-            
             <MenuItem 
-              onClick={handleLogout}
               className="user-menu-item logout"
+              onClick={handleLogout}
+              sx={{
+                color: 'error.main',
+                gap: '8px',
+                margin: '4px',
+                borderRadius: 'var(--radius-md)',
+                '&:hover': {
+                  backgroundColor: 'error.light',
+                  color: 'error.contrastText'
+                }
+              }}
             >
-              <LogoutIcon fontSize="small" sx={{ mr: 1.5 }} />
-              <Typography variant="body2">Logout</Typography>
+              <LogoutIcon fontSize="small" />
+              Logout
             </MenuItem>
           </Menu>
         </Box>
