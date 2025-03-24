@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1 style={{ wordSpacing: '0.2em' }}>Multi-Agent Orchestrator for Engineers</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Multi-flow, Multi-tool Orchestrator for AI Agent Developers</h1>
 
                     <div className="home-cta-buttons">
                         <button 
