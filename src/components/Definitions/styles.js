@@ -1,12 +1,10 @@
-
 export const tableStyles = {
   container: {
     p: 'var(--spacing-md)',
     maxWidth: '100%'
   },
   tableContainer: {
-    boxShadow: 'var(--shadow-sm)',
-    border: '1px solid var(--border-color)',
+    boxShadow: 'none',
     borderRadius: 'var(--radius-lg)',
     overflowX: 'auto',
   },
