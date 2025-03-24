@@ -248,7 +248,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>ID:</Box> {getDisplayValue(workflow?.workflowId)}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workflow Id:</Box> {getDisplayValue(workflow?.workflowId)}
               </Typography>
               <Typography 
                 sx={{ 
@@ -257,7 +257,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run ID:</Box> {getDisplayValue(workflow?.runId)}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run Id:</Box> {getDisplayValue(workflow?.runId)}
               </Typography>
               <Typography 
                 sx={{ 
@@ -297,24 +297,28 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {getDisplayValue(workflow?.workflowType)}
               </Typography>
-              <Typography 
-                sx={{ 
-                  color: 'text.secondary', 
-                  fontSize: 'inherit',
-                  wordBreak: 'break-word'
-                }}
-              >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Parent Flow:</Box> {getDisplayValue(workflow?.parentId)}
-              </Typography>
-              <Typography 
-                sx={{ 
-                  color: 'text.secondary', 
-                  fontSize: 'inherit',
-                  wordBreak: 'break-word'
-                }}
-              >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Parent Run:</Box> {getDisplayValue(workflow?.parentRunId)}
-              </Typography>
+              {workflow?.parentId && (
+                <Typography 
+                  sx={{ 
+                    color: 'text.secondary', 
+                    fontSize: 'inherit',
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Parent Flow:</Box> {workflow.parentId}
+                </Typography>
+              )}
+              {workflow?.parentRunId && (
+                <Typography 
+                  sx={{ 
+                    color: 'text.secondary', 
+                    fontSize: 'inherit',
+                    wordBreak: 'break-word'
+                  }}
+                >
+                  <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Parent Run:</Box> {workflow.parentRunId}
+                </Typography>
+              )}
             </Box>
           </Box>
         </Box>
