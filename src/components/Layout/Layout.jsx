@@ -27,11 +27,9 @@ const Layout = () => {
           <Outlet />
         </Box>
         {isOpen && (
-          <Box className="layout-slider">
-            <RightSlider onClose={closeSlider} title={sliderTitle}>
-              {sliderContent}
-            </RightSlider>
-          </Box>
+          <RightSlider onClose={closeSlider} title={sliderTitle}>
+            {sliderContent}
+          </RightSlider>
         )}
       </Box>
     </Box>
