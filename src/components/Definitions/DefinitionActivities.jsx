@@ -1,13 +1,29 @@
 import React from 'react';
-import { Table, TableBody, TableCell, TableHead, TableRow, Typography, Box } from '@mui/material';
-import { tableStyles } from './styles';
+import { 
+  Typography, 
+  Box, 
+  Card, 
+  CardContent,
+  Grid,
+  Chip,
+  ToggleButtonGroup,
+  ToggleButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow
+} from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
 import { useInstructionsApi } from '../../services/instructions-api';
 import InstructionViewer from '../Instructions/InstructionViewer';
+import ViewModuleIcon from '@mui/icons-material/ViewModule';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 const DefinitionActivities = ({ activities }) => {
   const { openSlider } = useSlider();
   const instructionsApi = useInstructionsApi();
+  const [viewMode, setViewMode] = React.useState('card');
 
   const handleInstructionClick = async (instructionName) => {
     try {
@@ -28,129 +44,224 @@ const DefinitionActivities = ({ activities }) => {
     openSlider(instructionsContent, instruction.name);
   };
 
-  return (
-    <div className="definition-section">
-      <Typography variant="h6" className="section-title">
-        Flow Activities <span className="section-count">({activities.length})</span>
-      </Typography>
-      <Table size="small" sx={tableStyles.nestedTable}>
-        {activities.length > 0 && (
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ 
-                fontWeight: 'bold', 
-                backgroundColor: 'var(--primary-light)', 
-                color: 'var(--text-primary)', 
-                padding: 'var(--spacing-sm)',
-                borderBottom: '2px solid var(--primary-dark)'
-              }}>
-                Activity Name
-              </TableCell>
-              <TableCell sx={{ 
-                fontWeight: 'bold', 
-                backgroundColor: 'var(--primary-light)', 
-                color: 'var(--text-primary)', 
-                padding: 'var(--spacing-sm)',
-                borderBottom: '2px solid var(--primary-dark)'
-              }}>
-                Agents
-              </TableCell>
-              <TableCell sx={{ 
-                fontWeight: 'bold', 
-                backgroundColor: 'var(--primary-light)', 
-                color: 'var(--text-primary)', 
-                padding: 'var(--spacing-sm)',
-                borderBottom: '2px solid var(--primary-dark)'
-              }}>
-                Instructions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-        )}
-        <TableBody>
-          {activities.map((activity, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                <Typography variant="body1" >
-                  {activity.activityName}
+  const handleViewChange = (event, newView) => {
+    if (newView !== null) {
+      setViewMode(newView);
+    }
+  };
+
+  const renderTableView = () => (
+    <Table size="small" sx={{ backgroundColor: 'var(--background-paper)' }}>
+      {activities.length > 0 && (
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ 
+              fontWeight: 'bold', 
+              backgroundColor: 'var(--primary-light)', 
+              color: 'var(--text-primary)', 
+              padding: 'var(--spacing-sm)',
+              borderBottom: '2px solid var(--primary-dark)'
+            }}>
+              Action
+            </TableCell>
+            <TableCell sx={{ 
+              fontWeight: 'bold', 
+              backgroundColor: 'var(--primary-light)', 
+              color: 'var(--text-primary)', 
+              padding: 'var(--spacing-sm)',
+              borderBottom: '2px solid var(--primary-dark)'
+            }}>
+              Tools
+            </TableCell>
+            <TableCell sx={{ 
+              fontWeight: 'bold', 
+              backgroundColor: 'var(--primary-light)', 
+              color: 'var(--text-primary)', 
+              padding: 'var(--spacing-sm)',
+              borderBottom: '2px solid var(--primary-dark)'
+            }}>
+              Knowledge
+            </TableCell>
+          </TableRow>
+        </TableHead>
+      )}
+      <TableBody>
+        {activities.map((activity, index) => (
+          <TableRow key={index}>
+            <TableCell>{activity.activityName}</TableCell>
+            <TableCell>
+              {activity.agentToolNames?.length > 0 ? (
+                activity.agentToolNames.map((agentTool, idx) => {
+                  const [name, type] = agentTool.split(' [');
+                  return (
+                    <Box key={idx} sx={{ mb: 1 }}>
+                      <Chip
+                        label={name}
+                        size="small"
+                        sx={{
+                          backgroundColor: 'var(--primary-light)',
+                          mb: 0.5
+                        }}
+                      />
+                      {type && (
+                        <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
+                          Type: {type.replace(']', '')}
+                        </Typography>
+                      )}
+                    </Box>
+                  )
+                })
+              ) : (
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                  No tools
                 </Typography>
-                {activity.parameters?.length > 0 && (
-                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)', marginLeft: 'var(--spacing-sm)' }}>
-                    Parameters: {activity.parameters.map(param => param.name).join(', ')}
-                  </Typography>
-                )}
-              </TableCell>
-              <TableCell>
-                {activity.agentNames?.length > 0 ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                    {activity.agentNames.map((agent, idx) => {
-                      const [name, type] = agent.split(' [');
-                      return (
-                        <Box key={idx}>
-                          <Typography 
-                            component="code" 
-                            variant="caption"
-                            sx={{ 
-                              backgroundColor: 'var(--primary-light)',
-                              padding: 'var(--spacing-xs) var(--spacing-sm)',
-                              borderRadius: 'var(--radius-sm)',
-                              display: 'inline-block',
-                              width: 'fit-content'
-                            }}
-                          >
-                            {name}
+              )}
+            </TableCell>
+            <TableCell>
+              {activity.instructions?.length > 0 ? (
+                activity.instructions.map((instruction, idx) => (
+                  <Chip
+                    key={idx}
+                    label={instruction}
+                    onClick={() => handleInstructionClick(instruction)}
+                    sx={{
+                      m: 0.5,
+                      backgroundColor: 'var(--primary-light)',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: 'var(--primary-dark)',
+                        transform: 'scale(1.05)'
+                      },
+                      transition: 'transform 0.2s, background-color 0.2s'
+                    }}
+                  />
+                ))
+              ) : (
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                  No instructions
+                </Typography>
+              )}
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+
+  const renderCardView = () => (
+    <Grid container spacing={2}>
+      {activities.map((activity, index) => (
+        <Grid item xs={12} sm={6} md={4} key={index}>
+          <Card sx={{ 
+            height: '100%',
+            backgroundColor: 'var(--background-paper)',
+            border: '1px solid var(--border-color)',
+            '&:hover': {
+              boxShadow: 3
+            }
+          }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom>
+                {activity.activityName}
+              </Typography>
+
+              {activity.parameters?.length > 0 && (
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block', mb: 2 }}>
+                  Parameters: {activity.parameters.map(param => param.name).join(', ')}
+                </Typography>
+              )}
+
+              <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>Tools:</Typography>
+              <Box sx={{ mb: 2 }}>
+                {activity.agentToolNames?.length > 0 ? (
+                  activity.agentToolNames.map((agentTool, idx) => {
+                    const [name, type] = agentTool.split(' [');
+                    return (
+                      <Box key={idx} sx={{ mb: 1 }}>
+                        <Chip
+                          label={name}
+                          size="small"
+                          sx={{
+                            backgroundColor: 'var(--primary-light)',
+                            mb: 0.5
+                          }}
+                        />
+                        {type && (
+                          <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
+                            Type: {type.replace(']', '')}
                           </Typography>
-                          {type && (
-                            <Typography variant="caption" sx={{ color: 'var(--text-secondary)', marginLeft: 'var(--spacing-sm)', display: 'block' }}>
-                              Type: {type.replace(']', '')}
-                            </Typography>
-                          )}
-                        </Box>
-                      );
-                    })}
-                  </Box>
+                        )}
+                      </Box>
+                    )
+                  })
                 ) : (
                   <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                    No agents
+                    No tools
                   </Typography>
                 )}
-              </TableCell>
-              <TableCell sx={{ verticalAlign: 'top' }}>
+              </Box>
+
+              <Typography variant="subtitle2" gutterBottom>Knowledge:</Typography>
+              <Box>
                 {activity.instructions?.length > 0 ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
-                    {activity.instructions.map((instruction, idx) => (
-                      <Typography 
-                        key={idx}
-                        variant="caption"
-                        sx={{ 
-                          backgroundColor: 'var(--primary-light)',
-                          padding: 'var(--spacing-xs) var(--spacing-sm)',
-                          borderRadius: 'var(--radius-sm)',
-                          display: 'inline-block',
-                          width: 'fit-content',
-                          cursor: 'pointer',
-                          transition: 'transform 0.2s, background-color 0.2s',
-                          '&:hover': {
-                            transform: 'scale(1.05)',
-                            backgroundColor: 'var(--primary-dark)',
-                          }
-                        }}
-                        onClick={() => handleInstructionClick(instruction)}
-                      >
-                        {instruction}
-                      </Typography>
-                    ))}
-                  </Box>
+                  activity.instructions.map((instruction, idx) => (
+                    <Chip
+                      key={idx}
+                      label={instruction}
+                      onClick={() => handleInstructionClick(instruction)}
+                      sx={{
+                        m: 0.5,
+                        backgroundColor: 'var(--primary-light)',
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'var(--primary-dark)',
+                          transform: 'scale(1.05)'
+                        },
+                        transition: 'transform 0.2s, background-color 0.2s'
+                      }}
+                    />
+                  ))
                 ) : (
                   <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
                     No instructions
                   </Typography>
                 )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </Box>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  return (
+    <div className="definition-section">
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        mb: 2 
+      }}>
+        <Typography variant="h6" className="section-title">
+          Agent Activities <span className="section-count">({activities.length})</span>
+        </Typography>
+        
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewChange}
+          size="small"
+        >
+          <ToggleButton value="card" aria-label="card view">
+            <ViewModuleIcon />
+          </ToggleButton>
+          <ToggleButton value="table" aria-label="table view">
+            <ViewListIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      {viewMode === 'card' ? renderCardView() : renderTableView()}
     </div>
   );
 };

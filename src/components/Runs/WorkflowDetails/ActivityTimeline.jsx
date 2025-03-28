@@ -6,11 +6,11 @@ import SortIcon from '@mui/icons-material/Sort';
 import ActivityTimelineItem from './ActivityTimelineItem';
 import ActivityDetailsView from './ActivityDetailsView';
 import './WorkflowDetails.css';
-import { useLoading } from '../../contexts/LoadingContext';
-import { useNotification } from '../../contexts/NotificationContext';
-import { useApi } from '../../services/workflow-api';
+import { useLoading } from '../../../contexts/LoadingContext';
+import { useNotification } from '../../../contexts/NotificationContext';
+import { useApi } from '../../../services/workflow-api';
 
-const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
+const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile }) => {
   const [events, setEvents] = useState([]);
   const [latestEventId, setLatestEventId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,7 +131,10 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
 
   return (
     <Paper className="paper-container">
-      <Box className="header-container">
+      <Box className="header-container" sx={{ 
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 2 : 0
+      }}>
         <Box className="header-left">
           <Typography className="overview-title-small">Flow Activities</Typography>
           <Typography 
@@ -141,11 +144,15 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
             {events.length}
           </Typography>
         </Box>
-        <Box className="header-actions">
+        <Box className="header-actions" sx={{ 
+          width: isMobile ? '100%' : 'auto',
+          justifyContent: isMobile ? 'space-between' : 'flex-end'
+        }}>
           <IconButton
             onClick={() => setSortAscending(!sortAscending)}
             className="action-button"
             title={`Sort ${sortAscending ? 'newest first' : 'oldest first'}`}
+            sx={{ flex: isMobile ? 1 : 'none', mr: isMobile ? 1 : 0 }}
           >
             <SortIcon 
               fontSize="small" 
@@ -154,7 +161,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
                 transition: 'transform 0.2s'
               }} 
             />
-            <Typography variant="button">
+            <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
               {sortAscending ? 'Oldest First' : 'Newest First'}
             </Typography>
           </IconButton>
@@ -163,9 +170,12 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
             disabled={isLoading}
             className="action-button"
             title="Refresh activities"
+            sx={{ flex: isMobile ? 1 : 'none' }}
           >
             <RefreshIcon fontSize="small" />
-            <Typography variant="button">Refresh</Typography>
+            <Typography variant="button" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              Refresh
+            </Typography>
           </IconButton>
         </Box>
       </Box>
@@ -173,6 +183,21 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
       <Timeline 
         className="timeline-root" 
         position="left"
+        sx={{
+          padding: isMobile ? '0 0 0 8px' : '0',
+          '& .MuiTimelineItem-root': {
+            minHeight: 'auto',
+            '&:before': {
+              display: 'none'
+            }
+          },
+          '& .MuiTimelineContent-root': {
+            padding: isMobile ? '0 0 16px 16px' : '0 16px 16px 16px'
+          },
+          '& .MuiTimelineDot-root': {
+            margin: isMobile ? '0 8px 0 0' : '0 12px 0 0'
+          }
+        }}
       >
         {sortedEventsWithIndex.map((event) => (
           <ActivityTimelineItem
@@ -182,6 +207,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete }) => {
             onShowDetails={handleShowDetails}
             sortAscending={sortAscending}
             isHighlighted={event.ID === latestEventId}
+            isMobile={isMobile}
           />
         ))}
       </Timeline>

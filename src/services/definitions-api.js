@@ -77,6 +77,26 @@ export const useDefinitionsApi = () => {
           throw error;
         }
       },
+      
+      deleteDefinition: async (definitionId) => {
+        try {
+          const headers = await createAuthHeaders();
+          
+          const response = await fetch(`${apiBaseUrl}/api/client/definitions/${definitionId}`, {
+            method: 'DELETE',
+            headers
+          });
+
+          if (!response.ok) {
+            throw await handleApiError(response);
+          }
+
+          return true;
+        } catch (error) {
+          console.error('Error deleting definition:', error);
+          throw error;
+        }
+      },
     };
   }, [getAccessTokenSilently, selectedOrg]);
 };

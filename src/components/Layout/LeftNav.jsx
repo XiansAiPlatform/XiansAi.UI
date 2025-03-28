@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -11,19 +11,19 @@ const NAV_ITEMS = [
   {
     to: '/runs',
     icon: <AirIcon />,
-    label: 'Flow Runs',
+    label: 'Agent Runs',
     isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
   },
   {
     to: '/definitions',
     icon: <CodeOutlinedIcon />,
-    label: 'Definitions',
+    label: 'Agent Definitions',
     isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
   {
     to: '/instructions',
     icon: <DescriptionOutlinedIcon />,
-    label: 'Instructions',
+    label: 'Knowledge',
     isSelected: (pathname) => pathname === '/instructions' || pathname.startsWith('/instructions/'),
   },
   {
@@ -35,7 +35,7 @@ const NAV_ITEMS = [
 ];
 
 // Reusable NavItem component
-const NavItem = ({ to, icon, label, isSelected, pathname }) => {
+const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick }) => {
   const selected = isSelected(pathname);
   
   return (
@@ -43,9 +43,10 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
       component={Link}
       to={to}
       className={`nav-item ${selected ? 'selected' : ''}`}
+      onClick={onNavItemClick}
       sx={{
         mb: 1,
-        transition: 'all 0.2s ease-in-out',
+        transition: 'all 0.3s ease',
         '&:hover': {
           transform: 'translateX(4px)',
           backgroundColor: 'var(--bg-hover)'
@@ -55,8 +56,8 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
       <ListItemIcon 
         sx={{ 
           minWidth: '32px',
-          color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-          opacity: selected ? 1 : 0.8
+          color: selected ? 'var(--primary)' : 'var(--text-secondary)',
+          opacity: selected ? 1 : 0.7
         }}
       >
         {icon}
@@ -66,7 +67,7 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
         sx={{
           '& .MuiTypography-root': {
             fontSize: 'var(--text-sm)',
-            fontWeight: selected ? 'var(--font-weight-medium)' : 'var(--font-weight-regular)',
+            fontWeight: selected ? 600 : 500,
             color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
             fontFamily: 'var(--font-family)',
             letterSpacing: '0.2px'
@@ -77,21 +78,71 @@ const NavItem = ({ to, icon, label, isSelected, pathname }) => {
   );
 };
 
-const LeftNav = () => {
+const LeftNav = ({ isOpen, onClose }) => {
   const { pathname } = useLocation();
+  const isMobile = window.innerWidth <= 768;
+
+  const handleNavItemClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
 
   return (
-    <Box className="nav">
-      <List sx={{ pt: 2 }}>
-        {NAV_ITEMS.map((item) => (
-          <NavItem
-            key={item.to}
-            {...item}
-            pathname={pathname}
-          />
-        ))}
-      </List>
-    </Box>
+    <>
+      {isMobile && isOpen && <div className="nav-overlay open" onClick={onClose}></div>}
+      <Box className={`nav ${isOpen ? 'open' : ''}`}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          height: '100%'
+        }}>
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="overline"
+              sx={{
+                display: 'block',
+                color: 'var(--text-secondary)',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                letterSpacing: '1px',
+                opacity: 0.7,
+                padding: '0 8px',
+                marginBottom: '8px'
+              }}
+            >
+              NAVIGATION
+            </Typography>
+            <List>
+              {NAV_ITEMS.map((item) => (
+                <NavItem
+                  key={item.to}
+                  {...item}
+                  pathname={pathname}
+                  onNavItemClick={handleNavItemClick}
+                />
+              ))}
+            </List>
+          </Box>
+          
+          <Box sx={{ mt: 'auto', mb: 2, opacity: 0.6 }}>
+            <Divider sx={{ mb: 2 }} />
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                color: 'var(--text-secondary)',
+                fontSize: '0.7rem',
+                padding: '0 16px',
+                textAlign: 'center'
+              }}
+            >
+              Xians.ai &copy; {new Date().getFullYear()}
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
+    </>
   );
 };
 

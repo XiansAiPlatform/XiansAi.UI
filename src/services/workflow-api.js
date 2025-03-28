@@ -49,9 +49,9 @@ export const useApi = () => {
     };
 
     return {
-      getWorkflow: async (workflowId) => {
+      getWorkflow: async (workflowId, runId) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}`, {
+          const response = await fetch(`${apiBaseUrl}/api/client/workflows/${workflowId}/${runId}`, {
             headers: await createAuthHeaders()
           });
           return response.json();
@@ -60,7 +60,7 @@ export const useApi = () => {
           handleApiError(error, 'Failed to fetch workflow');
         }
       },
-      fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all') => {
+      fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all', statusFilter = 'all') => {
         try {
           const { startTime, endTime } = getTimeRangeParams(timeFilter);
           const queryParams = new URLSearchParams();
@@ -71,6 +71,9 @@ export const useApi = () => {
           }
           if (ownerFilter === 'mine') {
             queryParams.append('owner', 'current');
+          }
+          if (statusFilter !== 'all') {
+            queryParams.append('status', statusFilter);
           }
 
           const response = await fetch(`${apiBaseUrl}/api/client/workflows?${queryParams}`, {
@@ -150,14 +153,16 @@ export const useApi = () => {
         }
       },
 
-      startNewWorkflow: async (workflowType, parameters) => {
+      startNewWorkflow: async (workflowType, agentName, parameters, flowId = null) => {
         try {
           const response = await fetch(`${apiBaseUrl}/api/client/workflows`, {
             method: 'POST',
             headers: await createAuthHeaders(),
             body: JSON.stringify({
               WorkflowType: workflowType,
-              Parameters: parameters
+              AgentName: agentName,
+              Parameters: parameters,
+              WorkflowId: flowId
             })
           });
 

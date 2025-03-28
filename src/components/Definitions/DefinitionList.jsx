@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField } from '@mui/material';
+import { keyframes } from '@emotion/react';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
 import { useAuth0 } from '@auth0/auth0-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
@@ -16,7 +19,7 @@ const DefinitionList = () => {
   const definitionsApi = useDefinitionsApi();
   const { setLoading } = useLoading();
   const [searchQuery, setSearchQuery] = useState('');
-  const [timeFilter, setTimeFilter] = useState('7days');
+  const [timeFilter, setTimeFilter] = useState('all');
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
@@ -38,24 +41,92 @@ const DefinitionList = () => {
     }
   };
 
+  const handleDeleteSuccess = (deletedDefinitionId) => {
+    setDefinitions(prevDefinitions => 
+      prevDefinitions.filter(def => def.id !== deletedDefinitionId)
+    );
+  };
+
   const filteredDefinitions = definitions
     .filter(def => {
       const matchesFilter = filter === 'all' || (filter === 'mine' && def.owner === user?.sub);
       const searchLower = searchQuery.toLowerCase();
       const nameLower = def.typeName?.toLowerCase() || '';
-      const matchesSearch = searchQuery === '' || nameLower.includes(searchLower);
-      
-      console.log({
-        name: def.name,
-        searchQuery,
-        nameLower,
-        searchLower,
-        matchesSearch
-      });
+      const agentNameLower = def.agentName?.toLowerCase() || '';
+      const matchesSearch = searchQuery === '' || 
+                           nameLower.includes(searchLower) || 
+                           agentNameLower.includes(searchLower);
       
       return matchesFilter && matchesSearch;
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  // Group definitions by agent name
+  const groupDefinitionsByAgent = (definitions) => {
+    const grouped = {};
+    const latestFlowByAgent = {};
+    
+    definitions.forEach(def => {
+      const agentName = def.agentName || 'Ungrouped';
+      if (!grouped[agentName]) {
+        grouped[agentName] = [];
+        latestFlowByAgent[agentName] = new Date(0);
+      }
+      grouped[agentName].push(def);
+      
+      // Track the most recent flow creation/update date for each agent
+      const flowDate = new Date(def.createdAt);
+      if (flowDate > latestFlowByAgent[agentName]) {
+        latestFlowByAgent[agentName] = flowDate;
+      }
+    });
+    
+    // Sort agent names by their most recent flow date (descending)
+    const sortedAgentNames = Object.keys(grouped).sort((a, b) => {
+      // Special case for 'Ungrouped' - always keep at the end
+      if (a === 'Ungrouped') return 1;
+      if (b === 'Ungrouped') return -1;
+      
+      // Sort by most recent flow date (newest first)
+      return latestFlowByAgent[b] - latestFlowByAgent[a];
+    });
+    
+    return { grouped, sortedAgentNames, latestFlowByAgent };
+  };
+
+  const { grouped, sortedAgentNames, latestFlowByAgent } = groupDefinitionsByAgent(filteredDefinitions);
+
+  const formatLastUpdated = (date) => {
+    try {
+      return `Updated ${formatDistanceToNow(date, { addSuffix: false })} ago`;
+    } catch (error) {
+      return '';
+    }
+  };
+
+  const isRecentlyUpdated = (date) => {
+    try {
+      const now = new Date();
+      const lastUpdated = new Date(date);
+      const diffInHours = Math.floor((now - lastUpdated) / (1000 * 60 * 60));
+      return diffInHours < 24;
+    } catch (error) {
+      return false;
+    }
+  };
+
+  // Define a keyframe animation for the pulsing effect
+  const pulse = keyframes`
+    0% {
+      box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(var(--success-rgb), 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0);
+    }
+  `;
 
   useEffect(() => {
     const fetchDefinitions = async () => {
@@ -83,12 +154,26 @@ const DefinitionList = () => {
   }
 
   if (!definitions.length) {
-    return <EmptyState />;
+    return <EmptyState 
+      searchQuery={searchQuery}
+      onSearchChange={handleSearchChange}
+      timeFilter={timeFilter}
+      onTimeFilterChange={handleTimeFilterChange}
+      filter={filter}
+      onFilterChange={handleFilterChange}
+    />;
   }
 
   return (
     <Box sx={tableStyles.container}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        mb: 4,
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: { xs: 2, md: 0 }
+      }}>
         <Typography 
           variant="h4" 
           component="h1"
@@ -98,57 +183,251 @@ const DefinitionList = () => {
             color: 'var(--text-primary)',
           }}
         >
-          Flow Definitions
+          Agent Definitions
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 2, 
+          alignItems: 'center',
+          flexDirection: { xs: 'column', sm: 'row' },
+          width: { xs: '100%', sm: 'auto' }
+        }}>
           <TextField
             size="small"
-            placeholder="Search definitions..."
+            placeholder="Search by name or agent..."
             value={searchQuery}
             onChange={handleSearchChange}
             sx={{
-              width: '250px',
+              width: { xs: '100%', sm: '250px' },
               '& .MuiOutlinedInput-root': {
                 borderRadius: 'var(--radius-md)',
               }
             }}
           />
-          <ToggleButtonGroup
-            value={timeFilter}
-            exclusive
-            onChange={handleTimeFilterChange}
-            size="small"
+          <Stack 
+            direction={{ xs: 'column', sm: 'row' }} 
+            spacing={2}
+            width={{ xs: '100%', sm: 'auto' }}
           >
-            <ToggleButton value="7days">Last 7 Days</ToggleButton>
-            <ToggleButton value="30days">Last 30 Days</ToggleButton>
-            <ToggleButton value="all">All Time</ToggleButton>
-          </ToggleButtonGroup>
-          <ToggleButtonGroup
-            value={filter}
-            exclusive
-            onChange={handleFilterChange}
-            size="small"
-          >
-            <ToggleButton value="all">All</ToggleButton>
-            <ToggleButton value="mine">Mine</ToggleButton>
-          </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={timeFilter}
+              exclusive
+              onChange={handleTimeFilterChange}
+              size="small"
+              sx={{ 
+                width: { xs: '100%', sm: 'auto' },
+                '& .MuiToggleButton-root': {
+                  borderColor: 'var(--border-light)',
+                  color: 'var(--text-secondary)',
+                  textTransform: 'none',
+                  '&.Mui-selected': {
+                    backgroundColor: 'var(--bg-selected)',
+                    color: 'var(--text-primary)',
+                    fontWeight: 500
+                  }
+                }
+              }}
+            >
+              <ToggleButton value="7days">Last 7 Days</ToggleButton>
+              <ToggleButton value="30days">Last 30 Days</ToggleButton>
+              <ToggleButton value="all">All Time</ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup
+              value={filter}
+              exclusive
+              onChange={handleFilterChange}
+              size="small"
+              sx={{ 
+                width: { xs: '100%', sm: 'auto' },
+                '& .MuiToggleButton-root': {
+                  borderColor: 'var(--border-light)',
+                  color: 'var(--text-secondary)',
+                  textTransform: 'none',
+                  '&.Mui-selected': {
+                    backgroundColor: 'var(--bg-selected)',
+                    color: 'var(--text-primary)',
+                    fontWeight: 500
+                  }
+                }
+              }}
+            >
+              <ToggleButton value="all">All</ToggleButton>
+              <ToggleButton value="mine">Mine</ToggleButton>
+            </ToggleButtonGroup>
+          </Stack>
         </Box>
       </Box>
-      <TableContainer component={Paper} sx={tableStyles.tableContainer}>
-        <Table sx={{ minWidth: 650 }}>
-          <TableBody>
-            {filteredDefinitions.map((definition, index) => (
-              <DefinitionRow 
-                key={definition.id} 
-                definition={definition}
-                isOpen={openDefinitionId === definition.id}
-                previousRowOpen={index > 0 && openDefinitionId === filteredDefinitions[index - 1].id}
-                onToggle={handleToggle}
+
+      {sortedAgentNames.map((agentName, groupIndex) => (
+        <Box 
+          key={agentName} 
+          sx={{ 
+            mb: 4,
+            borderRadius: 'var(--radius-lg)',
+            overflow: 'hidden',
+            boxShadow: agentName !== 'Ungrouped' && 'none',
+            border: agentName !== 'Ungrouped' ? isRecentlyUpdated(latestFlowByAgent[agentName]) 
+              ? '1px solid var(--border-color)'
+              : '1px solid var(--border-color)' 
+              : 'none',
+            transition: 'var(--transition-fast)',
+            ...(agentName !== 'Ungrouped' && {
+              '&:hover': {
+                boxShadow: 'var(--shadow-sm)',
+                borderColor: 'var(--border-color-hover)'
+              }
+            })
+          }}
+        >
+          <Box 
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              p: 2,
+              gap: 2,
+              backgroundColor: agentName !== 'Ungrouped' 
+                ? isRecentlyUpdated(latestFlowByAgent[agentName])
+                  ? 'var(--success-ultralight)'
+                  : 'var(--bg-subtle)'
+                : 'transparent',
+              borderTopLeftRadius: 'var(--radius-lg)',
+              borderTopRightRadius: 'var(--radius-lg)',
+              mb: 0,
+              position: 'relative',
+              '&:after': agentName !== 'Ungrouped' ? {
+                content: '""',
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '1px',
+                backgroundColor: 'var(--border-light)'
+              } : {}
+            }}
+          >
+            <Stack 
+              direction="row" 
+              spacing={1.5} 
+              alignItems="center"
+              sx={{ flex: 1 }}
+            >
+              <Typography 
+                variant="h6" 
+                component="h2"
+                sx={{ 
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
+                  fontSize: '1.1rem',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {agentName !== 'Ungrouped' && (
+                  <Box sx={{ 
+                    mr: 2, 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    backgroundColor: isRecentlyUpdated(latestFlowByAgent[agentName]) ? 'white' : 'white',
+                    borderRadius: '50%',
+                    p: '5px',
+                    boxShadow: isRecentlyUpdated(latestFlowByAgent[agentName]) 
+                      ? '0 0 0 1px var(--success)' 
+                      : '0 0 0 1px var(--border-light)',
+                    ...(isRecentlyUpdated(latestFlowByAgent[agentName]) && {
+                      animation: `${pulse} 2s infinite`,
+                    })
+                  }}>
+                    <AgentSvgIcon style={{ 
+                      width: '32px', 
+                      height: '32px', 
+                      opacity: isRecentlyUpdated(latestFlowByAgent[agentName]) ? 1 : 0.85 
+                    }} />
+                  </Box>
+                )}
+                {agentName}
+              </Typography>
+              
+              <Chip 
+                label={`${grouped[agentName].length} flow${grouped[agentName].length !== 1 ? 's' : ''}`}
+                size="small"
+                sx={{ 
+                  fontWeight: 500,
+                  backgroundColor: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-light)',
+                  height: '22px',
+                  fontSize: '0.75rem',
+                  borderRadius: '10px',
+                  '& .MuiChip-label': {
+                    px: 1
+                  }
+                }}
               />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              
+              {agentName !== 'Ungrouped' && isRecentlyUpdated(latestFlowByAgent[agentName]) && (
+                <Chip
+                  label="New"
+                  size="small"
+                  color="success"
+                  sx={{ 
+                    height: '22px',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(45deg, var(--success) 0%, var(--success-light) 100%)',
+                    color: 'white',
+                    '& .MuiChip-label': {
+                      px: 1
+                    },
+                    animation: `${pulse} 2s infinite`
+                  }}
+                />
+              )}
+            </Stack>
+            
+            {agentName !== 'Ungrouped' && (
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.75rem'
+                }}
+              >
+                {formatLastUpdated(latestFlowByAgent[agentName])}
+              </Typography>
+            )}
+          </Box>
+          
+          <TableContainer 
+            component={Paper} 
+            elevation={0}
+            sx={{
+              ...tableStyles.tableContainer,
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              borderTop: 'none',
+              backgroundColor: 'white',
+              overflowX: 'auto'
+            }}
+          >
+            <Table sx={{ minWidth: 650 }}>
+              <TableBody>
+                {grouped[agentName].map((definition, index) => (
+                  <DefinitionRow 
+                    key={definition.id} 
+                    definition={definition}
+                    isOpen={openDefinitionId === definition.id}
+                    previousRowOpen={index > 0 && openDefinitionId === grouped[agentName][index - 1].id}
+                    onToggle={handleToggle}
+                    onDeleteSuccess={handleDeleteSuccess}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      ))}
     </Box>
   );
 };

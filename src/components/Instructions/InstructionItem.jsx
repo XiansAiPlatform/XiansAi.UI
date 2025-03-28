@@ -14,6 +14,9 @@ import InstructionViewer from './InstructionViewer';
 import '../Instructions/Instructions.css';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 import { useInstructionsApi } from '../../services/instructions-api';
+import { ReactComponent as AgentKnowledgeIcon } from '../../theme/agent-knowledge.svg';
+import { keyframes } from '@emotion/react';
+
 const InstructionItem = ({ 
   instruction,
   onUpdateInstruction,
@@ -31,6 +34,30 @@ const InstructionItem = ({
   const instructionsApi = useInstructionsApi();
 
   console.log(instruction);
+
+  // Define a keyframe animation for the pulsing effect
+  const pulse = keyframes`
+    0% {
+      box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(var(--success-rgb), 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0);
+    }
+  `;
+
+  const isRecentlyUpdated = (date) => {
+    try {
+      const now = new Date();
+      const lastUpdated = new Date(date);
+      const diffInHours = Math.floor((now - lastUpdated) / (1000 * 60 * 60));
+      return diffInHours < 24;
+    } catch (error) {
+      return false;
+    }
+  };
 
   useEffect(() => {
     const fetchVersions = async () => {
@@ -148,6 +175,8 @@ const InstructionItem = ({
     return name.trim();
   };
 
+  const wasRecentlyUpdated = isRecentlyUpdated(instruction.updatedAt || instruction.createdAt);
+
   return (
     <>
       <Box 
@@ -162,13 +191,34 @@ const InstructionItem = ({
           },
           mb: 2,
           border: '1px solid',
-          borderColor: 'divider',
+          borderColor: wasRecentlyUpdated ? 'var(--success)' : 'divider',
           cursor: 'pointer',
+          backgroundColor: wasRecentlyUpdated ? 'var(--success-ultralight)' : 'background.paper',
         }}
       >
         <Box>
           <Box className="card-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ 
+                mr: 0,
+                display: 'flex', 
+                alignItems: 'center',
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                p: '5px',
+                boxShadow: wasRecentlyUpdated 
+                  ? '0 0 0 1px var(--success)' 
+                  : '0 0 0 1px var(--border-light)',
+                ...(wasRecentlyUpdated && {
+                  animation: `${pulse} 2s infinite`,
+                })
+              }}>
+                <AgentKnowledgeIcon style={{ 
+                  width: 32, 
+                  height: 32,
+                  opacity: wasRecentlyUpdated ? 1 : 0.85 
+                }} />
+              </Box>
               <Typography 
                 variant="h6" 
                 className="instruction-name"
@@ -190,6 +240,26 @@ const InstructionItem = ({
                   fontWeight: 500
                 }}
               />
+              {wasRecentlyUpdated && (
+                <Chip
+                  label="New"
+                  size="small"
+                  color="success"
+                  sx={{ 
+                    height: '22px',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(45deg, var(--success) 0%, var(--success-light) 100%)',
+                    color: 'white',
+                    '& .MuiChip-label': {
+                      px: 1
+                    },
+                    animation: `${pulse} 2s infinite`
+                  }}
+                />
+              )}
               <Box 
                 sx={{ 
                   display: 'flex', 

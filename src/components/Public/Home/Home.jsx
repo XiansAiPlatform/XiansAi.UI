@@ -15,7 +15,7 @@ export default function Home() {
 
     const featureTabs = [
         {
-            title: "Flow Visualization",
+            title: "Agent Visualization",
             description: "Design and monitor complex AI workflows with intuitive visualization tools. Track agent interactions and data flows in real-time for complete operational visibility.",
             image: "/images/visualizer.png",
             icon: <RiFlowChart className="home-tab-icon" />
@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1>Reinvent Your Business with AI Workflows</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Multi-flow, Multi-tool Orchestrator for AI Agent Developers</h1>
 
                     <div className="home-cta-buttons">
                         <button 
@@ -214,7 +214,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                        Build intelligent, resilient business workflows that operate reliably at scale - even while you sleep.
+                    Let your AI flows do the work — intelligent and robust, so you can focus on what matters.
                     </p>
                     <div className="code-sample">
                         <code>

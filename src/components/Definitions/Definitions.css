@@ -82,36 +82,42 @@
     letter-spacing: var(--letter-spacing-tight);
     font-family: var(--font-family) !important;
     font-weight: var(--font-weight-normal) !important;
-    font-size: var(--text-lg) !important;
+    font-size: var(--text-md) !important;
 }
 
 .visualize-btn {
   border-radius: var(--radius-md);
-  background-color: var(--bg-light);
-  color: var(--text-primary);
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border-color);
 }
 
 .visualize-btn:hover {
-  background-color: var(--bg-hover);
+  background-color: var(--primary-lighter);
+  border-color: var(--primary);
+}
+
+.visualize-btn svg {
+  color: var(--primary);
 }
 
 .start-btn {
   border-radius: var(--radius-md);
   background-color: var(--primary);
-  color: #fff;
+  color: white;
 }
 
 .start-btn .MuiButton-startIcon {
-  color: #fff;
+  color: white;
 }
 
 .start-btn:hover {
   background-color: var(--primary-dark);
-  color: #000;
+  box-shadow: var(--button-primary-shadow) !important;
 }
 
 .start-btn:hover .MuiButton-startIcon {
-  color: #000;
+  color: white;
 }
 
 .definition-collapse-cell {

@@ -3,9 +3,11 @@ import { Box, IconButton, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import { useSlider } from '../../contexts/SliderContext';
 
 const RightSlider = ({ onClose, children, title }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const { isVisible } = useSlider();
   const sliderRef = useRef(null);
 
   useEffect(() => {
@@ -26,6 +28,10 @@ const RightSlider = ({ onClose, children, title }) => {
     };
   }, [onClose]);
 
+  // Calculate the width based on the current state
+  const sliderWidth = isFullScreen ? '100vw' : '50vw';
+  const sliderMaxWidth = isFullScreen ? '100vw' : '1200px';
+
   return (
     <>
       <Box
@@ -36,7 +42,9 @@ const RightSlider = ({ onClose, children, title }) => {
           right: 0,
           bottom: 0,
           bgcolor: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1200
+          zIndex: 1200,
+          opacity: isVisible ? 1 : 0,
+          transition: 'opacity 0.3s ease-out'
         }}
         onClick={onClose}
       />
@@ -48,14 +56,16 @@ const RightSlider = ({ onClose, children, title }) => {
           right: 0,
           backgroundColor: '#fff',
           height: '100vh',
-          width: isFullScreen ? '100vw' : '50vw',
-          maxWidth: isFullScreen ? '100vw' : '1200px',
+          width: sliderWidth,
+          maxWidth: sliderMaxWidth,
           boxShadow: '-4px 0 8px rgba(0, 0, 0, 0.1)',
           borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
           zIndex: 1300,
           display: 'flex',
           flexDirection: 'column',
-          transition: 'width 0.3s ease-in-out, max-width 0.3s ease-in-out'
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'translateX(0)' : 'translateX(20px)',
+          transition: 'transform 0.3s ease-out, opacity 0.3s ease-out, width 0.3s ease-out, max-width 0.3s ease-out'
         }}
       >
         <Box sx={{ 

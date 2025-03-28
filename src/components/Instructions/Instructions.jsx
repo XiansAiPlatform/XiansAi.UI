@@ -63,7 +63,7 @@ const Instructions = () => {
         }}
         onClose={closeSlider}
       />,
-      "Add Instruction"
+      "Add Knowledge"
     );
   };
 
@@ -130,7 +130,7 @@ const Instructions = () => {
               color: 'var(--text-primary)'
             }}
           >
-            Instructions
+            Knowledge Base
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <TextField

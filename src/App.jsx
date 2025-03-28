@@ -1,12 +1,12 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { NotificationProvider } from './contexts/NotificationContext';
-import WorkflowList from './components/WorkflowList/WorkflowList';
-import WorkflowDetails from './components/WorkflowDetails/WorkflowDetails';
+import WorkflowList from './components/Runs/WorkflowList';
+import WorkflowDetails from './components/Runs/WorkflowDetails/WorkflowDetails';
 import Layout from './components/Layout/Layout';
 import { SliderProvider } from './contexts/SliderContext';
 import { LoadingProvider } from './contexts/LoadingContext';
-import Toaster from './components/Toaster/Toaster';
+import Toaster from './components/Common/Toaster/Toaster';
 import ProtectedRoute from './auth/ProtectedRoute';
 import Callback from './auth/Callback';
 import { ToastContainer } from 'react-toastify';
@@ -68,7 +68,7 @@ function App() {
                           <DefinitionList />
                         </ProtectedRoute>
                       } />
-                      <Route path="/runs/:id" element={
+                      <Route path="/runs/:id/:runId" element={
                         <ProtectedRoute>
                           <WorkflowDetails />
                         </ProtectedRoute>
