@@ -8,7 +8,7 @@ import {
   Tabs,
   Tab
 } from '@mui/material';
-import { useApi } from '../../services/settings-api';
+import { useSettingsApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
 import { getConfig } from '../../config';
@@ -19,7 +19,7 @@ const AppServerSettings = () => {
   const [certName, setCertName] = useState('AppServerCert');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const api = useApi();
+  const api = useSettingsApi();
   const { apiBaseUrl } = getConfig();
   const [activeTab, setActiveTab] = useState(0);
   const [apiKey, setApiKey] = useState('');

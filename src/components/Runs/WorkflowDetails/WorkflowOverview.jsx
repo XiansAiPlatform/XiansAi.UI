@@ -18,7 +18,7 @@ import {
 } from '@mui/icons-material';
 import StatusChip from '../../Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { useApi } from '../../../services/workflow-api';
+import { useWorkflowApi } from '../../../services/workflow-api';
 import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
 import { useEffect } from 'react';
@@ -32,7 +32,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const [copySuccess, setCopySuccess] = useState(false);
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
-  const api = useApi();
+  const api = useWorkflowApi();
   const { user } = useAuth0();
   
   // Add a helper function to safely convert status to string (moved this up to avoid initialization error)

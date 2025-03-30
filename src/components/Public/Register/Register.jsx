@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FiPlusCircle } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
-import { useApi } from '../../../services/registration-api';
+import { useRegistrationApi } from '../../../services/registration-api';
 
 export default function Register() {
   const navigate = useNavigate();
   const location = useLocation();
-  const registrationApi = useApi();
+  const registrationApi = useRegistrationApi();
   
   // Get step from URL or default to 1
   const getStepFromUrl = () => {

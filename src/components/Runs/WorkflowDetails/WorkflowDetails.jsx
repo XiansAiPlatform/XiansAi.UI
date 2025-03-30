@@ -4,7 +4,7 @@ import { Container, CircularProgress, Box, useMediaQuery, useTheme } from '@mui/
 import { useSlider } from '../../../contexts/SliderContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { handleApiError } from '../../../utils/errorHandler';
-import { useApi } from '../../../services/workflow-api';
+import { useWorkflowApi } from '../../../services/workflow-api';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
 
@@ -17,7 +17,7 @@ const WorkflowDetails = () => {
   const { showError } = useNotification();
   const containerRef = useRef(null);
   const [onActionComplete, setOnActionComplete] = useState(false);
-  const api = useApi();
+  const api = useWorkflowApi();
   const { id, runId } = useParams();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

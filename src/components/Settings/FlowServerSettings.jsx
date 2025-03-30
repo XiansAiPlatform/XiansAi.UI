@@ -9,7 +9,7 @@ import {
   Tabs,
   Tab
 } from '@mui/material';
-import { useApi } from '../../services/settings-api';
+import { useSettingsApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
 
@@ -21,7 +21,7 @@ const FlowServerSettings = () => {
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [apiKey, setApiKey] = useState('');
-  const api = useApi();
+  const api = useSettingsApi();
 
   useEffect(() => {
     fetchSettings();

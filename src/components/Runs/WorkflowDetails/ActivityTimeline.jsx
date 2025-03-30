@@ -8,7 +8,7 @@ import ActivityDetailsView from './ActivityDetailsView';
 import './WorkflowDetails.css';
 import { useLoading } from '../../../contexts/LoadingContext';
 import { useNotification } from '../../../contexts/NotificationContext';
-import { useApi } from '../../../services/workflow-api';
+import { useWorkflowApi } from '../../../services/workflow-api';
 
 const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile }) => {
   const [events, setEvents] = useState([]);
@@ -18,7 +18,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
   const [shouldNotifyCompletion, setShouldNotifyCompletion] = useState(false);
   const { setLoading } = useLoading();
   const { showError } = useNotification();
-  const api = useApi();
+  const api = useWorkflowApi();
 
   const startEventStream = useCallback(async () => {
     setIsLoading(true);

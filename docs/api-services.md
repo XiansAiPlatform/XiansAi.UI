@@ -16,40 +16,172 @@ The application follows a three-layered architecture for API integration:
 
 API services should be implemented as custom hooks that encapsulate all API-related logic for a specific domain entity.
 
+#### Creating API Services
+
+Our application uses a centralized API client that handles common concerns like authentication, error handling, and request formatting. This approach simplifies individual API service implementations.
+
+1. **Basic Service Structure**:
+
 ```javascript
+// src/services/entity-api.js
+import { useApiClient } from './api-client';
+import { useMemo } from 'react';
+
 export const useEntityApi = () => {
-  const { getAccessTokenSilently } = useAuth0();
-  const { selectedOrg } = useSelectedOrg();
+  const apiClient = useApiClient();
 
   return useMemo(() => {
-    const createAuthHeaders = async () => ({
-      'Authorization': `Bearer ${await getAccessToken()}`,
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': selectedOrg
-    });
-
     return {
-      create: async (data) => {
-        const headers = await createAuthHeaders();
-        // API implementation
+      // Get all entities
+      getAll: async (params = {}) => {
+        try {
+          return await apiClient.get('/api/entities', { params });
+        } catch (error) {
+          console.error('Error fetching entities:', error);
+          throw error;
+        }
       },
-      getAll: async () => {
-        const headers = await createAuthHeaders();
-        // API implementation
+      
+      // Get entity by ID
+      getById: async (id) => {
+        try {
+          return await apiClient.get(`/api/entities/${id}`);
+        } catch (error) {
+          console.error(`Error fetching entity ${id}:`, error);
+          throw error;
+        }
+      },
+      
+      // Create entity
+      create: async (data) => {
+        try {
+          return await apiClient.post('/api/entities', data);
+        } catch (error) {
+          console.error('Error creating entity:', error);
+          throw error;
+        }
+      },
+      
+      // Update entity
+      update: async (id, data) => {
+        try {
+          return await apiClient.put(`/api/entities/${id}`, data);
+        } catch (error) {
+          console.error(`Error updating entity ${id}:`, error);
+          throw error;
+        }
+      },
+      
+      // Delete entity
+      delete: async (id) => {
+        try {
+          await apiClient.delete(`/api/entities/${id}`);
+          return true;
+        } catch (error) {
+          console.error(`Error deleting entity ${id}:`, error);
+          throw error;
+        }
       }
-      // Additional methods...
     };
-  }, [dependencies]);
+  }, [apiClient]);
 };
 ```
 
-#### Key Patterns:
+1. **Real-world Example**:
 
-- Use `useMemo` to memoize API methods
-- Implement consistent error handling
-- Include authentication and headers setup
-- Return a structured API methods object
-- Use TypeScript interfaces for type safety
+```javascript
+// src/services/activities-api.js
+import { useApiClient } from './api-client';
+import { useMemo } from 'react';
+
+export const useActivitiesApi = () => {
+  const apiClient = useApiClient();
+
+  return useMemo(() => {
+    return {
+      getWorkflowActivity: async (workflowId, activityId) => {
+        try {
+          return await apiClient.get(`/api/client/workflows/${workflowId}/activities/${activityId}`);
+        } catch (error) {
+          console.error('Error fetching workflow activity:', error);
+          throw error;
+        }
+      }
+    };
+  }, [apiClient]);
+};
+```
+
+#### Using API Services in Components
+
+```javascript
+import { useEffect, useState } from 'react';
+import { useEntityApi } from '../services/entity-api';
+
+const EntityList = () => {
+  const entityApi = useEntityApi();
+  const [entities, setEntities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  // Fetch entities
+  useEffect(() => {
+    const fetchEntities = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await entityApi.getAll();
+        setEntities(data);
+      } catch (err) {
+        setError(err.message || 'Failed to fetch entities');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchEntities();
+  }, [entityApi]);
+  
+  // Component rendering...
+};
+```
+
+#### Example with React Query
+
+```javascript
+import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useEntityApi } from '../services/entity-api';
+
+const EntityList = () => {
+  const entityApi = useEntityApi();
+  const queryClient = useQueryClient();
+  
+  // Query for fetching entities
+  const { 
+    data: entities = [], 
+    isLoading, 
+    error 
+  } = useQuery('entities', entityApi.getAll);
+  
+  // Mutation for creating entity
+  const createMutation = useMutation(entityApi.create, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('entities');
+    }
+  });
+  
+  // Component rendering...
+};
+```
+
+#### Key Patterns
+
+- Use a centralized `apiClient` for consistent API interactions
+- Use `useMemo` to memoize API methods, preventing recreations on component renders
+- Implement clean try/catch blocks in each method for error handling
+- Use TypeScript interfaces for type safety when applicable
+- Keep API services focused on a specific domain entity or feature
+- Return a structured object of API methods
 
 ### 2. Component Implementation
 
@@ -84,7 +216,7 @@ const EntityComponent = () => {
 }
 ```
 
-#### Best Practices:
+#### Best Practices
 
 - Separate data fetching from UI rendering
 - Implement loading and error states
@@ -124,14 +256,14 @@ All API calls must:
 
 ### 5. State Management Patterns
 
-#### Local State:
+#### Local State
 
 - Use for component-specific data
 - Implement loading states
 - Handle error states
 - Manage pagination state
 
-#### Global State:
+#### Global State
 
 - Use contexts for shared data
 - Implement caching strategies
@@ -170,41 +302,6 @@ useEffect(() => {
 }, [url]);
 ```
 
-### 7. Testing Strategies
-
-#### Unit Tests:
-- Mock API calls
-- Test loading states
-- Test error handling
-- Verify component behavior
-
-```javascript
-test('handles API error correctly', async () => {
-  // Mock API error
-  api.getAll.mockRejectedValue(new Error('API Error'));
-  
-  render(<EntityComponent />);
-  
-  // Verify error state
-  expect(await screen.findByText('Error loading data')).toBeInTheDocument();
-});
-```
-
-#### Integration Tests:
-
-- Test API integration
-- Verify data flow
-- Test error scenarios
-- Validate state updates
-
-### 8. Documentation
-
-Document your API implementations:
-- Include TypeScript interfaces
-- Document error handling
-- Provide usage examples
-- Include API response examples
-
 ## Example Implementation
 
 Reference the following files for implementation examples:
@@ -237,12 +334,6 @@ Reference the following files for implementation examples:
    - Implement caching
    - Handle large datasets
    - Monitor performance
-
-5. **Testing**
-   - Write comprehensive tests
-   - Mock external dependencies
-   - Test error scenarios
-   - Implement E2E tests
 
 ## Additional Resources
 
