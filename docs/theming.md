@@ -91,6 +91,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 When creating styles that need to respond to theme changes:
 
 1. Access theme values using the theme parameter in styled components:
+
 ```javascript
 const MyComponent = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -98,7 +99,8 @@ const MyComponent = styled(Box)(({ theme }) => ({
 }));
 ```
 
-2. Use the `useTheme` hook for dynamic styles:
+1. Use the `useTheme` hook for dynamic styles:
+
 ```javascript
 import { useTheme } from '@mui/material/styles';
 
@@ -133,12 +135,14 @@ components: {
 ## Best Practices
 
 1. **Consistent Spacing**: Use theme.spacing() for consistent spacing throughout the application
+
    ```javascript
    padding: theme.spacing(2) // 16px by default
    margin: theme.spacing(1, 2) // 8px vertical, 16px horizontal
    ```
 
 2. **Dark/Light Mode**: Always consider both light and dark modes when defining colors
+
    ```javascript
    backgroundColor: theme.palette.mode === 'dark' 
      ? 'rgba(255, 255, 255, 0.08)'
@@ -146,6 +150,7 @@ components: {
    ```
 
 3. **Component Styling**: Prefer styled components for reusable styles and the `sx` prop for one-off styles
+
    ```javascript
    // Reusable styled component
    const StyledBox = styled(Box)(({ theme }) => ({
@@ -160,6 +165,7 @@ components: {
    ```
 
 4. **Typography**: Use MUI's typography variants instead of custom font styles
+
    ```javascript
    // Good
    <Typography variant="h6">Title</Typography>
@@ -169,6 +175,7 @@ components: {
    ```
 
 5. **Theme Spacing**: Use the spacing helper for consistent layout
+
    ```javascript
    // Good
    <Box sx={{ mt: 2, mb: 4 }}>
@@ -178,6 +185,7 @@ components: {
    ```
 
 6. **Color Usage**: Use theme palette colors for consistency
+
    ```javascript
    // Good
    <Button sx={{ color: 'primary.main' }}>
@@ -208,6 +216,7 @@ function App() {
 To extend or modify the theme:
 
 1. Create a new theme file or modify the existing one:
+
 ```javascript
 import { createTheme } from '@mui/material/styles';
 
@@ -234,7 +243,8 @@ export const theme = createTheme({
 });
 ```
 
-2. Access custom theme values in components:
+1. Access custom theme values in components:
+
 ```javascript
 const CustomComponent = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.custom.lightGray,
@@ -261,4 +271,3 @@ const ResponsiveComponent = styled(Box)(({ theme }) => ({
 ```
 
 This comprehensive guide should help maintain consistent theming across the application. Always refer to the Material-UI documentation for more detailed information about specific components and features.
-
