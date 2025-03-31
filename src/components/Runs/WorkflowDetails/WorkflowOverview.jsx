@@ -457,6 +457,31 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
           </Typography>
         </Box>
       </Box>
+      <Box className="overview-current-activity">
+          
+          <Typography
+          className="overview-label"
+          variant="subtitle2"
+          sx={{ 
+            color: 'text.secondary', 
+            marginBottom: isMobile ? 0.5 : 1,
+            fontSize: isMobile ? '0.7rem' : '0.875rem'
+          }}
+          >
+            Current activity:
+          </Typography>
+          
+          <Typography
+          color='black'
+          variant="body1"
+          sx={{ 
+            fontWeight: 500,
+            fontSize: isMobile ? '0.8rem' : '1rem'
+          }}
+          >
+            {workflow?.currentActivity?.activityType.name || 'No Pending Activities'}
+          </Typography>
+        </Box>
     </Paper>
   );
 };

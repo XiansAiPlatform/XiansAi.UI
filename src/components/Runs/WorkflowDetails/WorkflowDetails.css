@@ -114,6 +114,13 @@
   background-color: rgba(0, 0, 0, 0.02);
 }
 
+.overview-current-activity {
+  padding: 16px;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.02);
+  margin-top: 16px;
+}
+
 .overview-label.MuiTypography-root {
   margin-bottom: 8px;
   font-weight: 500;
