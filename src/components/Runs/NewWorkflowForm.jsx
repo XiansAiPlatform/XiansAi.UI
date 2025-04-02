@@ -229,6 +229,22 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
                   },
                 }}
               />
+              <Box sx={{ 
+                mt: 1,
+                p: 1.5,
+                borderRadius: 1,
+                backgroundColor: 'rgba(255, 152, 0, 0.08)',
+                border: '1px solid',
+                borderColor: 'warning.main',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <Box sx={{ fontSize: '16px', pl: 0.5 }}>⚠️</Box>
+                <Typography variant="caption" sx={{ color: 'warning.dark', fontWeight: 500, pl: 1 }}>
+                  Ensure workflow runners are configured to handle this custom queue name before proceeding.
+                </Typography>
+              </Box>
             </Box>
           </Paper>
         )}
