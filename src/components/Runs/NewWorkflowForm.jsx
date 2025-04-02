@@ -29,6 +29,8 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   );
   const [runType, setRunType] = useState('unique'); // 'unique' or 'singleton'
   const [flowId, setFlowId] = useState(definition ? `${definition.agentName}:${definition.typeName}` : '');
+  const [queueType, setQueueType] = useState('default'); // 'default' or 'named'
+  const [queueName, setQueueName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = useWorkflowApi();
@@ -72,6 +74,10 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
     setRunType(event.target.value);
   };
 
+  const handleQueueTypeChange = (event) => {
+    setQueueType(event.target.value);
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ 
       p: isMobile ? 2 : 3,
@@ -109,7 +115,127 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         </Alert>
       )}
 
-      <Box sx={{ mb: 3 }}>
+      <Typography variant={isMobile ? "h7" : "h6"} sx={{ pr: isMobile ? 4 : 0, mb: 2 }}>
+        Input Parameters
+      </Typography>
+
+      <Box sx={{ 
+        mb: 2
+      }}>
+        {definition.parameters && definition.parameters.length > 0 ? (
+          definition.parameters.map((param, index) => (
+            <Paper
+              key={param.name}
+              elevation={0}
+              className="parameter-paper"
+              sx={{
+                p: isMobile ? 1.5 : 2,
+                mb: 2
+              }}
+            >
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={isMobile ? 3 : 2}
+                  value={parameters[param.name]}
+                  onChange={(e) => handleParameterChange(param.name, e.target.value)}
+                  placeholder={param.name}
+                  label={`${param.name} (${param.type})`}
+                  sx={{ flex: 1 }}
+                  size={isMobile ? "small" : "medium"}
+                />
+              </Box>
+            </Paper>
+          ))
+        ) : (
+          <Typography variant="body1" color="text.secondary" sx={{ p: 2, textAlign: 'left' }}>
+            No input parameters required for this workflow.
+          </Typography>
+        )}
+      </Box>
+
+      <Box sx={{ mb: 2 }}>
+        <Typography variant={isMobile ? "h7" : "h6"} sx={{ mb: 1 }}>
+          Priority Queue
+        </Typography>
+        <FormControl component="fieldset" sx={{ width: '100%' }}>
+          <RadioGroup
+            aria-label="queue-type"
+            name="queue-type"
+            value={queueType}
+            onChange={handleQueueTypeChange}
+            row
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, mr: 2 }}>
+              <FormControlLabel 
+                value="default" 
+                control={<Radio />} 
+                label="Default Queue" 
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: -0.5, mb: 1, ml: 4 }}>
+                Uses the default priority queue for this workflow.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <FormControlLabel 
+                value="named" 
+                control={<Radio />} 
+                label="Named Queue" 
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: -0.5, mb: 1, ml: 4 }}>
+                Specify a custom priority queue name for this workflow.
+              </Typography>
+            </Box>
+          </RadioGroup>
+        </FormControl>
+        
+        {queueType === 'named' && (
+          <Paper
+            elevation={0}
+            className="parameter-paper"
+            sx={{
+              p: isMobile ? 1.5 : 2,
+              mt: 2,
+              mb: 2
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                Priority Queue Name
+              </Typography>
+              <TextField
+                fullWidth
+                required
+                error={queueType === 'named' && !queueName}
+                value={queueName}
+                onChange={(e) => setQueueName(e.target.value)}
+                placeholder="Enter queue name"
+                size={isMobile ? "small" : "medium"}
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'rgba(0, 0, 0, 0.87)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#1976d2',
+                    },
+                  },
+                }}
+              />
+            </Box>
+          </Paper>
+        )}
+      </Box>
+
+      <Box sx={{ mb: 2 }}>
+        <Typography variant={isMobile ? "h7" : "h6"} sx={{ mb: 1 }}>
+          Flow Identity
+        </Typography>
         <FormControl component="fieldset" sx={{ width: '100%' }}>
           <RadioGroup
             aria-label="run-type"
@@ -195,7 +321,6 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
                   fullWidth
                   required
                   error={runType === 'singleton' && !flowId}
-                  helperText={runType === 'singleton' && !flowId ? "Flow ID is required" : ""}
                   value={flowId}
                   onChange={(e) => setFlowId(e.target.value)}
                   placeholder="Enter custom Flow ID"
@@ -220,58 +345,11 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
                   variant="outlined"
                 />
               </Box>
-              {(runType === 'singleton' && !flowId) && (
-                <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5, ml: 1.75 }}>
-                  Flow ID is required
-                </Typography>
-              )}
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                 The server will automatically add "{tenantPrefix}" as a prefix to your Flow ID
               </Typography>
             </Box>
           </Paper>
-        )}
-      </Box>
-
-      <Typography variant={isMobile ? "h7" : "h6"} sx={{ pr: isMobile ? 4 : 0, mb: 2 }}>
-        Input Parameters
-      </Typography>
-
-      <Box sx={{ 
-        mb: 3, 
-        flex: 1,
-        overflowY: 'auto'
-      }}>
-        {definition.parameters && definition.parameters.length > 0 ? (
-          definition.parameters.map((param, index) => (
-            <Paper
-              key={param.name}
-              elevation={0}
-              className="parameter-paper"
-              sx={{
-                p: isMobile ? 1.5 : 2,
-                mb: 2
-              }}
-            >
-              <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={isMobile ? 3 : 2}
-                  value={parameters[param.name]}
-                  onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                  placeholder={param.name}
-                  label={`${param.name} (${param.type})`}
-                  sx={{ flex: 1 }}
-                  size={isMobile ? "small" : "medium"}
-                />
-              </Box>
-            </Paper>
-          ))
-        ) : (
-          <Typography variant="body1" color="text.secondary" sx={{ p: 2, textAlign: 'left' }}>
-            No input parameters required for this workflow.
-          </Typography>
         )}
       </Box>
 
@@ -294,7 +372,9 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         <Button
           type="submit"
           variant="contained"
-          disabled={loading || (runType === 'singleton' && !flowId)}
+          disabled={loading || 
+            (runType === 'singleton' && !flowId) || 
+            (queueType === 'named' && !queueName)}
           fullWidth={isMobile}
           startIcon={loading && <CircularProgress size={20} />}
         >
