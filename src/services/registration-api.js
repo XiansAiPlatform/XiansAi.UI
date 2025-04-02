@@ -1,83 +1,35 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { handleApiError } from '../utils/errorHandler';
-import { getConfig } from '../config';
+import { useApiClient } from './api-client';
 import { useMemo } from 'react';
-import { useSelectedOrg } from '../contexts/OrganizationContext';
 
-const { apiBaseUrl } = getConfig();
+export const useRegistrationApi = () => {
+  const apiClient = useApiClient();
 
-export const useApi = () => {
-  const { getAccessTokenSilently } = useAuth0();
-  const { selectedOrg } = useSelectedOrg();
-
-  const registrationApi = useMemo(() => {
-    const getAccessToken = async () => {
-      try {
-        return await getAccessTokenSilently();
-      } catch (error) {
-        console.error('Error getting access token:', error);
-        return null;
-      }
-    };
-
-    const createAuthHeaders = async () => ({
-      'Authorization': `Bearer ${await getAccessToken()}`,
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': selectedOrg || '',
-    });
-
+  return useMemo(() => {
     return {
       // validate verification code
       validateVerificationCode: async (email, code) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/public/register/verification/validate`, {
-            method: 'POST',
-            headers: await createAuthHeaders(),
-            body: JSON.stringify({ Email: email, Code: code })
+          const response = await apiClient.post('/api/public/register/verification/validate', { 
+            Email: email, 
+            Code: code 
           });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to validate verification code');
-          }
-          const data = await response.json();
-          if (response.status === 200) {
-            console.log(data);
-            return data.isValid;
-          } else {
-            throw new Error(data.message || 'Failed to validate verification code');
-          }
+          
+          return response.isValid;
         } catch (error) {
           console.error('Failed to validate verification code:', error);
-          throw handleApiError(error, 'Failed to validate verification code');
+          throw error;
         }
       },
 
       // Send verification code
       sendVerificationCode: async (email) => {
         try {
-          const response = await fetch(`${apiBaseUrl}/api/public/register/verification/send`, {
-            method: 'POST',
-            headers: await createAuthHeaders(),
-            body: JSON.stringify(email)
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to send verification code');
-          }
-          if (response.status === 200) {
-            return response.json();
-          } else {
-            throw new Error(response.json().message || 'Failed to send verification code');
-          }
+          return await apiClient.post('/api/public/register/verification/send', email);
         } catch (error) {
           console.error('Failed to send verification code:', error);
-          throw handleApiError(error, 'Failed to send verification code');
+          throw error;
         }
       },
     };
-  }, [getAccessTokenSilently, selectedOrg]);
-
-  return registrationApi;
+  }, [apiClient]);
 }; 

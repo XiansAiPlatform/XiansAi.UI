@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   IconButton
 } from '@mui/material';
-import { useApi } from '../../services/workflow-api';
+import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
@@ -38,7 +38,7 @@ const WorkflowList = () => {
   const isSmallMobile = useMediaQuery('(max-width:480px)');
 
   const { setLoading, isLoading } = useLoading();
-  const { fetchWorkflowRuns } = useApi();
+  const api = useWorkflowApi();
 
   const calculateStats = useCallback((runs) => {
     return runs.reduce((acc, run) => {
@@ -72,7 +72,7 @@ const WorkflowList = () => {
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
     try {
-      const runs = await fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
+      const runs = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
       if (runs && runs.length > 0) {
         setStats(calculateStats(runs));
         setWorkflows(groupWorkflows(runs));
@@ -87,7 +87,7 @@ const WorkflowList = () => {
     } finally {
       setLoading(false);
     }
-  }, [calculateStats, groupWorkflows, setLoading, fetchWorkflowRuns, timeFilter, ownerFilter, statusFilter]);
+  }, [calculateStats, groupWorkflows, setLoading, api, timeFilter, ownerFilter, statusFilter]);
 
   useEffect(() => {
     loadWorkflows();

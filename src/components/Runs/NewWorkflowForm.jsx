@@ -15,7 +15,7 @@ import {
   FormControl
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import { useApi } from '../../services/workflow-api';
+import { useWorkflowApi } from '../../services/workflow-api';
 import './WorkflowList.css';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
@@ -31,7 +31,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   const [flowId, setFlowId] = useState(definition ? `${definition.agentName}:${definition.typeName}` : '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const api = useApi();
+  const api = useWorkflowApi();
   const tenantPrefix = `${selectedOrg}:`; // Using the actual tenant ID from context
 
   const handleSubmit = async (e) => {
