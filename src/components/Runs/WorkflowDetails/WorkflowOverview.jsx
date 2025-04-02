@@ -481,6 +481,19 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
           >
             {workflow?.currentActivity?.activityType.name || 'No Pending Activities'}
           </Typography>
+
+        {workflow?.lastError && (
+          <Typography
+          color='red'
+          variant="body1"
+          sx={{ 
+            fontWeight: 500,
+            fontSize: isMobile ? '0.8rem' : '1rem'
+          }}
+          >
+            {workflow.lastError}
+          </Typography>
+        )}
         </Box>
     </Paper>
   );
