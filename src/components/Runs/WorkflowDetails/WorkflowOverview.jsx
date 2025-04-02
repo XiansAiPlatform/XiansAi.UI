@@ -1,20 +1,26 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { 
-  Typography, 
-  Box, 
-  Paper, 
+import {
+  Typography,
+  Box,
+  Paper,
   Button,
   Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
   IconButton,
-  Tooltip
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
   Stop as TerminateIcon,
   MoreVert as MoreVertIcon,
-  ContentCopy as CopyIcon
+  ContentCopy as CopyIcon,
+  Description as LogsIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import StatusChip from '../../Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -30,21 +36,22 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const [workflow, setWorkflow] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [logsModalOpen, setLogsModalOpen] = useState(false);
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
   const api = useApi();
   const { user } = useAuth0();
-  
+
   // Add a helper function to safely convert status to string (moved this up to avoid initialization error)
   const getStatusString = (status) => {
     if (status === null || status === undefined) return '';
     return String(status);
   };
-  
+
   // Function to fetch workflow data (memoized with useCallback)
   const fetchWorkflow = useCallback(async () => {
     if (!workflowId) return;
-    
+
     setIsLoading(true);
     try {
       const workflowData = await api.getWorkflow(workflowId, runId);
@@ -93,7 +100,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     try {
       await api.executeWorkflowCancelAction(workflow.workflowId, force);
       showSuccess('Termination requested. It may take a few minutes to complete.');
-      
+
       // Wait a moment before fetching updated data
       setTimeout(() => {
         fetchWorkflow();
@@ -118,16 +125,16 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   // Add helper function to calculate duration
   const calculateDuration = (startTime, endTime) => {
     if (!startTime) return 'N/A';
-    
+
     const start = new Date(startTime);
     const end = endTime ? new Date(endTime) : new Date();
     const diff = end - start;
-    
+
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
+
     if (days > 0) {
       return `${days}d ${hours}h ${minutes}m`;
     }
@@ -169,9 +176,17 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       });
   };
 
+  const handleLogsClick = () => {
+    setLogsModalOpen(true);
+  };
+
+  const handleLogsClose = () => {
+    setLogsModalOpen(false);
+  };
+
   return (
-    <Paper 
-      elevation={0} 
+    <Paper
+      elevation={0}
       className="overview-paper"
       sx={{
         padding: isMobile ? 2 : 3,
@@ -179,7 +194,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         background: 'linear-gradient(to right bottom, #ffffff, #fafafa)'
       }}
     >
-      <Box 
+      <Box
         className="header-container"
         sx={{
           display: 'flex',
@@ -191,24 +206,24 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         }}
       >
         {/* Top row with title and actions button */}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'flex-start',
           width: '100%',
           mb: 1
         }}>
-          <Typography 
+          <Typography
             className="overview-title"
             variant="h5"
-            sx={{ 
+            sx={{
               fontWeight: 600,
               fontSize: isMobile ? '1.25rem' : '1.5rem'
             }}
           >
             {getDisplayValue(workflow?.workflowType)?.replace(/([A-Z])/g, ' $1').trim()}
           </Typography>
-          
+
           <Button
             id="actions-button"
             variant="outlined"
@@ -233,34 +248,34 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
 
         {/* Status and details section */}
         <Box className="header-left" sx={{ width: '100%' }}>
-          <Box 
+          <Box
             className="overview-header-content"
             sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
           >
-            <Box 
+            <Box
               className="overview-title-row"
-              sx={{ 
-                display: 'flex', 
+              sx={{
+                display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                alignItems: isMobile ? 'flex-start' : 'center', 
-                gap: isMobile ? 1 : 2 
+                alignItems: isMobile ? 'flex-start' : 'center',
+                gap: isMobile ? 1 : 2
               }}
             >
-              <StatusChip 
+              <StatusChip
                 label={getDisplayValue(workflow?.status)}
                 status={getStatusString(workflow?.status).toUpperCase()}
               />
             </Box>
-            
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
+
+            <Box sx={{
+              display: 'flex',
+              flexDirection: 'column',
               gap: 0.5,
               fontSize: isMobile ? '0.8125rem' : '0.875rem'
             }}>
-              <Typography 
-                sx={{ 
-                  color: 'text.secondary', 
+              <Typography
+                sx={{
+                  color: 'text.secondary',
                   fontSize: 'inherit',
                   wordBreak: 'break-word',
                   display: 'flex',
@@ -268,11 +283,11 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   gap: 0.5
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workflow Id:</Box> 
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workflow Id:</Box>
                 {getDisplayValue(workflow?.workflowId)}
                 <Tooltip title="Copy to clipboard">
-                  <IconButton 
-                    size="small" 
+                  <IconButton
+                    size="small"
                     onClick={() => handleCopyToClipboard(workflow?.workflowId)}
                     color={copySuccess ? "success" : "default"}
                     sx={{ ml: 0.5, p: 0.5 }}
@@ -281,9 +296,9 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   </IconButton>
                 </Tooltip>
               </Typography>
-              <Typography 
-                sx={{ 
-                  color: 'text.secondary', 
+              <Typography
+                sx={{
+                  color: 'text.secondary',
                   fontSize: 'inherit',
                   wordBreak: 'break-word',
                   display: 'flex',
@@ -293,8 +308,8 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Run Id:</Box> {getDisplayValue(workflow?.runId)}
               </Typography>
-              <Typography 
-                sx={{ 
+              <Typography
+                sx={{
                   fontSize: 'inherit',
                   color: isOwner ? 'primary.main' : 'text.secondary',
                   display: 'flex',
@@ -322,9 +337,9 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   </Typography>
                 )}
               </Typography>
-              <Typography 
-                sx={{ 
-                  color: 'text.secondary', 
+              <Typography
+                sx={{
+                  color: 'text.secondary',
                   fontSize: 'inherit',
                   wordBreak: 'break-word'
                 }}
@@ -332,9 +347,9 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Type:</Box> {getDisplayValue(workflow?.workflowType)}
               </Typography>
               {workflow?.parentId && (
-                <Typography 
-                  sx={{ 
-                    color: 'text.secondary', 
+                <Typography
+                  sx={{
+                    color: 'text.secondary',
                     fontSize: 'inherit',
                     wordBreak: 'break-word'
                   }}
@@ -343,9 +358,9 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                 </Typography>
               )}
               {workflow?.parentRunId && (
-                <Typography 
-                  sx={{ 
-                    color: 'text.secondary', 
+                <Typography
+                  sx={{
+                    color: 'text.secondary',
                     fontSize: 'inherit',
                     wordBreak: 'break-word'
                   }}
@@ -356,7 +371,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
             </Box>
           </Box>
         </Box>
-        
+
         <Menu
           id="actions-menu"
           anchorEl={anchorEl}
@@ -370,7 +385,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Menu>
       </Box>
 
-      <Box 
+      <Box
         className="overview-grid"
         sx={{
           display: 'grid',
@@ -389,20 +404,20 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         }}
       >
         <Box className="overview-grid-item" sx={{ gridColumn: isMobile ? 'span 2' : 'auto' }}>
-          <Typography 
-            className="overview-label" 
+          <Typography
+            className="overview-label"
             variant="subtitle2"
-            sx={{ 
-              color: 'text.secondary', 
+            sx={{
+              color: 'text.secondary',
               marginBottom: isMobile ? 0.5 : 1,
               fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}
           >
             Start Time
           </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
+          <Typography
+            variant="body1"
+            sx={{
               fontWeight: 500,
               fontSize: isMobile ? '0.8rem' : '1rem'
             }}
@@ -412,20 +427,20 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Box>
 
         <Box className="overview-grid-item">
-          <Typography 
-            className="overview-label" 
+          <Typography
+            className="overview-label"
             variant="subtitle2"
-            sx={{ 
-              color: 'text.secondary', 
+            sx={{
+              color: 'text.secondary',
               marginBottom: isMobile ? 0.5 : 1,
               fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}
           >
             Duration
           </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
+          <Typography
+            variant="body1"
+            sx={{
               fontWeight: 500,
               fontSize: isMobile ? '0.8rem' : '1rem'
             }}
@@ -435,20 +450,20 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Box>
 
         <Box className="overview-grid-item">
-          <Typography 
-            className="overview-label" 
+          <Typography
+            className="overview-label"
             variant="subtitle2"
-            sx={{ 
-              color: 'text.secondary', 
+            sx={{
+              color: 'text.secondary',
               marginBottom: isMobile ? 0.5 : 1,
               fontSize: isMobile ? '0.7rem' : '0.875rem'
             }}
           >
             End Time
           </Typography>
-          <Typography 
-            variant="body1" 
-            sx={{ 
+          <Typography
+            variant="body1"
+            sx={{
               fontWeight: 500,
               fontSize: isMobile ? '0.8rem' : '1rem'
             }}
@@ -458,43 +473,101 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Box>
       </Box>
       <Box className="overview-current-activity">
-          
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box>
           <Typography
-          className="overview-label"
-          variant="subtitle2"
-          sx={{ 
-            color: 'text.secondary', 
-            marginBottom: isMobile ? 0.5 : 1,
-            fontSize: isMobile ? '0.7rem' : '0.875rem'
-          }}
+            className="overview-label"
+            variant="subtitle2"
+            sx={{
+              color: 'text.secondary',
+              fontSize: isMobile ? '0.7rem' : '0.875rem'
+            }}
           >
             Current activity:
           </Typography>
-          
+
           <Typography
-          color='black'
-          variant="body1"
-          sx={{ 
-            fontWeight: 500,
-            fontSize: isMobile ? '0.8rem' : '1rem'
-          }}
+            color='black'
+            variant="body1"
+            sx={{
+              fontWeight: 500,
+              fontSize: isMobile ? '0.8rem' : '1rem'
+            }}
           >
             {workflow?.currentActivity?.activityType.name || 'No Pending Activities'}
           </Typography>
+          </Box>
 
-        {workflow?.lastError && (
-          <Typography
-          color='red'
-          variant="body1"
-          sx={{ 
-            fontWeight: 500,
-            fontSize: isMobile ? '0.8rem' : '1rem'
-          }}
-          >
-            {workflow.lastError}
-          </Typography>
-        )}
+          {workflow?.logs && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<LogsIcon />}
+              onClick={handleLogsClick}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2,
+                padding: '4px 12px'
+              }}
+            >
+              Show Logs
+            </Button>
+          )}
         </Box>
+        
+      </Box>
+
+      {/* Logs Modal */}
+      <Dialog
+        open={logsModalOpen}
+        onClose={handleLogsClose}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            maxHeight: '80vh'
+          }
+        }}
+      >
+        <DialogTitle sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          pb: 2
+        }}>
+          Workflow Logs
+          <IconButton
+            aria-label="close"
+            onClick={handleLogsClose}
+            sx={{ color: 'text.secondary' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{
+          p: 3,
+          '& pre': {
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            backgroundColor: 'rgba(0, 0, 0, 0.02)',
+            padding: 2,
+            borderRadius: 1,
+            maxHeight: '60vh',
+            overflow: 'auto',
+            fontFamily: 'monospace',
+            fontSize: '0.875rem'
+          }
+        }}>
+          <pre>{workflow?.logs}</pre>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
+          <Button onClick={handleLogsClose} variant="outlined">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
