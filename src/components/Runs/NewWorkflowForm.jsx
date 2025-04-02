@@ -47,12 +47,14 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         : [];
       
       const flowIdToSend = runType === 'singleton' ? flowId : null;
+      const queueNameToSend = queueType === 'named' ? queueName : null;
       
       await api.startNewWorkflow(
         definition.typeName, 
         definition.agentName, 
         parameterValues,
-        flowIdToSend
+        flowIdToSend,
+        queueNameToSend
       );
       onSuccess();
       navigate('/runs');
