@@ -1,11 +1,6 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { handleApiError } from '../utils/errorHandler';
-import { getConfig } from '../config';
 import { useMemo } from 'react';
-import { useSelectedOrg } from '../contexts/OrganizationContext';
 import { useApiClient, getTimeRangeParams } from './api-client';
 
-const { apiBaseUrl } = getConfig();
 
 export const useWorkflowApi = () => {
   const apiClient = useApiClient();
