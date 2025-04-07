@@ -62,10 +62,10 @@ public class BloggingFlow: FlowBase
 }`
         },
         agentOne: {
-            file: 'ResearchAgent.cs',
+            file: 'ResearchActivity.cs',
             code: `[Agents("xiansai-agent/web-research")]
 [Instructions("Competitor-Urls", "How-To-Research-Blog-Topics")]
-public class ResearchAgent : AgentStub,  IResearchAgent
+public class ResearchActivity : ActivityStub,  IResearchActivity
 {
     [Activity]
     public async Task<string[]> FindRelevantTopics()
@@ -86,10 +86,10 @@ public class ResearchAgent : AgentStub,  IResearchAgent
 }`
         },
         agentTwo: {
-            file: 'WriterAgent.cs',
+            file: 'WriterActivity.cs',
             code: `[Agents("xiansai-agent/blog-publisher")]
 [Instructions("How-To-Write-Blogs")]
-public class WriterAgent : AgentStub, IWriterAgent
+public class WriterActivity : ActivityStub, IWriterActivity
 {
     [Activity]
     public async Task<Uri> WriteAndPublishBlog(string topic)
@@ -254,7 +254,7 @@ var newBlogPosts = new List<string>();`
                 <div className="home-code-demo-content">
                     <div className="home-code-demo-text">
                         <h2>
-                            Create Your First Multi-Agent Workflow
+                            Create Your First Multi-Tool Agent Workflow
                         </h2>
                         <p>Develop powerful AI workflows in minutes. Here's how to build a marketing content generation pipeline using multiple AI agents:</p>
                         <ul className="home-code-demo-points">
@@ -285,6 +285,54 @@ var newBlogPosts = new List<string>();`
                         >
                             {codeExamples[activeCodeTab].code}
                         </SyntaxHighlighter>
+                    </div>
+                </div>
+                <br></br>
+                <div className="home-code-demo-content" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <div className="home-code-demo-box">
+                        <div className="home-code-header">
+                            <h3 style={{ 
+                                textAlign: 'center', 
+                                width: '100%',
+                                fontFamily: 'var(--font-family)',
+                                fontWeight: 'var(--font-weight-semibold)',
+                                letterSpacing: 'var(--letter-spacing-tight)',
+                                color: 'var(--home-text-primary)'
+                            }}>Read documentation to get started</h3>
+                        </div>
+                        <div className="home-code-block" style={{ 
+                            padding: '2rem', 
+                            textAlign: 'center',
+                            background: 'var(--home-bg-darker)'
+                        }}>
+                            <p style={{ 
+                                marginBottom: '1.5rem', 
+                                color: 'var(--home-text-secondary)',
+                                fontFamily: 'var(--font-family)',
+                                fontSize: 'var(--text-base)',
+                                lineHeight: '1.6'
+                            }}>
+                                Learn more about the Xians.ai platform and how to use it's capabilities to build your own AI Agents and Workflows.
+                            </p>
+                            <a 
+                                href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="home-btn home-btn-primary"
+                                style={{ 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.5rem',
+                                    fontFamily: 'var(--font-family)',
+                                    fontWeight: 'var(--font-weight-medium)',
+                                    letterSpacing: '0.05em',
+                                    textTransform: 'uppercase'
+                                }}
+                            >
+                                <FiSettings className="feature-icon-svg" />
+                                Read Documentation
+                            </a>
+                        </div>
                     </div>
                 </div>
             </section>
