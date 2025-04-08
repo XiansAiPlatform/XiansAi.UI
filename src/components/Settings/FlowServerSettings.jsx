@@ -5,21 +5,16 @@ import {
   TextField, 
   Button, 
   Box,
-  CircularProgress,
-  Tabs,
-  Tab
+  CircularProgress
 } from '@mui/material';
 import { useSettingsApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
 
 const FlowServerSettings = () => {
-  const [certName, setCertName] = useState('FlowServerCert');
-  const [keyName, setKeyName] = useState('FlowServerPrivateKey');
   const [isLoading, setIsLoading] = useState(false);
   const [settings, setSettings] = useState(null);
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState(0);
   const [apiKey, setApiKey] = useState('');
   const api = useSettingsApi();
 
@@ -41,32 +36,6 @@ const FlowServerSettings = () => {
     }
   };
 
-  const generateNewFiles = async () => {
-    if (!certName || !keyName) {
-      toast.error('Please provide both certificate and key names');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Generate certificate with password
-      const certResponse = await api.getFlowServerCertFile(certName);  // Empty password for now
-      downloadBlob(certResponse, `${certName}-${Date.now()}.crt`, 'application/x-x509-ca-cert');
-
-      // Generate key
-      const keyResponse = await api.getFlowServerPrivateKeyFile(keyName);
-      downloadBlob(keyResponse, `${keyName}-${Date.now()}.key`, 'application/x-pem-file');
-
-      toast.success('Certificate and key generated successfully');
-      await fetchSettings(); // Refresh settings after generating new files
-      
-    } catch (error) {
-      toast.error(`Failed to generate files: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const generateApiKey = async () => {
     setIsLoading(true);
     try {
@@ -78,18 +47,6 @@ const FlowServerSettings = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const downloadBlob = (data, filename, type) => {
-    const blob = new Blob([data], { type });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', filename);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -129,76 +86,28 @@ const FlowServerSettings = () => {
             />
           </Box>
 
-          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-            <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-              <Tab label="With API Keys" />
-              <Tab label="With Certificates" />
-            </Tabs>
+          <Box className="form-container">
+            <TextField
+              label="API Key"
+              value={apiKey}
+              fullWidth
+              multiline
+              rows={3}
+              InputProps={{ readOnly: true }}
+              className="input-field"
+              sx={{ mb: 2 }}
+            />
+            <Button
+              variant="contained"
+              onClick={generateApiKey}
+              disabled={isLoading}
+              className="submit-button"
+              size="small"
+              sx={{ alignSelf: 'flex-start' }}
+            >
+              {isLoading ? 'Generating...' : 'Generate New API Key'}
+            </Button>
           </Box>
-
-          {activeTab === 0 ? (
-            <Box className="form-container">
-              <TextField
-                label="API Key"
-                value={apiKey}
-                fullWidth
-                multiline
-                rows={3}
-                InputProps={{ readOnly: true }}
-                className="input-field"
-                sx={{ mb: 2 }}
-              />
-              <Button
-                variant="contained"
-                onClick={generateApiKey}
-                disabled={isLoading}
-                className="submit-button"
-                size="small"
-                sx={{ alignSelf: 'flex-start' }}
-              >
-                {isLoading ? 'Generating...' : 'Generate New API Key'}
-              </Button>
-            </Box>
-          ) : (
-            <Box>
-              <Typography variant="subtitle1" gutterBottom>
-                Download Certificates
-              </Typography>
-
-              <Box component="form" sx={{ mt: 2 }}>
-                <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                  <TextField
-                    label="Certificate Name"
-                    value={certName}
-                    onChange={(e) => setCertName(e.target.value)}
-                    fullWidth
-                    required
-                    disabled={isLoading}
-                    className="input-field"
-                  />
-                  
-                  <TextField
-                    label="Private Key Name"
-                    value={keyName}
-                    onChange={(e) => setKeyName(e.target.value)}
-                    fullWidth
-                    required
-                    disabled={isLoading}
-                    className="input-field"
-                  />
-                </Box>
-
-                <Button
-                  variant="contained"
-                  onClick={generateNewFiles}
-                  disabled={isLoading || !certName || !keyName}
-                  className="submit-button"
-                >
-                  {isLoading ? 'Generating...' : 'Download Files'}
-                </Button>
-              </Box>
-            </Box>
-          )}
         </>
       )}
     </Paper>

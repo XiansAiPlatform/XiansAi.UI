@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import '../Public.css';
-import { FiCpu } from 'react-icons/fi';
+import { FiCpu, FiLock, FiSettings } from 'react-icons/fi';
 import { BiLogoGithub } from 'react-icons/bi';
-import { RiRobot2Fill, RiFlowChart } from 'react-icons/ri';
+import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine } from 'react-icons/ri';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -62,10 +62,10 @@ public class BloggingFlow: FlowBase
 }`
         },
         agentOne: {
-            file: 'ResearchAgent.cs',
+            file: 'ResearchActivity.cs',
             code: `[Agents("xiansai-agent/web-research")]
 [Instructions("Competitor-Urls", "How-To-Research-Blog-Topics")]
-public class ResearchAgent : AgentStub,  IResearchAgent
+public class ResearchActivity : ActivityStub,  IResearchActivity
 {
     [Activity]
     public async Task<string[]> FindRelevantTopics()
@@ -86,10 +86,10 @@ public class ResearchAgent : AgentStub,  IResearchAgent
 }`
         },
         agentTwo: {
-            file: 'WriterAgent.cs',
+            file: 'WriterActivity.cs',
             code: `[Agents("xiansai-agent/blog-publisher")]
 [Instructions("How-To-Write-Blogs")]
-public class WriterAgent : AgentStub, IWriterAgent
+public class WriterActivity : ActivityStub, IWriterActivity
 {
     [Activity]
     public async Task<Uri> WriteAndPublishBlog(string topic)
@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1 style={{ wordSpacing: '0.2em' }}>Multi-flow, Multi-tool Orchestrator for AI Agent Developers</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Open Source AI Agent Orchestration Platform</h1>
 
                     <div className="home-cta-buttons">
                         <button 
@@ -214,7 +214,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                    Let your AI flows do the work — intelligent and robust, so you can focus on what matters.
+                    Build intelligent, sophisticated, and robust AI agents that orchestrate complex workflows and tools.
                     </p>
                     <div className="code-sample">
                         <code>
@@ -254,9 +254,9 @@ var newBlogPosts = new List<string>();`
                 <div className="home-code-demo-content">
                     <div className="home-code-demo-text">
                         <h2>
-                            Write Your First Multi-Agent Flow
+                            Create Your First Multi-Tool Agent Workflow
                         </h2>
-                        <p>Create powerful AI workflows in minutes. Here's how to create a marketing content generation pipeline using multiple AI agents:</p>
+                        <p>Develop powerful AI workflows in minutes. Here's how to build a marketing content generation pipeline using multiple AI agents:</p>
                         <ul className="home-code-demo-points">
                             <li>Define and reuse specialized agents for different tasks</li>
                             <li>Train agents to improve their work performance</li>
@@ -287,6 +287,54 @@ var newBlogPosts = new List<string>();`
                         </SyntaxHighlighter>
                     </div>
                 </div>
+                <br></br>
+                <div className="home-code-demo-content" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                    <div className="home-code-demo-box">
+                        <div className="home-code-header">
+                            <h3 style={{ 
+                                textAlign: 'center', 
+                                width: '100%',
+                                fontFamily: 'var(--font-family)',
+                                fontWeight: 'var(--font-weight-semibold)',
+                                letterSpacing: 'var(--letter-spacing-tight)',
+                                color: 'var(--home-text-primary)'
+                            }}>Read documentation to get started</h3>
+                        </div>
+                        <div className="home-code-block" style={{ 
+                            padding: '2rem', 
+                            textAlign: 'center',
+                            background: 'var(--home-bg-darker)'
+                        }}>
+                            <p style={{ 
+                                marginBottom: '1.5rem', 
+                                color: 'var(--home-text-secondary)',
+                                fontFamily: 'var(--font-family)',
+                                fontSize: 'var(--text-base)',
+                                lineHeight: '1.6'
+                            }}>
+                                Learn more about the Xians.ai platform and how to use it's capabilities to build your own AI Agents and Workflows.
+                            </p>
+                            <a 
+                                href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="home-btn home-btn-primary"
+                                style={{ 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    gap: '0.5rem',
+                                    fontFamily: 'var(--font-family)',
+                                    fontWeight: 'var(--font-weight-medium)',
+                                    letterSpacing: '0.05em',
+                                    textTransform: 'uppercase'
+                                }}
+                            >
+                                <FiSettings className="feature-icon-svg" />
+                                Read Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </section>
 
 
@@ -294,8 +342,8 @@ var newBlogPosts = new List<string>();`
             <section className="home-features">
                 <div className="home-features-grid">
                     <div className="home-feature-card-large">
-                        <h3>Avoid Vendor Lock-In with Open Architecture</h3>
-                        <p>Deploy AI agents from any source - whether from Xians.ai, other providers, or your own development team. 
+                        <h3>Escape Vendor Lock-In with Open Architecture</h3>
+                        <p>Deploy AI agents from any source—whether from Xians.ai, other providers, or your own development team. 
                         Any containerized agent integrates seamlessly with our platform.</p>
                         <div className="home-tech-logos">
                             <img src="/images/docker-logo.png" alt="Docker" className="home-tech-logo" />
@@ -331,8 +379,8 @@ var newBlogPosts = new List<string>();`
                     </div>
 
                     <div className="home-feature-card-medium">
-                        <h3>Fast Build with our Ready Made Agents</h3>
-                        <p>Create complex workflows using our open-source agents.</p>
+                        <h3>Accelerate Development with Ready-Made Agent Tools</h3>
+                        <p>Create complex workflows using our comprehensive library of open-source agent tools.</p>
                         <div className="home-feature-code">
                         <SyntaxHighlighter
                                 language="csharp"
@@ -352,14 +400,81 @@ var newBlogPosts = new List<string>();`
                     </div>
 
                     <div className="home-feature-card-large">
-                        <h3>Balance AI Autonomy with Control</h3>
+                        <h3>Balance AI Autonomy with Human Control</h3>
                         <ul className="home-code-demo-points">
                             <li>Maintain control over critical business processes</li>
                             <li>Implement AI automation strategically after review</li>
-                            <li>Keep human oversight in workflow designing</li>
+                            <li>Keep human oversight in workflow design</li>
                             <li>Blend autonomy and orchestration seamlessly</li>
                         </ul>
                     </div>
+
+                    <div className="home-feature-card-large">
+                        <h3>Sophisticated Agents, Not Just Chatbots</h3>
+                        <p>Our platform is designed to host sophisticated agents capable of executing complex tasks and workflows, far beyond simple chat interactions.</p>
+                        <br></br>
+                        <div className="home-feature-self-host">
+                            <div>
+                                <img src="/images/agent-anatomy.png" alt="Agent Anatomy"/>
+                                <p>A workflow within an agent intelligently orchestrates between multiple tools that are augmented by prompts</p>
+                            </div>
+                            <div>
+                                <img src="/images/multi-workflow-agent.png" alt="Multi-Workflow Agent"/>
+                                <span>Agents can consist of multiple workflows, some for user interaction, others for business process capabilities.</span>
+                            </div>
+                        </div>  
+                   
+                    </div>
+
+                    <div className="home-feature-card-medium">
+                        <h3>Self-Host in Your Cloud</h3>
+                        <div className="home-feature-self-host">
+                            <div >
+                                <img src="/images/deployment.png" alt="Deployment Architecture"/>
+                                <span>Agent Platform Deployment</span>
+                            </div>
+                            <p style={{textAlign: 'left'}}>Deploy the Xians.ai platform and agents in your own infrastructure for complete control and compliance.</p>
+                            <div className="self-host-features">
+                                <div className="self-host-feature">
+                                    <div className="feature-icon">
+                                        <FiLock className="feature-icon-svg" />
+                                    </div>
+                                    <div className="feature-text">Keep sensitive data within your environment</div>
+                                </div>
+                                <div className="self-host-feature">
+                                    <div className="feature-icon">
+                                        <RiRocketLine className="feature-icon-svg" />
+                                    </div>
+                                    <div className="feature-text">Deploy as containers or app services</div>
+                                </div>
+                                <div className="self-host-feature">
+                                    <div className="feature-icon">
+                                        <RiExchangeLine className="feature-icon-svg" />
+                                    </div>
+                                    <div className="feature-text">Seamless integration with your existing cloud resources</div>
+                                </div>
+                                <div className="self-host-feature">
+                                    <div className="feature-icon">
+                                        <FiSettings className="feature-icon-svg" />
+                                    </div>
+                                    <div className="feature-text">Customize networking and security policies</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="home-feature-card-large">
+                        <h3>Built for Multi-Tenancy</h3>
+                        <p>Scale your AI operations across multiple customers with built-in tenant isolation. Deploy and manage agents per customer while maintaining unified oversight.</p>
+                        <ul className="home-code-demo-points">
+                            <li>Isolate agent execution between tenants</li>
+                            <li>Activate or deactivate agents on a per-tenant</li>
+                            <li>Maintain separate configurations for tenants</li>
+                            <li>Centralized monitoring across tenants</li>
+                        </ul>
+                        <div className="home-feature-image" style={{maxHeight: "140px", display: "flex", justifyContent: "center", marginTop: "15px"}}>
+                            {/* <img src="/images/multitenancy.png" alt="Multitenancy architecture" style={{maxHeight: "100%"}} /> */}
+                        </div>
+                    </div>                    
                 </div>
             </section>
 
@@ -383,6 +498,12 @@ var newBlogPosts = new List<string>();`
                             onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/', '_blank')}
                         >
                             Read the Docs
+                        </button>
+                        <button 
+                            className="home-btn home-btn-secondary" 
+                            onClick={() => window.open('https://api.xians.ai/api-docs/', '_blank')}
+                        >
+                            API Specifications
                         </button>
                     </div>
                 </div>

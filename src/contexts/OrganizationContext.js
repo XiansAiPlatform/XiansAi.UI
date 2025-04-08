@@ -14,9 +14,15 @@ export function OrganizationProvider({ children }) {
   const { showError } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
+  
   useEffect(() => {
     const initializeOrg = async () => {
-      if (!isAuthenticated) return;
+      // Don't initialize org for public pages
+      const publicPaths = ['/', '/login', '/register'];
+      if (!isAuthenticated || publicPaths.includes(location.pathname)) {
+        setIsOrgLoading(false);
+        return;
+      }
 
       try {
         setIsOrgLoading(true);
@@ -36,14 +42,20 @@ export function OrganizationProvider({ children }) {
             setSelectedOrg(orgs[0]);
             localStorage.setItem(STORAGE_KEY, orgs[0]);
           } else {
-            showError('No organizations available for this user');
+            // Only show organization errors for authenticated protected routes
+            if (!publicPaths.includes(location.pathname)) {
+              showError('No organizations available for this user');
+            }
           }
-        } else if (location.pathname !== "/" && location.pathname !== "/register") {
+        } else if (location.pathname !== "/" && location.pathname !== "/register" && location.pathname !== "/login") {
           navigate('/register');
         }
       } catch (error) {
         console.error('Error initializing organization:', error);
-        showError('Failed to load organization information');
+        // Only show organization errors for authenticated protected routes
+        if (!publicPaths.includes(location.pathname)) {
+          showError('Failed to load organization information');
+        }
       } finally {
         setIsOrgLoading(false);
       }

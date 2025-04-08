@@ -1,11 +1,6 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import { handleApiError } from '../utils/errorHandler';
-import { getConfig } from '../config';
 import { useMemo } from 'react';
-import { useSelectedOrg } from '../contexts/OrganizationContext';
 import { useApiClient, getTimeRangeParams } from './api-client';
 
-const { apiBaseUrl } = getConfig();
 
 export const useWorkflowApi = () => {
   const apiClient = useApiClient();
@@ -68,13 +63,14 @@ export const useWorkflowApi = () => {
         }
       },
 
-      startNewWorkflow: async (workflowType, agentName, parameters, flowId = null) => {
+      startNewWorkflow: async (workflowType, agentName, parameters, flowId = null, queueName = null) => {
         try {
           return await apiClient.post('/api/client/workflows', {
             WorkflowType: workflowType,
             AgentName: agentName,
             Parameters: parameters,
-            WorkflowId: flowId
+            WorkflowId: flowId,
+            QueueName: queueName
           });
         } catch (error) {
           console.error('Failed to start workflow:', error);
