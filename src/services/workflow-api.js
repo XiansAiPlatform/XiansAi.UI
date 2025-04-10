@@ -15,21 +15,21 @@ export const useWorkflowApi = () => {
           throw error;
         }
       },
-      
+
       fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all', statusFilter = 'all') => {
         try {
           const { startTime, endTime } = getTimeRangeParams(timeFilter);
           const queryParams = {};
-          
+
           if (startTime) {
             queryParams.startTime = startTime;
             queryParams.endTime = endTime;
           }
-          
+
           if (ownerFilter === 'mine') {
             queryParams.owner = 'current';
           }
-          
+
           if (statusFilter !== 'all') {
             queryParams.status = statusFilter;
           }
@@ -50,6 +50,16 @@ export const useWorkflowApi = () => {
           return await apiClient.get(`/api/client/workflows/${workflowId}/events`);
         } catch (error) {
           console.error('Failed to fetch workflow events:', error);
+          throw error;
+        }
+      },
+
+      fetchWorkflowRunLogs: async (workflowRunId, skip = 0, limit = 20) => {
+        try {
+          return await apiClient.get(`/api/client/logs/by-run-id/${workflowRunId}`, { skip, limit }
+          );
+        } catch (error) {
+          console.error('Failed to fetch workflow run logs:', error);
           throw error;
         }
       },

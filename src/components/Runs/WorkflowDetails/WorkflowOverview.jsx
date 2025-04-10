@@ -13,7 +13,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  CircularProgress
 } from '@mui/material';
 import {
   Stop as TerminateIcon,
@@ -34,7 +35,12 @@ import { useAuth0 } from '@auth0/auth0-react';
 const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [workflow, setWorkflow] = useState(null);
+  const [workflowLogs, setWorkflowLogs] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const limit = 2;
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [logsModalOpen, setLogsModalOpen] = useState(false);
   const open = Boolean(anchorEl);
@@ -48,45 +54,100 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     return String(status);
   };
 
-  // Function to fetch workflow data (memoized with useCallback)
   const fetchWorkflow = useCallback(async () => {
     if (!workflowId) return;
-
-    setIsLoading(true);
     try {
       const workflowData = await api.getWorkflow(workflowId, runId);
-      console.log('workflowData', workflowData);
       if (workflowData) {
         setWorkflow(workflowData);
       }
     } catch (error) {
       console.error('Failed to fetch workflow details:', error);
-      // Don't clear existing workflow data on error
       showError('Failed to fetch workflow details');
-    } finally {
-      setIsLoading(false);
     }
   }, [workflowId, runId, api, showError]);
 
+  // Append logs manually (e.g. "Load more" button)
+  const loadMoreLogs = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const newLogs = await api.fetchWorkflowRunLogs(runId, skip, limit);
+      if (newLogs.length < limit) setHasMore(false);
+      setWorkflowLogs((prev) => [...prev, ...newLogs]);
+      setSkip(skip + newLogs.length);
+    } catch (error) {
+      console.error('Failed to load more logs:', error);
+      showError('Failed to load more logs');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // ⏱ Fetch *new logs only* during interval
+  const fetchLatestLogs = useCallback(async () => {
+    if (isLoading) return;
+    const currentWorkflow = workflow;
+    if (!currentWorkflow || getStatusString(currentWorkflow?.status).toUpperCase() !== 'RUNNING') return;
+    
+    try {
+      // Always fetch latest logs from the beginning
+      const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit);
+      if (newLogs?.length) {
+        // Only add logs that aren't already in the list
+        setWorkflowLogs((prev) => {
+          const existingIds = new Set(prev.map(log => log.id));
+          const uniqueNewLogs = newLogs.filter(log => !existingIds.has(log.id));
+          // If we got new logs, increase skip by the number of new logs
+          if (uniqueNewLogs.length > 0) {
+            setSkip(prevSkip => prevSkip + uniqueNewLogs.length);
+          }
+          return [...uniqueNewLogs, ...prev];
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch logs on interval:', error);
+    }
+  }, [runId, api, limit, isLoading, workflow]);
+
   // Initial fetch
   useEffect(() => {
-    fetchWorkflow();
-  }, [fetchWorkflow]); // Now this is safe
+    const fetchInitialLogs = async () => {
+      try {
+        setIsLoading(true);
+        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit);
+        setWorkflowLogs(logs);
+        setSkip(logs.length);
+        if (logs.length < limit) setHasMore(false);
+      } catch (error) {
+        console.error('Failed to fetch initial logs:', error);
+        showError('Failed to fetch workflow logs');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Refresh workflow data periodically if workflow is running
+    fetchWorkflow();
+    fetchInitialLogs();
+  }, [workflowId, runId, api, showError]);
+
+  const isRunning = workflow && getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
+ 
   useInterval(
-    fetchWorkflow,
-    getStatusString(workflow?.status).toUpperCase() === 'RUNNING' ? 30000 : null
+    () => {
+      fetchWorkflow();
+      fetchLatestLogs();
+    },
+    isRunning ? 30000 : null
   );
 
   // Update the refresh useEffect when an action is completed
   useEffect(() => {
     if (onActionComplete) {
       fetchWorkflow();
+      fetchLatestLogs();
     }
-  }, [onActionComplete, fetchWorkflow]); // Now this is safe
-
-  const isRunning = getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
+  }, [onActionComplete]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -104,6 +165,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       // Wait a moment before fetching updated data
       setTimeout(() => {
         fetchWorkflow();
+        fetchLatestLogs();
       }, 2000);
     } catch (error) {
       showError('An unexpected error occurred. Please check if the workflow is still running. Error: ' + error.message);
@@ -475,46 +537,44 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       <Box className="overview-current-activity">
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Box>
-          <Typography
-            className="overview-label"
-            variant="subtitle2"
-            sx={{
-              color: 'text.secondary',
-              fontSize: isMobile ? '0.7rem' : '0.875rem'
-            }}
-          >
-            Current activity:
-          </Typography>
-
-          <Typography
-            color='black'
-            variant="body1"
-            sx={{
-              fontWeight: 500,
-              fontSize: isMobile ? '0.8rem' : '1rem'
-            }}
-          >
-            {workflow?.currentActivity?.activityType.name || 'No Pending Activities'}
-          </Typography>
-          </Box>
-
-          {workflow?.logs && (
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<LogsIcon />}
-              onClick={handleLogsClick}
+            <Typography
+              className="overview-label"
+              variant="subtitle2"
               sx={{
-                textTransform: 'none',
-                borderRadius: 2,
-                padding: '4px 12px'
+                color: 'text.secondary',
+                fontSize: isMobile ? '0.7rem' : '0.875rem'
               }}
             >
-              Show Logs
-            </Button>
-          )}
+              Current activity:
+            </Typography>
+
+            <Typography
+              color='black'
+              variant="body1"
+              sx={{
+                fontWeight: 500,
+                fontSize: isMobile ? '0.8rem' : '1rem'
+              }}
+            >
+              {workflow?.currentActivity?.activityType.name || 'No Pending Activities'}
+            </Typography>
+          </Box>
+
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<LogsIcon />}
+            onClick={handleLogsClick}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 2,
+              padding: '4px 12px'
+            }}
+          >
+            Show Logs
+          </Button>
         </Box>
-        
+
       </Box>
 
       {/* Logs Modal */}
@@ -546,22 +606,56 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent sx={{
-          p: 3,
-          '& pre': {
-            whiteSpace: 'pre-wrap',
-            wordBreak: 'break-word',
-            backgroundColor: 'rgba(0, 0, 0, 0.02)',
-            padding: 2,
-            borderRadius: 1,
-            maxHeight: '60vh',
-            overflow: 'auto',
-            fontFamily: 'monospace',
-            fontSize: '0.875rem'
-          }
-        }}>
-          <pre>{workflow?.logs}</pre>
+        <DialogContent
+          sx={{
+            p: 3,
+            overflow: 'hidden',
+            '& pre': {
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+              backgroundColor: 'rgba(0, 0, 0, 0.02)',
+              padding: 2,
+              borderRadius: 1,
+              maxHeight: '60vh',
+              overflow: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '0.875rem',
+              margin: 0
+            }
+          }}
+        >
+          {isLoading ? (
+            <Box display="flex" justifyContent="center" p={3}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : workflowLogs.length > 0 ? (
+            <>
+              <pre>
+                {workflowLogs.map((log, index) => (
+                  <Box key={log.id || index} sx={{ mb: 2 }}>
+                    {JSON.stringify(log, null, 2)}
+                  </Box>
+                ))}
+              </pre>
+              {hasMore && (
+                <Box my={2} display="flex" justifyContent="center">
+                  <Button 
+                    onClick={loadMoreLogs} 
+                    disabled={isLoadingMore}
+                    startIcon={isLoadingMore ? <CircularProgress size={16} /> : null}
+                  >
+                    {isLoadingMore ? 'Loading...' : 'Show More'}
+                  </Button>
+                </Box>
+              )}
+            </>
+          ) : (
+            <Typography variant="body1" color="text.secondary" textAlign="center">
+              No logs available
+            </Typography>
+          )}
         </DialogContent>
+
         <DialogActions sx={{ p: 2, borderTop: '1px solid rgba(0, 0, 0, 0.12)' }}>
           <Button onClick={handleLogsClose} variant="outlined">
             Close
@@ -572,4 +666,4 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   );
 };
 
-export default WorkflowOverview; 
+export default WorkflowOverview;
