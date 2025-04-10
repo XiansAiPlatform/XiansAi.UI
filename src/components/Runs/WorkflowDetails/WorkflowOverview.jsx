@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -14,7 +14,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  CircularProgress
+  CircularProgress,
+  Select,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import {
   Stop as TerminateIcon,
@@ -28,7 +31,6 @@ import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
 import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
-import { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 
 
@@ -47,6 +49,54 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const { showSuccess, showError } = useNotification();
   const api = useWorkflowApi();
   const { user } = useAuth0();
+  const [selectedLogLevel, setSelectedLogLevel] = useState('');
+  const [filteredLogs, setFilteredLogs] = useState([]);
+
+  // Microsoft Log Levels
+  const LOG_LEVELS = [
+    { value: '', label: 'All Levels' },
+    { value: 0, label: 'Trace' },
+    { value: 1, label: 'Debug' },
+    { value: 2, label: 'Information' },
+    { value: 3, label: 'Warning' },
+    { value: 4, label: 'Error' },
+    { value: 5, label: 'Critical' },
+    { value: 6, label: 'None' }
+  ];
+
+  // Helper function to convert UI value to API value
+  const getApiLogLevel = (level) => level === '' ? null : level;
+
+  // Update filtered logs when logs or level change
+  useEffect(() => {
+    if (selectedLogLevel === '') {
+      setFilteredLogs(workflowLogs);
+    } else {
+      setFilteredLogs(workflowLogs.filter(log => log.level === selectedLogLevel));
+    }
+  }, [workflowLogs, selectedLogLevel]);
+
+  // Reset skip and fetch logs when log level changes
+  useEffect(() => {
+    const fetchLogsWithNewLevel = async () => {
+      try {
+        setIsLoading(true);
+        setSkip(0);
+        setHasMore(true);
+        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
+        setWorkflowLogs(logs);
+        setSkip(logs.length);
+        if (logs.length < limit) setHasMore(false);
+      } catch (error) {
+        console.error('Failed to fetch logs with new level:', error);
+        showError('Failed to fetch workflow logs');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchLogsWithNewLevel();
+  }, [selectedLogLevel, runId, api, showError]);
 
   // Add a helper function to safely convert status to string (moved this up to avoid initialization error)
   const getStatusString = (status) => {
@@ -72,7 +122,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     if (isLoadingMore) return;
     setIsLoadingMore(true);
     try {
-      const newLogs = await api.fetchWorkflowRunLogs(runId, skip, limit);
+      const newLogs = await api.fetchWorkflowRunLogs(runId, skip, limit, getApiLogLevel(selectedLogLevel));
       if (newLogs.length < limit) setHasMore(false);
       setWorkflowLogs((prev) => [...prev, ...newLogs]);
       setSkip(skip + newLogs.length);
@@ -92,7 +142,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     
     try {
       // Always fetch latest logs from the beginning
-      const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit);
+      const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
       if (newLogs?.length) {
         // Only add logs that aren't already in the list
         setWorkflowLogs((prev) => {
@@ -108,14 +158,14 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     } catch (error) {
       console.error('Failed to fetch logs on interval:', error);
     }
-  }, [runId, api, limit, isLoading, workflow]);
+  }, [runId, api, limit, isLoading, workflow, selectedLogLevel]);
 
   // Initial fetch
   useEffect(() => {
     const fetchInitialLogs = async () => {
       try {
         setIsLoading(true);
-        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit);
+        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
         setWorkflowLogs(logs);
         setSkip(logs.length);
         if (logs.length < limit) setHasMore(false);
@@ -129,7 +179,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
 
     fetchWorkflow();
     fetchInitialLogs();
-  }, [workflowId, runId, api, showError]);
+  }, [workflowId, runId, api, showError, selectedLogLevel]);
 
   const isRunning = workflow && getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
  
@@ -598,13 +648,29 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
           pb: 2
         }}>
           Workflow Logs
-          <IconButton
-            aria-label="close"
-            onClick={handleLogsClose}
-            sx={{ color: 'text.secondary' }}
-          >
-            <CloseIcon />
-          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Log Level</InputLabel>
+              <Select
+                value={selectedLogLevel}
+                label="Log Level"
+                onChange={(e) => setSelectedLogLevel(e.target.value)}
+              >
+                {LOG_LEVELS.map((level) => (
+                  <MenuItem key={level.value} value={level.value}>
+                    {level.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <IconButton
+              aria-label="close"
+              onClick={handleLogsClose}
+              sx={{ color: 'text.secondary' }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </Box>
         </DialogTitle>
         <DialogContent
           sx={{
@@ -628,10 +694,10 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
             <Box display="flex" justifyContent="center" p={3}>
               <CircularProgress size={24} />
             </Box>
-          ) : workflowLogs.length > 0 ? (
+          ) : filteredLogs.length > 0 ? (
             <>
               <pre>
-                {workflowLogs.map((log, index) => (
+                {filteredLogs.map((log, index) => (
                   <Box key={log.id || index} sx={{ mb: 2 }}>
                     {JSON.stringify(log, null, 2)}
                   </Box>
