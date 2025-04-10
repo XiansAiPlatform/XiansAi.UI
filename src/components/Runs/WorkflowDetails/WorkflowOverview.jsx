@@ -40,7 +40,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const [workflowLogs, setWorkflowLogs] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [skip, setSkip] = useState(0);
-  const limit = 2;
+  const limit = 4;
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -696,19 +696,146 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
             </Box>
           ) : filteredLogs.length > 0 ? (
             <>
-              <pre>
-                {filteredLogs.map((log, index) => (
-                  <Box key={log.id || index} sx={{ mb: 2 }}>
-                    {JSON.stringify(log, null, 2)}
-                  </Box>
-                ))}
-              </pre>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: 2,
+                maxHeight: '60vh',
+                overflow: 'auto',
+                mt: 2,
+                '& .log-entry': {
+                  p: 2,
+                  borderRadius: 1,
+                  backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                  '&.error': {
+                    backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                    borderLeft: '4px solid #d32f2f'
+                  },
+                  '&.warning': {
+                    backgroundColor: 'rgba(255, 152, 0, 0.08)',
+                    borderLeft: '4px solid #ff9800'
+                  },
+                  '&.info': {
+                    backgroundColor: 'rgba(33, 150, 243, 0.08)',
+                    borderLeft: '4px solid #2196f3'
+                  }
+                },
+                '& .log-header': {
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 1,
+                  '& .log-level': {
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    fontSize: '0.75rem',
+                    padding: '2px 8px',
+                    borderRadius: 1
+                  },
+                  '& .log-time': {
+                    color: 'text.secondary',
+                    fontSize: '0.75rem'
+                  }
+                },
+                '& .log-message': {
+                  fontFamily: 'monospace',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '0.875rem',
+                  mb: 1
+                },
+                '& .log-exception': {
+                  fontFamily: 'monospace',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '0.75rem',
+                  color: '#d32f2f',
+                  backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                  p: 1,
+                  borderRadius: 1,
+                  mt: 1
+                }
+              }}>
+                {filteredLogs.map((log, index) => {
+                  const getLogLevelClass = (level) => {
+                    switch (level) {
+                      case 4: return 'error';
+                      case 3: return 'warning';
+                      case 2: return 'info';
+                      default: return '';
+                    }
+                  };
+
+                  const getLogLevelLabel = (level) => {
+                    switch (level) {
+                      case 0: return 'TRACE';
+                      case 1: return 'DEBUG';
+                      case 2: return 'INFO';
+                      case 3: return 'WARNING';
+                      case 4: return 'ERROR';
+                      case 5: return 'CRITICAL';
+                      case 6: return 'NONE';
+                      default: return 'UNKNOWN';
+                    }
+                  };
+
+                  const getLogLevelColor = (level) => {
+                    switch (level) {
+                      case 4: return '#d32f2f';
+                      case 3: return '#ff9800';
+                      case 2: return '#2196f3';
+                      default: return '#757575';
+                    }
+                  };
+
+                  return (
+                    <Box key={log.id || index} className={`log-entry ${getLogLevelClass(log.level)}`}>
+                      <Box className="log-header">
+                        <Box 
+                          className="log-level"
+                          sx={{ 
+                            backgroundColor: `${getLogLevelColor(log.level)}20`,
+                            color: getLogLevelColor(log.level)
+                          }}
+                        >
+                          {getLogLevelLabel(log.level)}
+                        </Box>
+                        <Box className="log-time">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </Box>
+                      </Box>
+                      <Box className="log-message">
+                        {log.message}
+                      </Box>
+                      {log.exception && (
+                        <Box className="log-exception">
+                          {log.exception}
+                        </Box>
+                      )}
+                    </Box>
+                  );
+                })}
+              </Box>
               {hasMore && (
-                <Box my={2} display="flex" justifyContent="center">
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: 'background.paper',
+                    py: 2,
+                    borderTop: '1px solid',
+                    borderColor: 'divider'
+                  }}
+                >
                   <Button 
                     onClick={loadMoreLogs} 
                     disabled={isLoadingMore}
                     startIcon={isLoadingMore ? <CircularProgress size={16} /> : null}
+                    variant="outlined"
                   >
                     {isLoadingMore ? 'Loading...' : 'Show More'}
                   </Button>
@@ -716,7 +843,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               )}
             </>
           ) : (
-            <Typography variant="body1" color="text.secondary" textAlign="center">
+            <Typography variant="body1" color="text.secondary" textAlign="center" mt={3}>
               No logs available
             </Typography>
           )}
