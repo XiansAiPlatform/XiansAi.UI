@@ -5,7 +5,12 @@ import AirIcon from '@mui/icons-material/Air';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import { Link, useLocation } from 'react-router-dom';
-
+import BarChartIcon from '@mui/icons-material/BarChart';
+import SettingsIcon from '@mui/icons-material/Settings';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 
 const NAV_ITEMS = [
   {
@@ -25,6 +30,12 @@ const NAV_ITEMS = [
     icon: <DescriptionOutlinedIcon />,
     label: 'Knowledge',
     isSelected: (pathname) => pathname === '/instructions' || pathname.startsWith('/instructions/'),
+  },
+  {
+    to: '/messaging',
+    icon: <ForumOutlinedIcon />,
+    label: 'Messaging',
+    isSelected: (pathname) => pathname === '/messaging' || pathname.startsWith('/messaging/'),
   },
   {
     to: '/settings',
