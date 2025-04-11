@@ -24,7 +24,8 @@ import {
   MoreVert as MoreVertIcon,
   ContentCopy as CopyIcon,
   Description as LogsIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  ErrorOutline as ErrorOutlineIcon
 } from '@mui/icons-material';
 import StatusChip from '../../Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -610,19 +611,30 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
             </Typography>
           </Box>
 
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<LogsIcon />}
-            onClick={handleLogsClick}
-            sx={{
-              textTransform: 'none',
-              borderRadius: 2,
-              padding: '4px 12px'
-            }}
-          >
-            Show Logs
-          </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {workflowLogs[0]?.level === 4 && (
+              <ErrorOutlineIcon 
+                sx={{ 
+                  color: '#d32f2f',
+                  fontSize: isMobile ? '16px' : '20px'
+                }} 
+                titleAccess="Error occurred"
+              />
+            )}
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<LogsIcon />}
+              onClick={handleLogsClick}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2,
+                padding: '4px 12px'
+              }}
+            >
+              Show Logs
+            </Button>
+          </Box>
         </Box>
 
       </Box>

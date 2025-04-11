@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
 import { formatDistanceToNow, formatDistance } from 'date-fns';
 import { useAuth0 } from '@auth0/auth0-react';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const WorkflowRunItem = ({ run, isMobile }) => {
   const { user } = useAuth0();
@@ -44,10 +45,21 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             fontSize: isMobile ? '14px' : '16px',
             fontWeight: 500,
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            gap: '4px'
           }}>
             {formatWorkflowType(run.workflowType)}
+            {run.lastLog?.level === 4 && (
+              <ErrorOutlineIcon 
+                style={{ 
+                  color: '#d32f2f',
+                  fontSize: isMobile ? '16px' : '20px'
+                }} 
+                titleAccess="Error occurred"
+              />
+            )}
           </div>
+          
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <StatusChip 
               status={run.status.toLowerCase()} 
