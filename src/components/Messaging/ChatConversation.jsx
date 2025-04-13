@@ -41,6 +41,15 @@ const ChatConversation = ({
 
     const pageSize = 15;
 
+    // Check if a message is recent (less than 1 minute old)
+    const isMessageRecent = useCallback((message) => {
+        if (!message.createdAt) return false;
+        const messageTime = new Date(message.createdAt).getTime();
+        const now = new Date().getTime();
+        const oneMinuteInMs = 60 * 1000;
+        return (now - messageTime) < oneMinuteInMs;
+    }, []);
+
     // Function to fetch messages (used for initial load and refresh)
     const fetchThreadMessages = useCallback(async (threadId, page = 1) => {
         setIsLoadingMessages(true);
@@ -237,7 +246,11 @@ const ChatConversation = ({
                           {/* Messages List - Takes remaining space */} 
                           <List sx={{ px: 1, width: '100%', py: 0 }}>
                               {sortedMessagesForDisplay.map((msg, index) => (
-                                  <MessageItem key={msg.id || index} message={msg} />
+                                  <MessageItem 
+                                      key={msg.id || index} 
+                                      message={msg} 
+                                      isRecent={isMessageRecent(msg)}
+                                  />
                               ))}
                           </List>
   

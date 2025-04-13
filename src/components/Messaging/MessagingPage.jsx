@@ -86,10 +86,11 @@ const MessagingPage = () => {
                 // Use details from the stored selectedThreadDetails object
                 initialParticipantId={selectedThreadDetails?.participantId || ''}
                 // initialParticipantChannelId={selectedThreadDetails?.participantChannelId || ''} // If needed
+                onMessageSent={handleRefresh}
             />,
             `Send Message` // Simplified title
         );
-    }, [selectedWorkflowId, selectedThreadDetails, openSlider, closeSlider, showError]);
+    }, [selectedWorkflowId, selectedThreadDetails, openSlider, closeSlider, showError, handleRefresh]);
 
     // Handler for opening the webhook registration slider
     const handleRegisterWebhook = useCallback(() => {

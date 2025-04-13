@@ -7,7 +7,7 @@ import {
 import { useMessagingApi } from '../../services/messaging-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
-const SendMessageForm = ({ workflowId, onClose, initialParticipantId = '' }) => {
+const SendMessageForm = ({ workflowId, onClose, initialParticipantId = '', onMessageSent }) => {
     const [participantId, setParticipantId] = useState(initialParticipantId);
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
@@ -73,6 +73,12 @@ const SendMessageForm = ({ workflowId, onClose, initialParticipantId = '' }) => 
             );
             
             showSuccess('Message sent successfully!');
+            
+            // Call onMessageSent callback if provided
+            if (onMessageSent) {
+                onMessageSent();
+            }
+            
             onClose();
         } catch (error) {
             showError(`Error sending message: ${error.message}`);

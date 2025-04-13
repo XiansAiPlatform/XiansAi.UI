@@ -35,8 +35,9 @@ import { formatStatus } from './utils/ConversationUtils';
  * @param {string} props.message.participantChannelId - Channel ID
  * @param {Object} [props.message.metadata] - Optional message metadata
  * @param {Array} [props.message.logs] - Optional message logs
+ * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
  */
-const MessageItem = ({ message }) => {
+const MessageItem = ({ message, isRecent = false }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
     const isIncoming = message.direction === 'Incoming';
@@ -60,22 +61,35 @@ const MessageItem = ({ message }) => {
             <Paper 
                 elevation={0} 
                 sx={{
-                    p: 1.5,
+                    p: { left: 0, right: 1.5, top: 2, bottom: 2 },
+                    pl: 1.5,
                     width: '70%',
-                    backgroundColor: isIncoming ? theme.palette.grey[50] : theme.palette.grey[100],
+                    backgroundColor: isRecent 
+                        ? (isIncoming ? theme.palette.info.light : theme.palette.primary.light) + '20' // Add 20% opacity
+                        : isIncoming ? theme.palette.grey[50] : theme.palette.grey[100],
                     color: isIncoming ? theme.palette.text.primary : theme.palette.text.primary,
-                    borderRadius: theme.shape.borderRadius,
+                    borderRadius: '5px',
                     position: 'relative',
                     border: '1px solid',
-                    borderColor: isIncoming ? theme.palette.grey[200] : theme.palette.grey[300],
-                    borderLeftWidth: '4px',
-                    borderLeftColor: isIncoming ? theme.palette.info.light : theme.palette.primary.light,
+                    borderColor: isRecent 
+                        ? (isIncoming ? theme.palette.info.main : theme.palette.primary.main)
+                        : isIncoming ? theme.palette.grey[200] : theme.palette.grey[300],
+                    transition: 'all 0.3s ease',
+                    boxShadow: isRecent ? '0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
                 }}
             >
-                <Box sx={{ mb: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="body2" color="text.secondary" fontWeight="medium">
-                        {message.participantChannelId}
-                    </Typography>
+                <Box sx={{ mb: 1, mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <Typography variant="body2" color="text.secondary" fontWeight="medium">
+                            {message.participantChannelId}
+                        </Typography>
+                        <Typography 
+                            variant="caption" 
+                            sx={{ color: 'text.secondary' }}
+                        >
+                            {formattedDate}
+                        </Typography>
+                    </Box>
                     <Box display="flex" alignItems="center">
                         <Chip 
                             label={message.direction} 
@@ -102,6 +116,21 @@ const MessageItem = ({ message }) => {
                                 }
                             }} 
                         />
+                        {isRecent && (
+                            <Chip 
+                                label="New" 
+                                size="small" 
+                                color="success"
+                                sx={{ 
+                                    ml: 1, 
+                                    height: 18,
+                                    '& .MuiChip-label': { 
+                                        px: 1,
+                                        fontSize: '0.65rem'
+                                    }
+                                }} 
+                            />
+                        )}
                         <IconButton 
                             size="small" 
                             onClick={handleExpandClick}
@@ -118,18 +147,15 @@ const MessageItem = ({ message }) => {
                     </Box>
                 </Box>
                 
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{messageContent}</Typography>
-                
                 <Typography 
-                    variant="caption" 
+                    variant="body2" 
                     sx={{ 
-                        display: 'block', 
-                        textAlign: 'right', 
-                        mt: 0.5,
-                        color: 'text.secondary'
+                        whiteSpace: 'pre-wrap', 
+                        lineHeight: 1.4,
+                        mt: 1
                     }}
                 >
-                    {formattedDate}
+                    {messageContent}
                 </Typography>
                 
                 <Collapse in={expanded} timeout="auto" unmountOnExit sx={{ mt: 2 }}>
