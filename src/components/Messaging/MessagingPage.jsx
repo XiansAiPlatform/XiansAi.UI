@@ -38,7 +38,6 @@ const MessagingPage = () => {
 
     // Callback passed to WorkflowSelector
     const handleWorkflowSelected = useCallback((workflowId) => {
-        console.log("Workflow selected:", workflowId);
         setSelectedWorkflowId(workflowId);
         setSelectedThreadId(null); // Reset thread selection when workflow changes
         setSelectedThreadDetails(null);

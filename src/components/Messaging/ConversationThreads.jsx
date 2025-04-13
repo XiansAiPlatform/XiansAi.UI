@@ -10,7 +10,8 @@ import {
     Divider,
     Badge,
     useTheme,
-    IconButton
+    IconButton,
+    Button
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { format } from 'date-fns';
@@ -39,6 +40,10 @@ const ConversationThreads = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { openSlider } = useSlider();
+    const [page, setPage] = useState(0);
+    const [pageSize] = useState(20);
+    const [hasMore, setHasMore] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     // Function to handle opening the form in the slider
     const handleOpenForm = () => {
@@ -56,14 +61,39 @@ const ConversationThreads = ({
     const handleMessageSent = async () => {
         if (!selectedWorkflowId) return;
         
+        setPage(0); // Reset to first page
         setIsLoading(true);
         try {
-            const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId);
+            const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId, 0, pageSize);
             setThreads(fetchedThreads || []);
+            setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
         } catch (err) {
             showError(`Failed to refresh threads: ${err.message}`);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    // Function to load more threads
+    const handleLoadMore = async () => {
+        if (!selectedWorkflowId || loadingMore) return;
+        
+        setLoadingMore(true);
+        try {
+            const nextPage = page + 1;
+            const moreThreads = await messagingApi.getThreads(selectedWorkflowId, nextPage, pageSize);
+            
+            if (moreThreads && moreThreads.length > 0) {
+                setThreads(prevThreads => [...prevThreads, ...moreThreads]);
+                setPage(nextPage);
+                setHasMore(moreThreads.length === pageSize);
+            } else {
+                setHasMore(false);
+            }
+        } catch (err) {
+            showError(`Failed to load more threads: ${err.message}`);
+        } finally {
+            setLoadingMore(false);
         }
     };
 
@@ -73,15 +103,19 @@ const ConversationThreads = ({
             setThreads([]);
             setError(null);
             setIsLoading(false);
+            setHasMore(false);
+            setPage(0);
             return;
         }
 
         const fetchConversationThreads = async () => {
             setIsLoading(true);
             setError(null);
+            setPage(0); // Reset to first page when workflow changes
             try {
-                const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId);
+                const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId, 0, pageSize);
                 setThreads(fetchedThreads || []);
+                setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
 
                 // Check if the currently selected thread still exists
                 // If not, or if no thread was selected, select the first one if available
@@ -96,6 +130,7 @@ const ConversationThreads = ({
                 showError(`${errorMsg}: ${err.message}`);
                 console.error(err);
                 setThreads([]);
+                setHasMore(false);
                 onThreadSelect(null); // Deselect thread on error
             } finally {
                 setIsLoading(false);
@@ -104,7 +139,7 @@ const ConversationThreads = ({
 
         fetchConversationThreads();
         // Dependency array ensures refetch when workflow ID, api, or notification changes
-    }, [selectedWorkflowId, messagingApi, showError, onThreadSelect, selectedThreadId]);
+    }, [selectedWorkflowId, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize]);
 
     if (isLoading) {
         return (
@@ -222,6 +257,22 @@ const ConversationThreads = ({
                             </React.Fragment>
                         ))}
                     </List>
+                )}
+                {hasMore && (
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
+                        <Button 
+                            onClick={handleLoadMore}
+                            disabled={loadingMore}
+                            variant="text"
+                            size="small"
+                            sx={{ minWidth: '120px' }}
+                        >
+                            {loadingMore ? (
+                                <CircularProgress size={16} sx={{ mr: 1 }} />
+                            ) : null}
+                            {loadingMore ? 'Loading...' : 'Load More'}
+                        </Button>
+                    </Box>
                 )}
             </Box>
         </Paper>

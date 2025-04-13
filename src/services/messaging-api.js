@@ -7,11 +7,14 @@ export const useMessagingApi = () => {
   return useMemo(() => {
     return {
 
-      getThreads: async (workflowId) => {
+      getThreads: async (workflowId, page = null, pageSize = null) => {
         try {
           console.log('Fetching threads for workflowId:', workflowId);
-          //pass workflowId as query param
-          return await apiClient.get('/api/client/messaging/threads', { workflowId: workflowId });
+          const params = { workflowId };
+          if (page !== null) params.page = page;
+          if (pageSize !== null) params.pageSize = pageSize;
+          
+          return await apiClient.get('/api/client/messaging/threads', params);
         } catch (error) {
           console.error('Error fetching threads:', error);
           throw error;
