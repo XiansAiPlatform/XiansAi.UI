@@ -12,8 +12,13 @@ import WorkflowSelector from './WorkflowSelector';
 import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
-import { ChatConversation, ConversationThreads } from './ConversationComponents';
+import ConversationThreads from './ConversationThreads';
+import ChatConversation from './ChatConversation';
 
+
+/**
+ * Parent component that coordinates messaging components and manages shared state
+ */
 const MessagingPage = () => {
     // --- State --- 
     // Keep selected workflow/thread IDs and error state
@@ -21,16 +26,12 @@ const MessagingPage = () => {
     const [selectedThreadId, setSelectedThreadId] = useState(null);
     const [selectedThreadDetails, setSelectedThreadDetails] = useState(null); // Store full thread object
     const [error, setError] = useState(null); // Keep top-level error state if needed
-    // Removed state related to workflows, workflowIds, messages, threads, loading states, pagination
 
     // --- Hooks ---
-    // API and UI hooks remain
-    const messagingApi = useMessagingApi(); // Passed down to children
+    // Using the existing API hook from services/messaging-api.js
+    const messagingApi = useMessagingApi(); 
     const { openSlider, closeSlider } = useSlider();
-    const { showError } = useNotification(); // Passed down to children
-
-    // --- Effects --- 
-    // Removed useEffect hooks for fetching workflows, instances, threads, messages
+    const { showError } = useNotification();
 
     // --- Callbacks --- 
 
@@ -71,7 +72,7 @@ const MessagingPage = () => {
         );
     }, [selectedWorkflowId, selectedThreadDetails, openSlider, closeSlider, showError]);
 
-    // Handler for opening the webhook registration slider (uses workflowApi)
+    // Handler for opening the webhook registration slider
     const handleRegisterWebhook = useCallback(() => {
         if (!selectedWorkflowId) {
             showError('Please select a workflow first.');
@@ -81,7 +82,7 @@ const MessagingPage = () => {
             <RegisterWebhookForm workflowId={selectedWorkflowId} onClose={closeSlider} />,
             `Register Webhook for ${selectedWorkflowId}`
         );
-    }, [selectedWorkflowId, openSlider, closeSlider, showError]); // Removed workflowApi dependency
+    }, [selectedWorkflowId, openSlider, closeSlider, showError]);
 
     // --- Render --- 
 
@@ -100,15 +101,14 @@ const MessagingPage = () => {
             {/* Display top-level error if any */} 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            {/* Refactored WorkflowSelector */}
+            {/* Workflow selection */}
             <WorkflowSelector
-                messagingApi={messagingApi} // Pass down API hook
-                showError={showError}       // Pass down notification hook
-                onWorkflowSelected={handleWorkflowSelected} // Pass down callback
-                // Removed props related to specific data lists and loading states
+                messagingApi={messagingApi}
+                showError={showError}
+                onWorkflowSelected={handleWorkflowSelected}
             />
 
-            {/* WorkflowActions now only depends on selectedWorkflowId */}
+            {/* Action buttons */}
             <WorkflowActions
                 selectedWorkflowId={selectedWorkflowId}
                 onRegisterWebhook={handleRegisterWebhook}
@@ -118,30 +118,28 @@ const MessagingPage = () => {
             {selectedWorkflowId ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
                     <Grid item xs={12} md={3}>
-                        {/* Refactored ConversationThreads */}
+                        {/* Threads list */}
                         <ConversationThreads
                             selectedWorkflowId={selectedWorkflowId}
                             messagingApi={messagingApi}
                             showError={showError}
                             selectedThreadId={selectedThreadId}
-                            onThreadSelect={handleThreadSelected} // Use the new callback
-                            // Removed threads and isLoading props
+                            onThreadSelect={handleThreadSelected}
                         />
                     </Grid>
                     <Grid item xs={12} md={9}>
-                        {/* Refactored ChatConversation */}
+                        {/* Messages display */}
                         <ChatConversation 
                             selectedThreadId={selectedThreadId}
                             messagingApi={messagingApi}
                             showError={showError}
-                            selectedThread={selectedThreadDetails} // Pass the stored thread details
-                            onSendMessage={handleSendMessage} // Pass send message handler
-                            // Removed messages, onLoadMoreMessages, isLoadingMore, hasMoreMessages props
+                            selectedThread={selectedThreadDetails}
+                            onSendMessage={handleSendMessage}
                         />
                     </Grid>
                 </Grid>
             ) : (
-                // Keep the placeholder text if no workflow is selected
+                // Placeholder when no workflow selected
                 <Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     Please select an agent, workflow type, and instance to view messages.
                 </Typography>

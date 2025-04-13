@@ -14,8 +14,8 @@ class MessagingService {
      */
     async getThreads(workflowId) {
         try {
-            const response = await this.apiClient.get(`/api/messaging/workflows/${workflowId}/threads`);
-            return response.data || [];
+            const response = await this.apiClient.get(`/api/client/messaging/threads`, { workflowId });
+            return response || [];
         } catch (error) {
             console.error('Error fetching threads:', error);
             throw error;
@@ -31,10 +31,12 @@ class MessagingService {
      */
     async getThreadMessages(threadId, page = 1, pageSize = 15) {
         try {
-            const response = await this.apiClient.get(`/api/messaging/threads/${threadId}/messages`, {
-                params: { page, pageSize }
-            });
-            return response.data || [];
+            const params = {};
+            if (page !== null) params.page = page;
+            if (pageSize !== null) params.pageSize = pageSize;
+            
+            const response = await this.apiClient.get(`/api/client/messaging/threads/${threadId}/messages`, params);
+            return response || [];
         } catch (error) {
             console.error('Error fetching thread messages:', error);
             throw error;
@@ -49,8 +51,14 @@ class MessagingService {
      */
     async sendMessage(threadId, messageData) {
         try {
-            const response = await this.apiClient.post(`/api/messaging/threads/${threadId}/messages`, messageData);
-            return response.data;
+            // Adjust payload according to your API requirements
+            const payload = {
+                ...messageData,
+                threadId
+            };
+            
+            const response = await this.apiClient.post(`/api/client/messaging/inbound`, payload);
+            return response;
         } catch (error) {
             console.error('Error sending message:', error);
             throw error;
@@ -65,8 +73,13 @@ class MessagingService {
      */
     async createThread(workflowId, threadData) {
         try {
-            const response = await this.apiClient.post(`/api/messaging/workflows/${workflowId}/threads`, threadData);
-            return response.data;
+            const payload = {
+                ...threadData,
+                workflowId
+            };
+            
+            const response = await this.apiClient.post(`/api/client/messaging/threads`, payload);
+            return response;
         } catch (error) {
             console.error('Error creating thread:', error);
             throw error;
@@ -80,8 +93,8 @@ class MessagingService {
      */
     async getThread(threadId) {
         try {
-            const response = await this.apiClient.get(`/api/messaging/threads/${threadId}`);
-            return response.data;
+            const response = await this.apiClient.get(`/api/client/messaging/threads/${threadId}`);
+            return response;
         } catch (error) {
             console.error('Error fetching thread:', error);
             throw error;

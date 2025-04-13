@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAxios } from '../../../hooks/useAxios';
+import { useApiClient } from '../../../services/api-client';
 import MessagingService from '../services/MessagingService';
 
 /**
@@ -7,12 +7,12 @@ import MessagingService from '../services/MessagingService';
  * @returns {Object} - Object containing messaging API methods
  */
 export const useMessagingApi = () => {
-    const axios = useAxios();
+    const apiClient = useApiClient();
     
     // Create a memoized instance of the messaging service
     const messagingService = useMemo(() => 
-        new MessagingService(axios),
-        [axios]
+        new MessagingService(apiClient),
+        [apiClient]
     );
     
     return {
