@@ -26,6 +26,7 @@ const MessagingPage = () => {
     const [selectedThreadId, setSelectedThreadId] = useState(null);
     const [selectedThreadDetails, setSelectedThreadDetails] = useState(null); // Store full thread object
     const [error, setError] = useState(null); // Keep top-level error state if needed
+    const [refreshCounter, setRefreshCounter] = useState(0); // Add counter for refreshing
 
     // --- Hooks ---
     // Using the existing API hook from services/messaging-api.js
@@ -51,6 +52,24 @@ const MessagingPage = () => {
         setSelectedThreadDetails(threadDetails); // Store the full thread object
         setError(null); // Clear errors when selection changes
     }, []);
+
+    // Handler for refreshing threads and messages
+    const handleRefresh = useCallback(() => {
+        if (!selectedWorkflowId) {
+            showError('Please select a workflow first.');
+            return;
+        }
+        
+        console.log("Refreshing threads and messages...");
+        // Increment refresh counter to force children to reload
+        setRefreshCounter(prev => prev + 1);
+        
+        // If thread is selected, refresh it
+        if (selectedThreadId) {
+            // Clear thread data to force reload
+            setSelectedThreadDetails(prev => ({...prev}));
+        }
+    }, [selectedWorkflowId, selectedThreadId, showError]);
 
     // Handler for opening the send message slider
     const handleSendMessage = useCallback(() => {
@@ -112,6 +131,7 @@ const MessagingPage = () => {
             <WorkflowActions
                 selectedWorkflowId={selectedWorkflowId}
                 onRegisterWebhook={handleRegisterWebhook}
+                onRefresh={handleRefresh}
             />
 
             {/* Conditionally render Thread/Conversation area */}
@@ -120,6 +140,7 @@ const MessagingPage = () => {
                     <Grid item xs={12} md={3}>
                         {/* Threads list */}
                         <ConversationThreads
+                            key={`threads-${refreshCounter}`}
                             selectedWorkflowId={selectedWorkflowId}
                             messagingApi={messagingApi}
                             showError={showError}
@@ -130,6 +151,7 @@ const MessagingPage = () => {
                     <Grid item xs={12} md={9}>
                         {/* Messages display */}
                         <ChatConversation 
+                            key={`conversation-${refreshCounter}-${selectedThreadId}`}
                             selectedThreadId={selectedThreadId}
                             messagingApi={messagingApi}
                             showError={showError}

@@ -7,6 +7,7 @@ import {
 const WorkflowActions = ({
     selectedWorkflowId,
     onRegisterWebhook,
+    onRefresh,
 }) => {
     return (
         <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
@@ -16,6 +17,13 @@ const WorkflowActions = ({
                 disabled={!selectedWorkflowId}
             >
                 Webhooks To Receive Messages
+            </Button>
+            <Button
+                variant="outlined"
+                onClick={onRefresh}
+                disabled={!selectedWorkflowId}
+            >
+                Refresh
             </Button>
         </Box>
     );
