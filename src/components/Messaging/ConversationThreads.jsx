@@ -9,9 +9,13 @@ import {
     ListItemButton,
     Divider,
     Badge,
-    useTheme
+    useTheme,
+    IconButton
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import { format } from 'date-fns';
+import SendMessageForm from './SendMessageForm';
+import { useSlider } from '../../contexts/SliderContext';
 
 /**
  * Displays a list of conversation threads for a selected workflow
@@ -34,6 +38,34 @@ const ConversationThreads = ({
     const [threads, setThreads] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const { openSlider } = useSlider();
+
+    // Function to handle opening the form in the slider
+    const handleOpenForm = () => {
+        openSlider(
+            <SendMessageForm
+                workflowId={selectedWorkflowId}
+                onClose={handleMessageSent}
+                onMessageSent={handleMessageSent}
+            />,
+            'New Conversation'
+        );
+    };
+
+    // Function to refresh threads after sending a message
+    const handleMessageSent = async () => {
+        if (!selectedWorkflowId) return;
+        
+        setIsLoading(true);
+        try {
+            const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId);
+            setThreads(fetchedThreads || []);
+        } catch (err) {
+            showError(`Failed to refresh threads: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
         // Don't fetch if no workflow is selected
@@ -105,11 +137,23 @@ const ConversationThreads = ({
                     borderColor: theme.palette.divider,
                     backgroundColor: theme.palette.background.paper,
                     borderTopLeftRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
-                    borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`
+                    borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
                 }}>
                 <Typography variant="subtitle1" fontWeight="bold">
                     Conversations
                 </Typography>
+                <IconButton 
+                    size="small" 
+                    color="primary" 
+                    onClick={handleOpenForm}
+                    disabled={!selectedWorkflowId}
+                    title="Start new conversation"
+                >
+                    <AddIcon />
+                </IconButton>
             </Box>
             
             <Box sx={{ flex: '1 1 auto' }}>
