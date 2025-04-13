@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
     Box,
     Typography,
@@ -23,6 +23,10 @@ import {
 import { format } from 'date-fns';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+
+// Added hooks
+import { useMessagingApi } from '../../services/messaging-api'; 
+import { useNotification } from '../../contexts/NotificationContext';
 
 // Utility function for relative time
 const getRelativeTimeString = (dateString) => {
@@ -80,14 +84,14 @@ export const MessageItem = ({ message }) => {
             sx={{ 
                 display: 'flex', 
                 justifyContent: isIncoming ? 'flex-start' : 'flex-end',
-                mb: expanded ? 3 : 2,
+                mb: expanded ? 2 : 1,
                 width: '100%'
             }}
         >
             <Paper 
                 elevation={0} 
                 sx={{
-                    p: 2,
+                    p: 1.5,
                     width: '70%',
                     backgroundColor: isIncoming ? theme.palette.grey[50] : theme.palette.grey[100],
                     color: isIncoming ? theme.palette.text.primary : theme.palette.text.primary,
@@ -99,8 +103,8 @@ export const MessageItem = ({ message }) => {
                     borderLeftColor: isIncoming ? theme.palette.info.light : theme.palette.primary.light,
                 }}
             >
-                <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="subtitle2" color="text.secondary" fontWeight="medium">
+                <Box sx={{ mb: 0.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary" fontWeight="medium">
                         {message.participantChannelId}
                     </Typography>
                     <Box display="flex" alignItems="center">
@@ -109,10 +113,10 @@ export const MessageItem = ({ message }) => {
                             size="small" 
                             color={message.direction === 'Incoming' ? 'info' : 'primary'} 
                             sx={{ 
-                                height: 20,
+                                height: 18,
                                 '& .MuiChip-label': { 
                                     px: 1,
-                                    fontSize: '0.7rem'
+                                    fontSize: '0.65rem'
                                 }
                             }} 
                         />
@@ -122,10 +126,10 @@ export const MessageItem = ({ message }) => {
                             color="default"
                             sx={{ 
                                 ml: 1, 
-                                height: 20,
+                                height: 18,
                                 '& .MuiChip-label': { 
                                     px: 1,
-                                    fontSize: '0.7rem'
+                                    fontSize: '0.65rem'
                                 }
                             }} 
                         />
@@ -135,22 +139,24 @@ export const MessageItem = ({ message }) => {
                             sx={{ 
                                 ml: 0.5, 
                                 color: theme.palette.grey[600],
-                                p: 0.5
+                                p: 0.3,
+                                width: 20,
+                                height: 20
                             }}
                         >
-                            {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                            {expanded ? <ExpandLessIcon fontSize="inherit" /> : <ExpandMoreIcon fontSize="inherit" />}
                         </IconButton>
                     </Box>
                 </Box>
                 
-                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>{messageContent}</Typography>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>{messageContent}</Typography>
                 
                 <Typography 
                     variant="caption" 
                     sx={{ 
                         display: 'block', 
                         textAlign: 'right', 
-                        mt: 1,
+                        mt: 0.5,
                         color: 'text.secondary'
                     }}
                 >
@@ -179,7 +185,7 @@ export const MessageItem = ({ message }) => {
                         <Table size="small" sx={{ 
                             '& .MuiTableCell-root': { 
                                 borderColor: theme.palette.grey[300],
-                                py: 0.5,
+                                py: 0.3,
                                 px: 1
                             }
                         }}>
@@ -327,32 +333,111 @@ export const MessageItem = ({ message }) => {
     );
 };
 
+// Refactored ChatConversation
 export const ChatConversation = ({ 
-    messages, 
-    selectedThread, 
-    onSendMessage, 
-    onLoadMoreMessages, 
-    isLoadingMore = false, 
-    hasMoreMessages = true 
+    selectedThreadId, // ID of the thread to display messages for
+    messagingApi,     // API hook
+    showError,        // Notification hook
+    selectedThread,   // Details of the selected thread (passed from parent)
+    onSendMessage     // Callback to open send message form
 }) => {
     const theme = useTheme();
+    const [messages, setMessages] = useState([]);
+    const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [messagesPage, setMessagesPage] = useState(1);
+    const [hasMoreMessages, setHasMoreMessages] = useState(true);
+    const [error, setError] = useState(null);
+    const scrollContainerRef = useRef(null); // Ref for the container to check scroll
+    const isInitialLoad = useRef(true); // Track initial load
 
-    // Sort messages to show most recent at top
-    const sortedMessages = [...messages].sort((a, b) => {
-        // If createdAt is available, sort by that
-        if (a.createdAt && b.createdAt) {
-            return new Date(b.createdAt) - new Date(a.createdAt);
+    const pageSize = 15; // Increase page size slightly
+
+    // Function to fetch messages (used for initial load and refresh)
+    const fetchThreadMessages = useCallback(async (threadId, page = 1) => {
+        setIsLoadingMessages(true);
+        setError(null);
+        try {
+            console.log(`Loading messages for thread: ${threadId}, page: ${page}`);
+            const threadMessages = await messagingApi.getThreadMessages(threadId, page, pageSize);
+            console.log(`Loaded ${threadMessages.length} messages`);
+            
+            // Sort messages on fetch (newest first)
+            const sorted = threadMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            
+            setMessages(sorted); 
+            setMessagesPage(page); // Reset page number on initial fetch
+            setHasMoreMessages(threadMessages.length === pageSize);
+            isInitialLoad.current = true; // Reset initial load flag
+
+        } catch (err) {
+            const errorMsg = 'Failed to fetch messages for the selected thread.';
+            setError(errorMsg);
+            showError(`${errorMsg}: ${err.message}`);
+            console.error(err);
+            setMessages([]);
+            setHasMoreMessages(false);
+        } finally {
+            setIsLoadingMessages(false);
         }
-        // Fallback to maintain current order if no timestamps
-        return 0;
-    });
+    }, [messagingApi, showError, pageSize]);
 
-    // When selected thread changes, scroll to top
+    // Initial message fetch when thread ID changes
     useEffect(() => {
-        if (messages.length > 0) {
-            window.scrollTo(0, 0);
+        if (!selectedThreadId) {
+            setMessages([]);
+            setMessagesPage(1);
+            setHasMoreMessages(true);
+            setError(null);
+            isInitialLoad.current = true; // Reset on thread change
+            return;
         }
-    }, [selectedThread?.id]);
+        fetchThreadMessages(selectedThreadId, 1);
+    }, [selectedThreadId, fetchThreadMessages]);
+
+    // Function to load more messages
+    const loadMoreMessages = useCallback(async () => {
+        if (!selectedThreadId || !hasMoreMessages || isLoadingMore || isLoadingMessages) {
+            console.log("Cannot load more messages:", { selectedThreadId, hasMoreMessages, isLoadingMore, isLoadingMessages });
+            return;
+        }
+
+        console.log("Loading more messages, page:", messagesPage + 1);
+        setIsLoadingMore(true);
+        setError(null);
+        try {
+            const nextPage = messagesPage + 1;
+            const olderMessages = await messagingApi.getThreadMessages(selectedThreadId, nextPage, pageSize);
+            console.log(`Loaded ${olderMessages.length} older messages`);
+            
+            if (olderMessages.length > 0) {
+                // Sort new messages before appending
+                const sortedOlder = olderMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                setMessages(prevMessages => [...prevMessages, ...sortedOlder]);
+                setMessagesPage(nextPage);
+                setHasMoreMessages(olderMessages.length === pageSize);
+            } else {
+                setHasMoreMessages(false);
+            }
+        } catch (err) {
+            const errorMsg = 'Failed to load more messages.';
+            setError(errorMsg); // Show error specific to loading more
+            showError(`${errorMsg}: ${err.message}`);
+            console.error(err);
+            // Don't clear existing messages on load more error
+        } finally {
+            setIsLoadingMore(false);
+        }
+    }, [selectedThreadId, messagesPage, hasMoreMessages, isLoadingMessages, isLoadingMore, messagingApi, showError, pageSize]);
+
+    // Sort messages whenever the messages array changes
+    // Messages are fetched newest first, older messages are appended.
+    // We want newest at the *top* of the display list (reversed order from before)
+    const sortedMessagesForDisplay = useMemo(() => 
+        [...messages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+        [messages]
+    );
 
     return (
         <Paper 
@@ -364,21 +449,20 @@ export const ChatConversation = ({
                 border: '1px solid',
                 borderColor: theme.palette.divider,
                 borderRadius: theme.shape.borderRadius,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                width: '100%'
             }}
         >
             {/* Thread Header */}
             {selectedThread && (
-                <Paper 
-                    elevation={0} 
+                <Box
                     sx={{ 
                         p: 2, 
                         bgcolor: theme.palette.background.paper, 
                         borderBottom: '1px solid',
                         borderColor: theme.palette.divider,
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 1
+                        borderTopLeftRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
+                        borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`
                     }}
                 >
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -386,7 +470,7 @@ export const ChatConversation = ({
                             {selectedThread.participantId || 'Conversation'}
                         </Typography>
                         <Button 
-                            variant="contained" 
+                            variant="outlined" 
                             color="primary" 
                             size="small"
                             onClick={onSendMessage}
@@ -419,77 +503,139 @@ export const ChatConversation = ({
                             </Typography>
                         )}
                     </Box>
-                </Paper>
+                </Box>
             )}
             
-            {/* Messages Container */}
+            {/* Messages Container - Scrollable area */}
             <Box 
+                ref={scrollContainerRef} // Add ref here
                 sx={{ 
                     p: 2, 
-                    flexGrow: 1,
                     display: 'flex',
                     flexDirection: 'column'
                 }}
             >
-                {messages.length === 0 ? (
-                    <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
-                        alignItems: 'center', 
-                        flexGrow: 1, 
-                        height: '100%',
-                        color: theme.palette.text.secondary
-                    }}>
-                        <Box sx={{ textAlign: 'center', p: 3 }}>
-                            <Typography variant="body1" sx={{ mb: 1 }}>
-                                No messages found
-                            </Typography>
-                            <Typography variant="body2">
-                                Start a conversation or select another thread
-                            </Typography>
-                        </Box>
+                {isLoadingMessages && messages.length === 0 ? (
+                    // Centered Loading Spinner for initial load
+                    <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                         <CircularProgress />
                     </Box>
-                ) : (
-                    <>
-                        <List sx={{ px: 1, width: '100%' }}>
-                            {sortedMessages.map((msg, index) => (
-                                <MessageItem key={msg.id || index} message={msg} />
-                            ))}
-                        </List>
-                        
-                        {/* Load More Button at the bottom */}
-                        {hasMoreMessages && (
-                            <Box 
-                                sx={{ 
-                                    display: 'flex', 
-                                    justifyContent: 'center', 
-                                    py: 2,
-                                    mt: 2
-                                }}
-                            >
-                                <Button 
-                                    size="small" 
-                                    onClick={onLoadMoreMessages}
-                                    disabled={isLoadingMore}
-                                    startIcon={isLoadingMore ? <CircularProgress size={16} /> : <ExpandMoreIcon />}
-                                    variant="outlined"
-                                    color="primary"
-                                    sx={{ textTransform: 'none' }}
-                                >
-                                    {isLoadingMore ? 'Loading...' : 'Load older messages'}
-                                </Button>
-                            </Box>
-                        )}
-                    </>
-                )}
+                ) : error ? (
+                     // Centered Error Message
+                     <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                         <Box sx={{ p: 3 }}>
+                             <Typography variant="body1" color="error" sx={{ mb: 1 }}>
+                                 Error loading messages
+                             </Typography>
+                             <Typography variant="body2" color="text.secondary">
+                                 {error} - Check console.
+                             </Typography>
+                         </Box>
+                     </Box>
+                 ) : messages.length === 0 ? (
+                     // Centered No Messages Found
+                     <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
+                         <Box sx={{ p: 3 }}>
+                             <Typography variant="body1" sx={{ mb: 1 }}>
+                                 No messages found
+                             </Typography>
+                             <Typography variant="body2" color="text.secondary">
+                                 Start a conversation or select another thread
+                             </Typography>
+                         </Box>
+                     </Box>
+                 ) : (
+                     // Actual Messages List and Load More Button
+                     <>
+                          {/* Messages List - Takes remaining space */} 
+                          <List sx={{ px: 1, width: '100%', py: 0 }}> {/* Removed mt:auto, padding y */} 
+                              {sortedMessagesForDisplay.map((msg, index) => (
+                                  <MessageItem key={msg.id || index} message={msg} />
+                              ))}
+                          </List>
+  
+                          {/* Load More Button at the BOTTOM */}
+                          {hasMoreMessages && (
+                              <Box 
+                                  sx={{ 
+                                      display: 'flex', 
+                                      justifyContent: 'center', 
+                                      py: 2,
+                                      mt: 2  // Add margin at top
+                                  }}
+                              >
+                                  <Button 
+                                      size="small" 
+                                      onClick={loadMoreMessages}
+                                      disabled={isLoadingMore || isLoadingMessages}
+                                      startIcon={isLoadingMore ? <CircularProgress size={16} /> : <ExpandMoreIcon />}
+                                      variant="outlined"
+                                      color="primary"
+                                      sx={{ textTransform: 'none' }}
+                                  >
+                                      {isLoadingMore ? 'Loading...' : 'Load older messages'}
+                                  </Button>
+                              </Box>
+                          )}
+                     </>
+                 )}
             </Box>
         </Paper>
     );
 };
 
-export const ConversationThreads = ({ threads, selectedThreadId, onThreadSelect, isLoading }) => {
+// Refactored ConversationThreads
+export const ConversationThreads = ({ 
+    selectedWorkflowId, // ID of the workflow to fetch threads for
+    messagingApi,       // API hook
+    showError,          // Notification hook
+    selectedThreadId,   // Currently selected thread ID (passed from parent)
+    onThreadSelect      // Callback when a thread is selected
+}) => {
     const theme = useTheme();
-    
+    const [threads, setThreads] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        // Don't fetch if no workflow is selected
+        if (!selectedWorkflowId) {
+            setThreads([]);
+            setError(null);
+            setIsLoading(false);
+            return;
+        }
+
+        const fetchConversationThreads = async () => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId);
+                setThreads(fetchedThreads || []);
+
+                // Check if the currently selected thread still exists
+                // If not, or if no thread was selected, select the first one if available
+                const currentSelectionExists = fetchedThreads.some(t => t.id === selectedThreadId);
+                if ((!selectedThreadId || !currentSelectionExists) && fetchedThreads.length > 0) {
+                     // Pass both the ID and the full thread object
+                     onThreadSelect(fetchedThreads[0].id, fetchedThreads[0]); 
+                }
+            } catch (err) {
+                const errorMsg = 'Failed to fetch conversation threads.';
+                setError(errorMsg);
+                showError(`${errorMsg}: ${err.message}`);
+                console.error(err);
+                setThreads([]);
+                onThreadSelect(null); // Deselect thread on error
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchConversationThreads();
+        // Dependency array ensures refetch when workflow ID, api, or notification changes
+    }, [selectedWorkflowId, messagingApi, showError, onThreadSelect, selectedThreadId]);
+
     if (isLoading) {
         return (
             <Box sx={{ 
@@ -515,26 +661,42 @@ export const ConversationThreads = ({ threads, selectedThreadId, onThreadSelect,
                 flexDirection: 'column'
             }}
         >
-            <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: theme.palette.divider }}>
+            <Box sx={{ 
+                    p: 2, 
+                    borderBottom: '1px solid', 
+                    borderColor: theme.palette.divider,
+                    backgroundColor: theme.palette.background.paper,
+                    borderTopLeftRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
+                    borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`
+                }}>
                 <Typography variant="subtitle1" fontWeight="bold">
                     Conversations
                 </Typography>
             </Box>
             
-            <Box>
-                {threads.length === 0 ? (
+            <Box sx={{ flex: '1 1 auto' }}> {/* Allow content to determine size */}
+                {error && (
+                     <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                         <Typography color="error" align="center">
+                             {error}
+                         </Typography>
+                     </Box>
+                )}
+                {!error && threads.length === 0 && !isLoading && (
                     <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                         <Typography color="text.secondary" align="center">
                             No conversation threads found
                         </Typography>
                     </Box>
-                ) : (
+                )}
+                {!error && threads.length > 0 && (
                     <List disablePadding>
                         {threads.map(thread => (
                             <React.Fragment key={thread.id}>
                                 <ListItemButton 
                                     selected={selectedThreadId === thread.id}
-                                    onClick={() => onThreadSelect(thread.id)}
+                                    // Pass both the ID and the full thread object on click
+                                    onClick={() => onThreadSelect(thread.id, thread)} 
                                     sx={{
                                         px: 2,
                                         py: 1.5,
