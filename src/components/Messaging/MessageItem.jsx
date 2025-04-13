@@ -55,7 +55,10 @@ const MessageItem = ({ message, isRecent = false }) => {
                 display: 'flex', 
                 justifyContent: isIncoming ? 'flex-start' : 'flex-end',
                 mb: expanded ? 2 : 1,
-                width: '100%'
+                width: '100%',
+                position: 'relative',
+                pl: isIncoming ? '12px' : 0,
+                pr: isIncoming ? 0 : '12px',
             }}
         >
             <Paper 
@@ -76,6 +79,34 @@ const MessageItem = ({ message, isRecent = false }) => {
                         : isIncoming ? theme.palette.grey[200] : theme.palette.grey[300],
                     transition: 'all 0.3s ease',
                     boxShadow: isRecent ? '0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
+                    '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        width: 0,
+                        height: 0,
+                        borderStyle: 'solid',
+                        borderWidth: isIncoming ? '8px 8px 8px 0' : '8px 0 8px 8px',
+                        borderColor: isIncoming 
+                            ? `transparent ${isRecent ? theme.palette.info.main : theme.palette.grey[200]} transparent transparent` 
+                            : `transparent transparent transparent ${isRecent ? theme.palette.primary.main : theme.palette.grey[300]}`,
+                        top: '20px',
+                        [isIncoming ? 'left' : 'right']: '-8px',
+                        zIndex: 1
+                    },
+                    '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        width: 0,
+                        height: 0,
+                        borderStyle: 'solid',
+                        borderWidth: isIncoming ? '7px 7px 7px 0' : '7px 0 7px 7px',
+                        borderColor: isIncoming 
+                            ? `transparent ${isRecent ? theme.palette.info.light + '20' : theme.palette.grey[50]} transparent transparent` 
+                            : `transparent transparent transparent ${isRecent ? theme.palette.primary.light + '20' : theme.palette.grey[100]}`,
+                        top: '21px',
+                        [isIncoming ? 'left' : 'right']: '-7px',
+                        zIndex: 2
+                    }
                 }}
             >
                 <Box sx={{ mb: 1, mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -152,7 +183,9 @@ const MessageItem = ({ message, isRecent = false }) => {
                     sx={{ 
                         whiteSpace: 'pre-wrap', 
                         lineHeight: 1.4,
-                        mt: 1
+                        mt: 1,
+                        mb: 1
+
                     }}
                 >
                     {messageContent}
