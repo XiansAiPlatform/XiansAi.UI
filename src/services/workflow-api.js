@@ -56,11 +56,15 @@ export const useWorkflowApi = () => {
 
       fetchWorkflowRunLogs: async (workflowRunId, skip = 0, limit = 20, logLevel = null) => {
         try {
-          const queryParams = { skip, limit };
+          const queryParams = { 
+            workflowRunId, 
+            skip, 
+            limit 
+          };
           if (logLevel !== null) {
-            queryParams.level = Number(logLevel);
+            queryParams.logLevel = Number(logLevel);
           }
-          return await apiClient.get(`/api/client/logs/by-run-id/${workflowRunId}`, queryParams);
+          return await apiClient.get('/api/client/logs/workflow', queryParams);
         } catch (error) {
           console.error('Failed to fetch workflow run logs:', error);
           throw error;
