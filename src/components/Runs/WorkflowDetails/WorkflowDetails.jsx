@@ -26,7 +26,9 @@ const WorkflowDetails = () => {
     const fetchWorkflow = async () => {
       if (!workflow) {
         try {
+          console.log('fetching workflow', id, runId);
           const data = await api.getWorkflow(id, runId);
+          console.log('workflow', data);
           setWorkflow(data);
         } catch (error) {
           const errorMessage = handleApiError(error, 'Failed to load workflow');

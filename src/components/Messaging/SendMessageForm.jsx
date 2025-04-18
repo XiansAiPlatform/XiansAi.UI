@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Box,
     CircularProgress,
@@ -17,6 +17,14 @@ const SendMessageForm = ({ workflowId, onClose, initialParticipantId = '', onMes
     const [isMetadataValid, setIsMetadataValid] = useState(true);
     const messagingApi = useMessagingApi();
     const { showError, showSuccess } = useNotification();
+    const contentInputRef = useRef(null);
+
+    // Focus on the content input when the component mounts
+    useEffect(() => {
+        if (contentInputRef.current) {
+            contentInputRef.current.focus();
+        }
+    }, []);
 
     // Update the state if the props change (e.g., when switching threads)
     useEffect(() => {
@@ -87,6 +95,13 @@ const SendMessageForm = ({ workflowId, onClose, initialParticipantId = '', onMes
         }
     };
 
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey && !isSendDisabled) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
     // Determine if the send button should be disabled
     const isSendDisabled = isSending || !participantId || !content || (showMetadata && metadata && !isMetadataValid);
 
@@ -127,6 +142,8 @@ const SendMessageForm = ({ workflowId, onClose, initialParticipantId = '', onMes
                 required
                 helperText="Message content to be sent"
                 disabled={isSending}
+                inputRef={contentInputRef}
+                onKeyDown={handleKeyDown}
             />
             <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
                 <Button 
