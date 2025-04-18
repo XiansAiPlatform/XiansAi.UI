@@ -36,10 +36,20 @@ const ChatConversation = ({
     const [messagesPage, setMessagesPage] = useState(1);
     const [hasMoreMessages, setHasMoreMessages] = useState(true);
     const [error, setError] = useState(null);
+    const [lastUpdateTime, setLastUpdateTime] = useState(null);
     const scrollContainerRef = useRef(null);
     const isInitialLoad = useRef(true);
+    const pollingTimerRef = useRef(null);
+    const pollingCountRef = useRef(0);
+    
+    // Use refs to hold the function references to avoid circular dependencies
+    const fetchThreadMessagesRef = useRef(null);
+    const startMessagePollingRef = useRef(null);
+    const stopMessagePollingRef = useRef(null);
 
     const pageSize = 15;
+    const POLLING_INTERVAL = 5000; // 5 seconds
+    const MAX_POLLING_COUNT = 24; // Poll 24 times (2 minutes total)
 
     // Check if a message is recent (less than 1 minute old)
     const isMessageRecent = useCallback((message) => {
@@ -49,38 +59,134 @@ const ChatConversation = ({
         const oneMinuteInMs = 60 * 1000;
         return (now - messageTime) < oneMinuteInMs;
     }, []);
-
+    
+    // Update the last update time based on latest message
+    const updateLastUpdateTime = useCallback((messagesList) => {
+        if (!messagesList || messagesList.length === 0) return;
+        
+        // Find the newest message by creation date
+        const newestMessage = [...messagesList].sort((a, b) => 
+            new Date(b.createdAt) - new Date(a.createdAt)
+        )[0];
+        
+        if (newestMessage && newestMessage.createdAt) {
+            setLastUpdateTime(newestMessage.createdAt);
+        }
+    }, []);
+    
+    // When selectedThread changes, initialize lastUpdateTime
+    useEffect(() => {
+        if (selectedThread && selectedThread.updatedAt) {
+            setLastUpdateTime(selectedThread.updatedAt);
+        }
+    }, [selectedThread]);
+    
+    // Stop message polling
+    stopMessagePollingRef.current = () => {
+        if (pollingTimerRef.current) {
+            clearTimeout(pollingTimerRef.current);
+            pollingTimerRef.current = null;
+        }
+    };
+    
     // Function to fetch messages (used for initial load and refresh)
-    const fetchThreadMessages = useCallback(async (threadId, page = 1) => {
-        setIsLoadingMessages(true);
+    fetchThreadMessagesRef.current = async (threadId, page = 1, isPolling = false) => {
+        if (!isPolling) {
+            setIsLoadingMessages(true);
+        }
         setError(null);
+        
         try {
-            console.log(`Loading messages for thread: ${threadId}, page: ${page}`);
+            console.log(`${isPolling ? 'Polling' : 'Loading'} messages for thread: ${threadId}, page: ${page}`);
             const threadMessages = await messagingApi.getThreadMessages(threadId, page, pageSize);
-            console.log(`Loaded ${threadMessages.length} messages`);
+            console.log(`Loaded ${threadMessages.length} messages${isPolling ? ' from polling' : ''}`);
             
             // Sort messages on fetch (newest first)
             const sorted = threadMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
-            setMessages(sorted); 
+            // Update the messages state
+            setMessages(sorted);
             setMessagesPage(page); // Reset page number on initial fetch
             setHasMoreMessages(threadMessages.length === pageSize);
-            isInitialLoad.current = true; // Reset initial load flag
-
+            
+            // Update the last update time based on newest message
+            updateLastUpdateTime(sorted);
+            
+            if (!isPolling) {
+                isInitialLoad.current = true; // Reset initial load flag
+                // Start polling for new messages
+                startMessagePollingRef.current(threadId);
+            }
         } catch (err) {
-            const errorMsg = 'Failed to fetch messages for the selected thread.';
-            setError(errorMsg);
-            showError(`${errorMsg}: ${err.message}`);
-            console.error(err);
-            setMessages([]);
-            setHasMoreMessages(false);
+            if (!isPolling) {
+                const errorMsg = 'Failed to fetch messages for the selected thread.';
+                setError(errorMsg);
+                showError(`${errorMsg}: ${err.message}`);
+                console.error(err);
+                setMessages([]);
+                setHasMoreMessages(false);
+            } else {
+                console.error('Error polling for messages:', err);
+            }
         } finally {
-            setIsLoadingMessages(false);
+            if (!isPolling) {
+                setIsLoadingMessages(false);
+            }
         }
-    }, [messagingApi, showError, pageSize]);
+    };
+    
+    // Start polling for message updates
+    startMessagePollingRef.current = (threadId) => {
+        // Clear any existing polling
+        stopMessagePollingRef.current();
+        
+        // Reset the polling counter
+        pollingCountRef.current = 0;
+        
+        console.log('Starting message polling for 2 minutes');
+        
+        // Define the polling function
+        const pollMessages = () => {
+            pollingCountRef.current += 1;
+            
+            // Check if we've reached the max polling count
+            if (pollingCountRef.current > MAX_POLLING_COUNT) {
+                console.log('Message polling completed after 2 minutes');
+                stopMessagePollingRef.current();
+                return;
+            }
+            
+            // Check if thread ID is still valid
+            if (!threadId) {
+                stopMessagePollingRef.current();
+                return;
+            }
+            
+            // Fetch messages with polling flag set to true
+            fetchThreadMessagesRef.current(threadId, 1, true);
+            
+            // Schedule the next poll
+            pollingTimerRef.current = setTimeout(pollMessages, POLLING_INTERVAL);
+        };
+        
+        // Start the first poll after the interval
+        pollingTimerRef.current = setTimeout(pollMessages, POLLING_INTERVAL);
+    };
+    
+    // Function wrappers to use the refs - this helps React hook dependency system
+    const fetchThreadMessages = useCallback((threadId, page, isPolling) => {
+        fetchThreadMessagesRef.current(threadId, page, isPolling);
+    }, []);
+    
+    const stopMessagePolling = useCallback(() => {
+        stopMessagePollingRef.current();
+    }, []);
 
     // Initial message fetch when thread ID changes
     useEffect(() => {
+        // Clean up polling when thread changes
+        stopMessagePolling();
+        
         if (!selectedThreadId) {
             setMessages([]);
             setMessagesPage(1);
@@ -90,7 +196,14 @@ const ChatConversation = ({
             return;
         }
         fetchThreadMessages(selectedThreadId, 1);
-    }, [selectedThreadId, fetchThreadMessages]);
+    }, [selectedThreadId, fetchThreadMessages, stopMessagePolling]);
+
+    // Clean up polling on unmount
+    useEffect(() => {
+        return () => {
+            stopMessagePolling();
+        };
+    }, [stopMessagePolling]);
 
     // Function to load more messages
     const loadMoreMessages = useCallback(async () => {
@@ -111,7 +224,10 @@ const ChatConversation = ({
                 // Sort new messages before appending
                 const sortedOlder = olderMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 
-                setMessages(prevMessages => [...prevMessages, ...sortedOlder]);
+                setMessages(prevMessages => {
+                    const updatedMessages = [...prevMessages, ...sortedOlder];
+                    return updatedMessages;
+                });
                 setMessagesPage(nextPage);
                 setHasMoreMessages(olderMessages.length === pageSize);
             } else {
@@ -189,9 +305,10 @@ const ChatConversation = ({
                                 <strong>Topic:</strong> {selectedThread.title}
                             </Typography>
                         )}
-                        {selectedThread.updatedAt && (
+                        {/* Use lastUpdateTime instead of selectedThread.updatedAt */}
+                        {lastUpdateTime && (
                             <Typography variant="body2" color="text.secondary">
-                                <strong>Last update:</strong> {getRelativeTimeString(selectedThread.updatedAt)}
+                                <strong>Last update:</strong> {getRelativeTimeString(lastUpdateTime)}
                             </Typography>
                         )}
                         {selectedThread.createdAt && (
