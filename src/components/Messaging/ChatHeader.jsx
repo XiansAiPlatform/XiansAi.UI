@@ -27,22 +27,30 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage }) => {
             }}
         >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant="h6" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
-                    {selectedThread.participantId || 'Conversation'}
-                </Typography>
-                <Button 
-                    variant="outlined" 
-                    color="primary" 
-                    size="small"
-                    onClick={onSendMessage}
+                <Typography 
+                    variant={selectedThread.isInternalThread ? "subtitle1" : "h6"} 
                     sx={{ 
-                        fontWeight: 500,
-                        textTransform: 'none',
-                        px: 2
+                        fontWeight: 'bold', 
+                        color: selectedThread.isInternalThread ? theme.palette.text.secondary : theme.palette.primary.main
                     }}
                 >
-                    Send Message
-                </Button>
+                    {selectedThread.participantId || 'Conversation'}
+                </Typography>
+                {!selectedThread.isInternalThread && (
+                    <Button 
+                        variant="outlined" 
+                        color="primary" 
+                        size="small"
+                        onClick={onSendMessage}
+                        sx={{ 
+                            fontWeight: 500,
+                            textTransform: 'none',
+                            px: 2
+                        }}
+                    >
+                        Send Message
+                    </Button>
+                )}
             </Box>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Typography variant="body2" color="text.secondary">

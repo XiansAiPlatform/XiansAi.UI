@@ -28,7 +28,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       {}
   );
   const [runType, setRunType] = useState('unique'); // 'unique' or 'singleton'
-  const [flowId, setFlowId] = useState(definition ? `${definition.agentName}:${definition.typeName}` : '');
+  const [flowId, setFlowId] = useState(definition ? `${definition.agentName.replaceAll(' ', '')}:${definition.typeName.replaceAll(' ', '')}` : '');
   const [queueType, setQueueType] = useState('default'); // 'default' or 'named'
   const [queueName, setQueueName] = useState('');
   const [loading, setLoading] = useState(false);

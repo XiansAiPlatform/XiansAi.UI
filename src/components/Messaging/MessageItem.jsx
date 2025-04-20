@@ -184,8 +184,10 @@ const MessageItem = ({ message, isRecent = false }) => {
                         whiteSpace: 'pre-wrap', 
                         lineHeight: 1.4,
                         mt: 1,
-                        mb: 1
-
+                        mb: 1,
+                        overflowWrap: 'break-word',
+                        wordBreak: 'break-word',
+                        wordWrap: 'break-word'
                     }}
                 >
                     {messageContent}

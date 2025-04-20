@@ -81,7 +81,7 @@ const WorkflowSelector = ({
     }, [selectedAgentName, selectedWorkflowType, messagingApi, showError, onWorkflowSelected]);
 
     const agentNames = useMemo(() =>
-        [...new Set(allWorkflows.map(wf => wf.agentName))].sort(),
+        [...new Set(allWorkflows.map(wf => wf.agentName))],
         [allWorkflows]
     );
 

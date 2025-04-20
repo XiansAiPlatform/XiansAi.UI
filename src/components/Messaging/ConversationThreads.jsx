@@ -233,18 +233,20 @@ const ConversationThreads = ({
                                         primaryTypographyProps={{
                                             fontWeight: selectedThreadId === thread.id ? 'bold' : 'medium',
                                             variant: 'body2',
-                                            noWrap: true
+                                            noWrap: true,
+                                            color: thread.isInternalThread ? theme.palette.text.disabled : 'inherit'
                                         }}
                                         secondaryTypographyProps={{
                                             variant: 'caption',
-                                            noWrap: true
+                                            noWrap: true,
+                                            color: thread.isInternalThread ? theme.palette.text.disabled : 'inherit'
                                         }}
                                         sx={{ mr: 1 }}
                                     />
                                     {thread.messageCount > 0 && (
                                         <Badge 
                                             badgeContent={thread.messageCount} 
-                                            color="primary"
+                                            color={thread.isInternalThread ? "default" : "primary"}
                                             sx={{
                                                 '& .MuiBadge-badge': {
                                                     fontSize: '0.7rem'
