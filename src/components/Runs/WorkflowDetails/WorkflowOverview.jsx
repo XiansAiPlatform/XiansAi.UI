@@ -66,7 +66,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   ];
 
   // Helper function to convert UI value to API value
-  const getApiLogLevel = (level) => level === '' ? null : level;
+  const getApiLogLevel = useCallback((level) => level === '' ? null : level, []);
 
   // Update filtered logs when logs or level change
   useEffect(() => {
@@ -97,7 +97,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     };
 
     fetchLogsWithNewLevel();
-  }, [selectedLogLevel, runId, api, showError]);
+  }, [selectedLogLevel, runId, api, showError, getApiLogLevel]);
 
   // Add a helper function to safely convert status to string (moved this up to avoid initialization error)
   const getStatusString = (status) => {
@@ -118,24 +118,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     }
   }, [workflowId, runId, api, showError]);
 
-  // Append logs manually (e.g. "Load more" button)
-  const loadMoreLogs = async () => {
-    if (isLoadingMore) return;
-    setIsLoadingMore(true);
-    try {
-      const newLogs = await api.fetchWorkflowRunLogs(runId, skip, limit, getApiLogLevel(selectedLogLevel));
-      if (newLogs.length < limit) setHasMore(false);
-      setWorkflowLogs((prev) => [...prev, ...newLogs]);
-      setSkip(skip + newLogs.length);
-    } catch (error) {
-      console.error('Failed to load more logs:', error);
-      showError('Failed to load more logs');
-    } finally {
-      setIsLoadingMore(false);
-    }
-  };
-
-  // ⏱ Fetch *new logs only* during interval
   const fetchLatestLogs = useCallback(async () => {
     if (isLoading) return;
     const currentWorkflow = workflow;
@@ -159,28 +141,28 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
     } catch (error) {
       console.error('Failed to fetch logs on interval:', error);
     }
-  }, [runId, api, limit, isLoading, workflow, selectedLogLevel]);
+  }, [runId, api, limit, isLoading, workflow, selectedLogLevel, getApiLogLevel]);
+
+  const fetchInitialLogs = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const logs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
+      setWorkflowLogs(logs);
+      setSkip(logs.length);
+      if (logs.length < limit) setHasMore(false);
+    } catch (error) {
+      console.error('Failed to fetch initial logs:', error);
+      showError('Failed to fetch workflow logs');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [runId, api, limit, selectedLogLevel, showError, getApiLogLevel]);
 
   // Initial fetch
   useEffect(() => {
-    const fetchInitialLogs = async () => {
-      try {
-        setIsLoading(true);
-        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
-        setWorkflowLogs(logs);
-        setSkip(logs.length);
-        if (logs.length < limit) setHasMore(false);
-      } catch (error) {
-        console.error('Failed to fetch initial logs:', error);
-        showError('Failed to fetch workflow logs');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchWorkflow();
     fetchInitialLogs();
-  }, [workflowId, runId, api, showError, selectedLogLevel]);
+  }, [fetchWorkflow, fetchInitialLogs]);
 
   const isRunning = workflow && getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
  
@@ -198,7 +180,24 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       fetchWorkflow();
       fetchLatestLogs();
     }
-  }, [onActionComplete]);
+  }, [onActionComplete, fetchWorkflow, fetchLatestLogs]);
+
+  // Append logs manually (e.g. "Load more" button)
+  const loadMoreLogs = async () => {
+    if (isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const newLogs = await api.fetchWorkflowRunLogs(runId, skip, limit, getApiLogLevel(selectedLogLevel));
+      if (newLogs.length < limit) setHasMore(false);
+      setWorkflowLogs((prev) => [...prev, ...newLogs]);
+      setSkip(skip + newLogs.length);
+    } catch (error) {
+      console.error('Failed to load more logs:', error);
+      showError('Failed to load more logs');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
