@@ -22,6 +22,7 @@ import Home from './components/Public/Home/Home';
 import Login from './auth/Login';
 import Register from './components/Public/Register/Register';
 import { useAuth0 } from "@auth0/auth0-react";
+import MessagingPage from './components/Messaging/MessagingPage';
 
 function App() {
   const { isLoading, error, logout } = useAuth0();
@@ -86,6 +87,11 @@ function App() {
                       <Route path="/settings" element={
                         <ProtectedRoute>
                           <Settings />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/messaging" element={
+                        <ProtectedRoute>
+                          <MessagingPage />
                         </ProtectedRoute>
                       } />
                     </Route>

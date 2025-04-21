@@ -26,6 +26,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
     try {
       
       const abortController = new AbortController();
+      console.log('workflowId', workflowId);
       
       await api.streamActivityEvents(workflowId, (newEvent) => {
         

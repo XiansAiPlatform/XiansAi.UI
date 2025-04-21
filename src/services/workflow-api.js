@@ -106,7 +106,7 @@ export const useWorkflowApi = () => {
           console.error('Failed to establish event stream:', error);
           throw error;
         }
-      },
+      }
     };
   }, [apiClient]);
 };
