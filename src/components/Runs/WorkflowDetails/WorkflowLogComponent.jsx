@@ -101,15 +101,11 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
       const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
       if (newLogs?.length) {
         setWorkflowLogs((prev) => {
-          // Create a Set of existing log IDs for quick lookup
-          const existingIds = new Set(prev.map(log => log.id));
-          // Filter out any logs that already exist
-          const uniqueNewLogs = newLogs.filter(log => !existingIds.has(log.id));
-          // If we got new logs, add them to the beginning
-          if (uniqueNewLogs.length > 0) {
-            setSkip(prevSkip => prevSkip + uniqueNewLogs.length);
-          }
-          return [...uniqueNewLogs, ...prev];
+          const updatedLogs = [...newLogs, ...prev];
+          // Update skip to match the total count
+          setSkip(updatedLogs.length);
+          
+          return updatedLogs;
         });
       }
     } catch (error) {
@@ -164,15 +160,8 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
       if (newLogs.length < limit) setHasMore(false);
       
       setWorkflowLogs((prev) => {
-        // Create a Set of existing log IDs for quick lookup
-        const existingIds = new Set(prev.map(log => log.id));
-        // Filter out any logs that already exist
-        const uniqueNewLogs = newLogs.filter(log => !existingIds.has(log.id));
-        // Only update if we have new unique logs
-        if (uniqueNewLogs.length > 0) {
-          return [...prev, ...uniqueNewLogs];
-        }
-        return prev;
+        const updatedLogs = [...prev, ...newLogs];
+        return updatedLogs;
       });
       setSkip(skip + newLogs.length);
     } catch (error) {
@@ -401,10 +390,13 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
 
                   const getLogLevelColor = (level) => {
                     switch (level) {
-                      case 4: return '#d32f2f';
-                      case 3: return '#ff9800';
-                      case 2: return '#2196f3';
-                      default: return '#757575';
+                      case 5: return '#9c27b0'; // Critical - purple
+                      case 4: return '#d32f2f'; // Error - red
+                      case 3: return '#ff9800'; // Warning - orange
+                      case 2: return '#2196f3'; // Info - blue
+                      case 1: return '#00bcd4'; // Debug - cyan
+                      case 0: return '#8bc34a'; // Trace - light green
+                      default: return '#757575'; // None/Unknown - grey
                     }
                   };
 
