@@ -130,7 +130,26 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
       const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
       if (newLogs?.length) {
         setWorkflowLogs((prev) => {
-          const updatedLogs = [...newLogs, ...prev];
+          // Create a Set of existing log IDs for fast lookup
+          const existingLogIds = new Set();
+          prev.forEach(log => {
+            // Use id as primary identifier, fallback to unique signature if id is not available
+            const logIdentifier = log.id || `${log.level}-${log.createdAt}-${log.message?.substring(0, 50)}`;
+            existingLogIds.add(logIdentifier);
+          });
+          
+          // Filter out logs that already exist in our state
+          const uniqueNewLogs = newLogs.filter(log => {
+            const logIdentifier = log.id || `${log.level}-${log.createdAt}-${log.message?.substring(0, 50)}`;
+            return !existingLogIds.has(logIdentifier);
+          });
+          
+          // Only add unique logs
+          if (uniqueNewLogs.length === 0) {
+            return prev; // No changes if no new unique logs
+          }
+          
+          const updatedLogs = [...uniqueNewLogs, ...prev];
           // Update skip to match the total count
           setSkip(updatedLogs.length);
           
@@ -449,9 +468,12 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                   })();
 
                   const logLevelClass = hasErrorMessage ? 'error' : getLogLevelClass(log.level);
+                  
+                  // Create a guaranteed unique key for each log
+                  const logKey = log.id || `log-${log.createdAt}-${index}-${log.level}-${log.message?.substring(0, 20)}`;
 
                   return (
-                    <Box key={log.id || index} className={`log-entry ${logLevelClass}`}>
+                    <Box key={logKey} className={`log-entry ${logLevelClass}`}>
                       <Box className="log-header">
                         <Box 
                           className="log-level"
