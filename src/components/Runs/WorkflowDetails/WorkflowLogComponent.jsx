@@ -50,6 +50,24 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     { value: 6, label: 'None' }
   ];
 
+  // Helper function to detect errors in log messages
+  const hasErrorInLogs = useCallback(() => {
+    if (!workflowLogs.length) return false;
+    
+    // Check by log level
+    if (workflowLogs[0]?.level === 4) return true;
+    
+    // Check last log message for error information in JSON format
+    const lastLog = workflowLogs[0]; // First log is the latest
+    if (lastLog?.message) {
+      return lastLog.message.includes('"failed":') && 
+             lastLog.message.includes('"failure":') && 
+             lastLog.message.includes('"message":');
+    }
+    
+    return false;
+  }, [workflowLogs]);
+
   // Helper function to convert UI value to API value
   const getApiLogLevel = useCallback((level) => level === '' ? null : level, []);
 
@@ -209,7 +227,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            {workflowLogs[0]?.level === 4 && (
+            {hasErrorInLogs() && (
               <ErrorOutlineIcon 
                 sx={{ 
                   color: '#d32f2f',
@@ -400,8 +418,16 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                     }
                   };
 
+                  // Check if this log contains error information in the message
+                  const hasErrorMessage = log.message && 
+                    log.message.includes('"failed":') && 
+                    log.message.includes('"failure":') && 
+                    log.message.includes('"message":');
+
+                  const logLevelClass = hasErrorMessage ? 'error' : getLogLevelClass(log.level);
+
                   return (
-                    <Box key={log.id || index} className={`log-entry ${getLogLevelClass(log.level)}`}>
+                    <Box key={log.id || index} className={`log-entry ${logLevelClass}`}>
                       <Box className="log-header">
                         <Box 
                           className="log-level"
@@ -410,7 +436,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                             color: getLogLevelColor(log.level)
                           }}
                         >
-                          {getLogLevelLabel(log.level)}
+                          {hasErrorMessage ? 'FAILED' : getLogLevelLabel(log.level)}
                         </Box>
                         <Box className="log-time">
                           {new Date(log.createdAt).toLocaleString()}

@@ -21,6 +21,23 @@ const WorkflowRunItem = ({ run, isMobile }) => {
     return formatDistance(startDate, endDate, { includeSeconds: true });
   };
 
+  // Helper function to check if run has error in logs
+  const hasError = () => {
+    if (!run.lastLog) return false;
+    
+    // Check by log level
+    if (run.lastLog.level === 4) return true;
+    
+    // Check log message for error information in JSON format
+    if (run.lastLog.message) {
+      return run.lastLog.message.includes('"failed":') && 
+             run.lastLog.message.includes('"failure":') && 
+             run.lastLog.message.includes('"message":');
+    }
+    
+    return false;
+  };
+
   return (
     <Link 
       to={`/runs/${run.workflowId}/${run.runId}`} 
@@ -49,7 +66,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             gap: '4px'
           }}>
             {formatWorkflowType(run.workflowType)}
-            {run.lastLog?.level === 4 && (
+            {hasError() && (
               <ErrorOutlineIcon 
                 style={{ 
                   color: '#d32f2f',
