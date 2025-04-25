@@ -28,11 +28,22 @@ const WorkflowRunItem = ({ run, isMobile }) => {
     // Check by log level
     if (run.lastLog.level === 4) return true;
     
-    // Check log message for error information in JSON format
+    // Check log message for error information in JSON structure
     if (run.lastLog.message) {
-      return run.lastLog.message.includes('"failed":') && 
-             run.lastLog.message.includes('"failure":') && 
-             run.lastLog.message.includes('"message":');
+      try {
+        // Find JSON object in message if it exists
+        const match = run.lastLog.message.match(/\{.*\}/s);
+        if (match) {
+          const jsonObj = JSON.parse(match[0]);
+          // Check for the specific error structure
+          return jsonObj.result && 
+                 jsonObj.result.failed && 
+                 jsonObj.result.failed.failure;
+        }
+      } catch (e) {
+        // If parsing fails, it's not a valid JSON error structure
+        console.debug('Error parsing log message JSON:', e);
+      }
     }
     
     return false;

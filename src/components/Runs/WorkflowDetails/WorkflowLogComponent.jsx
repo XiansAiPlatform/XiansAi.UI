@@ -57,12 +57,23 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     // Check by log level
     if (workflowLogs[0]?.level === 4) return true;
     
-    // Check last log message for error information in JSON format
+    // Check last log message for error information in JSON structure
     const lastLog = workflowLogs[0]; // First log is the latest
     if (lastLog?.message) {
-      return lastLog.message.includes('"failed":') && 
-             lastLog.message.includes('"failure":') && 
-             lastLog.message.includes('"message":');
+      try {
+        // Find JSON object in message if it exists
+        const match = lastLog.message.match(/\{.*\}/s);
+        if (match) {
+          const jsonObj = JSON.parse(match[0]);
+          // Check for the specific error structure
+          return jsonObj.result && 
+                 jsonObj.result.failed && 
+                 jsonObj.result.failed.failure;
+        }
+      } catch (e) {
+        // If parsing fails, it's not a valid JSON error structure
+        console.debug('Error parsing log message JSON:', e);
+      }
     }
     
     return false;
@@ -419,10 +430,23 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                   };
 
                   // Check if this log contains error information in the message
-                  const hasErrorMessage = log.message && 
-                    log.message.includes('"failed":') && 
-                    log.message.includes('"failure":') && 
-                    log.message.includes('"message":');
+                  const hasErrorMessage = log.message && (() => {
+                    try {
+                      // Find JSON object in message if it exists
+                      const match = log.message.match(/\{.*\}/s);
+                      if (match) {
+                        const jsonObj = JSON.parse(match[0]);
+                        // Check for the specific error structure
+                        return jsonObj.result && 
+                               jsonObj.result.failed && 
+                               jsonObj.result.failed.failure;
+                      }
+                      return false;
+                    } catch (e) {
+                      // If parsing fails, it's not a valid JSON error structure
+                      return false;
+                    }
+                  })();
 
                   const logLevelClass = hasErrorMessage ? 'error' : getLogLevelClass(log.level);
 
