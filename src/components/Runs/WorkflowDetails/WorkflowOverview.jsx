@@ -180,7 +180,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
 
     fetchWorkflow();
     fetchInitialLogs();
-  }, [workflowId, runId, api, showError, selectedLogLevel]);
+  }, [workflowId, runId, api, showError, selectedLogLevel, fetchWorkflow]);
 
   const isRunning = workflow && getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
  
@@ -198,7 +198,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       fetchWorkflow();
       fetchLatestLogs();
     }
-  }, [onActionComplete]);
+  }, [onActionComplete, fetchWorkflow, fetchLatestLogs]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);

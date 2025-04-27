@@ -6,8 +6,7 @@ import {
     TextField,
     Autocomplete,
     Typography,
-    Alert,
-    ClickAwayListener} from '@mui/material';
+    Alert} from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
 import { useNotification } from '../../contexts/NotificationContext';
 

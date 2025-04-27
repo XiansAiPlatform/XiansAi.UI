@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Paper, Typography, useTheme } from '@mui/material';
+import { Box, Paper, useTheme } from '@mui/material';
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 
 /**
@@ -104,7 +104,6 @@ const TypingIndicator = () => {
               />
             ))}
           </Box>
-
         </Paper>
       </Box>
     </Box>
