@@ -5,7 +5,7 @@ import {
 } from '@mui/material';
 
 const WorkflowActions = ({
-    selectedWorkflowId,
+    selectedAgentName,
     onRegisterWebhook,
     onRefresh,
 }) => {
@@ -14,14 +14,14 @@ const WorkflowActions = ({
             <Button
                 variant="outlined"
                 onClick={onRegisterWebhook}
-                disabled={!selectedWorkflowId}
+                disabled={!selectedAgentName}
             >
                 Webhooks To Receive Messages
             </Button>
             <Button
                 variant="outlined"
                 onClick={onRefresh}
-                disabled={!selectedWorkflowId}
+                disabled={!selectedAgentName}
             >
                 Refresh
             </Button>

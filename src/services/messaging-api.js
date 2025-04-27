@@ -7,10 +7,10 @@ export const useMessagingApi = () => {
   return useMemo(() => {
     return {
 
-      getThreads: async (workflowId, page = null, pageSize = null) => {
+      getThreads: async (agent, page = null, pageSize = null) => {
         try {
-          console.log('Fetching threads for workflowId:', workflowId);
-          const params = { workflowId };
+          console.log('Fetching threads for agent:', agent);
+          const params = { agent };
           if (page !== null) params.page = page;
           if (pageSize !== null) params.pageSize = pageSize;
           
@@ -59,14 +59,21 @@ export const useMessagingApi = () => {
         }
       },
 
-      sendMessage: async (workflowId, participantId, content, metadata = null) => {
+      sendMessage: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
         try {
           const payload = {
+            threadId,
+            agent,
+            workflowType,
+            workflowId,
             participantId,
             content,
-            workflowId,
             metadata
           };
+          
+          if (!threadId) {
+            delete payload.threadId;
+          }
           
           const response = await apiClient.post('/api/client/messaging/inbound', payload);
           return response.value;

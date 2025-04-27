@@ -30,11 +30,11 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage }) => {
                 <Typography 
                     variant={selectedThread.isInternalThread ? "subtitle1" : "h6"} 
                     sx={{ 
-                        fontWeight: 'bold', 
+                        fontWeight: '200', 
                         color: selectedThread.isInternalThread ? theme.palette.text.secondary : theme.palette.primary.main
                     }}
                 >
-                    {selectedThread.participantId || 'Conversation'}
+                    {selectedThread.participantId || 'User'} , {selectedThread.workflowType || 'Bot'}
                 </Typography>
                 {!selectedThread.isInternalThread && (
                     <Button 
