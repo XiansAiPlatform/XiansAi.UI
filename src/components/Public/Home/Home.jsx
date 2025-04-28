@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1 style={{ wordSpacing: '0.2em' }}>Open Source AI Agent Orchestration Platform</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Build P2P agents with a true sense of team work</h1>
 
                     <div className="home-cta-buttons">
                         <button 
@@ -214,7 +214,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                    Build intelligent, sophisticated, and robust AI agents that orchestrate complex workflows and tools.
+                    Open source AI Agent Development Kit (ADK) and Agent Management Platform.
                     </p>
                     <div className="code-sample">
                         <code>
@@ -247,6 +247,156 @@ var newBlogPosts = new List<string>();`
                         <p>{featureTabs[activeTab].description}</p>
                     </div>
 
+                </div>
+            </section>
+
+            <section className="home-comparison">
+                <div className="home-comparison-content">
+                    <div className="home-comparison-text">
+                        <h2>ADK Platform Comparison</h2>
+                        <p>See how Xians.ai compares to other AI agent development platforms:</p>
+                    </div>
+                    <div className="home-comparison-table-container">
+                        <table className="home-comparison-table">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Xians.ai</th>
+                                    <th>Google ADK</th>
+                                    <th>Rowboat</th>
+                                    <th>OpenAI Agent SDK</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Hub & Spoke Handoffs</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>P2P Handoffs</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Deterministic Workflow Orchestration</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Generative Workflow Orchestration</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>Long-running Process Automation</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Functions + MCP Tools</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>Event-driven Coordination</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Multi-tenancy</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Open Source</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>No Vendor Lock-in</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Agent Visualization</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>Multi-Cloud Deployment</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>Enterprise-grade Robustness</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Agent Management Portal</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Prompt/Knowledge Base Management</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Agent Execution History</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                </tr>
+                                <tr>
+                                    <td>Agent Tracing & Logging</td>
+                                    <td>✅</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td>Rapid Agent Generation</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
