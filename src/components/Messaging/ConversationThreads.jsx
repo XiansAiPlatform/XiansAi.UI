@@ -19,17 +19,17 @@ import SendMessageForm from './SendMessageForm';
 import { useSlider } from '../../contexts/SliderContext';
 
 /**
- * Displays a list of conversation threads for a selected workflow
+ * Displays a list of conversation threads for a selected agent
  * 
  * @param {Object} props
- * @param {string} props.selectedWorkflowId - ID of the workflow to fetch threads for
+ * @param {string} props.selectedAgentName - Name of the selected agent
  * @param {Object} props.messagingApi - API hook for messaging operations
  * @param {Function} props.showError - Function to display error notifications
  * @param {string} props.selectedThreadId - Currently selected thread ID
  * @param {Function} props.onThreadSelect - Callback when a thread is selected
  */
 const ConversationThreads = ({ 
-    selectedWorkflowId,
+    selectedAgentName,
     messagingApi,
     showError,
     selectedThreadId,
@@ -39,7 +39,7 @@ const ConversationThreads = ({
     const [threads, setThreads] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const { openSlider } = useSlider();
+    const { openSlider, closeSlider } = useSlider();
     const [page, setPage] = useState(0);
     const [pageSize] = useState(20);
     const [hasMore, setHasMore] = useState(false);
@@ -49,8 +49,9 @@ const ConversationThreads = ({
     const handleOpenForm = () => {
         openSlider(
             <SendMessageForm
-                workflowId={selectedWorkflowId}
-                onClose={handleMessageSent}
+                agentName={selectedAgentName}
+                threadId={null}
+                onClose={() => closeSlider()}
                 onMessageSent={handleMessageSent}
             />,
             'New Conversation'
@@ -58,15 +59,28 @@ const ConversationThreads = ({
     };
 
     // Function to refresh threads after sending a message
-    const handleMessageSent = async () => {
-        if (!selectedWorkflowId) return;
+    const handleMessageSent = async (newThread) => {
+        if (!selectedAgentName) return;
         
+        closeSlider();
         setPage(0); // Reset to first page
         setIsLoading(true);
         try {
-            const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId, 0, pageSize);
+            const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 0, pageSize);
             setThreads(fetchedThreads || []);
             setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
+            
+            // If we have a new thread, select it
+            if (newThread && fetchedThreads.length > 0) {
+                // Find the newly created thread in the fetched threads
+                const createdThread = fetchedThreads.find(t => t.id === newThread.id);
+                if (createdThread) {
+                    onThreadSelect(createdThread.id, createdThread);
+                } else if (fetchedThreads[0]) {
+                    // If not found (which shouldn't happen), select the first thread
+                    onThreadSelect(fetchedThreads[0].id, fetchedThreads[0]);
+                }
+            }
         } catch (err) {
             showError(`Failed to refresh threads: ${err.message}`);
         } finally {
@@ -76,12 +90,12 @@ const ConversationThreads = ({
 
     // Function to load more threads
     const handleLoadMore = async () => {
-        if (!selectedWorkflowId || loadingMore) return;
+        if (!selectedAgentName || loadingMore) return;
         
         setLoadingMore(true);
         try {
             const nextPage = page + 1;
-            const moreThreads = await messagingApi.getThreads(selectedWorkflowId, nextPage, pageSize);
+            const moreThreads = await messagingApi.getThreads(selectedAgentName, nextPage, pageSize);
             
             if (moreThreads && moreThreads.length > 0) {
                 setThreads(prevThreads => [...prevThreads, ...moreThreads]);
@@ -98,8 +112,8 @@ const ConversationThreads = ({
     };
 
     useEffect(() => {
-        // Don't fetch if no workflow is selected
-        if (!selectedWorkflowId) {
+        // Don't fetch if no agent is selected
+        if (!selectedAgentName) {
             setThreads([]);
             setError(null);
             setIsLoading(false);
@@ -111,9 +125,9 @@ const ConversationThreads = ({
         const fetchConversationThreads = async () => {
             setIsLoading(true);
             setError(null);
-            setPage(0); // Reset to first page when workflow changes
+            setPage(0); // Reset to first page when agent changes
             try {
-                const fetchedThreads = await messagingApi.getThreads(selectedWorkflowId, 0, pageSize);
+                const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 0, pageSize);
                 setThreads(fetchedThreads || []);
                 setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
 
@@ -138,8 +152,8 @@ const ConversationThreads = ({
         };
 
         fetchConversationThreads();
-        // Dependency array ensures refetch when workflow ID, api, or notification changes
-    }, [selectedWorkflowId, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize]);
+        // Dependency array ensures refetch when agent name, api, or notification changes
+    }, [selectedAgentName, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize]);
 
     if (isLoading) {
         return (
@@ -184,7 +198,7 @@ const ConversationThreads = ({
                     size="small" 
                     color="primary" 
                     onClick={handleOpenForm}
-                    disabled={!selectedWorkflowId}
+                    disabled={!selectedAgentName}
                     title="Start new conversation"
                 >
                     <AddIcon />
@@ -228,55 +242,51 @@ const ConversationThreads = ({
                                     }}
                                 >
                                     <ListItemText 
-                                        primary={thread.participantId || thread.title || `Thread ${thread.id.slice(-4)}`}
-                                        secondary={thread.updatedAt ? format(new Date(thread.updatedAt), 'MMM d, yyyy h:mm a') : 'No date'}
-                                        primaryTypographyProps={{
-                                            fontWeight: selectedThreadId === thread.id ? 'bold' : 'medium',
-                                            variant: 'body2',
-                                            noWrap: true,
-                                            color: thread.isInternalThread ? theme.palette.text.disabled : 'inherit'
-                                        }}
-                                        secondaryTypographyProps={{
-                                            variant: 'caption',
-                                            noWrap: true,
-                                            color: thread.isInternalThread ? theme.palette.text.disabled : 'inherit'
-                                        }}
-                                        sx={{ mr: 1 }}
+                                        primary={
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <Typography variant="body1" component="span" fontWeight={500}>
+                                                    {thread.participantId || 'Unknown Participant'}
+                                                </Typography>
+                                                {thread.hasUnread && (
+                                                    <Badge badgeContent=" " color="primary" variant="dot" sx={{ ml: 1 }} />
+                                                )}
+                                            </Box>
+                                        }
+                                        secondary={
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5 }}>
+                                                <Typography variant="caption" color="text.secondary" noWrap>
+                                                    {thread.lastMessage ? thread.lastMessage.substring(0, 40) + (thread.lastMessage.length > 40 ? '...' : '') : 'No messages yet'}
+                                                </Typography>
+                                                {thread.lastMessageTime && (
+                                                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                                                        {format(new Date(thread.lastMessageTime), 'MMM d, h:mm a')}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        }
+                                        primaryTypographyProps={{ noWrap: true }}
                                     />
-                                    {thread.messageCount > 0 && (
-                                        <Badge 
-                                            badgeContent={thread.messageCount} 
-                                            color={thread.isInternalThread ? "default" : "primary"}
-                                            sx={{
-                                                '& .MuiBadge-badge': {
-                                                    fontSize: '0.7rem'
-                                                }
-                                            }}
-                                        />
-                                    )}
                                 </ListItemButton>
                                 <Divider component="li" />
                             </React.Fragment>
                         ))}
                     </List>
                 )}
-                {hasMore && (
-                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'center' }}>
-                        <Button 
-                            onClick={handleLoadMore}
-                            disabled={loadingMore}
-                            variant="text"
-                            size="small"
-                            sx={{ minWidth: '120px' }}
-                        >
-                            {loadingMore ? (
-                                <CircularProgress size={16} sx={{ mr: 1 }} />
-                            ) : null}
-                            {loadingMore ? 'Loading...' : 'Load More'}
-                        </Button>
-                    </Box>
-                )}
             </Box>
+            
+            {hasMore && (
+                <Box sx={{ p: 1, borderTop: '1px solid', borderColor: theme.palette.divider }}>
+                    <Button 
+                        fullWidth 
+                        onClick={handleLoadMore} 
+                        disabled={loadingMore}
+                        size="small"
+                        sx={{ textTransform: 'none' }}
+                    >
+                        {loadingMore ? <CircularProgress size={16} /> : "Load more"}
+                    </Button>
+                </Box>
+            )}
         </Paper>
     );
 };

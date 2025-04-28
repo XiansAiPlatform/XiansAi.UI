@@ -13,13 +13,15 @@ import useMessagePolling from './hooks/useMessagePolling';
  * @param {Function} props.showError - Function to display error notifications
  * @param {Object} props.selectedThread - Details of the selected thread
  * @param {Function} props.onSendMessage - Callback to open send message form
+ * @param {Function} [props.onHandover] - Optional callback to call when a thread handover is detected
  */
 const ChatConversation = ({ 
     selectedThreadId,
     messagingApi,
     showError,
     selectedThread,
-    onSendMessage
+    onSendMessage,
+    onHandover
 }) => {
     const theme = useTheme();
     const [messages, setMessages] = useState([]);
@@ -32,6 +34,7 @@ const ChatConversation = ({
     const scrollContainerRef = useRef(null);
     const isInitialLoad = useRef(true);
     const messagePollingRef = useRef(null);
+    const lastHandoverIdRef = useRef(null); // Track last handover message to avoid duplicate events
     
     const pageSize = 15;
 
@@ -64,6 +67,42 @@ const ChatConversation = ({
             setLastUpdateTime(selectedThread.updatedAt);
         }
     }, [selectedThread]);
+
+    // Check for handover messages and refresh thread details if detected
+    const checkForHandover = useCallback((messagesList) => {
+        if (!messagesList || messagesList.length === 0 || !onHandover) return;
+        
+        // Get current time for comparison
+        const now = new Date().getTime();
+        const oneMinuteInMs = 60 * 1000;
+        
+        // Find recent handover messages (created within the last minute)
+        const handoverMessages = messagesList.filter(msg => {
+            // Check if it's a handover message
+            if (msg.direction !== 'Handover') return false;
+            
+            // Skip if we've already processed this handover message
+            if (msg.id === lastHandoverIdRef.current) return false;
+            
+            // Only consider recent handover messages (within the last minute)
+            // This prevents infinite refreshes when loading older handover messages
+            if (!msg.createdAt) return false;
+            const messageTime = new Date(msg.createdAt).getTime();
+            return (now - messageTime) < oneMinuteInMs;
+        }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        if (handoverMessages.length > 0) {
+            // We found a new recent handover message
+            const latestHandover = handoverMessages[0];
+            console.log('Recent thread handover detected:', latestHandover.content);
+            
+            // Update the reference to avoid duplicate events
+            lastHandoverIdRef.current = latestHandover.id;
+            
+            // Trigger the handover callback
+            onHandover(selectedThreadId);
+        }
+    }, [onHandover, selectedThreadId]);
     
     // Function to fetch thread messages
     const fetchThreadMessages = useCallback(async (threadId, page = 1, isPolling = false) => {
@@ -87,6 +126,9 @@ const ChatConversation = ({
             
             // Update the last update time based on newest message
             updateLastUpdateTime(sorted);
+
+            // Check for handover messages
+            checkForHandover(sorted);
             
             if (!isPolling && messagePollingRef.current) {
                 isInitialLoad.current = true; // Reset initial load flag
@@ -109,7 +151,7 @@ const ChatConversation = ({
                 setIsLoadingMessages(false);
             }
         }
-    }, [messagingApi, pageSize, showError, updateLastUpdateTime]);
+    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover]);
     
     // Initialize the message polling hook
     const messagePolling = useMessagePolling({

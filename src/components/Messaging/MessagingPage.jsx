@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import {
     Box,
     Typography,
@@ -21,12 +21,17 @@ import ChatConversation from './ChatConversation';
  */
 const MessagingPage = () => {
     // --- State --- 
-    // Keep selected workflow/thread IDs and error state
-    const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
+    // Keep selected agent name and other state
+    const [selectedAgentName, setSelectedAgentName] = useState(null);
     const [selectedThreadId, setSelectedThreadId] = useState(null);
     const [selectedThreadDetails, setSelectedThreadDetails] = useState(null); // Store full thread object
     const [error, setError] = useState(null); // Keep top-level error state if needed
     const [refreshCounter, setRefreshCounter] = useState(0); // Add counter for refreshing
+    
+    // Use a ref to track the last handover refresh time to prevent rapid refreshes
+    const lastHandoverRefreshRef = useRef(0);
+    // Track processing state to prevent concurrent handover refreshes
+    const isProcessingHandoverRef = useRef(false);
 
     // --- Hooks ---
     // Using the existing API hook from services/messaging-api.js
@@ -37,9 +42,9 @@ const MessagingPage = () => {
     // --- Callbacks --- 
 
     // Callback passed to WorkflowSelector
-    const handleWorkflowSelected = useCallback((workflowId) => {
-        setSelectedWorkflowId(workflowId);
-        setSelectedThreadId(null); // Reset thread selection when workflow changes
+    const handleAgentSelected = useCallback((agentName) => {
+        setSelectedAgentName(agentName);
+        setSelectedThreadId(null); // Reset thread selection when agent changes
         setSelectedThreadDetails(null);
         setError(null); // Clear errors when selection changes
     }, []);
@@ -53,9 +58,9 @@ const MessagingPage = () => {
     }, []);
 
     // Handler for refreshing threads and messages
-    const handleRefresh = useCallback(() => {
-        if (!selectedWorkflowId) {
-            showError('Please select a workflow first.');
+    const handleRefresh = useCallback((newThread) => {
+        if (!selectedAgentName) {
+            showError('Please select an agent first.');
             return;
         }
         
@@ -63,45 +68,106 @@ const MessagingPage = () => {
         // Increment refresh counter to force children to reload
         setRefreshCounter(prev => prev + 1);
         
-        // If thread is selected, refresh it
-        if (selectedThreadId) {
+        // If a new thread was created, select it
+        if (newThread) {
+            setSelectedThreadId(newThread.id);
+            setSelectedThreadDetails({
+                id: newThread.id,
+                participantId: newThread.participantId,
+                // Add other necessary properties
+            });
+        }
+        // Otherwise, if thread is selected, refresh it
+        else if (selectedThreadId) {
             // Clear thread data to force reload
             setSelectedThreadDetails(prev => ({...prev}));
         }
-    }, [selectedWorkflowId, selectedThreadId, showError]);
+    }, [selectedAgentName, selectedThreadId, showError]);
+
+    // Handler for thread handover events
+    const handleThreadHandover = useCallback(async (threadId) => {
+        if (!selectedAgentName || !threadId) {
+            return;
+        }
+        
+        // Prevent multiple refreshes within a short time period (3 seconds)
+        const now = Date.now();
+        const debounceTime = 3000; // 3 seconds
+        if (now - lastHandoverRefreshRef.current < debounceTime) {
+            console.log("Handover refresh debounced - too soon after last refresh");
+            return;
+        }
+        
+        // Prevent concurrent handover processing
+        if (isProcessingHandoverRef.current) {
+            console.log("Handover refresh skipped - already processing a handover");
+            return;
+        }
+        
+        isProcessingHandoverRef.current = true;
+        lastHandoverRefreshRef.current = now;
+        
+        console.log("Thread handover detected, refreshing thread details for:", threadId);
+        
+        try {
+            // Get updated thread details from API
+            const threads = await messagingApi.getThreads(selectedAgentName);
+            if (!threads || threads.length === 0) {
+                isProcessingHandoverRef.current = false;
+                return;
+            }
+            
+            // Find the thread that had a handover
+            const updatedThreadDetails = threads.find(t => t.id === threadId);
+            if (updatedThreadDetails) {
+                // Update thread details with fresh data
+                setSelectedThreadDetails(updatedThreadDetails);
+                // Force refresh of components
+                setRefreshCounter(prev => prev + 1);
+                console.log("Thread details refreshed after handover");
+            }
+        } catch (err) {
+            console.error("Error refreshing thread after handover:", err);
+            showError(`Failed to refresh thread: ${err.message}`);
+        } finally {
+            // Reset processing flag after a short delay to ensure stability
+            setTimeout(() => {
+                isProcessingHandoverRef.current = false;
+            }, 1000);
+        }
+    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter]);
 
     // Handler for opening the send message slider
     const handleSendMessage = useCallback(() => {
-        if (!selectedWorkflowId) {
-            showError('Please select a workflow first.');
+        if (!selectedAgentName) {
+            showError('Please select an agent first.');
             return;
         }
         
         // Pass necessary details to SendMessageForm
         openSlider(
             <SendMessageForm 
-                workflowId={selectedWorkflowId} 
+                agentName={selectedAgentName}
+                threadId={selectedThreadId}
                 onClose={closeSlider} 
                 // Use details from the stored selectedThreadDetails object
                 initialParticipantId={selectedThreadDetails?.participantId || ''}
-                // initialParticipantChannelId={selectedThreadDetails?.participantChannelId || ''} // If needed
+                initialWorkflowType={selectedThreadDetails?.workflowType || ''}
+                initialWorkflowId={selectedThreadDetails?.workflowId || ''}
                 onMessageSent={handleRefresh}
             />,
             `Send Message` // Simplified title
         );
-    }, [selectedWorkflowId, selectedThreadDetails, openSlider, closeSlider, showError, handleRefresh]);
+    }, [selectedAgentName, selectedThreadId, selectedThreadDetails, openSlider, closeSlider, showError, handleRefresh]);
 
     // Handler for opening the webhook registration slider
     const handleRegisterWebhook = useCallback(() => {
-        if (!selectedWorkflowId) {
-            showError('Please select a workflow first.');
-            return;
-        }
+        // When registering webhook, we'll require workflow details to be selected in the form
         openSlider(
-            <RegisterWebhookForm workflowId={selectedWorkflowId} onClose={closeSlider} />,
-            `Register Webhook for ${selectedWorkflowId}`
+            <RegisterWebhookForm onClose={closeSlider} agentName={selectedAgentName} />,
+            `Register Webhook`
         );
-    }, [selectedWorkflowId, openSlider, closeSlider, showError]);
+    }, [selectedAgentName, openSlider, closeSlider]);
 
     // --- Render --- 
 
@@ -114,34 +180,34 @@ const MessagingPage = () => {
         }}
         >
             <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-                Agent Messaging
+                Messaging Playground
             </Typography>
 
             {/* Display top-level error if any */} 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            {/* Workflow selection */}
+            {/* Agent selection */}
             <WorkflowSelector
                 messagingApi={messagingApi}
                 showError={showError}
-                onWorkflowSelected={handleWorkflowSelected}
+                onAgentSelected={handleAgentSelected}
             />
 
             {/* Action buttons */}
             <WorkflowActions
-                selectedWorkflowId={selectedWorkflowId}
+                selectedAgentName={selectedAgentName}
                 onRegisterWebhook={handleRegisterWebhook}
                 onRefresh={handleRefresh}
             />
 
             {/* Conditionally render Thread/Conversation area */}
-            {selectedWorkflowId ? (
+            {selectedAgentName ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
                     <Grid item xs={12} md={3}>
                         {/* Threads list */}
                         <ConversationThreads
                             key={`threads-${refreshCounter}`}
-                            selectedWorkflowId={selectedWorkflowId}
+                            selectedAgentName={selectedAgentName}
                             messagingApi={messagingApi}
                             showError={showError}
                             selectedThreadId={selectedThreadId}
@@ -157,13 +223,14 @@ const MessagingPage = () => {
                             showError={showError}
                             selectedThread={selectedThreadDetails}
                             onSendMessage={handleSendMessage}
+                            onHandover={handleThreadHandover}
                         />
                     </Grid>
                 </Grid>
             ) : (
-                // Placeholder when no workflow selected
+                // Placeholder when no agent selected
                 <Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    Please select an agent, workflow type, and instance to view messages.
+                    Please select an agent to view messages.
                 </Typography>
             )}
         </Box>
