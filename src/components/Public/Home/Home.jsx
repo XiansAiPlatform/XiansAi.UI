@@ -203,7 +203,7 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1 style={{ wordSpacing: '0.2em' }}>Build P2P agents with a true sense of team work</h1>
+                    <h1 style={{ wordSpacing: '0.2em' }}>Build Intelligent AI Agents That Work Together Seamlessly</h1>
 
                     <div className="home-cta-buttons">
                         <button 
@@ -214,7 +214,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                    Open source AI Agent Development Kit (ADK) and Agent Management Platform.
+                    The open-source platform for creating, deploying, and managing sophisticated AI agent workflows with enterprise-grade reliability.
                     </p>
                     <div className="code-sample">
                         <code>
