@@ -150,7 +150,7 @@ var newBlogPosts = new List<string>();`
                         <div className="home-logo">
                             <span className="home-logo-flow">Xians</span>
                             <span className="home-logo-ai">.ai</span>
-                            <span className="preview-tag">Preview</span>
+                            {/* <span className="preview-tag">Preview</span> */}
                         </div>
                         <a href="https://99x.io" target="_blank" rel="noopener noreferrer" className="home-logo-sub">
                             <span className="home-logo-by">by</span>
