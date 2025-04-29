@@ -92,7 +92,7 @@ const MessageItem = ({ message, isRecent = false }) => {
                 display: 'flex', 
                 flexDirection: 'column',
                 alignItems: isIncoming ? 'flex-start' : 'flex-end',
-                mb: expanded ? 2 : 1,
+                mb: expanded ? 3 : 6,
                 width: '100%',
                 position: 'relative',
                 pl: isIncoming ? '12px' : 0,

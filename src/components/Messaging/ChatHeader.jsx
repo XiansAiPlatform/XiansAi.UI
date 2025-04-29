@@ -81,13 +81,13 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onThreadDel
         >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                 <Typography 
-                    variant={selectedThread.isInternalThread ? "subtitle1" : "h6"} 
+                    variant={selectedThread.isInternalThread ? "subtitle2" : "h8"} 
                     sx={{ 
-                        fontWeight: '200', 
+                        fontWeight: '500', 
                         color: selectedThread.isInternalThread ? theme.palette.text.secondary : theme.palette.primary.main
                     }}
                 >
-                    {selectedThread.participantId || 'User'} , {selectedThread.workflowType || 'Bot'}
+                    {selectedThread.participantId || 'User'}, {selectedThread.workflowType || 'Bot'}
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     {!selectedThread.isInternalThread && (
@@ -137,7 +137,7 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onThreadDel
                 )}
                 {lastUpdateTime && (
                     <Typography variant="body2" color="text.secondary">
-                        <strong>Last update:</strong> {getRelativeTimeString(lastUpdateTime)}
+                        <strong>Updated:</strong> {getRelativeTimeString(lastUpdateTime)}
                     </Typography>
                 )}
                 {selectedThread.createdAt && (

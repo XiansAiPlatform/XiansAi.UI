@@ -117,7 +117,7 @@ const MessagesList = ({
     return (
         <>
             {/* Messages List - Takes remaining space */} 
-            <List sx={{ px: 1, width: '100%', py: 0 }}>
+            <List sx={{ px: 1, width: '100%', py: 0, pt: 2 }}>
                 {/* Show typing indicator if needed */}
                 {showTypingIndicator && <TypingIndicator />}
                 
