@@ -23,6 +23,7 @@ import Login from './auth/Login';
 import Register from './components/Public/Register/Register';
 import { useAuth0 } from "@auth0/auth0-react";
 import MessagingPage from './components/Messaging/MessagingPage';
+import AuditingPage from './components/Auditing/AuditingPage';
 
 function App() {
   const { isLoading, error, logout } = useAuth0();
@@ -92,6 +93,11 @@ function App() {
                       <Route path="/messaging" element={
                         <ProtectedRoute>
                           <MessagingPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/auditing" element={
+                        <ProtectedRoute>
+                          <AuditingPage />
                         </ProtectedRoute>
                       } />
                     </Route>

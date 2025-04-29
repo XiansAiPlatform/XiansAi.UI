@@ -6,7 +6,7 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
-
+import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 const NAV_ITEMS = [
   {
     to: '/runs',
@@ -37,6 +37,12 @@ const NAV_ITEMS = [
     icon: <SettingsOutlinedIcon />,
     label: 'Settings',
     isSelected: (pathname) => pathname === '/settings' || pathname.startsWith('/settings/'),
+  },
+  {
+    to: '/auditing',
+    icon: <ChecklistOutlinedIcon />,
+    label: 'Auditing',
+    isSelected: (pathname) => pathname === '/auditing' || pathname.startsWith('/auditing/'),
   },
 ];
 

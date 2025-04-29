@@ -1,0 +1,112 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+    Grid,
+    TextField,
+    Autocomplete,
+    CircularProgress,
+    Box,
+    Typography,
+    Alert
+} from '@mui/material';
+
+const WorkflowSelector = ({
+    messagingApi,
+    showError,
+    onAgentSelected
+}) => {
+    const [allWorkflows, setAllWorkflows] = useState([]);
+    const [isLoadingWorkflows, setIsLoadingWorkflows] = useState(true);
+    const [selectedAgentName, setSelectedAgentName] = useState('');
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchWorkflows = async () => {
+            setIsLoadingWorkflows(true);
+            setError(null);
+            setAllWorkflows([]);
+            setSelectedAgentName('');
+            onAgentSelected(null);
+            try {
+                const response = await messagingApi.getAgentsAndTypes();
+                const workflows = response.data || (response || []);
+                setAllWorkflows(Array.isArray(workflows) ? workflows : []);
+            } catch (err) {
+                const errorMsg = 'Failed to fetch agent/workflow types.';
+                setError(errorMsg);
+                showError(`${errorMsg}: ${err.message}`);
+                console.error(err);
+            } finally {
+                setIsLoadingWorkflows(false);
+            }
+        };
+        fetchWorkflows();
+    }, [messagingApi, showError, onAgentSelected]);
+
+    const agentNames = useMemo(() =>
+        [...new Set(allWorkflows.map(wf => wf.agentName))],
+        [allWorkflows]
+    );
+
+    const handleAgentChange = (newValue) => {
+        const newAgentName = newValue || '';
+        if (newAgentName !== selectedAgentName) {
+            setSelectedAgentName(newAgentName);
+            onAgentSelected(newAgentName);
+        }
+    };
+
+    return (
+        <>
+            <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
+                <Grid item xs={12}>
+                    <Autocomplete
+                        id="agent-select"
+                        options={agentNames}
+                        value={selectedAgentName}
+                        onChange={(event, newValue) => handleAgentChange(newValue)}
+                        renderOption={(props, option) => (
+                            <li {...props}>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column',
+                                    width: '100%',
+                                    py: 0.5
+                                }}>
+                                    <Typography variant="body1" fontWeight="medium">
+                                        {option}
+                                    </Typography>
+                                </Box>
+                            </li>
+                        )}
+                        renderInput={(params) => (
+                            <TextField 
+                                {...params} 
+                                label="Agent Name" 
+                                variant="outlined"
+                                InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <>
+                                            {isLoadingWorkflows && <CircularProgress size={20} />}
+                                            {params.InputProps.endAdornment}
+                                        </>
+                                    ),
+                                }}
+                            />
+                        )}
+                        disabled={isLoadingWorkflows || agentNames.length === 0}
+                        fullWidth
+                    />
+                </Grid>
+            </Grid>
+
+            {error && (
+                <Alert severity="error" sx={{ mt: 2 }}>
+                    {error} - Please check the console for details.
+                </Alert>
+            )}
+        </>
+    );
+};
+
+export default WorkflowSelector; 
