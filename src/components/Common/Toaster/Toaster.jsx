@@ -7,7 +7,7 @@ function Toaster() {
       position="bottom-right"
       toastOptions={{
         error: {
-          duration: 5000,
+          duration: 8000,
           className: 'toast-error',
           dismissible: true,
           onClick: () => toast.dismiss(),
