@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { keyframes } from '@emotion/react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack, IconButton, Menu, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
 import { useAuth0 } from '@auth0/auth0-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
@@ -18,8 +21,12 @@ const DefinitionList = () => {
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
   const { setLoading } = useLoading();
+  const { showSuccess, showError } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('all');
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedAgentName, setSelectedAgentName] = useState(null);
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
@@ -45,6 +52,56 @@ const DefinitionList = () => {
     setDefinitions(prevDefinitions => 
       prevDefinitions.filter(def => def.id !== deletedDefinitionId)
     );
+  };
+
+  const handleMenuClick = (event, agentName) => {
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedAgentName(agentName);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  const handleDeleteAllClick = () => {
+    handleMenuClose();
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteAllCancel = () => {
+    setDeleteDialogOpen(false);
+    setSelectedAgentName(null);
+  };
+
+  const handleDeleteAllConfirm = async () => {
+    if (!selectedAgentName) {
+      showError('No agent selected for deletion');
+      return;
+    }
+
+    setDeleteDialogOpen(false);
+    
+    try {
+      setLoading(true);
+      // Get definitions for the selected agent from the original definitions array
+      const agentDefinitions = definitions.filter(def => def.agentName === selectedAgentName);
+      const deletePromises = agentDefinitions.map(def => definitionsApi.deleteDefinition(def.id));
+      await Promise.all(deletePromises);
+      
+      // Update the definitions state by removing all definitions for this agent
+      setDefinitions(prevDefinitions => 
+        prevDefinitions.filter(def => def.agentName !== selectedAgentName)
+      );
+      
+      showSuccess(`Successfully deleted all definitions for ${selectedAgentName}`);
+      setSelectedAgentName(null);
+    } catch (error) {
+      console.error('Failed to delete definitions:', error);
+      showError('Failed to delete definitions. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredDefinitions = definitions
@@ -387,15 +444,24 @@ const DefinitionList = () => {
             </Stack>
             
             {agentName !== 'Ungrouped' && (
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.75rem'
-                }}
-              >
-                {formatLastUpdated(latestFlowByAgent[agentName])}
-              </Typography>
+              <>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.75rem'
+                  }}
+                >
+                  {formatLastUpdated(latestFlowByAgent[agentName])}
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleMenuClick(e, agentName)}
+                  sx={{ ml: 1 }}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </>
             )}
           </Box>
           
@@ -428,6 +494,41 @@ const DefinitionList = () => {
           </TableContainer>
         </Box>
       ))}
+
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <MenuItem onClick={handleDeleteAllClick}>
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+          Delete All
+        </MenuItem>
+      </Menu>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteAllCancel}
+        onClick={(e) => e.stopPropagation()}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Delete All Definitions?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete all definitions for "{selectedAgentName}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: '16px 24px' }}>
+          <Button onClick={handleDeleteAllCancel}>Cancel</Button>
+          <Button onClick={handleDeleteAllConfirm} variant="contained" color="error" autoFocus>
+            Delete All
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
