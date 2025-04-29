@@ -224,6 +224,16 @@ const MessagingPage = () => {
                             selectedThread={selectedThreadDetails}
                             onSendMessage={handleSendMessage}
                             onHandover={handleThreadHandover}
+                            onRefresh={handleRefresh}
+                            onThreadDeleted={(threadId) => {
+                                // Clear the selected thread when it's deleted
+                                if (threadId === selectedThreadId) {
+                                    setSelectedThreadId(null);
+                                    setSelectedThreadDetails(null);
+                                }
+                                // Refresh the threads list
+                                handleRefresh();
+                            }}
                         />
                     </Grid>
                 </Grid>

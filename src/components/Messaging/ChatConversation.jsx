@@ -14,6 +14,8 @@ import useMessagePolling from './hooks/useMessagePolling';
  * @param {Object} props.selectedThread - Details of the selected thread
  * @param {Function} props.onSendMessage - Callback to open send message form
  * @param {Function} [props.onHandover] - Optional callback to call when a thread handover is detected
+ * @param {Function} [props.onRefresh] - Optional callback to refresh conversations list
+ * @param {Function} [props.onThreadDeleted] - Optional callback when thread is deleted
  */
 const ChatConversation = ({ 
     selectedThreadId,
@@ -21,7 +23,9 @@ const ChatConversation = ({
     showError,
     selectedThread,
     onSendMessage,
-    onHandover
+    onHandover,
+    onRefresh,
+    onThreadDeleted
 }) => {
     const theme = useTheme();
     const [messages, setMessages] = useState([]);
@@ -242,6 +246,8 @@ const ChatConversation = ({
                 selectedThread={selectedThread} 
                 lastUpdateTime={lastUpdateTime}
                 onSendMessage={onSendMessage}
+                onThreadDeleted={onThreadDeleted}
+                onRefresh={onRefresh}
             />
             
             {/* Messages Container - Scrollable area */}

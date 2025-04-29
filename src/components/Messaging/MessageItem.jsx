@@ -12,7 +12,8 @@ import {
     TableCell,
     TableContainer,
     TableRow,
-    Divider
+    Divider,
+    Avatar
 } from '@mui/material';
 import { format } from 'date-fns';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -115,8 +116,36 @@ const MessageItem = ({ message, isRecent = false }) => {
                     display: 'flex', 
                     justifyContent: isIncoming ? 'flex-start' : 'flex-end',
                     width: '100%',
+                    alignItems: 'flex-start',
+                    gap: 1
                 }}
             >
+                {isIncoming && (
+                    <Avatar 
+                        sx={{ 
+                            width: 56, 
+                            height: 56, 
+                            bgcolor: 'transparent',
+                            mt: 1,
+                            overflow: 'visible',
+                            border: '1px solid',
+                            borderColor: theme.palette.grey[200],
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                        }}
+                    >
+                        <Box
+                            component="img"
+                            src="/images/user.svg"
+                            alt="User"
+                            sx={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    </Avatar>
+                )}
+                
                 <Paper 
                     elevation={0} 
                     sx={{
@@ -438,6 +467,32 @@ const MessageItem = ({ message, isRecent = false }) => {
                         )}
                     </Collapse>
                 </Paper>
+                
+                {!isIncoming && (
+                    <Avatar 
+                        sx={{ 
+                            width: 56, 
+                            height: 56, 
+                            bgcolor: 'transparent',
+                            mt: 1,
+                            overflow: 'visible',
+                            border: '1px solid',
+                            borderColor: theme.palette.grey[200],
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                        }}
+                    >
+                        <Box
+                            component="img"
+                            src="/images/agent.svg"
+                            alt="Agent"
+                            sx={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain'
+                            }}
+                        />
+                    </Avatar>
+                )}
             </Box>
         </Box>
     );
