@@ -7,14 +7,31 @@ import {
   List,
   Box,
   keyframes,
+  IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  CircularProgress,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import StopIcon from '@mui/icons-material/Stop';
 import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowAccordion.css';
 import { ReactComponent as AgentActivatedSvgIcon } from '../../theme/agent-activated.svg';
+import { useWorkflowApi } from '../../services/workflow-api';
+import { useNotification } from '../../contexts/NotificationContext';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const WorkflowAccordion = ({ type, runs, isMobile }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isTerminating, setIsTerminating] = useState(false);
+  const open = Boolean(anchorEl);
+  const api = useWorkflowApi();
+  const { showSuccess, showError } = useNotification();
+  const { setLoading } = useLoading();
 
   // Create a beacon effect animation
   const beaconEffect = keyframes`
@@ -79,6 +96,34 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
 
   const handleChange = (event, expanded) => {
     setIsExpanded(expanded);
+  };
+
+  const handleMenuClick = (event) => {
+    event.stopPropagation(); // Prevent accordion from expanding/collapsing
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleTerminateAll = async () => {
+    try {
+      setIsTerminating(true);
+      setLoading(true);
+      const runningWorkflows = runs.filter(run => run.status.toLowerCase() === 'running');
+      for (const workflow of runningWorkflows) {
+        await api.executeWorkflowCancelAction(workflow.workflowId, true);
+      }
+      showSuccess(`Termination requested for ${runningWorkflows.length} workflow(s). It may take a few minutes to complete.`);
+      handleMenuClose();
+    } catch (error) {
+      showError('An unexpected error occurred while terminating workflows. Error: ' + error.message);
+      console.error('Error terminating workflows:', error);
+    } finally {
+      setIsTerminating(false);
+      setLoading(false);
+    }
   };
 
   return (
@@ -204,36 +249,62 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
               </div>
             </div>
             
-            {uniqueAssignments.length > 0 && (
-              <span style={{
-                fontSize: '.75rem',
-                color: '#666',
-                backgroundColor: '#f5f5f5',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                marginRight: isMobile ? '0' : '16px',
-                marginTop: isMobile ? '4px' : '0',
-                alignSelf: isMobile ? 'flex-start' : 'center',
-                maxWidth: isMobile ? 'fit-content' : 'auto'
-              }}>
-                {uniqueAssignments.length > 1 ? (
-                  <span style={{ opacity: 0.75 }}>{assignmentText}</span>
-                ) : (
-                  <>
-                    <span style={{ opacity: 0.75 }}>Assignment: </span>
-                    <span style={{ 
-                      marginLeft: '4px', 
-                      fontWeight: 600,
-                      color: '#444'
-                    }}>
-                      {assignmentText}
-                    </span>
-                  </>
-                )}
-              </span>
-            )}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px',
+              marginLeft: isMobile ? '0' : '16px'
+            }}>
+              {uniqueAssignments.length > 0 && (
+                <span style={{
+                  fontSize: '.75rem',
+                  color: '#666',
+                  backgroundColor: '#f5f5f5',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginRight: isMobile ? '0' : '16px',
+                  marginTop: isMobile ? '4px' : '0',
+                  alignSelf: isMobile ? 'flex-start' : 'center',
+                  maxWidth: isMobile ? 'fit-content' : 'auto'
+                }}>
+                  {uniqueAssignments.length > 1 ? (
+                    <span style={{ opacity: 0.75 }}>{assignmentText}</span>
+                  ) : (
+                    <>
+                      <span style={{ opacity: 0.75 }}>Assignment: </span>
+                      <span style={{ 
+                        marginLeft: '4px', 
+                        fontWeight: 600,
+                        color: '#444'
+                      }}>
+                        {assignmentText}
+                      </span>
+                    </>
+                  )}
+                </span>
+              )}
+              {hasRunningWorkflows && (
+                <IconButton
+                  onClick={handleMenuClick}
+                  size="small"
+                  disabled={isTerminating}
+                  sx={{
+                    color: 'text.secondary',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                >
+                  {isTerminating ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <MoreVertIcon />
+                  )}
+                </IconButton>
+              )}
+            </div>
           </div>
         </AccordionSummary>
         <AccordionDetails className="workflow-accordion-details" sx={{
@@ -250,6 +321,24 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
           </List>
         </AccordionDetails>
       </Accordion>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()} // Prevent accordion from expanding/collapsing
+      >
+        <MenuItem onClick={handleTerminateAll} disabled={isTerminating}>
+          <ListItemIcon>
+            {isTerminating ? (
+              <CircularProgress size={20} />
+            ) : (
+              <StopIcon fontSize="small" />
+            )}
+          </ListItemIcon>
+          <ListItemText>Terminate All Running</ListItemText>
+        </MenuItem>
+      </Menu>
     </>
   );
 };
