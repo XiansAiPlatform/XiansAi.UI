@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
     Box,
     Typography,
@@ -10,53 +10,69 @@ import { useNotification } from '../../contexts/NotificationContext';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowActions from './WorkflowActions';
 import RegisterWebhookForm from './RegisterWebhookForm';
-
+import UserAndWorkflowSelector from './UserAndWorkflowSelector';
+import WorkflowLogs from './WorkflowLogs';
 
 /**
  * Parent component that coordinates messaging components and manages shared state
  */
 const AuditingPage = () => {
     // --- State --- 
-    // Keep selected agent name and other state
     const [selectedAgentName, setSelectedAgentName] = useState(null);
-    const [error, setError] = useState(null); // Keep top-level error state if needed
+    const [selectedUserId, setSelectedUserId] = useState(null);
+    const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
+    const [error, setError] = useState(null);
     
     // --- Hooks ---
-    // Using the existing API hook from services/messaging-api.js
     const messagingApi = useMessagingApi(); 
     const { openSlider, closeSlider } = useSlider();
     const { showError } = useNotification();
 
     // --- Callbacks --- 
-
-    // Callback passed to WorkflowSelector
     const handleAgentSelected = useCallback((agentName) => {
         setSelectedAgentName(agentName);
-        setError(null); // Clear errors when selection changes
+        setSelectedUserId(null); // Reset user selection
+        setSelectedWorkflowId(null); // Reset workflow selection
+        setError(null);
     }, []);
 
-    // Handler for refreshing threads and messages
+    const handleUserSelected = useCallback((userId) => {
+        setSelectedUserId(userId);
+        setSelectedWorkflowId(null); // Reset workflow selection
+        setError(null);
+    }, []);
+
+    const handleWorkflowSelected = useCallback((workflowId) => {
+        setSelectedWorkflowId(workflowId);
+        setError(null);
+    }, []);
+
     const handleRefresh = useCallback(() => {
         if (!selectedAgentName) {
             showError('Please select an agent first.');
             return;
         }
         
-        console.log("Refreshing threads and messages...");
-        // Increment refresh counter to force children to reload
-       
+        // Reset selections to force a refresh
+        setSelectedUserId(null);
+        setSelectedWorkflowId(null);
     }, [selectedAgentName, showError]);
 
-
-
-    // Handler for opening the webhook registration slider
     const handleRegisterWebhook = useCallback(() => {
-        // When registering webhook, we'll require workflow details to be selected in the form
+        if (!selectedWorkflowId) {
+            showError('Please select a workflow first.');
+            return;
+        }
+        
         openSlider(
-            <RegisterWebhookForm onClose={closeSlider} agentName={selectedAgentName} />,
+            <RegisterWebhookForm 
+                onClose={closeSlider} 
+                agentName={selectedAgentName}
+                workflowId={selectedWorkflowId}
+            />,
             `Register Webhook`
         );
-    }, [selectedAgentName, openSlider, closeSlider]);
+    }, [selectedAgentName, selectedWorkflowId, openSlider, closeSlider, showError]);
 
     // --- Render --- 
 
@@ -66,8 +82,7 @@ const AuditingPage = () => {
             display: 'flex',
             flexDirection: 'column',
             width: '100%'
-        }}
-        >
+        }}>
             <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
                 Auditing
             </Typography>
@@ -75,29 +90,33 @@ const AuditingPage = () => {
             {/* Display top-level error if any */} 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            {/* Agent selection */}
             <WorkflowSelector
                 messagingApi={messagingApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
             />
 
-            {/* Action buttons */}
+            {selectedAgentName && (
+                <UserAndWorkflowSelector
+                    selectedAgentName={selectedAgentName}
+                    selectedUserId={selectedUserId}
+                    selectedWorkflowId={selectedWorkflowId}
+                    onUserSelected={handleUserSelected}
+                    onWorkflowSelected={handleWorkflowSelected}
+                />
+            )}
+
             <WorkflowActions
                 selectedAgentName={selectedAgentName}
                 onRegisterWebhook={handleRegisterWebhook}
                 onRefresh={handleRefresh}
             />
 
-            {/* Conditionally render Thread/Conversation area */}
-            {selectedAgentName ? (
-                <Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}></Typography>
-            ) : (
-                // Placeholder when no agent selected
-                <Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    Please select an agent to view messages.
-                </Typography>
-            )}
+            <WorkflowLogs
+                selectedAgentName={selectedAgentName}
+                selectedUserId={selectedUserId}
+                selectedWorkflowId={selectedWorkflowId}
+            />
         </Box>
     );
 };
