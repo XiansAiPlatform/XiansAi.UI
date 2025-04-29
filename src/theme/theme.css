@@ -1,56 +1,56 @@
 :root {
   /* Colors */
-  --primary: #6366f1;
-  --primary-light: #6366f115;
-  --primary-lighter: #6366f108;
-  --primary-dark: #4f46e5;
-  --primary-rgb: 99, 102, 241;
+  --primary: #0ea5e9;
+  --primary-light: #0ea5e915;
+  --primary-lighter: #0ea5e908;
+  --primary-dark: #0284c7;
+  --primary-rgb: 14, 165, 233;
   
   /* Success colors */
-  --success: #388e3c;
-  --success-light: #66bb6a;
-  --success-ultralight: #e8f5e9;
-  --success-rgb: 56, 142, 60;
+  --success: #059669;
+  --success-light: #34d399;
+  --success-ultralight: #ecfdf5;
+  --success-rgb: 5, 150, 105;
   
   /* Additional Colors */
-  --error-main: #b71c1c;
-  --error-light: rgba(183, 28, 28, 0.08);
-  --divider: rgba(0, 0, 0, 0.12);
+  --error-main: #dc2626;
+  --error-light: rgba(220, 38, 38, 0.08);
+  --divider: rgba(0, 0, 0, 0.08);
   
   /* Status Colors */
-  --status-running-bg: #b8e0ff;
-  --status-running-color: #1e4976;
-  --status-completed-bg: #c8e6c9;
-  --status-completed-color: #1b5e20;
-  --status-terminated-bg: #ffcdd2;
-  --status-terminated-color: #b71c1c;
-  --status-canceled-bg: #ffe0b2;
-  --status-canceled-color: #e65100;
-  --status-total-bg: #f5f5f5;
-  --status-total-color: #424242;
+  --status-running-bg: #e0f2fe;
+  --status-running-color: #0369a1;
+  --status-completed-bg: #dcfce7;
+  --status-completed-color: #166534;
+  --status-terminated-bg: #fee2e2;
+  --status-terminated-color: #991b1b;
+  --status-canceled-bg: #fef3c7;
+  --status-canceled-color: #92400e;
+  --status-total-bg: #f1f5f9;
+  --status-total-color: #334155;
   
   /* Text colors */
-  --text-primary: #2d3748;
-  --text-secondary: #64748b;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
   --text-light: #64748b;
   
   /* Background colors */
   --bg-main: #f8fafc;
-  --bg-paper: #fff;
-  --bg-hover: rgba(0, 0, 0, 0.04);
-  --bg-hover-dark: rgba(0, 0, 0, 0.08);
+  --bg-paper: #ffffff;
+  --bg-hover: rgba(14, 165, 233, 0.04);
+  --bg-hover-dark: rgba(14, 165, 233, 0.08);
   --bg-overlay: rgba(0, 0, 0, 0.02);
   
   /* Border & Shadow */
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-color-hover: rgba(0, 0, 0, 0.23);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 4px 24px -8px rgba(0, 0, 0, 0.1), 0 2px 16px -8px rgba(0, 0, 0, 0.06);
+  --border-color: rgba(14, 165, 233, 0.1);
+  --border-color-hover: rgba(14, 165, 233, 0.2);
+  --shadow-sm: 0 2px 8px rgba(14, 165, 233, 0.06);
+  --shadow-md: 0 4px 20px rgba(14, 165, 233, 0.08);
+  --shadow-lg: 0 4px 24px -8px rgba(14, 165, 233, 0.12), 0 2px 16px -8px rgba(14, 165, 233, 0.08);
   
   /* Typography */
-  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   
   /* Font Sizes */
   --text-xs: 0.75rem;
@@ -64,8 +64,8 @@
   /* Font Weights */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
-  --font-weight-semibold: 500;
-  --font-weight-bold: 600;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
   
   /* Spacing */
   --spacing-xs: 4px;
@@ -76,10 +76,10 @@
   
   /* Border Radius */
   --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
   
   /* Letter spacing */
   --letter-spacing-tight: -0.02em;
@@ -88,9 +88,9 @@
   --letter-spacing-wider: 0.1em;
   
   /* Transitions */
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
-  --transition-bezier: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-bezier: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   
   /* Z-index */
   --z-tooltip: 1000;
@@ -106,13 +106,13 @@
   --button-bg: var(--bg-paper);
   --button-hover-bg: var(--bg-hover);
   --button-text: var(--text-secondary);
-  --button-disabled-opacity: 0.7;
+  --button-disabled-opacity: 0.6;
   
   /* Theme Button Styles */
   --button-primary-bg: var(--primary);
   --button-primary-hover: var(--primary-dark);
   --button-primary-text: white;
-  --button-primary-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.4);
+  --button-primary-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
 }
 
 /* Add common button styles */
