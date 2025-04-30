@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 
 const WorkflowSelector = ({
-    messagingApi,
+    auditingApi,
     showError,
     onAgentSelected
 }) => {
@@ -27,8 +27,10 @@ const WorkflowSelector = ({
             setSelectedAgentName('');
             onAgentSelected(null);
             try {
-                const response = await messagingApi.getAgentsAndTypes();
+                const response = await auditingApi.getAgentsAndTypes();
                 const workflows = response.data || (response || []);
+                // log the first workflow
+                console.log(workflows[0]);
                 setAllWorkflows(Array.isArray(workflows) ? workflows : []);
             } catch (err) {
                 const errorMsg = 'Failed to fetch agent/workflow types.';
@@ -40,7 +42,7 @@ const WorkflowSelector = ({
             }
         };
         fetchWorkflows();
-    }, [messagingApi, showError, onAgentSelected]);
+    }, [auditingApi, showError, onAgentSelected]);
 
     const agentNames = useMemo(() =>
         [...new Set(allWorkflows.map(wf => wf.agentName))],

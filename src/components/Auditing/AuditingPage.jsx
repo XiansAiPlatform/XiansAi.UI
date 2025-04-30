@@ -4,7 +4,7 @@ import {
     Typography,
     Alert
 } from '@mui/material';
-import { useMessagingApi } from '../../services/messaging-api';
+import { useAuditingApi } from '../../services/auditing-api';
 import { useSlider } from '../../contexts/SliderContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import WorkflowSelector from './WorkflowSelector';
@@ -24,7 +24,7 @@ const AuditingPage = () => {
     const [error, setError] = useState(null);
     
     // --- Hooks ---
-    const messagingApi = useMessagingApi(); 
+    const auditingApi = useAuditingApi(); 
     const { openSlider, closeSlider } = useSlider();
     const { showError } = useNotification();
 
@@ -91,7 +91,7 @@ const AuditingPage = () => {
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
             <WorkflowSelector
-                messagingApi={messagingApi}
+                auditingApi={auditingApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
             />
