@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { TableRow, TableCell, IconButton, Box, Typography, Button, Stack, Collapse, Tooltip, Menu, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -15,14 +14,12 @@ import './Definitions.css';
 import DefinitionAgents from './DefinitionAgents';
 import { useAuth0 } from '@auth0/auth0-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useTheme } from '@mui/material/styles';
 import { useDefinitionsApi } from '../../services/definitions-api';
 
 const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDeleteSuccess }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
   const { user } = useAuth0();
-  const theme = useTheme();
   const definitionsApi = useDefinitionsApi();
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
