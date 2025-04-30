@@ -15,7 +15,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
-  const [filter, setFilter] = useState('mine');
   const { user } = useAuth0();
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
@@ -30,12 +29,6 @@ const DefinitionList = () => {
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
-  };
-
-  const handleFilterChange = (event, newFilter) => {
-    if (newFilter !== null) {
-      setFilter(newFilter);
-    }
   };
 
   const handleSearchChange = (event) => {
@@ -85,13 +78,13 @@ const DefinitionList = () => {
     try {
       setLoading(true);
       // Get definitions for the selected agent from the original definitions array
-      const agentDefinitions = definitions.filter(def => def.agentName === selectedAgentName);
+      const agentDefinitions = definitions.filter(def => def.agent === selectedAgentName);
       const deletePromises = agentDefinitions.map(def => definitionsApi.deleteDefinition(def.id));
       await Promise.all(deletePromises);
       
       // Update the definitions state by removing all definitions for this agent
       setDefinitions(prevDefinitions => 
-        prevDefinitions.filter(def => def.agentName !== selectedAgentName)
+        prevDefinitions.filter(def => def.agent !== selectedAgentName)
       );
       
       showSuccess(`Successfully deleted all definitions for ${selectedAgentName}`);
@@ -106,15 +99,16 @@ const DefinitionList = () => {
 
   const filteredDefinitions = definitions
     .filter(def => {
-      const matchesFilter = filter === 'all' || (filter === 'mine' && def.owner === user?.sub);
       const searchLower = searchQuery.toLowerCase();
-      const nameLower = def.typeName?.toLowerCase() || '';
-      const agentNameLower = def.agentName?.toLowerCase() || '';
+      const workflowTypeLower = def.workflowType?.toLowerCase() || '';
+      const agentNameLower = def.agent?.toLowerCase() || '';
+      const descriptionLower = def.description?.toLowerCase() || '';
       const matchesSearch = searchQuery === '' || 
-                           nameLower.includes(searchLower) || 
-                           agentNameLower.includes(searchLower);
+                           workflowTypeLower.includes(searchLower) || 
+                           agentNameLower.includes(searchLower) ||
+                           descriptionLower.includes(searchLower);
       
-      return matchesFilter && matchesSearch;
+      return matchesSearch;
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -124,7 +118,7 @@ const DefinitionList = () => {
     const latestFlowByAgent = {};
     
     definitions.forEach(def => {
-      const agentName = def.agentName || 'Ungrouped';
+      const agentName = def.agent || 'Ungrouped';
       if (!grouped[agentName]) {
         grouped[agentName] = [];
         latestFlowByAgent[agentName] = new Date(0);
@@ -189,7 +183,7 @@ const DefinitionList = () => {
     const fetchDefinitions = async () => {
       try {
         setLoading(true);
-        const data = await definitionsApi.getDefinitions(timeFilter, filter);
+        const data = await definitionsApi.getDefinitions(timeFilter);
         setDefinitions(data);
       } catch (err) {
         setError(err.message);
@@ -200,7 +194,7 @@ const DefinitionList = () => {
     };
 
     fetchDefinitions();
-  }, [definitionsApi, setLoading, timeFilter, filter]);
+  }, [definitionsApi, setLoading, timeFilter]);
 
   if (error) {
     return (
@@ -216,8 +210,6 @@ const DefinitionList = () => {
       onSearchChange={handleSearchChange}
       timeFilter={timeFilter}
       onTimeFilterChange={handleTimeFilterChange}
-      filter={filter}
-      onFilterChange={handleFilterChange}
     />;
   }
 
@@ -288,28 +280,6 @@ const DefinitionList = () => {
               <ToggleButton value="7days">Last 7 Days</ToggleButton>
               <ToggleButton value="30days">Last 30 Days</ToggleButton>
               <ToggleButton value="all">All Time</ToggleButton>
-            </ToggleButtonGroup>
-            <ToggleButtonGroup
-              value={filter}
-              exclusive
-              onChange={handleFilterChange}
-              size="small"
-              sx={{ 
-                width: { xs: '100%', sm: 'auto' },
-                '& .MuiToggleButton-root': {
-                  borderColor: 'var(--border-light)',
-                  color: 'var(--text-secondary)',
-                  textTransform: 'none',
-                  '&.Mui-selected': {
-                    backgroundColor: 'var(--bg-selected)',
-                    color: 'var(--text-primary)',
-                    fontWeight: 500
-                  }
-                }
-              }}
-            >
-              <ToggleButton value="all">All</ToggleButton>
-              <ToggleButton value="mine">Mine</ToggleButton>
             </ToggleButtonGroup>
           </Stack>
         </Box>

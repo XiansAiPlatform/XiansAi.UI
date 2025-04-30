@@ -28,7 +28,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       {}
   );
   const [runType, setRunType] = useState('unique'); // 'unique' or 'singleton'
-  const [flowId, setFlowId] = useState(definition ? `${definition.agentName.replaceAll(' ', '')}:${definition.typeName.replaceAll(' ', '')}` : '');
+  const [flowId, setFlowId] = useState(definition ? `${definition.agent?.replaceAll(' ', '')}:${definition.workflowType?.replaceAll(' ', '')}` : '');
   const [queueType, setQueueType] = useState('default'); // 'default' or 'named'
   const [queueName, setQueueName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,7 +50,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       const queueNameToSend = queueType === 'named' ? queueName : null;
       
       await api.startNewWorkflow(
-        definition.typeName, 
+        definition.workflowType, 
         definition.agentName, 
         parameterValues,
         flowIdToSend,

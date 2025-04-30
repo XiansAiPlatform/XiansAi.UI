@@ -77,7 +77,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
       .replace(/^\w/, c => c.toUpperCase());
   };
 
-  const handleStartNew = async () => {
+  const handleActivate = async () => {
     const formContent = (
       <NewWorkflowForm 
         definition={definition}
@@ -101,7 +101,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
     );
     setLoading(true);
     try {
-      await openSlider(formContent, `Activate '${definition.typeName}'`);
+      await openSlider(formContent, `Activate '${definition.workflowType}'`);
     } finally {
       setLoading(false);
     }
@@ -119,7 +119,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
     );
     setLoading(true);
     try {
-      await openSlider(diagramContent, `Visualization of '${definition.typeName}'`);
+      await openSlider(diagramContent, `Visualization of '${definition.workflowType}'`);
     } finally {
       setLoading(false);
     }
@@ -128,6 +128,14 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
   const hasMarkdown = definition.markdown && definition.markdown.trim().length > 0;
 
   const isCurrentUser = user?.sub === definition.owner;
+
+  const getPermissionLevel = () => {
+    if (!user?.sub) return 'Read';
+    if (definition.permissions?.ownerAccess?.includes(user.sub)) return 'Owner';
+    if (definition.permissions?.writeAccess?.includes(user.sub)) return 'Write';
+    if (definition.permissions?.readAccess?.includes(user.sub)) return 'Read';
+    return 'Read'; // Default to Read if no explicit permissions
+  };
 
   const formatCreatedTime = (date) => {
     try {
@@ -140,54 +148,33 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
   return (
     <>
       <TableRow 
+        className={`definition-row ${isOpen ? 'expanded' : ''} ${previousRowOpen ? 'previous-expanded' : ''}`}
         onClick={() => onToggle(definition.id)}
-        className="definition-row"
-        sx={{ 
-          '&:last-child td, &:last-child th': { border: 0 },
-          borderTop: previousRowOpen ? '1px solid rgba(224, 224, 224, 1)' : 'none',
-          borderBottom: isOpen ? '1px solid rgba(224, 224, 224, 1)' : 'inherit',
-          backgroundColor: isOpen ? theme.palette.action.hover : 'inherit',
-          transition: 'background-color 0.3s',
-        }}
       >
-        <TableCell className="definition-toggle-cell">
-          <IconButton 
-            size="small" 
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle(definition.id);
-            }}
-            className={`definition-toggle-button ${isOpen ? 'open' : ''}`}
-          >
-            <KeyboardArrowDownIcon />
-          </IconButton>
-        </TableCell>
         <TableCell className="definition-content-cell">
           <div className="definition-content-wrapper">
             <Box>
               <Typography 
-                
                 className="definition-title"
               >
-                {formatTypeName(definition.typeName)}
+                {formatTypeName(definition.workflowType)}
               </Typography>
               <Typography variant="caption">
                 <span className="definition-stat">
-                  <span className="stat-value">{definition.activities.length}</span> Activities
+                  <span className="stat-value">{definition.activityDefinitions?.length || 0}</span> Activities
                 </span>
                 <span className="definition-stat">
-                  <span className="stat-value">{definition.parameters.length}</span> Inputs
+                  <span className="stat-value">{definition.parameterDefinitions?.length || 0}</span> Inputs
                 </span>
                 <span className="definition-stat">
                   {formatCreatedTime(definition.createdAt)}
                 </span>
                 <span className="definition-stat">
-                  Owner: <span style={{ 
+                  Permission: <span style={{ 
                     color: isCurrentUser ? 'var(--primary)' : 'inherit',
                     fontWeight: isCurrentUser ? 600 : 'inherit'
                   }}>
-                    {definition.owner || 'Unknown'} 
-                    {isCurrentUser && ' (me)'}
+                    {getPermissionLevel()}
                   </span>
                 </span>
               </Typography>
@@ -213,7 +200,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
               <Button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleStartNew();
+                  handleActivate();
                 }}
                 className="button-base button-primary start-btn"
                 size="small"
@@ -249,9 +236,9 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
               >
                 <MenuItem 
                   onClick={handleDeleteClick}
-                  disabled={!isCurrentUser}
+                  disabled={getPermissionLevel() !== 'Owner'}
                   sx={{
-                    opacity: isCurrentUser ? 1 : 0.5,
+                    opacity: getPermissionLevel() === 'Owner' ? 1 : 0.5,
                     '&.Mui-disabled': {
                       color: 'text.disabled',
                     }
@@ -259,7 +246,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 >
                   <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
                   Delete
-                  {!isCurrentUser && (
+                  {getPermissionLevel() !== 'Owner' && (
                     <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
                       (Not owner)
                     </Typography>
@@ -278,9 +265,9 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
           >
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <div className="definition-collapse-content">
-                <DefinitionAgents activities={definition.activities} />
-                {definition.activities.length > 0 ? (
-                  <DefinitionActivities activities={definition.activities} />
+                <DefinitionAgents activities={definition.activityDefinitions || []} />
+                {definition.activityDefinitions?.length > 0 ? (
+                  <DefinitionActivities activities={definition.activityDefinitions} />
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
@@ -291,8 +278,8 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                     </Box>
                   </div>
                 )}
-                {definition.parameters.length > 0 ? (
-                  <DefinitionParameters parameters={definition.parameters} />
+                {definition.parameterDefinitions?.length > 0 ? (
+                  <DefinitionParameters parameters={definition.parameterDefinitions} />
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
@@ -320,7 +307,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Are you sure you want to delete "{formatTypeName(definition.typeName)}"? This action cannot be undone.
+            Are you sure you want to delete "{formatTypeName(definition.workflowType)}"? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ padding: '16px 24px' }}>

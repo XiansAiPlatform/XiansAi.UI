@@ -83,11 +83,11 @@ export const useWorkflowApi = () => {
       startNewWorkflow: async (workflowType, agentName, parameters, flowId = null, queueName = null) => {
         try {
           return await apiClient.post('/api/client/workflows', {
-            WorkflowType: workflowType,
-            AgentName: agentName,
-            Parameters: parameters,
-            WorkflowId: flowId,
-            QueueName: queueName
+            workflowType: workflowType,
+            agentName: agentName,
+            parameters: parameters,
+            workflowId: flowId,
+            queueName: queueName
           });
         } catch (error) {
           console.error('Failed to start workflow:', error);

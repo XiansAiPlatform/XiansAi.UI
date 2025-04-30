@@ -25,6 +25,10 @@ const DefinitionActivities = ({ activities }) => {
   const instructionsApi = useInstructionsApi();
   const [viewMode, setViewMode] = React.useState('card');
 
+  const formatText = (text) => {
+    return text.replace(/([A-Z])/g, ' $1').trim();
+  };
+
   const handleInstructionClick = async (instructionName) => {
     try {
       const instruction = await instructionsApi.getInstructionByName(instructionName);
@@ -52,7 +56,7 @@ const DefinitionActivities = ({ activities }) => {
 
   const renderTableView = () => (
     <Table size="small" sx={{ backgroundColor: 'var(--background-paper)' }}>
-      {activities.length > 0 && (
+      {activities?.length > 0 && (
         <TableHead>
           <TableRow>
             <TableCell sx={{ 
@@ -82,13 +86,22 @@ const DefinitionActivities = ({ activities }) => {
             }}>
               Knowledge
             </TableCell>
+            <TableCell sx={{ 
+              fontWeight: 'bold', 
+              backgroundColor: 'var(--primary-light)', 
+              color: 'var(--text-primary)', 
+              padding: 'var(--spacing-sm)',
+              borderBottom: '2px solid var(--primary-dark)'
+            }}>
+              Parameters
+            </TableCell>
           </TableRow>
         </TableHead>
       )}
       <TableBody>
-        {activities.map((activity, index) => (
+        {activities?.map((activity, index) => (
           <TableRow key={index}>
-            <TableCell>{activity.activityName}</TableCell>
+            <TableCell>{formatText(activity.activityName)}</TableCell>
             <TableCell>
               {activity.agentToolNames?.length > 0 ? (
                 activity.agentToolNames.map((agentTool, idx) => {
@@ -118,8 +131,8 @@ const DefinitionActivities = ({ activities }) => {
               )}
             </TableCell>
             <TableCell>
-              {activity.instructions?.length > 0 ? (
-                activity.instructions.map((instruction, idx) => (
+              {activity.knowledgeIds?.length > 0 ? (
+                activity.knowledgeIds.map((instruction, idx) => (
                   <Chip
                     key={idx}
                     label={instruction}
@@ -138,7 +151,22 @@ const DefinitionActivities = ({ activities }) => {
                 ))
               ) : (
                 <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                  No instructions
+                  No knowledge
+                </Typography>
+              )}
+            </TableCell>
+            <TableCell>
+              {activity.parameterDefinitions?.length > 0 ? (
+                activity.parameterDefinitions.map((param, idx) => (
+                  <Box key={idx} sx={{ mb: 1 }}>
+                    <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
+                      {param.name}: {param.type}
+                    </Typography>
+                  </Box>
+                ))
+              ) : (
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                  No parameters
                 </Typography>
               )}
             </TableCell>
@@ -150,7 +178,7 @@ const DefinitionActivities = ({ activities }) => {
 
   const renderCardView = () => (
     <Grid container spacing={2}>
-      {activities.map((activity, index) => (
+      {activities?.map((activity, index) => (
         <Grid item xs={12} sm={6} md={4} key={index}>
           <Card sx={{ 
             height: '100%',
@@ -162,16 +190,21 @@ const DefinitionActivities = ({ activities }) => {
           }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                {activity.activityName}
+                {formatText(activity.activityName)}
               </Typography>
 
-              {activity.parameters?.length > 0 && (
-                <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block', mb: 2 }}>
-                  Parameters: {activity.parameters.map(param => param.name).join(', ')}
-                </Typography>
+              {activity.parameterDefinitions?.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>Parameters:</Typography>
+                  {activity.parameterDefinitions.map((param, idx) => (
+                    <Typography key={idx} variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
+                      {param.name}: {param.type}
+                    </Typography>
+                  ))}
+                </Box>
               )}
 
-              <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>Tools:</Typography>
+              <Typography variant="subtitle2" gutterBottom>Tools:</Typography>
               <Box sx={{ mb: 2 }}>
                 {activity.agentToolNames?.length > 0 ? (
                   activity.agentToolNames.map((agentTool, idx) => {
@@ -203,8 +236,8 @@ const DefinitionActivities = ({ activities }) => {
 
               <Typography variant="subtitle2" gutterBottom>Knowledge:</Typography>
               <Box>
-                {activity.instructions?.length > 0 ? (
-                  activity.instructions.map((instruction, idx) => (
+                {activity.knowledgeIds?.length > 0 ? (
+                  activity.knowledgeIds.map((instruction, idx) => (
                     <Chip
                       key={idx}
                       label={instruction}
@@ -223,7 +256,7 @@ const DefinitionActivities = ({ activities }) => {
                   ))
                 ) : (
                   <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                    No instructions
+                    No knowledge
                   </Typography>
                 )}
               </Box>
@@ -243,7 +276,7 @@ const DefinitionActivities = ({ activities }) => {
         mb: 2 
       }}>
         <Typography variant="h6" className="section-title">
-          Agent Activities <span className="section-count">({activities.length})</span>
+          Agent Activities <span className="section-count">({activities?.length || 0})</span>
         </Typography>
         
         <ToggleButtonGroup
@@ -261,7 +294,13 @@ const DefinitionActivities = ({ activities }) => {
         </ToggleButtonGroup>
       </Box>
 
-      {viewMode === 'card' ? renderCardView() : renderTableView()}
+      {activities?.length > 0 ? (
+        viewMode === 'card' ? renderCardView() : renderTableView()
+      ) : (
+        <Typography variant="body2" sx={{ color: 'var(--text-secondary)', mt: 1 }}>
+          No activities defined
+        </Typography>
+      )}
     </div>
   );
 };
