@@ -5,7 +5,8 @@ import {
     TextField,
     CircularProgress,
     Typography,
-    Alert
+    Alert,
+    Button
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -22,11 +23,15 @@ const UserAndWorkflowSelector = ({
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
     const [isLoadingWorkflows, setIsLoadingWorkflows] = useState(false);
     const [error, setError] = useState(null);
+    const [page, setPage] = useState(0);
+    const [pageSize] = useState(20);
+    const [hasMoreUsers, setHasMoreUsers] = useState(false);
+    const [loadingMoreUsers, setLoadingMoreUsers] = useState(false);
     
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
 
-    // Get users for the selected agent
+    // Get users (threads) for the selected agent
     useEffect(() => {
         if (!selectedAgentName) {
             setUsers([]);
@@ -37,8 +42,15 @@ const UserAndWorkflowSelector = ({
             setIsLoadingUsers(true);
             setError(null);
             try {
-                const users = await auditingApi.getUsers(selectedAgentName);
-                setUsers(users);
+                const threads = await auditingApi.getThreads(selectedAgentName, 0, pageSize);
+                // Map threads to users format
+                const usersFromThreads = threads.map(thread => ({
+                    id: thread.id,
+                    name: thread.participantId || 'Unknown Participant'
+                }));
+                setUsers(usersFromThreads);
+                setHasMoreUsers(threads && threads.length === pageSize);
+                setPage(0);
             } catch (err) {
                 setError('Failed to fetch users');
                 showError(`Error fetching users: ${err.message}`);
@@ -48,7 +60,35 @@ const UserAndWorkflowSelector = ({
         };
 
         fetchUsers();
-    }, [selectedAgentName, auditingApi, showError]);
+    }, [selectedAgentName, auditingApi, showError, pageSize]);
+
+    // Load more users (threads)
+    const handleLoadMoreUsers = async () => {
+        if (!selectedAgentName || loadingMoreUsers) return;
+        
+        setLoadingMoreUsers(true);
+        try {
+            const nextPage = page + 1;
+            const moreThreads = await auditingApi.getThreads(selectedAgentName, nextPage, pageSize);
+            
+            if (moreThreads && moreThreads.length > 0) {
+                // Map threads to users format
+                const moreUsers = moreThreads.map(thread => ({
+                    id: thread.id,
+                    name: thread.participantId || 'Unknown Participant'
+                }));
+                setUsers(prevUsers => [...prevUsers, ...moreUsers]);
+                setPage(nextPage);
+                setHasMoreUsers(moreThreads.length === pageSize);
+            } else {
+                setHasMoreUsers(false);
+            }
+        } catch (err) {
+            showError(`Failed to load more users: ${err.message}`);
+        } finally {
+            setLoadingMoreUsers(false);
+        }
+    };
 
     // Get workflows for the selected user
     useEffect(() => {
@@ -81,31 +121,43 @@ const UserAndWorkflowSelector = ({
             </Typography>
 
             <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                <Autocomplete
-                    id="user-select"
-                    options={users}
-                    value={users.find(user => user.id === selectedUserId) || null}
-                    onChange={(event, newValue) => onUserSelected(newValue?.id || null)}
-                    getOptionLabel={(option) => option.name}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label="Select User"
-                            variant="outlined"
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {isLoadingUsers && <CircularProgress size={20} />}
-                                        {params.InputProps.endAdornment}
-                                    </>
-                                ),
-                            }}
-                        />
+                <Box sx={{ width: '100%' }}>
+                    <Autocomplete
+                        id="user-select"
+                        options={users}
+                        value={users.find(user => user.id === selectedUserId) || null}
+                        onChange={(event, newValue) => onUserSelected(newValue?.id || null)}
+                        getOptionLabel={(option) => option.name}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Select User"
+                                variant="outlined"
+                                InputProps={{
+                                    ...params.InputProps,
+                                    endAdornment: (
+                                        <>
+                                            {isLoadingUsers && <CircularProgress size={20} />}
+                                            {params.InputProps.endAdornment}
+                                        </>
+                                    ),
+                                }}
+                            />
+                        )}
+                        disabled={!selectedAgentName || isLoadingUsers}
+                        fullWidth
+                    />
+                    {hasMoreUsers && (
+                        <Button
+                            size="small"
+                            onClick={handleLoadMoreUsers}
+                            disabled={loadingMoreUsers}
+                            sx={{ mt: 1, textTransform: 'none' }}
+                        >
+                            {loadingMoreUsers ? <CircularProgress size={16} /> : "Load more users"}
+                        </Button>
                     )}
-                    disabled={!selectedAgentName || isLoadingUsers}
-                    fullWidth
-                />
+                </Box>
 
                 <Autocomplete
                     id="workflow-select"

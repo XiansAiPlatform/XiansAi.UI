@@ -6,20 +6,33 @@ export const useAuditingApi = () => {
 
   return useMemo(() => {
     return {
+      // Keeping for backwards compatibility but it's not used anymore
       getUsers: async (agentName) => {
         try {
-          // Mock data - replace with actual API call
           const mockUsers = [
             { id: 'user1', name: 'John Doe' },
             { id: 'user2', name: 'Jane Smith' },
             { id: 'user3', name: 'Bob Johnson' }
           ];
           return mockUsers;
-
-          // Actual implementation would be:
-          // return await apiClient.get('/api/client/auditing/users', { agentName });
         } catch (error) {
           console.error('Error fetching users:', error);
+          throw error;
+        }
+      },
+
+      getThreads: async (agent, page = 0, pageSize = 20) => {
+        try {
+          console.log('Fetching threads for agent:', agent, 'page:', page, 'pageSize:', pageSize);
+          const params = { 
+            agent,
+            page,
+            pageSize
+          };
+          
+          return await apiClient.get('/api/client/messaging/threads', params);
+        } catch (error) {
+          console.error('Error fetching threads:', error);
           throw error;
         }
       },
