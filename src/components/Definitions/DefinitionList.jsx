@@ -53,6 +53,15 @@ const DefinitionList = () => {
     setSelectedAgentName(agentName);
   };
 
+  const isUserOwnerOfAllWorkflows = (agentName) => {
+    const agentDefinitions = definitions.filter(def => def.agent === agentName);
+    return agentDefinitions.every(def => {
+      if (!user?.sub) return false;
+      if (def.permissions?.ownerAccess?.includes(user.sub)) return true;
+      return false;
+    });
+  };
+
   const handleMenuClose = () => {
     setMenuAnchorEl(null);
   };
@@ -471,9 +480,23 @@ const DefinitionList = () => {
         onClose={handleMenuClose}
         onClick={(e) => e.stopPropagation()}
       >
-        <MenuItem onClick={handleDeleteAllClick}>
+        <MenuItem 
+          onClick={handleDeleteAllClick}
+          disabled={!isUserOwnerOfAllWorkflows(selectedAgentName)}
+          sx={{
+            opacity: isUserOwnerOfAllWorkflows(selectedAgentName) ? 1 : 0.5,
+            '&.Mui-disabled': {
+              color: 'text.disabled',
+            }
+          }}
+        >
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
           Delete All
+          {!isUserOwnerOfAllWorkflows(selectedAgentName) && (
+            <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
+              (Not owner of all workflows)
+            </Typography>
+          )}
         </MenuItem>
       </Menu>
 
