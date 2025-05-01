@@ -5,6 +5,9 @@
   border-radius: 4px;
   font-family: monospace;
   position: relative;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .json-viewer__copy-button {
@@ -47,6 +50,8 @@
 
 .json-viewer__value--string {
   color: #98c379;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .json-viewer__value--number {

@@ -49,8 +49,8 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
                 const response = await messagingApi.getAgentsAndTypes();
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
-                    .filter(wf => wf.agentName === agentName)
-                    .map(wf => wf.typeName))].sort();
+                    .filter(wf => wf.agent === agentName)
+                    .map(wf => wf.workflowType))].sort();
                 setAllWorkflowTypes(types);
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow types.';

@@ -53,6 +53,8 @@ const ConversationThreads = ({
                 threadId={null}
                 onClose={() => closeSlider()}
                 onMessageSent={handleMessageSent}
+                initialWorkflowType={''}
+                initialWorkflowId={''}
             />,
             'New Conversation'
         );
