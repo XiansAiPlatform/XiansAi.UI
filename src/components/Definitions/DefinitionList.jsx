@@ -200,6 +200,11 @@ const DefinitionList = () => {
     }
   `;
 
+  const formatAgentName = (name) => {
+    if (!name) return '';
+    return name.replace(/([A-Z])/g, ' $1').trim();
+  };
+
   useEffect(() => {
     const fetchDefinitions = async () => {
       try {
@@ -393,7 +398,7 @@ const DefinitionList = () => {
                     }} />
                   </Box>
                 )}
-                {agentName}
+                {formatAgentName(agentName)}
               </Typography>
               
               <Chip 
