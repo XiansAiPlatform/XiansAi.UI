@@ -12,6 +12,9 @@ import { formatDistanceToNow } from 'date-fns';
 import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useSlider } from '../../contexts/SliderContext';
+import PermissionsManager from './PermissionsManager';
+import ShareIcon from '@mui/icons-material/Share';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
@@ -26,6 +29,7 @@ const DefinitionList = () => {
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState(null);
+  const { openSlider } = useSlider();
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
@@ -104,6 +108,14 @@ const DefinitionList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleShareClick = () => {
+    handleMenuClose();
+    openSlider(
+      <PermissionsManager agentName={selectedAgentName} />,
+      `Share ${selectedAgentName}`
+    );
   };
 
   const filteredDefinitions = definitions
@@ -492,6 +504,24 @@ const DefinitionList = () => {
         >
           <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
           Delete All
+          {!isUserOwnerOfAllWorkflows(selectedAgentName) && (
+            <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
+              (Not owner of all workflows)
+            </Typography>
+          )}
+        </MenuItem>
+        <MenuItem 
+          onClick={handleShareClick}
+          disabled={!isUserOwnerOfAllWorkflows(selectedAgentName)}
+          sx={{
+            opacity: isUserOwnerOfAllWorkflows(selectedAgentName) ? 1 : 0.5,
+            '&.Mui-disabled': {
+              color: 'text.disabled',
+            }
+          }}
+        >
+          <ShareIcon fontSize="small" sx={{ mr: 1 }} />
+          Share
           {!isUserOwnerOfAllWorkflows(selectedAgentName) && (
             <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
               (Not owner of all workflows)

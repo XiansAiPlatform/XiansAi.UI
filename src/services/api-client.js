@@ -105,6 +105,12 @@ export const useApiClient = () => {
         });
       },
       
+      patch: (endpoint) => {
+        return request(endpoint, {
+          method: 'PATCH'
+        });
+      },
+      
       delete: (endpoint, data) => {
         const options = {
           method: 'DELETE'

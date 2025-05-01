@@ -1,12 +1,8 @@
-import { Box, Typography, TextField, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Box, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material';
 
 const EmptyState = ({ 
-  searchQuery,
-  onSearchChange,
   timeFilter,
   onTimeFilterChange,
-  filter,
-  onFilterChange 
 }) => (
   <Box sx={{ margin: 'var(--spacing-md)' }}>
     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -22,18 +18,7 @@ const EmptyState = ({
         Agent Definitions
       </Typography>
       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          size="small"
-          placeholder="Search definitions..."
-          value={searchQuery}
-          onChange={onSearchChange}
-          sx={{
-            width: '250px',
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 'var(--radius-md)',
-            }
-          }}
-        />
+        
         <ToggleButtonGroup
           value={timeFilter}
           exclusive
@@ -43,15 +28,6 @@ const EmptyState = ({
           <ToggleButton value="7days">Last 7 Days</ToggleButton>
           <ToggleButton value="30days">Last 30 Days</ToggleButton>
           <ToggleButton value="all">All Time</ToggleButton>
-        </ToggleButtonGroup>
-        <ToggleButtonGroup
-          value={filter}
-          exclusive
-          onChange={onFilterChange}
-          size="small"
-        >
-          <ToggleButton value="all">All</ToggleButton>
-          <ToggleButton value="mine">Mine</ToggleButton>
         </ToggleButtonGroup>
       </Box>
     </Box>
