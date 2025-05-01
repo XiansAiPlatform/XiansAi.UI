@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
@@ -59,11 +59,7 @@ const PermissionsManager = ({ agentName }) => {
   const { setLoading } = useLoading();
   const { showSuccess } = useNotification();
 
-  useEffect(() => {
-    fetchPermissions();
-  }, [agentName]);
-
-  const fetchPermissions = async () => {
+  const fetchPermissions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -85,7 +81,12 @@ const PermissionsManager = ({ agentName }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [agentName, permissionsApi, setLoading]);
+
+  useEffect(() => {
+    fetchPermissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agentName]);
 
   const handleAddUser = async () => {
     if (!newUserId.trim()) return;
