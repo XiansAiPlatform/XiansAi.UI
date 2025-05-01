@@ -43,7 +43,7 @@ const WorkflowSelector = ({
     }, [messagingApi, showError, onAgentSelected]);
 
     const agentNames = useMemo(() =>
-        [...new Set(allWorkflows.map(wf => wf.agentName))],
+        [...new Set(allWorkflows.map(wf => wf.agent))].filter(Boolean),
         [allWorkflows]
     );
 
@@ -64,6 +64,7 @@ const WorkflowSelector = ({
                         options={agentNames}
                         value={selectedAgentName}
                         onChange={(event, newValue) => handleAgentChange(newValue)}
+                        getOptionLabel={(option) => option || ''}
                         renderOption={(props, option) => (
                             <li {...props}>
                                 <Box sx={{ 

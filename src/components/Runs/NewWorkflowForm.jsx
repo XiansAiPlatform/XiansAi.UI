@@ -51,7 +51,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       
       await api.startNewWorkflow(
         definition.workflowType, 
-        definition.agentName, 
+        definition.agent, 
         parameterValues,
         flowIdToSend,
         queueNameToSend
