@@ -327,130 +327,130 @@ var newBlogPosts = new List<string>();`
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Hub & Spoke Handoffs</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td>Hub & Spoke Agent Handoffs</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
-                                    <td>P2P Handoffs</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td>P2P Handoffs between Agents</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Deterministic Workflow Orchestration</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Generative Workflow Orchestration</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Long-running Process Automation</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Functions + MCP Tools</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Event-driven Coordination</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Multi-tenancy</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Open Source</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>No Vendor Lock-in</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Visualization</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Multi-Cloud Deployment</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Enterprise-grade Robustness</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Management Portal</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Prompt/Knowledge Base Management</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Execution History</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Tracing & Logging</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Rapid Agent Generation</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                             </tbody>
                         </table>

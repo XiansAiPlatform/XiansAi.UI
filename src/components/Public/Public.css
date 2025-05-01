@@ -3087,14 +3087,38 @@ h1, h2, h3 {
     text-align: center;
 }
 
-.home-comparison-table td:not(:first-child) span {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
-    text-align: center;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+.home-comparison-table td:not(:first-child):has(span) {
+    padding: 0.75rem 1rem;
+}
+
+/* Theme-colored checkmarks and crosses */
+.home-comparison-table td {
+    font-size: 1.1rem;
+}
+
+.home-comparison-table td:not(:first-child) {
+    color: var(--home-text-secondary);
+}
+
+/* Update checkmark color to match theme */
+.home-comparison-table td:contains('✅') {
+    color: var(--home-primary);
+}
+
+/* Update cross color to match theme with reduced opacity */
+.home-comparison-table td:contains('❌') {
+    color: var(--home-text-secondary);
+    opacity: 0.5;
+}
+
+/* Add subtle hover effect */
+.home-comparison-table tr:hover td:contains('✅') {
+    color: var(--home-primary-hover);
+    text-shadow: 0 0 8px var(--home-glow);
+}
+
+.home-comparison-table tr:hover td:contains('❌') {
+    opacity: 0.7;
 }
 
 /* Responsive styles for the comparison table */
@@ -3629,4 +3653,28 @@ h1, h2, h3 {
 
 .home-btn-secondary svg {
   font-size: 1.2rem;
+}
+
+/* Theme-colored checkmarks and crosses */
+.comparison-check {
+    color: var(--home-primary);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.comparison-x {
+    color: var(--home-text-secondary);
+    opacity: 0.5;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Add hover effects */
+tr:hover .comparison-check {
+    color: var(--home-primary-hover);
+    text-shadow: 0 0 8px var(--home-glow);
+}
+
+tr:hover .comparison-x {
+    opacity: 0.7;
 }
