@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '../Public.css';
 import { FiCpu, FiLock, FiSettings, FiStar, FiGitBranch } from 'react-icons/fi';
-import { BiLogoGithub, BiGitRepoForked, BiCodeAlt } from 'react-icons/bi';
+import { BiLogoGithub} from 'react-icons/bi';
 import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine, RiOpenSourceFill } from 'react-icons/ri';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
