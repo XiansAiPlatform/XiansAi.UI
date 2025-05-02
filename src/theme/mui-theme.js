@@ -3,32 +3,25 @@ import { createTheme } from '@mui/material/styles';
 export const theme = createTheme({
   palette: {
     primary: {
-      main: '#6366f1', // Match our CSS variable --primary
-      light: '#818cf8',
-      dark: '#4f46e5',
+      main: '#0ea5e9', // Match our CSS variable --primary
+      light: '#38bdf8',
+      dark: '#0284c7',
       contrastText: '#ffffff',
     }
   },
   typography: {
     fontFamily: [
-      'Plus Jakarta Sans',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      'Oxygen',
-      'Ubuntu',
-      'Cantarell',
-      '"Open Sans"',
-      '"Helvetica Neue"',
-      'sans-serif'
+      'JetBrains Mono',
+      'Fira Code',
+      'Source Code Pro',
+      'monospace'
     ].join(','),
     h1: {
-      fontWeight: 600,
+      fontWeight: 700,
       letterSpacing: '-0.5px'
     },
     h2: {
-      fontWeight: 600,
+      fontWeight: 700,
       letterSpacing: '-0.5px'
     },
     h3: {
@@ -56,29 +49,29 @@ export const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          fontFamily: 'Plus Jakarta Sans, sans-serif',
+          fontFamily: 'JetBrains Mono, monospace',
         },
       },
     },
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
+          borderRadius: '6px',
           boxShadow: 'none',
         },
         containedPrimary: {
-          backgroundColor: '#6366f1',
+          backgroundColor: '#0ea5e9',
           '&:hover': {
-            backgroundColor: '#4f46e5',
-            boxShadow: '0 2px 8px rgba(99, 102, 241, 0.4)',
+            backgroundColor: '#0284c7',
+            boxShadow: '0 2px 8px rgba(14, 165, 233, 0.3)',
           },
         },
         outlinedPrimary: {
-          borderColor: 'rgba(0, 0, 0, 0.08)',
-          color: '#6366f1',
+          borderColor: 'rgba(14, 165, 233, 0.1)',
+          color: '#0ea5e9',
           '&:hover': {
-            backgroundColor: 'rgba(99, 102, 241, 0.04)',
-            borderColor: '#6366f1',
+            backgroundColor: 'rgba(14, 165, 233, 0.04)',
+            borderColor: '#0ea5e9',
           },
         },
       },

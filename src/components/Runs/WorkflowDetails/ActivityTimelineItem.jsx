@@ -184,6 +184,12 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
     return String(parsed);
   };
 
+  const formatName = (name) => {
+    return name
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+  };
+
   // Get formatted inputs and outputs
   const inputs = event.Inputs ? formatText(JSON.stringify(event.Inputs)) : null;
   const outputs = event.Result ? formatText(JSON.stringify(event.Result)) : null;
@@ -228,7 +234,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
                   wordBreak: 'break-word'
                 }}
               >
-                {event.ActivityName || 'Unknown Activity'}
+                {formatName(event.ActivityName) || 'Unknown Activity'}
               </Typography>
               
               <Box sx={{ 

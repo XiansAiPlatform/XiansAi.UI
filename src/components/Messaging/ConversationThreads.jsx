@@ -53,6 +53,8 @@ const ConversationThreads = ({
                 threadId={null}
                 onClose={() => closeSlider()}
                 onMessageSent={handleMessageSent}
+                initialWorkflowType={''}
+                initialWorkflowId={''}
             />,
             'New Conversation'
         );
@@ -226,7 +228,6 @@ const ConversationThreads = ({
                             <React.Fragment key={thread.id}>
                                 <ListItemButton 
                                     selected={selectedThreadId === thread.id}
-                                    // Pass both the ID and the full thread object on click
                                     onClick={() => onThreadSelect(thread.id, thread)} 
                                     sx={{
                                         px: 2,
@@ -243,28 +244,52 @@ const ConversationThreads = ({
                                 >
                                     <ListItemText 
                                         primary={
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                <Typography variant="body1" component="span" fontWeight={500}>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                <Typography 
+                                                    variant="body1" 
+                                                    component="span" 
+                                                    fontWeight={400}
+                                                    sx={{ 
+                                                        wordBreak: 'break-word',
+                                                        pr: 1
+                                                    }}
+                                                >
                                                     {thread.participantId || 'Unknown Participant'}
                                                 </Typography>
                                                 {thread.hasUnread && (
-                                                    <Badge badgeContent=" " color="primary" variant="dot" sx={{ ml: 1 }} />
+                                                    <Badge badgeContent=" " color="primary" variant="dot" sx={{ ml: 1, flexShrink: 0 }} />
                                                 )}
                                             </Box>
                                         }
                                         secondary={
                                             <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5 }}>
-                                                <Typography variant="caption" color="text.secondary" noWrap>
-                                                    {thread.lastMessage ? thread.lastMessage.substring(0, 40) + (thread.lastMessage.length > 40 ? '...' : '') : 'No messages yet'}
+                                                <Typography 
+                                                    variant="caption" 
+                                                    color="text.secondary" 
+                                                    sx={{ 
+                                                        wordBreak: 'break-word',
+                                                        whiteSpace: 'normal'
+                                                    }}
+                                                >
+                                                    {thread.updatedAt ? format(new Date(thread.updatedAt), 'MMM d, h:mm a') : 'No messages yet.'}
                                                 </Typography>
                                                 {thread.lastMessageTime && (
-                                                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+                                                    <Typography 
+                                                        variant="caption" 
+                                                        color="text.secondary" 
+                                                        sx={{ mt: 0.5 }}
+                                                    >
                                                         {format(new Date(thread.lastMessageTime), 'MMM d, h:mm a')}
                                                     </Typography>
                                                 )}
                                             </Box>
                                         }
-                                        primaryTypographyProps={{ noWrap: true }}
+                                        primaryTypographyProps={{ 
+                                            sx: { 
+                                                whiteSpace: 'normal',
+                                                wordBreak: 'break-word'
+                                            }
+                                        }}
                                     />
                                 </ListItemButton>
                                 <Divider component="li" />

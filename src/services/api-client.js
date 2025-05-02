@@ -58,7 +58,8 @@ export const useApiClient = () => {
         });
 
         if (!response.ok) {
-          throw await handleApiError(response);
+          const errorResult = await handleApiError(response);
+          throw errorResult;
         }
 
         // Check if the response is empty
@@ -104,6 +105,12 @@ export const useApiClient = () => {
         });
       },
       
+      patch: (endpoint) => {
+        return request(endpoint, {
+          method: 'PATCH'
+        });
+      },
+      
       delete: (endpoint, data) => {
         const options = {
           method: 'DELETE'
@@ -134,7 +141,8 @@ export const useApiClient = () => {
           });
 
           if (!response.ok) {
-            throw await handleApiError(response);
+            const errorResult = await handleApiError(response);
+            throw errorResult;
           }
 
           const reader = response.body.getReader();

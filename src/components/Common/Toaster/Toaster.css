@@ -3,12 +3,17 @@
   color: #822727;
   padding: 16px;
   border-radius: 8px;
-  width: 400px;
+  width: 800px;
   max-width: 90vw;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .toast-success {
   background: #D1FAE5;
   color: #15803D;
   padding: 16px;
+  border-radius: 8px;
+  width: 800px;
+  max-width: 90vw;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 } 

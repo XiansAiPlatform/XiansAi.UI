@@ -65,8 +65,8 @@ const SendMessageForm = ({
                 const response = await messagingApi.getAgentsAndTypes();
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
-                    .filter(wf => wf.agentName === agentName)
-                    .map(wf => wf.typeName))].sort();
+                    .filter(wf => wf.agent === agentName)
+                    .map(wf => wf.workflowType))].sort();
                 setAllWorkflowTypes(types);
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow types.';
@@ -305,11 +305,39 @@ const SendMessageForm = ({
                 )}
                 componentsProps={{
                     popper: {
-                        onClick: (e) => e.stopPropagation()
+                        modifiers: [
+                            {
+                                name: 'preventOverflow',
+                                enabled: true,
+                                options: {
+                                    altAxis: true,
+                                    altBoundary: true,
+                                    tether: true,
+                                    rootBoundary: 'document',
+                                    padding: 8,
+                                },
+                            },
+                            {
+                                name: 'flip',
+                                enabled: true,
+                                options: {
+                                    fallbackPlacements: ['top', 'bottom'],
+                                },
+                            },
+                        ],
+                        onClick: (e) => e.stopPropagation(),
+                        sx: {
+                            zIndex: 1300, // Ensure it's above the slider
+                        }
                     }
                 }}
                 disabled={!agentName || isLoadingTypes}
                 fullWidth
+                ListboxProps={{
+                    style: {
+                        maxHeight: '350px'
+                    }
+                }}
             />
             
             <Autocomplete

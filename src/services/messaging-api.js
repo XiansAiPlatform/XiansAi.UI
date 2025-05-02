@@ -83,6 +83,15 @@ export const useMessagingApi = () => {
         }
       },
 
+      deleteThread: async (threadId) => {
+        try {
+          return await apiClient.delete(`/api/client/messaging/threads/${threadId}`);
+        } catch (error) {
+          console.error('Error deleting thread:', error);
+          throw error;
+        }
+      },
+
     };
   }, [apiClient]);
 };

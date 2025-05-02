@@ -1,34 +1,38 @@
 import { useState, useEffect } from 'react';
 import { keyframes } from '@emotion/react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, ToggleButton, ToggleButtonGroup, TextField, Chip, Stack, IconButton, Menu, MenuItem, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useLoading } from '../../contexts/LoadingContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
 import { useAuth0 } from '@auth0/auth0-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useSlider } from '../../contexts/SliderContext';
+import PermissionsManager from './PermissionsManager';
+import ShareIcon from '@mui/icons-material/Share';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
-  const [filter, setFilter] = useState('mine');
   const { user } = useAuth0();
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
   const { setLoading } = useLoading();
+  const { showSuccess, showError } = useNotification();
   const [searchQuery, setSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('all');
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedAgentName, setSelectedAgentName] = useState(null);
+  const { openSlider } = useSlider();
 
   const handleToggle = (definitionId) => {
     setOpenDefinitionId(openDefinitionId === definitionId ? null : definitionId);
-  };
-
-  const handleFilterChange = (event, newFilter) => {
-    if (newFilter !== null) {
-      setFilter(newFilter);
-    }
   };
 
   const handleSearchChange = (event) => {
@@ -47,17 +51,85 @@ const DefinitionList = () => {
     );
   };
 
+  const handleMenuClick = (event, agentName) => {
+    event.stopPropagation();
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedAgentName(agentName);
+  };
+
+  const isUserOwnerOfAllWorkflows = (agentName) => {
+    const agentDefinitions = definitions.filter(def => def.agent === agentName);
+    return agentDefinitions.every(def => {
+      if (!user?.sub) return false;
+      if (def.permissions?.ownerAccess?.includes(user.sub)) return true;
+      return false;
+    });
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  const handleDeleteAllClick = () => {
+    handleMenuClose();
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteAllCancel = () => {
+    setDeleteDialogOpen(false);
+    setSelectedAgentName(null);
+  };
+
+  const handleDeleteAllConfirm = async () => {
+    if (!selectedAgentName) {
+      showError('No agent selected for deletion');
+      return;
+    }
+
+    setDeleteDialogOpen(false);
+    
+    try {
+      setLoading(true);
+      // Get definitions for the selected agent from the original definitions array
+      const agentDefinitions = definitions.filter(def => def.agent === selectedAgentName);
+      const deletePromises = agentDefinitions.map(def => definitionsApi.deleteDefinition(def.id));
+      await Promise.all(deletePromises);
+      
+      // Update the definitions state by removing all definitions for this agent
+      setDefinitions(prevDefinitions => 
+        prevDefinitions.filter(def => def.agent !== selectedAgentName)
+      );
+      
+      showSuccess(`Successfully deleted all definitions for ${selectedAgentName}`);
+      setSelectedAgentName(null);
+    } catch (error) {
+      console.error('Failed to delete definitions:', error);
+      showError('Failed to delete definitions. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShareClick = () => {
+    handleMenuClose();
+    openSlider(
+      <PermissionsManager agentName={selectedAgentName} />,
+      `Share ${selectedAgentName}`
+    );
+  };
+
   const filteredDefinitions = definitions
     .filter(def => {
-      const matchesFilter = filter === 'all' || (filter === 'mine' && def.owner === user?.sub);
       const searchLower = searchQuery.toLowerCase();
-      const nameLower = def.typeName?.toLowerCase() || '';
-      const agentNameLower = def.agentName?.toLowerCase() || '';
+      const workflowTypeLower = def.workflowType?.toLowerCase() || '';
+      const agentNameLower = def.agent?.toLowerCase() || '';
+      const descriptionLower = def.description?.toLowerCase() || '';
       const matchesSearch = searchQuery === '' || 
-                           nameLower.includes(searchLower) || 
-                           agentNameLower.includes(searchLower);
+                           workflowTypeLower.includes(searchLower) || 
+                           agentNameLower.includes(searchLower) ||
+                           descriptionLower.includes(searchLower);
       
-      return matchesFilter && matchesSearch;
+      return matchesSearch;
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -67,7 +139,7 @@ const DefinitionList = () => {
     const latestFlowByAgent = {};
     
     definitions.forEach(def => {
-      const agentName = def.agentName || 'Ungrouped';
+      const agentName = def.agent || 'Ungrouped';
       if (!grouped[agentName]) {
         grouped[agentName] = [];
         latestFlowByAgent[agentName] = new Date(0);
@@ -128,11 +200,16 @@ const DefinitionList = () => {
     }
   `;
 
+  const formatAgentName = (name) => {
+    if (!name) return '';
+    return name.replace(/([A-Z])/g, ' $1').trim();
+  };
+
   useEffect(() => {
     const fetchDefinitions = async () => {
       try {
         setLoading(true);
-        const data = await definitionsApi.getDefinitions(timeFilter, filter);
+        const data = await definitionsApi.getDefinitions(timeFilter);
         setDefinitions(data);
       } catch (err) {
         setError(err.message);
@@ -143,7 +220,7 @@ const DefinitionList = () => {
     };
 
     fetchDefinitions();
-  }, [definitionsApi, setLoading, timeFilter, filter]);
+  }, [definitionsApi, setLoading, timeFilter]);
 
   if (error) {
     return (
@@ -159,8 +236,6 @@ const DefinitionList = () => {
       onSearchChange={handleSearchChange}
       timeFilter={timeFilter}
       onTimeFilterChange={handleTimeFilterChange}
-      filter={filter}
-      onFilterChange={handleFilterChange}
     />;
   }
 
@@ -231,28 +306,6 @@ const DefinitionList = () => {
               <ToggleButton value="7days">Last 7 Days</ToggleButton>
               <ToggleButton value="30days">Last 30 Days</ToggleButton>
               <ToggleButton value="all">All Time</ToggleButton>
-            </ToggleButtonGroup>
-            <ToggleButtonGroup
-              value={filter}
-              exclusive
-              onChange={handleFilterChange}
-              size="small"
-              sx={{ 
-                width: { xs: '100%', sm: 'auto' },
-                '& .MuiToggleButton-root': {
-                  borderColor: 'var(--border-light)',
-                  color: 'var(--text-secondary)',
-                  textTransform: 'none',
-                  '&.Mui-selected': {
-                    backgroundColor: 'var(--bg-selected)',
-                    color: 'var(--text-primary)',
-                    fontWeight: 500
-                  }
-                }
-              }}
-            >
-              <ToggleButton value="all">All</ToggleButton>
-              <ToggleButton value="mine">Mine</ToggleButton>
             </ToggleButtonGroup>
           </Stack>
         </Box>
@@ -345,7 +398,7 @@ const DefinitionList = () => {
                     }} />
                   </Box>
                 )}
-                {agentName}
+                {formatAgentName(agentName)}
               </Typography>
               
               <Chip 
@@ -387,15 +440,24 @@ const DefinitionList = () => {
             </Stack>
             
             {agentName !== 'Ungrouped' && (
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.75rem'
-                }}
-              >
-                {formatLastUpdated(latestFlowByAgent[agentName])}
-              </Typography>
+              <>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.75rem'
+                  }}
+                >
+                  {formatLastUpdated(latestFlowByAgent[agentName])}
+                </Typography>
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleMenuClick(e, agentName)}
+                  sx={{ ml: 1 }}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </>
             )}
           </Box>
           
@@ -428,6 +490,73 @@ const DefinitionList = () => {
           </TableContainer>
         </Box>
       ))}
+
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <MenuItem 
+          onClick={handleDeleteAllClick}
+          disabled={!isUserOwnerOfAllWorkflows(selectedAgentName)}
+          sx={{
+            opacity: isUserOwnerOfAllWorkflows(selectedAgentName) ? 1 : 0.5,
+            '&.Mui-disabled': {
+              color: 'text.disabled',
+            }
+          }}
+        >
+          <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+          Delete All
+          {!isUserOwnerOfAllWorkflows(selectedAgentName) && (
+            <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
+              (Not owner of all workflows)
+            </Typography>
+          )}
+        </MenuItem>
+        <MenuItem 
+          onClick={handleShareClick}
+          disabled={!isUserOwnerOfAllWorkflows(selectedAgentName)}
+          sx={{
+            opacity: isUserOwnerOfAllWorkflows(selectedAgentName) ? 1 : 0.5,
+            '&.Mui-disabled': {
+              color: 'text.disabled',
+            }
+          }}
+        >
+          <ShareIcon fontSize="small" sx={{ mr: 1 }} />
+          Share
+          {!isUserOwnerOfAllWorkflows(selectedAgentName) && (
+            <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary', fontSize: '0.7rem' }}>
+              (Not owner of all workflows)
+            </Typography>
+          )}
+        </MenuItem>
+      </Menu>
+
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteAllCancel}
+        onClick={(e) => e.stopPropagation()}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Delete All Definitions?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Are you sure you want to delete all definitions for "{selectedAgentName}"? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: '16px 24px' }}>
+          <Button onClick={handleDeleteAllCancel}>Cancel</Button>
+          <Button onClick={handleDeleteAllConfirm} variant="contained" color="error" autoFocus>
+            Delete All
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

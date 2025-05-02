@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import '../Public.css';
-import { FiCpu, FiLock, FiSettings } from 'react-icons/fi';
-import { BiLogoGithub } from 'react-icons/bi';
-import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine } from 'react-icons/ri';
+import { FiCpu, FiLock, FiSettings, FiStar, FiGitBranch } from 'react-icons/fi';
+import { BiLogoGithub} from 'react-icons/bi';
+import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine, RiOpenSourceFill } from 'react-icons/ri';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth0 } from '@auth0/auth0-react';
@@ -144,13 +144,21 @@ var newBlogPosts = new List<string>();`
 
     return (
         <div className="home-container">
+            {/* GitHub Corner */}
+            <a href="https://github.com/XiansAiPlatform" className="github-corner" aria-label="View on GitHub">
+                <svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true">
+                    <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+                    <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" className="octo-arm"></path>
+                    <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" className="octo-body"></path>
+                </svg>
+            </a>
+
             <header className="home-header">
                 <div className="home-header-content">
                     <div className="home-logo-container">
                         <div className="home-logo">
                             <span className="home-logo-flow">Xians</span>
                             <span className="home-logo-ai">.ai</span>
-                            {/* <span className="preview-tag">Preview</span> */}
                         </div>
                         <a href="https://99x.io" target="_blank" rel="noopener noreferrer" className="home-logo-sub">
                             <span className="home-logo-by">by</span>
@@ -203,9 +211,46 @@ var newBlogPosts = new List<string>();`
 
             <section className="home-hero">
                 <div className="home-hero-content">
-                    <h1 style={{ wordSpacing: '0.2em' }}>Build Intelligent AI Agents That Work Together Seamlessly</h1>
+                    <div className="hero-badges">
+                        <a 
+                            href="https://github.com/XiansAiPlatform" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="open-source-badge"
+                        >
+                            <RiOpenSourceFill />
+                            Open Source
+                        </a>
+                        <a 
+                            href="https://github.com/XiansAiPlatform" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="github-counter"
+                        >
+                            <FiStar />
+                            <span>Star</span>
+                        </a>
+                        <a 
+                            href="https://github.com/XiansAiPlatform" 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="github-counter"
+                        >
+                            <FiGitBranch />
+                            <span>Fork</span>
+                        </a>
+                    </div>
+                    
+                    <h1 style={{ wordSpacing: '0.2em' }}>Build Intelligent AI Agents That Work as a Team</h1>
 
                     <div className="home-cta-buttons">
+                        <button 
+                            className="home-btn home-btn-primary" 
+                            onClick={() => window.open('https://github.com/XiansAiPlatform', '_blank')}
+                        >
+                            <BiLogoGithub />
+                            View on GitHub
+                        </button>
                         <button 
                             className="home-btn home-btn-secondary" 
                             onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/', '_blank')}
@@ -214,9 +259,23 @@ var newBlogPosts = new List<string>();`
                         </button>
                     </div>
                     <p className="home-hero-subtitle">
-                    The open-source platform for creating, deploying, and managing sophisticated AI agent workflows with enterprise-grade reliability.
+                        The open-source platform for creating, deploying, and managing sophisticated AI agent workflows with enterprise-grade reliability.
                     </p>
-                    <div className="code-sample">
+
+                    
+                    {/* Add contributor avatars */}
+                    <div className="contributors-section">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                            <img 
+                                key={num}
+                                src={`https://randomuser.me/api/portraits/men/${num + 20}.jpg`} 
+                                alt={`Contributor ${num}`} 
+                                className="contributor-avatar"
+                                title={`Contributor ${num}`}
+                            />
+                        ))}
+                    </div>
+                    <div style={{ marginTop: '2rem' }}>
                         <code>
                             {'>'} dotnet add package XiansAi.Lib
                         </code>
@@ -246,7 +305,6 @@ var newBlogPosts = new List<string>();`
                         <h2>{featureTabs[activeTab].title}</h2>
                         <p>{featureTabs[activeTab].description}</p>
                     </div>
-
                 </div>
             </section>
 
@@ -269,130 +327,130 @@ var newBlogPosts = new List<string>();`
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Hub & Spoke Handoffs</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td>Hub & Spoke Agent Handoffs</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
-                                    <td>P2P Handoffs</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td>P2P Handoffs between Agents</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Deterministic Workflow Orchestration</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Generative Workflow Orchestration</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Long-running Process Automation</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Functions + MCP Tools</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Event-driven Coordination</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Multi-tenancy</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Open Source</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>No Vendor Lock-in</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Visualization</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Multi-Cloud Deployment</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Enterprise-grade Robustness</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Management Portal</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Prompt/Knowledge Base Management</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Execution History</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
                                 </tr>
                                 <tr>
                                     <td>Agent Tracing & Logging</td>
-                                    <td>✅</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-x">×</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                                 <tr>
                                     <td>Rapid Agent Generation</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
+                                    <td><span className="comparison-check">✓</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -407,6 +465,11 @@ var newBlogPosts = new List<string>();`
                             Create Your First Multi-Tool Agent Workflow
                         </h2>
                         <p>Develop powerful AI workflows in minutes. Here's how to build a marketing content generation pipeline using multiple AI agents:</p>
+                        
+                        <div className="repo-activity-graph" title="Repository activity">
+                            {/* Activity graph placeholder */}
+                        </div>
+                        
                         <ul className="home-code-demo-points">
                             <li>Define and reuse specialized agents for different tasks</li>
                             <li>Train agents to improve their work performance</li>
@@ -486,7 +549,6 @@ var newBlogPosts = new List<string>();`
                     </div>
                 </div>
             </section>
-
 
             {/* Features Section */}
             <section className="home-features">
