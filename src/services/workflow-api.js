@@ -84,7 +84,7 @@ export const useWorkflowApi = () => {
         try {
           const payload = {
             workflowType,
-            agent: agentName,
+            agentName: agentName,
             parameters,
             workflowId: flowId,
             queueName

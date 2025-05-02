@@ -55,8 +55,8 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       const queueNameToSend = queueType === 'named' ? queueName : null;
       
       await api.startNewWorkflow(
-        definition.workflowType, 
-        definition.agent, 
+        definition.workflowType.trim(), 
+        definition.agent.trim(), 
         parameterValues,
         flowIdToSend,
         queueNameToSend
