@@ -82,13 +82,19 @@ export const useWorkflowApi = () => {
 
       startNewWorkflow: async (workflowType, agentName, parameters, flowId = null, queueName = null) => {
         try {
-          return await apiClient.post('/api/client/workflows', {
-            workflowType: workflowType,
-            agentName: agentName,
-            parameters: parameters,
+          const payload = {
+            workflowType,
+            agent: agentName,
+            parameters,
             workflowId: flowId,
-            queueName: queueName
-          });
+            queueName
+          };
+
+          // Only include optional fields if they have values
+          if (!flowId) delete payload.id;
+          if (!queueName) delete payload.queueName;
+
+          return await apiClient.post('/api/client/workflows', payload);
         } catch (error) {
           console.error('Failed to start workflow:', error);
           throw error;

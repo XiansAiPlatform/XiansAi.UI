@@ -49,6 +49,17 @@ const WorkflowRunItem = ({ run, isMobile }) => {
     return false;
   };
 
+  const getOwnerDisplay = () => {
+    if (!run.permissions?.ownerAccess?.length) return null;
+    const owner = run.permissions.ownerAccess[0];
+    const isCurrentUser = owner === user?.sub;
+    
+    if (isMobile) {
+      return isCurrentUser ? 'me' : owner.substring(0, 10) + '...';
+    }
+    return `${owner}${isCurrentUser ? ' (me)' : ''}`;
+  };
+
   return (
     <Link 
       to={`/runs/${run.workflowId}/${run.runId}`} 
@@ -104,8 +115,6 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             alignItems: 'flex-start',
             gap: '4px'
           }}>
-
-            
             <div style={{ 
               display: 'flex', 
               flexDirection: isMobile ? 'column' : 'row',
@@ -116,12 +125,14 @@ const WorkflowRunItem = ({ run, isMobile }) => {
               {!isMobile && <span className="metadata-separator">•</span>}
               
               <span className="run-duration">Duration: {getDuration()}</span>
-              {!isMobile && run.owner && <span className="metadata-separator">•</span>}
+              {!isMobile && <span className="metadata-separator">•</span>}
               
-              {run.owner && (
-                <span className={`owner-name ${run.owner === user?.sub ? 'current-user' : ''}`}>
-                  Owner: {isMobile ? (run.owner === user?.sub ? 'me' : run.owner.substring(0, 10) + '...') : run.owner}
-                  {!isMobile && run.owner === user?.sub && ' (me)'}
+              <span className="agent-name">Agent: {run.agent}</span>
+              {!isMobile && <span className="metadata-separator">•</span>}
+              
+              {getOwnerDisplay() && (
+                <span className={`owner-name ${run.permissions?.ownerAccess?.[0] === user?.sub ? 'current-user' : ''}`}>
+                  Owner: {getOwnerDisplay()}
                 </span>
               )}
             </div>
