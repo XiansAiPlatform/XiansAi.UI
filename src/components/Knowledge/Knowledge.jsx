@@ -41,11 +41,55 @@ const Knowledge = () => {
   const [agents, setAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [activeKnowledge, setActiveKnowledge] = useState(null);
+  const [contentSearchTimeout, setContentSearchTimeout] = useState(null);
+  const [isSearchingContent, setIsSearchingContent] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
 
-  const filteredKnowledgeItems = knowledgeItems.filter(item => 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
-  ).filter(item => !selectedAgent || item.agent === selectedAgent);
+  const filteredKnowledgeItems = searchQuery && searchResults.length > 0 && isSearchingContent
+    ? searchResults
+    : knowledgeItems.filter(item => 
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).filter(item => !selectedAgent || item.agent === selectedAgent);
+
+  // Effect for content search with debounce
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      if (contentSearchTimeout) {
+        clearTimeout(contentSearchTimeout);
+      }
+      
+      setContentSearchTimeout(setTimeout(async () => {
+        setIsSearchingContent(true);
+        try {
+          // Get all knowledge items with full content if search query is substantial
+          const fullKnowledgeItems = await knowledgeApi.getAllKnowledge();
+          const results = fullKnowledgeItems.filter(item => 
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
+          ).filter(item => !selectedAgent || item.agent === selectedAgent);
+          
+          setSearchResults(results);
+        } catch (error) {
+          console.error('Error searching knowledge content:', error);
+        } finally {
+          setIsSearchingContent(false);
+        }
+      }, 500));
+    } else {
+      setSearchResults([]);
+      setIsSearchingContent(false);
+      if (contentSearchTimeout) {
+        clearTimeout(contentSearchTimeout);
+      }
+    }
+
+    return () => {
+      if (contentSearchTimeout) {
+        clearTimeout(contentSearchTimeout);
+      }
+    };
+  }, [searchQuery, selectedAgent, knowledgeApi]);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -220,6 +264,11 @@ const Knowledge = () => {
                   borderRadius: 'var(--radius-md)',
                 }
               }}
+              InputProps={{
+                endAdornment: isSearchingContent && (
+                  <CircularProgress size={16} color="inherit" sx={{ opacity: 0.7 }} />
+                )
+              }}
             />
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel id="agent-select-label">Agent</InputLabel>
@@ -334,14 +383,25 @@ const Knowledge = () => {
               color: 'var(--text-secondary)'
             }}
           >
-            <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
-              {searchQuery ? 'No matching knowledge found' : 'No knowledge yet'}
-            </Typography>
-            <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
-              {searchQuery 
-                ? 'Try adjusting your search terms or clear the search to see all knowledge.'
-                : 'Create your first knowledge item by clicking the + button above. Knowledge helps customize the AI\'s behavior and responses.'}
-            </Typography>
+            {isSearchingContent ? (
+              <>
+                <CircularProgress size={24} sx={{ mb: 2 }} />
+                <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
+                  Searching knowledge content...
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
+                  {searchQuery ? 'No matching knowledge found' : 'No knowledge yet'}
+                </Typography>
+                <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
+                  {searchQuery 
+                    ? 'Try adjusting your search terms or clear the search to see all knowledge.'
+                    : 'Create your first knowledge item by clicking the + button above. Knowledge helps customize the AI\'s behavior and responses.'}
+                </Typography>
+              </>
+            )}
           </Box>
         )}
       </Box>
