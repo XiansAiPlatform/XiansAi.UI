@@ -8,7 +8,7 @@ import {
 import { useMessagingApi } from '../../services/messaging-api';
 import { useSlider } from '../../contexts/SliderContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import WorkflowSelector from './WorkflowSelector';
+import AgentSelector from './AgentSelector';
 import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
@@ -187,7 +187,7 @@ const MessagingPage = () => {
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
             {/* Agent selection */}
-            <WorkflowSelector
+            <AgentSelector
                 messagingApi={messagingApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
