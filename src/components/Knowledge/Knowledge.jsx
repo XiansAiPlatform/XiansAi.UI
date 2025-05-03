@@ -18,16 +18,6 @@ import KnowledgeItem from './KnowledgeItem';
 import { useKnowledgeApi } from '../../services/knowledge-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
-// Add CSS with tag styling variables
-const styles = {
-  '@global': {
-    ':root': {
-      '--tag-background': 'var(--background-subtle)',
-      '--tag-text': 'var(--text-secondary)',
-    }
-  }
-};
-
 const Knowledge = () => {
   const [knowledgeItems, setKnowledgeItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -89,7 +79,7 @@ const Knowledge = () => {
         clearTimeout(contentSearchTimeout);
       }
     };
-  }, [searchQuery, selectedAgent, knowledgeApi]);
+  }, [searchQuery, selectedAgent, knowledgeApi, contentSearchTimeout]);
 
   useEffect(() => {
     const fetchAgents = async () => {

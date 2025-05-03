@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { Link, useLocation } from 'react-router-dom';
