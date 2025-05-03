@@ -15,7 +15,7 @@ import NotImplemented from './components/NotImplemented/NotImplemented';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme/mui-theme';
 import Settings from './components/Settings/Settings';
-import Instructions from './components/Instructions/Instructions';
+import Knowledge from './components/Knowledge/Knowledge';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import DefinitionList from './components/Definitions/DefinitionList';
 import Home from './components/Public/Home/Home';
@@ -79,9 +79,9 @@ function App() {
                           <NotImplemented />
                         </ProtectedRoute>
                       } />
-                      <Route path="/instructions" element={
+                      <Route path="/knowledge" element={
                         <ProtectedRoute>
-                          <Instructions />
+                          <Knowledge />
                         </ProtectedRoute>
                       } />
                       <Route path="/settings" element={

@@ -7,5 +7,5 @@ export { useWorkflowApi } from './workflow-api';
 export { useActivitiesApi } from './activities-api';
 export { useSettingsApi } from './settings-api';
 export { useRegistrationApi } from './registration-api';
-export { useInstructionsApi } from './instructions-api';
+export { useKnowledgeApi } from './knowledge-api';
 export { usePermissionsApi } from './permissions-api'; 

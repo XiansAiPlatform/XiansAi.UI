@@ -4,6 +4,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 
@@ -21,10 +22,10 @@ const NAV_ITEMS = [
     isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
   {
-    to: '/instructions',
-    icon: <DescriptionOutlinedIcon />,
-    label: 'Knowledge',
-    isSelected: (pathname) => pathname === '/instructions' || pathname.startsWith('/instructions/'),
+    to: '/knowledge',
+    icon: <MenuBookOutlinedIcon />,
+    label: 'Knowledge Base',
+    isSelected: (pathname) => pathname === '/knowledge' || pathname.startsWith('/knowledge/'),
   },
   {
     to: '/messaging',

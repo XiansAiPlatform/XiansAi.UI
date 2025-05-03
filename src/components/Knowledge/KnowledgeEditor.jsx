@@ -9,16 +9,22 @@ import {
   MenuItem
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
+import { useKnowledgeApi } from '../../services/knowledge-api';
 
-const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
-  const [formData, setFormData] = useState(instruction || {
+const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, onClose }) => {
+  const knowledgeApi = useKnowledgeApi();
+  const [formData, setFormData] = useState(knowledge || {
     name: '',
     content: '',
     type: null,
+    agent: selectedAgent || '',
   });
   const [jsonError, setJsonError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [agents, setAgents] = useState([]);
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [agentsError, setAgentsError] = useState(null);
 
   const normalizeType = (type) => {
     if (!type) return '';
@@ -30,13 +36,47 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
   };
 
   useEffect(() => {
-    if (instruction?.type) {
+    const fetchAgents = async () => {
+      setIsLoadingAgents(true);
+      setAgentsError(null);
+      try {
+        const response = await knowledgeApi.getAgents();
+        console.log('Agents API response:', response);
+        if (response && Array.isArray(response)) {
+          setAgents(response);
+        } else if (response && Array.isArray(response.data)) {
+          setAgents(response.data);
+        } else {
+          console.error('Unexpected agents response format:', response);
+          setAgents([]);
+        }
+      } catch (error) {
+        console.error('Error fetching agents:', error);
+        setAgentsError('Failed to load agents');
+      } finally {
+        setIsLoadingAgents(false);
+      }
+    };
+
+    fetchAgents();
+  }, [knowledgeApi]);
+
+  useEffect(() => {
+    if (knowledge?.type) {
       setFormData(prev => ({
         ...prev,
-        type: normalizeType(instruction.type)
+        type: normalizeType(knowledge.type)
       }));
     }
-  }, [instruction]);
+    
+    // If selectedAgent is passed and we're in add mode, update formData
+    if (mode === 'add' && selectedAgent && !formData.agent) {
+      setFormData(prev => ({
+        ...prev,
+        agent: selectedAgent
+      }));
+    }
+  }, [knowledge, selectedAgent, mode, formData.agent]);
 
   const validateJSON = (content) => {
     if (!content) return null;
@@ -66,8 +106,8 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
       onSave(formData);
       onClose();
     } catch (error) {
-      console.error('Error saving instruction:', error);
-      setSubmitError(error.message || 'Failed to save instruction');
+      console.error('Error saving knowledge:', error);
+      setSubmitError(error.message || 'Failed to save knowledge');
     } finally {
       setIsSubmitting(false);
     }
@@ -152,6 +192,49 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
           </Select>
         </FormControl>
 
+        <FormControl fullWidth sx={{ mb: 2 }}>
+          <InputLabel sx={{ 
+            backgroundColor: '#fff', 
+            px: 0.5,
+            zIndex: 1,
+            '&.Mui-focused, &.MuiFormLabel-filled': {
+              backgroundColor: '#fff',
+              padding: '0 8px',
+              marginLeft: '-4px',
+              zIndex: 1
+            }
+          }}>Agent</InputLabel>
+          <Select
+            value={formData.agent || ''}
+            onChange={(e) => setFormData({ ...formData, agent: e.target.value })}
+            sx={{
+              backgroundColor: 'var(--background-light)',
+              borderRadius: 'var(--radius-sm)',
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: 'var(--border-color)'
+              }
+            }}
+            disabled={isLoadingAgents}
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {isLoadingAgents ? (
+              <MenuItem disabled><em>Loading agents...</em></MenuItem>
+            ) : agentsError ? (
+              <MenuItem disabled><em>{agentsError}</em></MenuItem>
+            ) : agents.length === 0 ? (
+              <MenuItem disabled><em>No agents available</em></MenuItem>
+            ) : (
+              agents.map(agent => (
+                <MenuItem key={agent} value={agent}>
+                  {agent}
+                </MenuItem>
+              ))
+            )}
+          </Select>
+        </FormControl>
+
         <Box sx={{ 
           mb: 2, 
           border: 1, 
@@ -211,32 +294,51 @@ const InstructionEditor = ({ mode = 'add', instruction, onSave, onClose }) => {
           </Box>
         )}
 
-        <Button 
-          variant="contained" 
-          type="submit" 
-          disabled={(formData.type === 'json' && jsonError) || isSubmitting}
-          sx={{
-            bgcolor: 'var(--primary)',
-            color: '#fff',
-            fontWeight: 'var(--font-weight-medium)',
-            borderRadius: 'var(--radius-sm)',
-            textTransform: 'none',
-            '&:hover': {
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          <Button 
+            variant="outlined" 
+            onClick={onClose}
+            sx={{
+              borderColor: 'var(--border-color)',
+              color: 'var(--text-secondary)',
+              fontWeight: 'var(--font-weight-medium)',
+              borderRadius: 'var(--radius-sm)',
+              textTransform: 'none',
+              '&:hover': {
+                borderColor: 'var(--border-color)',
+                bgcolor: 'var(--background-subtle)'
+              }
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            variant="contained" 
+            type="submit" 
+            disabled={(formData.type === 'json' && jsonError) || isSubmitting}
+            sx={{
               bgcolor: 'var(--primary)',
-              opacity: 0.9
-            },
-            '&.Mui-disabled': {
-              bgcolor: 'var(--primary)',
-              opacity: 0.5,
-              color: '#fff'
-            }
-          }}
-        >
-          {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
-        </Button>
+              color: '#fff',
+              fontWeight: 'var(--font-weight-medium)',
+              borderRadius: 'var(--radius-sm)',
+              textTransform: 'none',
+              '&:hover': {
+                bgcolor: 'var(--primary)',
+                opacity: 0.9
+              },
+              '&.Mui-disabled': {
+                bgcolor: 'var(--primary)',
+                opacity: 0.5,
+                color: '#fff'
+              }
+            }}
+          >
+            {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
+          </Button>
+        </Box>
       </form>
     </Box>
   );
 };
 
-export default InstructionEditor; 
+export default KnowledgeEditor; 

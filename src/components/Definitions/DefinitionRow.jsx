@@ -264,7 +264,10 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
               <div className="definition-collapse-content">
                 <DefinitionAgents activities={definition.activityDefinitions || []} />
                 {definition.activityDefinitions?.length > 0 ? (
-                  <DefinitionActivities activities={definition.activityDefinitions} />
+                  <DefinitionActivities 
+                    activities={definition.activityDefinitions} 
+                    agentName={definition.agent}
+                  />
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
