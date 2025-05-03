@@ -6,7 +6,8 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  CircularProgress
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
 import { useKnowledgeApi } from '../../services/knowledge-api';
@@ -25,6 +26,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
   const [agents, setAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [agentsError, setAgentsError] = useState(null);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
 
   const normalizeType = (type) => {
     if (!type) return '';
@@ -60,6 +62,30 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
 
     fetchAgents();
   }, [knowledgeApi]);
+
+  useEffect(() => {
+    // Fetch knowledge content if in edit mode and content is not available
+    const fetchKnowledgeContent = async () => {
+      if (mode === 'edit' && knowledge && knowledge.id && (!knowledge.content || knowledge.content === '')) {
+        setIsLoadingContent(true);
+        try {
+          const fullKnowledge = await knowledgeApi.getKnowledge(knowledge.id);
+          setFormData(prev => ({
+            ...prev,
+            ...fullKnowledge,
+            type: normalizeType(fullKnowledge.type)
+          }));
+        } catch (error) {
+          console.error('Error fetching knowledge content:', error);
+          setSubmitError('Failed to load knowledge content');
+        } finally {
+          setIsLoadingContent(false);
+        }
+      }
+    };
+
+    fetchKnowledgeContent();
+  }, [knowledge, knowledgeApi, mode]);
 
   useEffect(() => {
     if (knowledge?.type) {
@@ -255,20 +281,26 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
             backgroundColor: 'var(--background-subtle) !important'
           }
         }}>
-          <Editor
-            height="400px"
-            language={formData.type === 'json' ? 'json' : 'markdown'}
-            value={formData.content}
-            onChange={handleEditorChange}
-            theme="light"
-            options={{
-              minimap: { enabled: false },
-              wordWrap: 'on',
-              fontFamily: 'var(--font-mono)',
-              padding: { top: 16, bottom: 16 },
-              scrollBeyondLastLine: false
-            }}
-          />
+          {isLoadingContent ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+              <CircularProgress size={40} />
+            </Box>
+          ) : (
+            <Editor
+              height="400px"
+              language={formData.type === 'json' ? 'json' : 'markdown'}
+              value={formData.content}
+              onChange={handleEditorChange}
+              theme="light"
+              options={{
+                minimap: { enabled: false },
+                wordWrap: 'on',
+                fontFamily: 'var(--font-mono)',
+                padding: { top: 16, bottom: 16 },
+                scrollBeyondLastLine: false
+              }}
+            />
+          )}
           {jsonError && (
             <Box sx={{ 
               p: 1, 
@@ -315,7 +347,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
           <Button 
             variant="contained" 
             type="submit" 
-            disabled={(formData.type === 'json' && jsonError) || isSubmitting}
+            disabled={(formData.type === 'json' && jsonError) || isSubmitting || isLoadingContent}
             sx={{
               bgcolor: 'var(--primary)',
               color: '#fff',
