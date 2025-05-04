@@ -142,6 +142,14 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
     }
   };
 
+  const formatUpdatedTime = (date) => {
+    try {
+      return `Updated ${formatDistanceToNow(new Date(date), { addSuffix: true })}`;
+    } catch (error) {
+      return 'Updated at unknown time';
+    }
+  };
+
   return (
     <>
       <TableRow 
@@ -166,6 +174,13 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 <span className="definition-stat">
                   {formatCreatedTime(definition.createdAt)}
                 </span>
+                {definition.updatedAt && 
+                  definition.updatedAt !== definition.createdAt && 
+                  new Date(definition.updatedAt) > new Date(definition.createdAt) && (
+                  <span className="definition-stat">
+                    {formatUpdatedTime(definition.updatedAt)}
+                  </span>
+                )}
                 <span className="definition-stat">
                   Permission: <span style={{ 
                     color: isCurrentUser ? 'var(--primary)' : 'inherit',
