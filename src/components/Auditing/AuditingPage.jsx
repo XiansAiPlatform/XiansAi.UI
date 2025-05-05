@@ -50,18 +50,6 @@ const AuditingPage = () => {
         setError(null);
     }, []);
 
-    const handleRefresh = useCallback(() => {
-        if (!selectedAgentName) {
-            showError('Please select an agent first.');
-            return;
-        }
-        
-        // Reset selections to force a refresh
-        setSelectedUserId(null);
-        setSelectedWorkflowId(null);
-        setSelectedWorkflowTypeId(null);
-    }, [selectedAgentName, showError]);
-
     return (
         <Box sx={{
             p: 3,

@@ -29,7 +29,6 @@ const UserAndWorkflowTypeSelector = ({
     const [error, setError] = useState(null);
     const [page, setPage] = useState(0);
     const [pageSize] = useState(20);
-    const [totalPages, setTotalPages] = useState(0);
     const [hasMoreUsers, setHasMoreUsers] = useState(false);
     const [loadingMoreUsers, setLoadingMoreUsers] = useState(false);
     
@@ -55,7 +54,6 @@ const UserAndWorkflowTypeSelector = ({
                 }));
                 
                 setUsers(usersFromParticipants);
-                setTotalPages(response.totalPages);
                 setHasMoreUsers(response.page < response.totalPages - 1);
                 setPage(response.page);
             } catch (err) {

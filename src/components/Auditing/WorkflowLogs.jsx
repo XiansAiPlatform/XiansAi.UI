@@ -5,7 +5,6 @@ import {
     CircularProgress,
     Alert,
     Paper,
-    Button,
     Select,
     MenuItem,
     FormControl,
@@ -14,7 +13,6 @@ import {
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
-import { getRelativeTimeString } from './utils/ConversationUtils';
 
 // Microsoft logging levels
 const LOG_LEVELS = [
@@ -41,7 +39,7 @@ const WorkflowLogs = ({
     
     // Pagination state
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(20);
+    const PAGE_SIZE = 20;
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0);
     
@@ -64,7 +62,7 @@ const WorkflowLogs = ({
                     workflowId: selectedWorkflowId || null,
                     logLevel: selectedLogLevel,
                     page,
-                    pageSize
+                    pageSize: PAGE_SIZE
                 };
                 
                 const result = await auditingApi.getWorkflowLogs(selectedAgentName, options);
@@ -86,7 +84,7 @@ const WorkflowLogs = ({
         };
 
         fetchLogs();
-    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, pageSize, auditingApi, showError]);
+    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError]);
 
     const handlePageChange = (event, newPage) => {
         setPage(newPage);
@@ -292,7 +290,7 @@ const WorkflowLogs = ({
                 
                 {totalCount > 0 && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', color: 'text.secondary', mb: 2, fontSize: '0.875rem' }}>
-                        Showing {Math.min((page - 1) * pageSize + 1, totalCount)} - {Math.min(page * pageSize, totalCount)} of {totalCount} logs
+                        Showing {Math.min((page - 1) * PAGE_SIZE + 1, totalCount)} - {Math.min(page * PAGE_SIZE, totalCount)} of {totalCount} logs
                     </Box>
                 )}
             </Paper>
