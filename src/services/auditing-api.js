@@ -6,33 +6,27 @@ export const useAuditingApi = () => {
 
   return useMemo(() => {
     return {
-      // Keeping for backwards compatibility but it's not used anymore
-      getUsers: async (agentName) => {
+      getParticipants: async (agent, page = null, pageSize = null) => {
         try {
-          const mockUsers = [
-            { id: 'user1', name: 'John Doe' },
-            { id: 'user2', name: 'Jane Smith' },
-            { id: 'user3', name: 'Bob Johnson' }
-          ];
-          return mockUsers;
+          console.log('Fetching participants for agent:', agent);
+          const params = {};
+          if (page !== null) params.page = page;
+          if (pageSize !== null) params.pageSize = pageSize;
+          
+          // Returns a paginated result with: 
+          // { TotalCount, Page, PageSize, TotalPages, Participants: [] }
+          return await apiClient.get(`/api/client/auditing/agents/${agent}/participants`, params);
         } catch (error) {
-          console.error('Error fetching users:', error);
+          console.error('Error fetching participants:', error);
           throw error;
         }
       },
-
-      getThreads: async (agent, page = 0, pageSize = 20) => {
+      
+      getAgents: async () => {
         try {
-          console.log('Fetching threads for agent:', agent, 'page:', page, 'pageSize:', pageSize);
-          const params = { 
-            agent,
-            page,
-            pageSize
-          };
-          
-          return await apiClient.get('/api/client/messaging/threads', params);
+          return await apiClient.get('/api/client/agents/all');
         } catch (error) {
-          console.error('Error fetching threads:', error);
+          console.error('Error fetching agents:', error);
           throw error;
         }
       },
@@ -46,74 +40,57 @@ export const useAuditingApi = () => {
         }
       },
 
-      getWorkflows: async (agentName, workflowType) => {
+      getWorkflowTypes: async (agent, participantId = null) => {
         try {
-          const url = '/api/client/messaging/workflows';
+          const url = `/api/client/auditing/agents/${agent}/workflow-types`;
           const params = {};
           
-          if (agentName) params.agentName = agentName;
-          if (workflowType) params.typeName = workflowType;
+          if (participantId) params.participantId = participantId;
           
-          const response = await apiClient.get(url, params);
-          return response.value;
+          console.log('Fetching workflow types for agent:', agent, 'participant:', participantId);
+          return await apiClient.get(url, params);
         } catch (error) {
-          console.error('Error fetching workflows:', error);
-          throw error;  
-        }
-      },
-
-      getWorkflows: async (userId) => {
-        try {
-          // Mock data - replace with actual API call
-          const mockWorkflows = [
-            { id: 'wf1', name: 'Workflow 1', status: 'running' },
-            { id: 'wf2', name: 'Workflow 2', status: 'completed' },
-            { id: 'wf3', name: 'Workflow 3', status: 'failed' }
-          ];
-          return mockWorkflows;
-
-          // Actual implementation would be:
-          // return await apiClient.get('/api/client/auditing/workflows', { userId });
-        } catch (error) {
-          console.error('Error fetching workflows:', error);
+          console.error('Error fetching workflow types:', error);
           throw error;
         }
       },
 
-      getWorkflowLogs: async (workflowId) => {
+      getWorkflowIds: async (agent, workflowType, participantId = null) => {
         try {
-          // Mock data - replace with actual API call
-          const mockLogs = [
-            {
-              timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-              level: 'INFO',
-              message: 'Workflow started'
-            },
-            {
-              timestamp: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-              level: 'INFO',
-              message: 'Processing step 1'
-            },
-            {
-              timestamp: new Date(Date.now() - 1000 * 60 * 3).toISOString(),
-              level: 'WARNING',
-              message: 'Retrying failed operation'
-            },
-            {
-              timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-              level: 'INFO',
-              message: 'Operation completed successfully'
-            },
-            {
-              timestamp: new Date(Date.now() - 1000 * 60 * 1).toISOString(),
-              level: 'INFO',
-              message: 'Workflow completed'
-            }
-          ];
-          return mockLogs;
+          console.log(`Fetching workflow IDs for agent: ${agent}, workflow type: ${workflowType}, participantId: ${participantId}`);
+          const url = `/api/client/auditing/agents/${agent}/workflow-types/${workflowType}/workflow-ids`;
+          const params = {};
+          
+          if (participantId) params.participantId = participantId;
+          
+          return await apiClient.get(url, params);
+        } catch (error) {
+          console.error('Error fetching workflow IDs:', error);
+          throw error;
+        }
+      },
 
-          // Actual implementation would be:
-          // return await apiClient.get('/api/client/auditing/workflow-logs', { workflowId });
+      getWorkflowLogs: async (agent, options = {}) => {
+        try {
+          const {
+            participantId = null,
+            workflowType = null,
+            workflowId = null,
+            logLevel = null,
+            page = 1,
+            pageSize = 20
+          } = options;
+
+          const params = { agent };
+          
+          if (participantId) params.participantId = participantId;
+          if (workflowType) params.workflowType = workflowType;
+          if (workflowId) params.workflowId = workflowId;
+          if (logLevel !== null && logLevel !== '') params.logLevel = logLevel;
+          params.page = page;
+          params.pageSize = pageSize;
+          
+          return await apiClient.get('/api/client/auditing/logs', params);
         } catch (error) {
           console.error('Error fetching workflow logs:', error);
           throw error;

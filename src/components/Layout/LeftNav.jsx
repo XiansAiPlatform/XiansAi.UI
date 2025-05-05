@@ -33,17 +33,17 @@ const NAV_ITEMS = [
     isSelected: (pathname) => pathname === '/messaging' || pathname.startsWith('/messaging/'),
   },
   {
-    to: '/settings',
-    icon: <SettingsOutlinedIcon />,
-    label: 'Settings',
-    isSelected: (pathname) => pathname === '/settings' || pathname.startsWith('/settings/'),
-  },
-  {
     to: '/auditing',
     icon: <ChecklistOutlinedIcon />,
     label: 'Auditing',
     isSelected: (pathname) => pathname === '/auditing' || pathname.startsWith('/auditing/'),
   },
+  {
+    to: '/settings',
+    icon: <SettingsOutlinedIcon />,
+    label: 'Settings',
+    isSelected: (pathname) => pathname === '/settings' || pathname.startsWith('/settings/'),
+  }
 ];
 
 // Reusable NavItem component

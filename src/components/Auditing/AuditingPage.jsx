@@ -5,12 +5,9 @@ import {
     Alert
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
-import { useSlider } from '../../contexts/SliderContext';
 import { useNotification } from '../../contexts/NotificationContext';
-import WorkflowSelector from './WorkflowSelector';
-import WorkflowActions from './WorkflowActions';
-import RegisterWebhookForm from './RegisterWebhookForm';
-import UserAndWorkflowSelector from './UserAndWorkflowSelector';
+import AgentSelector from './AgentSelector';
+import UserAndWorkflowTypeSelector from './UserAndWorkflowTypeSelector';
 import WorkflowLogs from './WorkflowLogs';
 
 /**
@@ -21,11 +18,11 @@ const AuditingPage = () => {
     const [selectedAgentName, setSelectedAgentName] = useState(null);
     const [selectedUserId, setSelectedUserId] = useState(null);
     const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
+    const [selectedWorkflowTypeId, setSelectedWorkflowTypeId] = useState(null);
     const [error, setError] = useState(null);
     
     // --- Hooks ---
     const auditingApi = useAuditingApi(); 
-    const { openSlider, closeSlider } = useSlider();
     const { showError } = useNotification();
 
     // --- Callbacks --- 
@@ -33,6 +30,7 @@ const AuditingPage = () => {
         setSelectedAgentName(agentName);
         setSelectedUserId(null); // Reset user selection
         setSelectedWorkflowId(null); // Reset workflow selection
+        setSelectedWorkflowTypeId(null); // Reset workflow type selection
         setError(null);
     }, []);
 
@@ -47,6 +45,11 @@ const AuditingPage = () => {
         setError(null);
     }, []);
 
+    const handleWorkflowTypeSelected = useCallback((workflowTypeId) => {
+        setSelectedWorkflowTypeId(workflowTypeId);
+        setError(null);
+    }, []);
+
     const handleRefresh = useCallback(() => {
         if (!selectedAgentName) {
             showError('Please select an agent first.');
@@ -56,25 +59,8 @@ const AuditingPage = () => {
         // Reset selections to force a refresh
         setSelectedUserId(null);
         setSelectedWorkflowId(null);
+        setSelectedWorkflowTypeId(null);
     }, [selectedAgentName, showError]);
-
-    const handleRegisterWebhook = useCallback(() => {
-        if (!selectedWorkflowId) {
-            showError('Please select a workflow first.');
-            return;
-        }
-        
-        openSlider(
-            <RegisterWebhookForm 
-                onClose={closeSlider} 
-                agentName={selectedAgentName}
-                workflowId={selectedWorkflowId}
-            />,
-            `Register Webhook`
-        );
-    }, [selectedAgentName, selectedWorkflowId, openSlider, closeSlider, showError]);
-
-    // --- Render --- 
 
     return (
         <Box sx={{
@@ -90,32 +76,29 @@ const AuditingPage = () => {
             {/* Display top-level error if any */} 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            <WorkflowSelector
+            <AgentSelector
                 auditingApi={auditingApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
             />
 
             {selectedAgentName && (
-                <UserAndWorkflowSelector
+                <UserAndWorkflowTypeSelector
                     selectedAgentName={selectedAgentName}
                     selectedUserId={selectedUserId}
                     selectedWorkflowId={selectedWorkflowId}
+                    selectedWorkflowTypeId={selectedWorkflowTypeId}
                     onUserSelected={handleUserSelected}
                     onWorkflowSelected={handleWorkflowSelected}
+                    onWorkflowTypeSelected={handleWorkflowTypeSelected}
                 />
             )}
-
-            <WorkflowActions
-                selectedAgentName={selectedAgentName}
-                onRegisterWebhook={handleRegisterWebhook}
-                onRefresh={handleRefresh}
-            />
 
             <WorkflowLogs
                 selectedAgentName={selectedAgentName}
                 selectedUserId={selectedUserId}
                 selectedWorkflowId={selectedWorkflowId}
+                selectedWorkflowTypeId={selectedWorkflowTypeId}
             />
         </Box>
     );
