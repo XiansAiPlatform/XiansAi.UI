@@ -179,8 +179,6 @@ const WorkflowLogs = ({
                     display: 'flex', 
                     flexDirection: 'column', 
                     gap: 2,
-                    maxHeight: '60vh',
-                    overflow: 'auto',
                     p: 2,
                     '& .log-entry': {
                         p: 2,
