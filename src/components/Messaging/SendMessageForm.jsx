@@ -62,7 +62,7 @@ const SendMessageForm = ({
             setIsLoadingTypes(true);
             setError(null);
             try {
-                const response = await messagingApi.getAgents();
+                const response = await messagingApi.getAgentsAndTypes();
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
                     .filter(wf => wf.agent === agentName)
