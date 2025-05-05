@@ -47,9 +47,7 @@ const UserAndWorkflowTypeSelector = ({
             setIsLoadingUsers(true);
             setError(null);
             try {
-                const response = await auditingApi.getParticipants(selectedAgentName, 0, pageSize);
-                console.log('response', response);
-                
+                const response = await auditingApi.getParticipants(selectedAgentName, 0, pageSize);    
                 // Map string participants to users format
                 const usersFromParticipants = response.participants.map((participantName, index) => ({
                     id: participantName, // Use the participant name as the ID
@@ -84,8 +82,6 @@ const UserAndWorkflowTypeSelector = ({
             try {
                 // Fetch workflow types with or without participantId
                 const types = await auditingApi.getWorkflowTypes(selectedAgentName, selectedUserId);
-                console.log('types', types);
-                
                 // Transform string array into objects with id and name properties
                 const formattedTypes = Array.isArray(types) ? types.map(type => ({
                     id: type,
@@ -119,9 +115,7 @@ const UserAndWorkflowTypeSelector = ({
                     selectedAgentName, 
                     selectedWorkflowTypeId, 
                     selectedUserId
-                );
-                console.log('workflowsData', workflowsData);
-                
+                ); 
                 // Transform string array into objects with id and name properties
                 const formattedWorkflows = Array.isArray(workflowsData) ? workflowsData.map(workflowId => ({
                     id: workflowId,

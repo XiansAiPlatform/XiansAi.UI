@@ -68,9 +68,7 @@ const WorkflowLogs = ({
                 };
                 
                 const result = await auditingApi.getWorkflowLogs(selectedAgentName, options);
-
-                console.log('result logs', result);
-                
+        
                 setLogs(result.logs);
                 setTotalCount(result.totalCount);
                 setTotalPages(result.totalPages);
