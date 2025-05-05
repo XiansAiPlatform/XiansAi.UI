@@ -15,37 +15,38 @@ import {
   TableRow
 } from '@mui/material';
 import { useSlider } from '../../contexts/SliderContext';
-import { useInstructionsApi } from '../../services/instructions-api';
-import InstructionViewer from '../Instructions/InstructionViewer';
+import { useKnowledgeApi } from '../../services/knowledge-api';
+import KnowledgeViewer from '../Knowledge/KnowledgeViewer';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
 
-const DefinitionActivities = ({ activities }) => {
+const DefinitionActivities = ({ activities, agentName }) => {
   const { openSlider } = useSlider();
-  const instructionsApi = useInstructionsApi();
+  const knowledgeApi = useKnowledgeApi();
   const [viewMode, setViewMode] = React.useState('card');
 
   const formatText = (text) => {
     return text.replace(/([A-Z])/g, ' $1').trim();
   };
 
-  const handleInstructionClick = async (instructionName) => {
+  const handleInstructionClick = async (knowledgeName, activity) => {
     try {
-      const instruction = await instructionsApi.getInstructionByName(instructionName);
-      showInstruction(instruction);
+      const agent = agentName;
+      const knowledge = await knowledgeApi.getKnowledgeByName(knowledgeName, agent);
+      showKnowledge(knowledge);
     } catch (error) {
-      console.error('Error fetching instruction by name:', error);
+      console.error('Error fetching knowledge by name:', error);
     }
   };
 
-  const showInstruction = (instruction) => {
-    const instructionsContent = (
-      <InstructionViewer
-        instruction={instruction}
+  const showKnowledge = (knowledge) => {
+    const knowledgeContent = (
+      <KnowledgeViewer
+        knowledge={knowledge}
         hideActions={true}
       />
     );
-    openSlider(instructionsContent, instruction.name);
+    openSlider(knowledgeContent, knowledge.name);
   };
 
   const handleViewChange = (event, newView) => {
@@ -136,7 +137,7 @@ const DefinitionActivities = ({ activities }) => {
                   <Chip
                     key={idx}
                     label={instruction}
-                    onClick={() => handleInstructionClick(instruction)}
+                    onClick={() => handleInstructionClick(instruction, activity)}
                     sx={{
                       m: 0.5,
                       backgroundColor: 'var(--primary-light)',
@@ -241,7 +242,7 @@ const DefinitionActivities = ({ activities }) => {
                     <Chip
                       key={idx}
                       label={instruction}
-                      onClick={() => handleInstructionClick(instruction)}
+                      onClick={() => handleInstructionClick(instruction, activity)}
                       sx={{
                         m: 0.5,
                         backgroundColor: 'var(--primary-light)',

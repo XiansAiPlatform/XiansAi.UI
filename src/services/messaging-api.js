@@ -36,16 +36,25 @@ export const useMessagingApi = () => {
 
       getAgentsAndTypes: async () => {
         try {
-          return await apiClient.get('/api/client/messaging/agents');
+          return await apiClient.get('/api/client/workflows/all');
         } catch (error) {
           console.error('Error fetching agents and types:', error);
           throw error;
         }
       },
 
+      getAgents: async () => {
+        try {
+          return await apiClient.get('/api/client/agents/all');
+        } catch (error) {
+          console.error('Error fetching agents:', error);
+          throw error;
+        }
+      },
+
       getWorkflows: async (agentName, workflowType) => {
         try {
-          const url = '/api/client/messaging/workflows';
+          const url = '/api/client/agents/workflows';
           const params = {};
           
           if (agentName) params.agentName = agentName;

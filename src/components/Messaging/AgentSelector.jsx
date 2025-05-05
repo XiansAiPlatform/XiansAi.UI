@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Grid,
     TextField,
@@ -14,38 +14,32 @@ const WorkflowSelector = ({
     showError,
     onAgentSelected
 }) => {
-    const [allWorkflows, setAllWorkflows] = useState([]);
-    const [isLoadingWorkflows, setIsLoadingWorkflows] = useState(true);
+    const [agentNames, setAgentNames] = useState([]);
+    const [isLoadingAgents, setIsLoadingAgents] = useState(true);
     const [selectedAgentName, setSelectedAgentName] = useState('');
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchWorkflows = async () => {
-            setIsLoadingWorkflows(true);
+        const fetchAgents = async () => {
+            setIsLoadingAgents(true);
             setError(null);
-            setAllWorkflows([]);
+            setAgentNames([]);
             setSelectedAgentName('');
             onAgentSelected(null);
             try {
-                const response = await messagingApi.getAgentsAndTypes();
-                const workflows = response.data || (response || []);
-                setAllWorkflows(Array.isArray(workflows) ? workflows : []);
+                const response = await messagingApi.getAgents();
+                setAgentNames(Array.isArray(response) ? response : []);
             } catch (err) {
-                const errorMsg = 'Failed to fetch agent/workflow types.';
+                const errorMsg = 'Failed to fetch agents.';
                 setError(errorMsg);
                 showError(`${errorMsg}: ${err.message}`);
                 console.error(err);
             } finally {
-                setIsLoadingWorkflows(false);
+                setIsLoadingAgents(false);
             }
         };
-        fetchWorkflows();
+        fetchAgents();
     }, [messagingApi, showError, onAgentSelected]);
-
-    const agentNames = useMemo(() =>
-        [...new Set(allWorkflows.map(wf => wf.agent))].filter(Boolean),
-        [allWorkflows]
-    );
 
     const handleAgentChange = (newValue) => {
         const newAgentName = newValue || '';
@@ -88,14 +82,14 @@ const WorkflowSelector = ({
                                     ...params.InputProps,
                                     endAdornment: (
                                         <>
-                                            {isLoadingWorkflows && <CircularProgress size={20} />}
+                                            {isLoadingAgents && <CircularProgress size={20} />}
                                             {params.InputProps.endAdornment}
                                         </>
                                     ),
                                 }}
                             />
                         )}
-                        disabled={isLoadingWorkflows || agentNames.length === 0}
+                        disabled={isLoadingAgents || agentNames.length === 0}
                         fullWidth
                     />
                 </Grid>

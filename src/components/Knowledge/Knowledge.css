@@ -1,0 +1,50 @@
+:root {
+  --tag-background: transparent;
+  --tag-text: var(--text-secondary);
+  --tag-border: var(--border-color);
+}
+
+.knowledge-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  will-change: contents;
+}
+
+.knowledge-grid.has-expanded {
+  display: flex;
+  flex-direction: column;
+}
+
+.knowledge-item-expanded {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.instruction-card {
+  padding: 16px;
+  transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
+  will-change: transform, box-shadow;
+}
+
+.instruction-card:hover {
+  transform: translateY(-2px);
+}
+
+.instruction-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.card-header {
+  min-height: 48px;
+}
+
+.type-chip, .agent-chip {
+  text-transform: capitalize;
+  font-size: 0.7rem;
+  height: 22px;
+} 

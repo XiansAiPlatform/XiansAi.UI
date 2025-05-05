@@ -6,8 +6,8 @@ import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
 import { useSlider } from '../../../contexts/SliderContext';
 import { useActivitiesApi } from '../../../services/activities-api';
-import { useInstructionsApi } from '../../../services/instructions-api';
-import InstructionViewer from '../../Instructions/InstructionViewer';
+import { useKnowledgeApi } from '../../../services/knowledge-api';
+import KnowledgeViewer from '../../Knowledge/KnowledgeViewer';
 import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useLoading } from '../../../contexts/LoadingContext';
@@ -95,10 +95,10 @@ const NoInstructionsBox = styled(Box)(({ theme }) => ({
 
 const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlighted, workflowId, isMobile }) => {
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [instructions, setInstructions] = React.useState([]);
+  const [knowledgeItems, setKnowledgeItems] = React.useState([]);
   const { openSlider } = useSlider();
   const activitiesApi = useActivitiesApi();
-  const instructionsApi = useInstructionsApi();
+  const knowledgeApi = useKnowledgeApi();
   const { setLoading } = useLoading();
 
   // Helper function to format timestamp
@@ -123,38 +123,38 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
         event.ActivityId
       );
 
-      const instructionIds = activity?.instructionIds || [];
-      if (instructionIds.length === 0) {
-        setInstructions([]);
+      const knowledgeIds = activity?.knowledgeIds || [];
+      if (knowledgeIds.length === 0) {
+        setKnowledgeItems([]);
         setIsDialogOpen(true);
-      } else if (instructionIds.length === 1) {
-        const instruction = await instructionsApi.getInstruction(instructionIds[0]);
-        showInstruction(instruction);
+      } else if (knowledgeIds.length === 1) {
+        const knowledge = await knowledgeApi.getKnowledge(knowledgeIds[0]);
+        showKnowledge(knowledge);
       } else {
-        const instructionPromises = instructionIds.map(id => 
-          instructionsApi.getInstruction(id)
+        const knowledgePromises = knowledgeIds.map(id => 
+          knowledgeApi.getKnowledge(id)
         );
-        const fetchedInstructions = await Promise.all(instructionPromises);
-        setInstructions(fetchedInstructions);
+        const fetchedKnowledge = await Promise.all(knowledgePromises);
+        setKnowledgeItems(fetchedKnowledge);
         setIsDialogOpen(true);
       }
     } catch (error) {
-      console.error('Error fetching instructions:', error);
-      setInstructions([]);
+      console.error('Error fetching knowledge:', error);
+      setKnowledgeItems([]);
       setIsDialogOpen(true);
     } finally {
       setLoading(false);
     }
   };
 
-  const showInstruction = (instruction) => {
-    const instructionsContent = (
-      <InstructionViewer
-        instruction={instruction}
+  const showKnowledge = (knowledge) => {
+    const knowledgeContent = (
+      <KnowledgeViewer
+        knowledge={knowledge}
         hideActions={true}
       />
     );
-    openSlider(instructionsContent, instruction.name);
+    openSlider(knowledgeContent, knowledge.name);
     setIsDialogOpen(false);
   };
 
@@ -376,7 +376,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
         fullWidth
       >
         <ModernDialogTitle>
-          Instructions
+          Knowledge
           <IconButton
             aria-label="close"
             onClick={() => setIsDialogOpen(false)}
@@ -390,17 +390,17 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
           </IconButton>
         </ModernDialogTitle>
         <ModernDialogContent>
-          {instructions.length > 0 ? (
+          {knowledgeItems.length > 0 ? (
             <List>
-              {instructions.map((instruction) => (
+              {knowledgeItems.map((knowledge) => (
                 <ModernListItem 
                   button 
-                  key={instruction.id} 
-                  onClick={() => showInstruction(instruction)}
+                  key={knowledge.id} 
+                  onClick={() => showKnowledge(knowledge)}
                 >
                   <ListItemText 
-                    primary={instruction.name} 
-                    secondary={instruction.description}
+                    primary={knowledge.name} 
+                    secondary={knowledge.description}
                     primaryTypographyProps={{
                       fontWeight: 500,
                       fontSize: isMobile ? '0.875rem' : '1rem'
@@ -414,7 +414,7 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
             </List>
           ) : (
             <NoInstructionsBox>
-              <Typography variant="body1">No instructions available</Typography>
+              <Typography variant="body1">No knowledge items available</Typography>
             </NoInstructionsBox>
           )}
         </ModernDialogContent>
