@@ -164,116 +164,123 @@ const UserAndWorkflowTypeSelector = ({
     };
 
     return (
-        <Box sx={{ mb: 3 }}>
+        <Box>
             <Typography variant="h6" gutterBottom>
                 Select User and Workflow
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
-                <Box sx={{ width: '100%' }}>
-                    <Autocomplete
-                        id="user-select"
-                        options={users}
-                        value={users.find(user => user.id === selectedUserId) || null}
-                        onChange={(event, newValue) => onUserSelected(newValue?.id || null)}
-                        getOptionLabel={(option) => option.name}
-                        renderOption={(props, option) => (
-                            <li {...props} key={option.id}>
-                                {option.name}
-                            </li>
+                {/* All three selectors in the same row */}
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Box sx={{ flex: 3 }}>
+                        <Autocomplete
+                            id="user-select"
+                            options={users}
+                            value={users.find(user => user.id === selectedUserId) || null}
+                            onChange={(event, newValue) => onUserSelected(newValue?.id || null)}
+                            getOptionLabel={(option) => option.name}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                    {option.name}
+                                </li>
+                            )}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Select User (Optional)"
+                                    variant="outlined"
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {isLoadingUsers && <CircularProgress size={20} />}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
+                            disabled={!selectedAgentName || isLoadingUsers}
+                            fullWidth
+                        />
+                        {hasMoreUsers && (
+                            <Button
+                                size="small"
+                                onClick={handleLoadMoreUsers}
+                                disabled={loadingMoreUsers}
+                                sx={{ mt: 1, textTransform: 'none' }}
+                            >
+                                {loadingMoreUsers ? <CircularProgress size={16} /> : "Load more users"}
+                            </Button>
                         )}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="Select User (Optional)"
-                                variant="outlined"
-                                InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                        <>
-                                            {isLoadingUsers && <CircularProgress size={20} />}
-                                            {params.InputProps.endAdornment}
-                                        </>
-                                    ),
-                                }}
-                            />
-                        )}
-                        disabled={!selectedAgentName || isLoadingUsers}
-                        fullWidth
-                    />
-                    {hasMoreUsers && (
-                        <Button
-                            size="small"
-                            onClick={handleLoadMoreUsers}
-                            disabled={loadingMoreUsers}
-                            sx={{ mt: 1, textTransform: 'none' }}
-                        >
-                            {loadingMoreUsers ? <CircularProgress size={16} /> : "Load more users"}
-                        </Button>
-                    )}
+                    </Box>
+
+                    <Box sx={{ flex: 3 }}>
+                        <Autocomplete
+                            id="workflow-type-select"
+                            options={workflowTypes}
+                            value={workflowTypes.find(wt => wt.id === selectedWorkflowTypeId) || null}
+                            onChange={(event, newValue) => onWorkflowTypeSelected(newValue?.id || null)}
+                            getOptionLabel={(option) => option.name || option.id}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                    {option.name || option.id}
+                                </li>
+                            )}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Select Workflow Type"
+                                    variant="outlined"
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {isLoadingWorkflowTypes && <CircularProgress size={20} />}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
+                            disabled={!selectedUserId || isLoadingWorkflowTypes}
+                            fullWidth
+                        />
+                    </Box>
+                    
+                    <Box sx={{ flex: 6 }}>
+                        <Autocomplete
+                            id="workflow-select"
+                            options={workflows}
+                            value={workflows.find(wf => wf.id === selectedWorkflowId) || null}
+                            onChange={(event, newValue) => onWorkflowSelected(newValue?.id || null)}
+                            getOptionLabel={(option) => option.name || 'Unknown'}
+                            renderOption={(props, option) => (
+                                <li {...props} key={option.id}>
+                                    {option.name || 'Unknown'}
+                                </li>
+                            )}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Select Workflow"
+                                    variant="outlined"
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {isLoadingWorkflows && <CircularProgress size={20} />}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
+                            disabled={!selectedWorkflowTypeId || isLoadingWorkflows}
+                            fullWidth
+                        />
+                    </Box>
                 </Box>
-
-                <Autocomplete
-                    id="workflow-type-select"
-                    options={workflowTypes}
-                    value={workflowTypes.find(wt => wt.id === selectedWorkflowTypeId) || null}
-                    onChange={(event, newValue) => onWorkflowTypeSelected(newValue?.id || null)}
-                    getOptionLabel={(option) => option.name || option.id}
-                    renderOption={(props, option) => (
-                        <li {...props} key={option.id}>
-                            {option.name || option.id}
-                        </li>
-                    )}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label="Select Workflow Type"
-                            variant="outlined"
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {isLoadingWorkflowTypes && <CircularProgress size={20} />}
-                                        {params.InputProps.endAdornment}
-                                    </>
-                                ),
-                            }}
-                        />
-                    )}
-                    disabled={!selectedUserId || isLoadingWorkflowTypes}
-                    fullWidth
-                />
-
-                <Autocomplete
-                    id="workflow-select"
-                    options={workflows}
-                    value={workflows.find(wf => wf.id === selectedWorkflowId) || null}
-                    onChange={(event, newValue) => onWorkflowSelected(newValue?.id || null)}
-                    getOptionLabel={(option) => option.name || 'Unknown'}
-                    renderOption={(props, option) => (
-                        <li {...props} key={option.id}>
-                            {option.name || 'Unknown'}
-                        </li>
-                    )}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            label="Select Workflow"
-                            variant="outlined"
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {isLoadingWorkflows && <CircularProgress size={20} />}
-                                        {params.InputProps.endAdornment}
-                                    </>
-                                ),
-                            }}
-                        />
-                    )}
-                    disabled={!selectedWorkflowTypeId || isLoadingWorkflows}
-                    fullWidth
-                />
             </Box>
 
             {error && (
