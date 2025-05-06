@@ -7,7 +7,7 @@ import {
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
 import AgentSelector from './AgentSelector';
-import UserAndWorkflowTypeSelector from './UserAndWorkflowTypeSelector';
+import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
 
 /**
@@ -71,7 +71,7 @@ const AuditingPage = () => {
             />
 
             {selectedAgentName && (
-                <UserAndWorkflowTypeSelector
+                <WorkflowSelector
                     selectedAgentName={selectedAgentName}
                     selectedUserId={selectedUserId}
                     selectedWorkflowId={selectedWorkflowId}
