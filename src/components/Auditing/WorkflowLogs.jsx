@@ -231,6 +231,27 @@ const WorkflowLogs = ({
                         p: 1,
                         borderRadius: 1,
                         mt: 1
+                    },
+                    '& .log-metadata': {
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 1,
+                        mt: 1,
+                        pt: 1,
+                        borderTop: '1px solid rgba(0, 0, 0, 0.12)',
+                        '& .metadata-item': {
+                            fontSize: '0.75rem',
+                            backgroundColor: 'rgba(0, 0, 0, 0.06)',
+                            padding: '2px 6px',
+                            borderRadius: 1,
+                            color: 'text.secondary',
+                            display: 'flex',
+                            alignItems: 'center',
+                            '& .label': {
+                                fontWeight: 500,
+                                marginRight: '4px'
+                            }
+                        }
                     }
                 }}>
                     {logs.length > 0 ? (
@@ -263,6 +284,26 @@ const WorkflowLogs = ({
                                             {log.exception}
                                         </Box>
                                     )}
+                                    <Box className="log-metadata">
+                                        {log.workflowType && (
+                                            <Box className="metadata-item">
+                                                <span className="label">Type:</span>
+                                                {log.workflowType}
+                                            </Box>
+                                        )}
+                                        {log.workflowId && (
+                                            <Box className="metadata-item">
+                                                <span className="label">ID:</span>
+                                                {log.workflowId}
+                                            </Box>
+                                        )}
+                                        {log.workflowRunId && (
+                                            <Box className="metadata-item">
+                                                <span className="label">Run ID:</span>
+                                                {log.workflowRunId}
+                                            </Box>
+                                        )}
+                                    </Box>
                                 </Box>
                             );
                         })
