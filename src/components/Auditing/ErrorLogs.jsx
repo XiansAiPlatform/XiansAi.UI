@@ -11,10 +11,15 @@ import {
     Chip,
     ToggleButtonGroup,
     ToggleButton,
-    Stack
+    Stack,
+    IconButton,
+    Tooltip,
+    Switch,
+    FormControlLabel
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -25,6 +30,7 @@ const ErrorLogs = () => {
     const [expandedAgents, setExpandedAgents] = useState({});
     const [expandedTypes, setExpandedTypes] = useState({});
     const [timeFilter, setTimeFilter] = useState('24hours');
+    const [autoRefresh, setAutoRefresh] = useState(false);
     
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
@@ -76,24 +82,35 @@ const ErrorLogs = () => {
         }));
     };
 
+    const fetchErrorLogs = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const { startTime, endTime } = getTimeRange();
+            const result = await auditingApi.getErrorLogs(startTime, endTime);
+            setErrorLogs(result);
+        } catch (err) {
+            setError('Failed to fetch error logs');
+            showError(`Error fetching error logs: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [auditingApi, showError, getTimeRange]);
+
     useEffect(() => {
-        const fetchErrorLogs = async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const { startTime, endTime } = getTimeRange();
-                const result = await auditingApi.getErrorLogs(startTime, endTime);
-                setErrorLogs(result);
-            } catch (err) {
-                setError('Failed to fetch error logs');
-                showError(`Error fetching error logs: ${err.message}`);
-            } finally {
-                setIsLoading(false);
+        fetchErrorLogs();
+
+        let intervalId;
+        if (autoRefresh) {
+            intervalId = setInterval(fetchErrorLogs, 30000); // Refresh every 30 seconds
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
             }
         };
-
-        fetchErrorLogs();
-    }, [auditingApi, showError, timeFilter, getTimeRange]);
+    }, [fetchErrorLogs, autoRefresh]);
 
     if (isLoading) {
         return (
@@ -125,7 +142,26 @@ const ErrorLogs = () => {
                     <Typography variant="h6">
                         Recent Error Logs Across All Agents
                     </Typography>
-                    <Stack direction="row" spacing={2}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={autoRefresh}
+                                    onChange={(e) => setAutoRefresh(e.target.checked)}
+                                    size="small"
+                                />
+                            }
+                            label="Auto-refresh"
+                        />
+                        <Tooltip title="Refresh logs">
+                            <IconButton 
+                                onClick={fetchErrorLogs} 
+                                disabled={isLoading}
+                                size="small"
+                            >
+                                <RefreshIcon />
+                            </IconButton>
+                        </Tooltip>
                         <ToggleButtonGroup
                             value={timeFilter}
                             exclusive
@@ -171,7 +207,26 @@ const ErrorLogs = () => {
                 <Typography variant="h6">
                     Recent Error Logs Across All Agents
                 </Typography>
-                <Stack direction="row" spacing={2}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={autoRefresh}
+                                onChange={(e) => setAutoRefresh(e.target.checked)}
+                                size="small"
+                            />
+                        }
+                        label="Auto-refresh"
+                    />
+                    <Tooltip title="Refresh logs">
+                        <IconButton 
+                            onClick={fetchErrorLogs} 
+                            disabled={isLoading}
+                            size="small"
+                        >
+                            <RefreshIcon />
+                        </IconButton>
+                    </Tooltip>
                     <ToggleButtonGroup
                         value={timeFilter}
                         exclusive

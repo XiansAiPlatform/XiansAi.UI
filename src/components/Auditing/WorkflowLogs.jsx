@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Typography,
@@ -9,8 +9,14 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
-    Pagination
+    Pagination,
+    IconButton,
+    Tooltip,
+    Switch,
+    FormControlLabel,
+    Stack
 } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -36,6 +42,7 @@ const WorkflowLogs = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedLogLevel, setSelectedLogLevel] = useState('');
+    const [autoRefresh, setAutoRefresh] = useState(false);
     
     // Pagination state
     const [page, setPage] = useState(1);
@@ -46,45 +53,56 @@ const WorkflowLogs = ({
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
 
-    useEffect(() => {
+    const fetchLogs = useCallback(async () => {
         if (!selectedAgentName) {
             setLogs([]);
             return;
         }
 
-        const fetchLogs = async () => {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const options = {
-                    participantId: selectedUserId || null,
-                    workflowType: selectedWorkflowTypeId || null,
-                    workflowId: selectedWorkflowId || null,
-                    logLevel: selectedLogLevel,
-                    page,
-                    pageSize: PAGE_SIZE
-                };
-                
-                const result = await auditingApi.getWorkflowLogs(selectedAgentName, options);
-        
-                setLogs(result.logs);
-                setTotalCount(result.totalCount);
-                setTotalPages(result.totalPages);
-                
-                // Reset page if it's out of bounds
-                if (page > result.totalPages && result.totalPages > 0) {
-                    setPage(1);
-                }
-            } catch (err) {
-                setError('Failed to fetch logs');
-                showError(`Error fetching logs: ${err.message}`);
-            } finally {
-                setIsLoading(false);
+        setIsLoading(true);
+        setError(null);
+        try {
+            const options = {
+                participantId: selectedUserId || null,
+                workflowType: selectedWorkflowTypeId || null,
+                workflowId: selectedWorkflowId || null,
+                logLevel: selectedLogLevel,
+                page,
+                pageSize: PAGE_SIZE
+            };
+            
+            const result = await auditingApi.getWorkflowLogs(selectedAgentName, options);
+    
+            setLogs(result.logs);
+            setTotalCount(result.totalCount);
+            setTotalPages(result.totalPages);
+            
+            // Reset page if it's out of bounds
+            if (page > result.totalPages && result.totalPages > 0) {
+                setPage(1);
+            }
+        } catch (err) {
+            setError('Failed to fetch logs');
+            showError(`Error fetching logs: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError]);
+
+    useEffect(() => {
+        fetchLogs();
+
+        let intervalId;
+        if (autoRefresh) {
+            intervalId = setInterval(fetchLogs, 30000); // Refresh every 30 seconds
+        }
+
+        return () => {
+            if (intervalId) {
+                clearInterval(intervalId);
             }
         };
-
-        fetchLogs();
-    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError]);
+    }, [fetchLogs, autoRefresh]);
 
     const handlePageChange = (event, newPage) => {
         setPage(newPage);
@@ -155,23 +173,44 @@ const WorkflowLogs = ({
                 <Typography variant="h6">
                     Workflow Logs {totalCount > 0 && `(${totalCount})`}
                 </Typography>
-                <FormControl size="small" sx={{ minWidth: 150 }}>
-                    <InputLabel>Log Level</InputLabel>
-                    <Select
-                        value={selectedLogLevel}
-                        label="Log Level"
-                        onChange={(e) => {
-                            setSelectedLogLevel(e.target.value);
-                            setPage(1); // Reset to first page on filter change
-                        }}
-                    >
-                        {LOG_LEVELS.map((level) => (
-                            <MenuItem key={level.value} value={level.value}>
-                                {level.label}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={autoRefresh}
+                                onChange={(e) => setAutoRefresh(e.target.checked)}
+                                size="small"
+                            />
+                        }
+                        label="Auto-refresh"
+                    />
+                    <Tooltip title="Refresh logs">
+                        <IconButton 
+                            onClick={fetchLogs} 
+                            disabled={isLoading}
+                            size="small"
+                        >
+                            <RefreshIcon />
+                        </IconButton>
+                    </Tooltip>
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Log Level</InputLabel>
+                        <Select
+                            value={selectedLogLevel}
+                            label="Log Level"
+                            onChange={(e) => {
+                                setSelectedLogLevel(e.target.value);
+                                setPage(1); // Reset to first page on filter change
+                            }}
+                        >
+                            {LOG_LEVELS.map((level) => (
+                                <MenuItem key={level.value} value={level.value}>
+                                    {level.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Stack>
             </Box>
             
             <Paper sx={{ p: 0 }} elevation={1}>
