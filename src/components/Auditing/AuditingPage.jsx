@@ -2,13 +2,15 @@ import React, { useState, useCallback } from 'react';
 import {
     Box,
     Typography,
-    Alert
+    Alert,
+    Divider
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
 import AgentSelector from './AgentSelector';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
+import ErrorLogs from './ErrorLogs';
 
 /**
  * Parent component that coordinates messaging components and manages shared state
@@ -63,6 +65,15 @@ const AuditingPage = () => {
 
             {/* Display top-level error if any */} 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+            {/* Error Logs Section */}
+            <ErrorLogs />
+            
+            <Divider sx={{ my: 4 }} />
+            
+            <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
+                Workflow Log Explorer
+            </Typography>
 
             <AgentSelector
                 auditingApi={auditingApi}

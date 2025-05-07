@@ -95,6 +95,19 @@ export const useAuditingApi = () => {
           console.error('Error fetching workflow logs:', error);
           throw error;
         }
+      },
+
+      getErrorLogs: async (startTime = null, endTime = null) => {
+        try {
+          const params = {};
+          if (startTime) params.startTime = startTime.toISOString();
+          if (endTime) params.endTime = endTime.toISOString();
+          
+          return await apiClient.get('/api/client/auditing/error-logs', params);
+        } catch (error) {
+          console.error('Error fetching error logs:', error);
+          throw error;
+        }
       }
     };
   }, [apiClient]);
