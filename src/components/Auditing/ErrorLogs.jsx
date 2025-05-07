@@ -19,9 +19,25 @@ const ErrorLogs = () => {
     const [errorLogs, setErrorLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [expandedAgents, setExpandedAgents] = useState({});
+    const [expandedTypes, setExpandedTypes] = useState({});
     
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
+
+    const handleAgentChange = (agentIndex) => (event, isExpanded) => {
+        setExpandedAgents(prev => ({
+            ...prev,
+            [agentIndex]: isExpanded
+        }));
+    };
+
+    const handleTypeChange = (agentIndex, typeIndex) => (event, isExpanded) => {
+        setExpandedTypes(prev => ({
+            ...prev,
+            [`${agentIndex}-${typeIndex}`]: isExpanded
+        }));
+    };
 
     useEffect(() => {
         const fetchErrorLogs = async () => {
@@ -72,22 +88,56 @@ const ErrorLogs = () => {
             </Typography>
             
             {errorLogs.map((agentGroup, agentIndex) => (
-                <Accordion key={`agent-${agentIndex}`} defaultExpanded sx={{ mb: 2 }}>
+                <Accordion 
+                    key={`agent-${agentIndex}`} 
+                    expanded={expandedAgents[agentIndex] || false}
+                    sx={{ mb: 2 }}
+                    onChange={handleAgentChange(agentIndex)}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography variant="subtitle1" fontWeight="bold">
-                            {agentGroup.agentName}
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="subtitle1" fontWeight="bold">
+                                {agentGroup.agentName}
+                            </Typography>
+                            {!expandedAgents[agentIndex] && (
+                                <Chip 
+                                    size="small" 
+                                    color="error" 
+                                    label={`${agentGroup.workflowTypes.reduce((total, type) => 
+                                        total + type.workflows.reduce((workflowTotal, workflow) => 
+                                            workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => 
+                                                runTotal + run.errorLogs.length, 0), 0), 0)} Error(s)`}
+                                    icon={<ErrorOutlineIcon />}
+                                    sx={{ ml: 2 }}
+                                />
+                            )}
+                        </Box>
                     </AccordionSummary>
                     <AccordionDetails>
                         {agentGroup.workflowTypes.map((workflowTypeGroup, typeIndex) => (
                             <Accordion 
                                 key={`type-${agentIndex}-${typeIndex}`} 
+                                expanded={expandedTypes[`${agentIndex}-${typeIndex}`] || false}
                                 sx={{ mb: 2, backgroundColor: 'background.paper' }}
+                                onChange={handleTypeChange(agentIndex, typeIndex)}
                             >
                                 <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                                    <Typography variant="subtitle2">
-                                        {workflowTypeGroup.workflowTypeName}
-                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Typography variant="subtitle2">
+                                            {workflowTypeGroup.workflowTypeName}
+                                        </Typography>
+                                        {!expandedTypes[`${agentIndex}-${typeIndex}`] && (
+                                            <Chip 
+                                                size="small" 
+                                                color="error" 
+                                                label={`${workflowTypeGroup.workflows.reduce((total, workflow) => 
+                                                    total + workflow.workflowRuns.reduce((runTotal, run) => 
+                                                        runTotal + run.errorLogs.length, 0), 0)} Error(s)`}
+                                                icon={<ErrorOutlineIcon />}
+                                                sx={{ ml: 2 }}
+                                            />
+                                        )}
+                                    </Box>
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     {workflowTypeGroup.workflows.map((workflowGroup, workflowIndex) => (
