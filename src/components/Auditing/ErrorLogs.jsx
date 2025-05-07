@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Typography,
@@ -35,7 +35,7 @@ const ErrorLogs = () => {
         }
     };
 
-    const getTimeRange = () => {
+    const getTimeRange = useCallback(() => {
         const now = new Date();
         let startTime = new Date();
 
@@ -60,7 +60,7 @@ const ErrorLogs = () => {
             startTime: startTime.toISOString(),
             endTime: now.toISOString()
         };
-    };
+    }, [timeFilter]);
 
     const handleAgentChange = (agentIndex) => (event, isExpanded) => {
         setExpandedAgents(prev => ({
@@ -93,7 +93,7 @@ const ErrorLogs = () => {
         };
 
         fetchErrorLogs();
-    }, [auditingApi, showError, timeFilter]);
+    }, [auditingApi, showError, timeFilter, getTimeRange]);
 
     if (isLoading) {
         return (
