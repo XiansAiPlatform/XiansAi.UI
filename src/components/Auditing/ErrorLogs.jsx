@@ -103,7 +103,7 @@ const ErrorLogs = () => {
                                                     <Chip 
                                                         size="small" 
                                                         color="error" 
-                                                        label={`${workflowGroup.workflowRuns.length} Error(s)`}
+                                                        label={`${workflowGroup.workflowRuns.reduce((total, run) => total + run.errorLogs.length, 0)} Error(s)`}
                                                         icon={<ErrorOutlineIcon />}
                                                         sx={{ ml: 2 }}
                                                     />
