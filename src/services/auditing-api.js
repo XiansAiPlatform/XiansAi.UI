@@ -100,8 +100,8 @@ export const useAuditingApi = () => {
       getErrorLogs: async (startTime = null, endTime = null) => {
         try {
           const params = {};
-          if (startTime) params.startTime = startTime.toISOString();
-          if (endTime) params.endTime = endTime.toISOString();
+          if (startTime) params.startTime = startTime;
+          if (endTime) params.endTime = endTime;
           
           return await apiClient.get('/api/client/auditing/error-logs', params);
         } catch (error) {

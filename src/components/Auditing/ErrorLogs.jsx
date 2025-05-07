@@ -8,7 +8,10 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Chip
+    Chip,
+    ToggleButtonGroup,
+    ToggleButton,
+    Stack
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -21,9 +24,43 @@ const ErrorLogs = () => {
     const [error, setError] = useState(null);
     const [expandedAgents, setExpandedAgents] = useState({});
     const [expandedTypes, setExpandedTypes] = useState({});
+    const [timeFilter, setTimeFilter] = useState('24hours');
     
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
+
+    const handleTimeFilterChange = (event, newTimeFilter) => {
+        if (newTimeFilter !== null) {
+            setTimeFilter(newTimeFilter);
+        }
+    };
+
+    const getTimeRange = () => {
+        const now = new Date();
+        let startTime = new Date();
+
+        switch (timeFilter) {
+            case '1hour':
+                startTime.setHours(now.getHours() - 1);
+                break;
+            case '6hours':
+                startTime.setHours(now.getHours() - 6);
+                break;
+            case '24hours':
+                startTime.setHours(now.getHours() - 24);
+                break;
+            case '7days':
+                startTime.setDate(now.getDate() - 7);
+                break;
+            default:
+                startTime.setHours(now.getHours() - 24);
+        }
+
+        return {
+            startTime: startTime.toISOString(),
+            endTime: now.toISOString()
+        };
+    };
 
     const handleAgentChange = (agentIndex) => (event, isExpanded) => {
         setExpandedAgents(prev => ({
@@ -44,7 +81,8 @@ const ErrorLogs = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const result = await auditingApi.getErrorLogs();
+                const { startTime, endTime } = getTimeRange();
+                const result = await auditingApi.getErrorLogs(startTime, endTime);
                 setErrorLogs(result);
             } catch (err) {
                 setError('Failed to fetch error logs');
@@ -55,7 +93,7 @@ const ErrorLogs = () => {
         };
 
         fetchErrorLogs();
-    }, [auditingApi, showError]);
+    }, [auditingApi, showError, timeFilter]);
 
     if (isLoading) {
         return (
@@ -75,17 +113,90 @@ const ErrorLogs = () => {
 
     if (!errorLogs || errorLogs.length === 0) {
         return (
-            <Alert severity="info" sx={{ mt: 4 }}>
-                No error logs found.
-            </Alert>
+            <Box sx={{ mt: 4 }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    mb: 4,
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: { xs: 2, md: 0 }
+                }}>
+                    <Typography variant="h6">
+                        Recent Error Logs Across All Agents
+                    </Typography>
+                    <Stack direction="row" spacing={2}>
+                        <ToggleButtonGroup
+                            value={timeFilter}
+                            exclusive
+                            onChange={handleTimeFilterChange}
+                            size="small"
+                            sx={{ 
+                                '& .MuiToggleButton-root': {
+                                    borderColor: 'var(--border-light)',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'none',
+                                    '&.Mui-selected': {
+                                        backgroundColor: 'var(--bg-selected)',
+                                        color: 'var(--text-primary)',
+                                        fontWeight: 500
+                                    }
+                                }
+                            }}
+                        >
+                            <ToggleButton value="1hour">Last Hour</ToggleButton>
+                            <ToggleButton value="6hours">Last 6 Hours</ToggleButton>
+                            <ToggleButton value="24hours">Last 24 Hours</ToggleButton>
+                            <ToggleButton value="7days">Last 7 Days</ToggleButton>
+                        </ToggleButtonGroup>
+                    </Stack>
+                </Box>
+                <Alert severity="info">
+                    No error logs found for the selected time period.
+                </Alert>
+            </Box>
         );
     }
 
     return (
         <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                Recent Error Logs Across All Agents
-            </Typography>
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                mb: 4,
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: { xs: 2, md: 0 }
+            }}>
+                <Typography variant="h6">
+                    Recent Error Logs Across All Agents
+                </Typography>
+                <Stack direction="row" spacing={2}>
+                    <ToggleButtonGroup
+                        value={timeFilter}
+                        exclusive
+                        onChange={handleTimeFilterChange}
+                        size="small"
+                        sx={{ 
+                            '& .MuiToggleButton-root': {
+                                borderColor: 'var(--border-light)',
+                                color: 'var(--text-secondary)',
+                                textTransform: 'none',
+                                '&.Mui-selected': {
+                                    backgroundColor: 'var(--bg-selected)',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: 500
+                                }
+                            }
+                        }}
+                    >
+                        <ToggleButton value="1hour">Last Hour</ToggleButton>
+                        <ToggleButton value="6hours">Last 6 Hours</ToggleButton>
+                        <ToggleButton value="24hours">Last 24 Hours</ToggleButton>
+                        <ToggleButton value="7days">Last 7 Days</ToggleButton>
+                    </ToggleButtonGroup>
+                </Stack>
+            </Box>
             
             {errorLogs.map((agentGroup, agentIndex) => (
                 <Accordion 
