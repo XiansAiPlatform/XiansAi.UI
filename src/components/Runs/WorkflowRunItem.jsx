@@ -24,29 +24,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
   // Helper function to check if run has error in logs
   const hasError = () => {
     if (!run.lastLog) return false;
-    
-    // Check by log level
-    if (run.lastLog.level === 4) return true;
-    
-    // Check log message for error information in JSON structure
-    if (run.lastLog.message) {
-      try {
-        // Find JSON object in message if it exists
-        const match = run.lastLog.message.match(/\{.*\}/s);
-        if (match) {
-          const jsonObj = JSON.parse(match[0]);
-          // Check for the specific error structure
-          return jsonObj.result && 
-                 jsonObj.result.failed && 
-                 jsonObj.result.failed.failure;
-        }
-      } catch (e) {
-        // If parsing fails, it's not a valid JSON error structure
-        console.debug('Error parsing log message JSON:', e);
-      }
-    }
-    
-    return false;
+    return run.lastLog.level === 4;
   };
 
   const getOwnerDisplay = () => {
