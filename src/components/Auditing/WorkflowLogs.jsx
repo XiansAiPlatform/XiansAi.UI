@@ -14,7 +14,9 @@ import {
     Tooltip,
     Switch,
     FormControlLabel,
-    Stack
+    Stack,
+    ToggleButtonGroup,
+    ToggleButton
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAuditingApi } from '../../services/auditing-api';
@@ -43,6 +45,7 @@ const WorkflowLogs = ({
     const [error, setError] = useState(null);
     const [selectedLogLevel, setSelectedLogLevel] = useState('');
     const [autoRefresh, setAutoRefresh] = useState(false);
+    const [timeFilter, setTimeFilter] = useState('24hours');
     
     // Pagination state
     const [page, setPage] = useState(1);
@@ -53,6 +56,40 @@ const WorkflowLogs = ({
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
 
+    const getTimeRange = useCallback(() => {
+        const now = new Date();
+        let startTime = new Date();
+
+        switch (timeFilter) {
+            case '1hour':
+                startTime.setHours(now.getHours() - 1);
+                break;
+            case '6hours':
+                startTime.setHours(now.getHours() - 6);
+                break;
+            case '24hours':
+                startTime.setHours(now.getHours() - 24);
+                break;
+            case '7days':
+                startTime.setDate(now.getDate() - 7);
+                break;
+            default:
+                startTime.setHours(now.getHours() - 24);
+        }
+
+        return {
+            startTime: startTime.toISOString(),
+            endTime: now.toISOString()
+        };
+    }, [timeFilter]);
+
+    const handleTimeFilterChange = (event, newTimeFilter) => {
+        if (newTimeFilter !== null) {
+            setTimeFilter(newTimeFilter);
+            setPage(1); // Reset to first page on filter change
+        }
+    };
+
     const fetchLogs = useCallback(async () => {
         if (!selectedAgentName) {
             setLogs([]);
@@ -62,11 +99,14 @@ const WorkflowLogs = ({
         setIsLoading(true);
         setError(null);
         try {
+            const { startTime, endTime } = getTimeRange();
             const options = {
                 participantId: selectedUserId || null,
                 workflowType: selectedWorkflowTypeId || null,
                 workflowId: selectedWorkflowId || null,
                 logLevel: selectedLogLevel,
+                startTime,
+                endTime,
                 page,
                 pageSize: PAGE_SIZE
             };
@@ -87,7 +127,7 @@ const WorkflowLogs = ({
         } finally {
             setIsLoading(false);
         }
-    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError]);
+    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError, getTimeRange]);
 
     useEffect(() => {
         fetchLogs();
@@ -193,6 +233,29 @@ const WorkflowLogs = ({
                             <RefreshIcon />
                         </IconButton>
                     </Tooltip>
+                    <ToggleButtonGroup
+                        value={timeFilter}
+                        exclusive
+                        onChange={handleTimeFilterChange}
+                        size="small"
+                        sx={{ 
+                            '& .MuiToggleButton-root': {
+                                borderColor: 'var(--border-light)',
+                                color: 'var(--text-secondary)',
+                                textTransform: 'none',
+                                '&.Mui-selected': {
+                                    backgroundColor: 'var(--bg-selected)',
+                                    color: 'var(--text-primary)',
+                                    fontWeight: 500
+                                }
+                            }
+                        }}
+                    >
+                        <ToggleButton value="1hour">Last Hour</ToggleButton>
+                        <ToggleButton value="6hours">Last 6 Hours</ToggleButton>
+                        <ToggleButton value="24hours">Last 24 Hours</ToggleButton>
+                        <ToggleButton value="7days">Last 7 Days</ToggleButton>
+                    </ToggleButtonGroup>
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Log Level</InputLabel>
                         <Select

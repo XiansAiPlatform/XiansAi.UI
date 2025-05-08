@@ -77,6 +77,8 @@ export const useAuditingApi = () => {
             workflowType = null,
             workflowId = null,
             logLevel = null,
+            startTime = null,
+            endTime = null,
             page = 1,
             pageSize = 20
           } = options;
@@ -87,6 +89,8 @@ export const useAuditingApi = () => {
           if (workflowType) params.workflowType = workflowType;
           if (workflowId) params.workflowId = workflowId;
           if (logLevel !== null && logLevel !== '') params.logLevel = logLevel;
+          if (startTime) params.startTime = startTime;
+          if (endTime) params.endTime = endTime;
           params.page = page;
           params.pageSize = pageSize;
           
