@@ -36,7 +36,7 @@ export const useMessagingApi = () => {
 
       getAgentsAndTypes: async () => {
         try {
-          return await apiClient.get('/api/client/workflows/all');
+          return await apiClient.get('/api/client/agents/workflows/all');
         } catch (error) {
           console.error('Error fetching agents and types:', error);
           throw error;
