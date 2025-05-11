@@ -9,7 +9,7 @@ import {
 import { useSettingsApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
-import { getConfig } from '../../config';
+import { getConfig } from '../../../../config';
 
 
 

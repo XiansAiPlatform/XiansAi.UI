@@ -1,6 +1,6 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { handleApiError } from '../utils/errorHandler';
-import { getConfig } from '../config';
+import { getConfig } from '../../../config';
 import { useMemo } from 'react';
 import { useSelectedOrg } from '../contexts/OrganizationContext';
 

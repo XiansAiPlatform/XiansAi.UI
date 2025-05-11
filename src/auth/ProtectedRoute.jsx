@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
-import { useNotification } from '../contexts/NotificationContext';
-import { useSelectedOrg } from '../contexts/OrganizationContext';
+import { useNotification } from '../modules/Manager/contexts/NotificationContext';
+import { useSelectedOrg } from '../modules/Manager/contexts/OrganizationContext';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0();

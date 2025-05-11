@@ -1,7 +1,7 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotification } from '../contexts/NotificationContext';
+import { useNotification } from '../modules/Manager/contexts/NotificationContext';
 
 const Callback = () => {
   const { isAuthenticated, error } = useAuth0();

@@ -1,4 +1,4 @@
-import { useApiClient } from './api-client';
+import { useApiClient } from '../../Manager/services/api-client';
 import { useMemo } from 'react';
 
 export const useRegistrationApi = () => {

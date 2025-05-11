@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FiPlusCircle } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
-import { useRegistrationApi } from '../../../services/registration-api';
+import { useRegistrationApi } from '../../services/registration-api';
 
 export default function Register() {
   const navigate = useNavigate();
