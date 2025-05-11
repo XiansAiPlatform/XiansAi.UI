@@ -147,10 +147,6 @@ const TopBar = ({ handleToggleSidebar, onBackToExplore, selectedAgent, onSelectA
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const profileMenuOpen = Boolean(profileAnchorEl);
   
-  // Default color if agent not provided
-  const avatarColor = selectedAgent?.avatarColor || '#E0F2FE'; // Pastel blue
-  const iconColor = selectedAgent?.iconColor || '#7DD3FC';
-  
   // Handle opening notifications popover
   const handleNotificationsClick = (event) => {
     setNotificationsAnchorEl(event.currentTarget);
