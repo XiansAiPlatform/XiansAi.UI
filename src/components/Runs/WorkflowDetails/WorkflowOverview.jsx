@@ -333,7 +333,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                   wordBreak: 'break-word'
                 }}
               >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Num of Workers Available:</Box> {getDisplayValue(workflow?.numOfWorkers)}
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workers: </Box> {getDisplayValue(workflow?.numOfWorkers)}
               </Typography>
               {workflow?.parentId && (
                 <Typography
