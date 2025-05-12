@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Box } from '@mui/material';
+import { Box, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import AgentSidebar from '../Sidebar/AgentSidebar';
 import AgentChat from '../Chat/AgentChat';
+import ProcessPanel from '../ProcessVisualization/ProcessPanel';
 import TopBar from '../TopBar/TopBar';
 import { useNavigate } from 'react-router-dom';
 
 const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) => {
   const [selectedAgent, setSelectedAgent] = useState(initialSelectedAgent);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [currentProcess, setCurrentProcess] = useState(null);
+  const [historicalProcesses, setHistoricalProcesses] = useState([]);
+  const [processPanelOpen, setProcessPanelOpen] = useState(true);
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const navigate = useNavigate();
 
   // If no agent is selected and one isn't passed in, redirect to explore page
@@ -24,8 +32,170 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
     }
   }, [initialSelectedAgent]);
 
+  // Simulated process data for demonstration
+  useEffect(() => {
+    if (selectedAgent) {
+      // Simulate loading process data
+      setCurrentProcess(null);
+      
+      // First, set up some historical processes
+      const sampleHistoricalProcesses = [
+        {
+          id: 'process-history-1',
+          name: 'Data Analysis',
+          timestamp: new Date(Date.now() - 3600000), // 1 hour ago
+          completed: true,
+          steps: [
+            { 
+              id: 'step-h1-1', 
+              name: 'Initialize', 
+              completed: true,
+              inputs: { query: "Analyze last quarter sales data" },
+              outputs: { status: "Initialized successfully" }
+            },
+            { 
+              id: 'step-h1-2', 
+              name: 'Data collection', 
+              completed: true,
+              inputs: { source: "Sales database", timeRange: "Last quarter" },
+              outputs: { recordsCollected: 1250, dataSize: "2.3MB" }
+            },
+            { 
+              id: 'step-h1-3', 
+              name: 'Analysis', 
+              completed: true,
+              inputs: { method: "Statistical regression", parameters: { confidence: 0.95 } },
+              outputs: { trends: ["10% increase in online sales", "5% decrease in retail"], anomalies: 2 }
+            },
+            { 
+              id: 'step-h1-4', 
+              name: 'Report generation', 
+              completed: true,
+              inputs: { format: "PDF", includeGraphs: true },
+              outputs: { reportUrl: "/reports/q2-analysis.pdf", pages: 15 }
+            }
+          ]
+        },
+        {
+          id: 'process-history-2',
+          name: 'Content Search',
+          timestamp: new Date(Date.now() - 7200000), // 2 hours ago
+          completed: true,
+          steps: [
+            { 
+              id: 'step-h2-1', 
+              name: 'Query parsing', 
+              completed: true,
+              inputs: { query: "Latest innovations in renewable energy" },
+              outputs: { tokens: ["latest", "innovations", "renewable", "energy"], entities: ["renewable energy"] }
+            },
+            { 
+              id: 'step-h2-2', 
+              name: 'Database search', 
+              completed: true,
+              inputs: { indices: ["articles", "research_papers"], limit: 50 },
+              outputs: { matchCount: 37, searchTime: "1.2s" }
+            },
+            { 
+              id: 'step-h2-3', 
+              name: 'Result compilation', 
+              completed: true,
+              inputs: { sortBy: "relevance", format: "summary" },
+              outputs: { topResults: 10, compilationTime: "0.8s" }
+            }
+          ]
+        },
+        {
+          id: 'process-history-3',
+          name: 'Image Generation',
+          timestamp: new Date(Date.now() - 86400000), // 1 day ago
+          completed: true,
+          steps: [
+            { 
+              id: 'step-h3-1', 
+              name: 'Prompt analysis', 
+              completed: true,
+              inputs: { prompt: "A futuristic city with flying cars and green buildings" },
+              outputs: { subjects: ["city", "flying cars", "green buildings"], style: "futuristic" }
+            },
+            { 
+              id: 'step-h3-2', 
+              name: 'Style selection', 
+              completed: true,
+              inputs: { baseStyle: "digital art", enhanceDetails: true },
+              outputs: { selectedStyles: ["digital art", "cinematic", "detailed"], resolution: "high" }
+            },
+            { 
+              id: 'step-h3-3', 
+              name: 'Image creation', 
+              completed: true,
+              inputs: { dimensions: "1024x1024", iterations: 50 },
+              outputs: { imageUrl: "/images/generated/future-city.png", generationTime: "15s" }
+            },
+            { 
+              id: 'step-h3-4', 
+              name: 'Post-processing', 
+              completed: true,
+              inputs: { enhance: true, upscale: true },
+              outputs: { finalUrl: "/images/generated/future-city-enhanced.png", finalResolution: "2048x2048" }
+            }
+          ]
+        }
+      ];
+      
+      setHistoricalProcesses(sampleHistoricalProcesses);
+      
+      // Then set up the current process
+      const timer = setTimeout(() => {
+        setCurrentProcess({
+          id: 'process-current-1',
+          name: 'Query Processing',
+          timestamp: new Date(),
+          completed: false,
+          currentStep: 'Analyzing input',
+          steps: [
+            { 
+              id: 'step-c1', 
+              name: 'Initialize', 
+              completed: true,
+              inputs: { query: "How does photosynthesis work?" },
+              outputs: { status: "Processing", sessionId: "query-12345" }
+            },
+            { 
+              id: 'step-c2', 
+              name: 'Analyzing input', 
+              completed: false,
+              inputs: { text: "How does photosynthesis work?", language: "English" },
+              outputs: null // Currently in progress
+            },
+            { 
+              id: 'step-c3', 
+              name: 'Processing data', 
+              completed: false,
+              inputs: null, // Not started yet
+              outputs: null
+            },
+            { 
+              id: 'step-c4', 
+              name: 'Generating response', 
+              completed: false,
+              inputs: null, // Not started yet
+              outputs: null
+            }
+          ]
+        });
+      }, 1500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedAgent]);
+
   const handleToggleSidebar = () => {
-    setMobileOpen(!mobileOpen);
+    if (isDesktop) {
+      setSidebarOpen(!sidebarOpen);
+    } else {
+      setMobileOpen(!mobileOpen);
+    }
   };
   
   // Handle navigation back to explore page
@@ -33,6 +203,24 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
     console.log('Navigating back to explore page');
     navigate('/agents/explore');
   };
+
+  // Toggle process panel visibility
+  const toggleProcessPanel = () => {
+    setProcessPanelOpen(!processPanelOpen);
+  };
+
+  // Calculate the width of the chat panel based on the Process Visualization panel state
+  const getChatWidth = () => {
+    if (!isDesktop) return '100%'; // Full width on mobile
+    
+    // On desktop, adjust width based on process panel state
+    if (processPanelOpen) {
+      return 'calc(50% - 1px)'; // Half width minus border when process panel is open
+    }
+    
+    return 'calc(100% - 40px)'; // Full width minus collapsed process panel width
+  };
+
 
   return (
     <Box sx={{ 
@@ -48,6 +236,7 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
         onBackToExplore={handleBackToExplore}
         selectedAgent={selectedAgent}
         onSelectAgent={setSelectedAgent}
+        sidebarOpen={sidebarOpen}
       />
       
       <Box sx={{ 
@@ -57,26 +246,62 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
         position: 'relative',
         height: 'calc(100vh - 64px)' // Account for TopBar height
       }}>
+        {/* Agent Sidebar - always visible but can be collapsed to icons-only */}
         <AgentSidebar 
           selectedAgent={selectedAgent} 
           setSelectedAgent={setSelectedAgent} 
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
           onBackToExplore={handleBackToExplore}
+          collapsed={isDesktop && !sidebarOpen}
+          onToggleCollapse={handleToggleSidebar}
         />
         
+        {/* Main content container with chat and process panel side by side */}
         <Box sx={{ 
           flex: 1, 
           display: 'flex', 
-          flexDirection: 'column', 
+          flexDirection: { xs: 'column', md: 'row' }, 
           overflow: 'hidden',
-          position: 'relative',
-          maxHeight: '100%' // Ensure it doesn't exceed parent container
+          maxHeight: '100%',
+          position: 'relative'
         }}>
-          <AgentChat 
-            selectedAgent={selectedAgent} 
-            initialPrompt={initialPrompt}
-          />
+          {/* Chat panel - width limited based on process panel state */}
+          <Box sx={{ 
+            width: getChatWidth(),
+            height: !isDesktop && processPanelOpen ? '50%' : '100%',
+            display: 'flex',
+            overflow: 'hidden',
+            transition: 'width 0.3s ease, height 0.3s ease'
+          }}>
+            <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
+              <AgentChat 
+                selectedAgent={selectedAgent} 
+                initialPrompt={initialPrompt}
+              />
+            </Box>
+          </Box>
+          
+          {/* Process Visualization panel - always at right side */}
+          <Box sx={{ 
+            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : '40px') : '100%',
+            height: !isDesktop ? (processPanelOpen ? '50%' : '40px') : '100%',
+            display: 'flex',
+            overflow: 'hidden',
+            borderLeft: isDesktop ? '1px solid' : 'none',
+            borderTop: !isDesktop && processPanelOpen ? '1px solid' : 'none',
+            borderColor: 'divider',
+            transition: 'width 0.3s ease, height 0.3s ease',
+            position: !isDesktop && processPanelOpen ? 'relative' : 'static' // Only use relative positioning on mobile when expanded
+          }}>
+            <ProcessPanel 
+              selectedAgent={selectedAgent}
+              currentProcess={currentProcess}
+              historicalProcesses={historicalProcesses}
+              onToggleVisibility={toggleProcessPanel}
+              collapsed={!processPanelOpen}
+            />
+          </Box>
         </Box>
       </Box>
     </Box>

@@ -12,12 +12,16 @@ import {
   Drawer,
   useMediaQuery,
   Divider,
-  ListItemIcon
+  ListItemIcon,
+  Tooltip,
+  Typography
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import SearchIcon from '@mui/icons-material/Search';
 import CloseIcon from '@mui/icons-material/Close';
 import HomeIcon from '@mui/icons-material/Home';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
+import MenuIcon from '@mui/icons-material/Menu';
 
 // Mock data - would come from an API in a real app
 const mockAgents = [
@@ -58,7 +62,34 @@ const mockAgents = [
   },
 ];
 
-const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOpen, onBackToExplore }) => {
+// Agent avatar component
+const AgentAvatar = ({ agent, size = 42 }) => (
+  <Box
+    sx={{
+      width: size,
+      height: size,
+      borderRadius: '50%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: agent.avatarColor,
+      border: `1px solid ${agent.iconColor}`,
+    }}
+  >
+    <Box
+      component="img"
+      src="/images/agent.svg"
+      alt="Agent icon"
+      sx={{
+        width: Math.floor(size * 0.76),
+        height: Math.floor(size * 0.76),
+        filter: `opacity(0.9) drop-shadow(0 0 0.5px ${agent.iconColor})`,
+      }}
+    />
+  </Box>
+);
+
+const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOpen, onBackToExplore, collapsed = false, onToggleCollapse }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [searchQuery, setSearchQuery] = useState('');
@@ -94,7 +125,70 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
     setSearchQuery('');
   };
 
-  const sidebarContent = (
+  // Collapsed sidebar content - only agent icons
+  const collapsedSidebarContent = (
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center',
+      py: 2,
+      height: '100%',
+      borderRight: 1,
+      borderColor: 'divider'
+    }}>
+      <Tooltip title="Expand sidebar" placement="right">
+        <IconButton 
+          onClick={onToggleCollapse}
+          sx={{ 
+            mb: 3,
+            backgroundColor: theme.palette.mode === 'dark' 
+              ? 'rgba(255,255,255,0.04)'
+              : 'rgba(0,0,0,0.02)',
+            '&:hover': {
+              backgroundColor: theme.palette.mode === 'dark' 
+                ? 'rgba(255,255,255,0.08)'
+                : 'rgba(0,0,0,0.04)',
+            }
+          }}
+        >
+          <MenuIcon />
+        </IconButton>
+      </Tooltip>
+      
+      <Box sx={{ 
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+        overflowY: 'auto',
+        width: '100%',
+        px: 1
+      }}>
+        {filteredAgents.map((agent) => (
+          <Tooltip key={agent.id} title={agent.name} placement="right">
+            <IconButton
+              onClick={() => handleAgentSelect(agent)}
+              sx={{ 
+                p: 0.5,
+                bgcolor: selectedAgent?.id === agent.id ? `${agent.avatarColor}99` : 'transparent',
+                border: selectedAgent?.id === agent.id ? `2px solid ${agent.iconColor}` : '2px solid transparent',
+                borderRadius: '50%',
+                '&:hover': {
+                  bgcolor: `${agent.avatarColor}77`
+                }
+              }}
+            >
+              <AgentAvatar agent={agent} size={36} />
+            </IconButton>
+          </Tooltip>
+        ))}
+      </Box>
+    </Box>
+  );
+
+  // Full sidebar content
+  const fullSidebarContent = (
     <Box sx={{ 
       p: 2, 
       display: 'flex', 
@@ -104,10 +198,24 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
       overflow: 'hidden' 
     }}>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-        {isMobile && (
+        {isMobile ? (
           <IconButton size="small" onClick={() => setMobileOpen(false)}>
             <CloseIcon />
           </IconButton>
+        ) : (
+          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <IconButton 
+                size="small" 
+                onClick={onToggleCollapse}
+                aria-label="Collapse sidebar"
+                sx={{ mr: 1 }}
+              >
+                <MenuOpenIcon />
+              </IconButton>
+              <Typography variant="subtitle1" fontWeight="medium">Agents</Typography>
+            </Box>
+          </Box>
         )}
       </Box>
       
@@ -196,29 +304,7 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
                 }}
               >
                 <ListItemAvatar>
-                  <Box
-                    sx={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: agent.avatarColor,
-                      border: `1px solid ${agent.iconColor}`,
-                    }}
-                  >
-                    <Box
-                      component="img"
-                      src="/images/agent.svg"
-                      alt="Agent icon"
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        filter: `opacity(0.9) drop-shadow(0 0 0.5px ${agent.iconColor})`,
-                      }}
-                    />
-                  </Box>
+                  <AgentAvatar agent={agent} />
                 </ListItemAvatar>
                 <ListItemText 
                   primary={agent.name} 
@@ -236,9 +322,11 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
           ))}
         </List>
       </Box>
-
     </Box>
   );
+
+  // Choose which content to display based on collapsed state and device
+  const sidebarContent = collapsed && !isMobile ? collapsedSidebarContent : fullSidebarContent;
 
   return isMobile ? (
     <Drawer
@@ -264,14 +352,14 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
   ) : (
     <Box
       sx={{
-        width: { sm: 280 },
+        width: collapsed ? 72 : 280,
+        minWidth: collapsed ? 72 : 280,
         flexShrink: 0,
         display: { xs: 'none', md: 'block' },
-        borderRight: 1,
-        borderColor: 'divider',
         height: '100%',
         maxHeight: '100%',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        transition: 'width 0.3s ease'
       }}
     >
       {sidebarContent}
