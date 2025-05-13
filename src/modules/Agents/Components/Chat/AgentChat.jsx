@@ -10,7 +10,7 @@ import useInputFocus from './hooks/useInputFocus';
 import useChatMessages from './hooks/useChatMessages';
 import useScrollHandling from './hooks/useScrollHandling';
 
-const AgentChat = ({ selectedAgent, initialPrompt = '' }) => {
+const AgentChat = ({ selectedAgent, initialPrompt = '', onClick }) => {
   const theme = useTheme();
   
   // Custom hooks
@@ -25,7 +25,7 @@ const AgentChat = ({ selectedAgent, initialPrompt = '' }) => {
   } = useScrollHandling(messages);
   
   return (
-    <ChatContainer>
+    <ChatContainer onClick={onClick}>
       {selectedAgent ? (
         <>
           {/* Chat header */}

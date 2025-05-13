@@ -274,7 +274,7 @@ const TopBar = ({ handleToggleSidebar, onBackToExplore, selectedAgent, onSelectA
                   letterSpacing: '0.01em'
                 }}
               >
-                {'Agent Team'}
+                {'Agent Squad'}
               </Typography>
             </Box>
           )}

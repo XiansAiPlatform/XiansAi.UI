@@ -1,8 +1,9 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-const ChatContainer = ({ children }) => (
+const ChatContainer = ({ children, onClick, ...props }) => (
   <Box 
+    onClick={onClick}
     sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
@@ -11,6 +12,7 @@ const ChatContainer = ({ children }) => (
       position: 'relative',
       overflow: 'hidden'
     }}
+    {...props}
   >
     {children}
   </Box>

@@ -66,34 +66,14 @@ const CollapsedProcessPanel = ({ currentProcess, historicalProcesses = [], onTog
         }
       }}
     >
-      <Tooltip title="Expand process panel" placement="left">
-        <IconButton 
-          onClick={(e) => {
-            // Prevent the click from triggering the parent's onClick
-            e.stopPropagation();
-            onToggleVisibility();
-          }}
-          sx={{ 
-            mb: 3,
-            backgroundColor: 'rgba(25, 118, 210, 0.04)',
-            '&:hover': {
-              backgroundColor: 'rgba(25, 118, 210, 0.08)',
-            },
-            // Make the button smaller on mobile for better space utilization
-            padding: isMobile ? '4px' : '8px',
-          }}
-        >
-          <VisibilityIcon color="primary" fontSize={isMobile ? "small" : "medium"} />
-        </IconButton>
-      </Tooltip>
-      
-      <Divider sx={{ width: '60%', mb: 2 }} />
       
       {/* Add chevron icon to indicate clickability */}
       <Box sx={{ mb: 2 }}>
         <ChevronLeftIcon color="action" fontSize="small" />
       </Box>
       
+      <Divider sx={{ width: '60%', mb: 2 }} />
+
       <Box sx={{ 
         flex: 1,
         display: 'flex',

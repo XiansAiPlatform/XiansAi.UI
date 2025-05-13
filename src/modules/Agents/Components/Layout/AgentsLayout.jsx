@@ -3,7 +3,7 @@ import { Box, useMediaQuery } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import AgentSidebar from '../Sidebar/AgentSidebar';
 import AgentChat from '../Chat/AgentChat';
-import ProcessPanel from '../ProcessVisualization/ProcessPanel';
+import ProcessPanel from '../ProcessPanel/ProcessPanel';
 import TopBar from '../TopBar/TopBar';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,10 +13,17 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentProcess, setCurrentProcess] = useState(null);
   const [historicalProcesses, setHistoricalProcesses] = useState([]);
-  const [processPanelOpen, setProcessPanelOpen] = useState(true);
+  const [processPanelOpen, setProcessPanelOpen] = useState(() => {
+    const savedState = localStorage.getItem('processPanelOpen');
+    return savedState !== null ? savedState === 'true' : true;
+  });
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem('processPanelOpen', processPanelOpen);
+  }, [processPanelOpen]);
 
   // If no agent is selected and one isn't passed in, redirect to explore page
   useEffect(() => {
@@ -209,16 +216,11 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
     setProcessPanelOpen(!processPanelOpen);
   };
 
-  // Calculate the width of the chat panel based on the Process Visualization panel state
-  const getChatWidth = () => {
-    if (!isDesktop) return '100%'; // Full width on mobile
-    
-    // On desktop, adjust width based on process panel state
-    if (processPanelOpen) {
-      return 'calc(50% - 1px)'; // Half width minus border when process panel is open
+  // Auto-collapse process panel when clicking on chat in mobile view
+  const handleChatClick = () => {
+    if (!isDesktop && processPanelOpen) {
+      setProcessPanelOpen(false);
     }
-    
-    return 'calc(100% - 40px)'; // Full width minus collapsed process panel width
   };
 
 
@@ -267,24 +269,31 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
           position: 'relative'
         }}>
           {/* Chat panel - adjust width dynamically based on process panel state */}
-          <Box sx={{ 
-            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : 'calc(100% - 40px)') : '100%',
-            height: '100%',
-            display: 'flex',
-            overflow: 'hidden',
-            transition: 'width 0.3s ease',
-          }}>
+          <Box 
+            sx={{ 
+              width: isDesktop 
+                ? (processPanelOpen ? 'calc(50% - 1px)' : 'calc(100% - 40px)') 
+                : (processPanelOpen ? '100%' : 'calc(100% - 36px)'), // Adjust mobile width to account for collapsed panel
+              height: '100%',
+              display: 'flex',
+              overflow: 'hidden',
+              transition: 'width 0.3s ease',
+              position: 'relative', // Ensure chat is always in a stable position
+              zIndex: 1, // Lower z-index than process panel
+            }}
+          >
             <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
               <AgentChat 
                 selectedAgent={selectedAgent} 
                 initialPrompt={initialPrompt}
+                onClick={handleChatClick}
               />
             </Box>
           </Box>
           
           {/* Process Visualization panel - slides over on mobile, side by side on desktop */}
           <Box sx={{ 
-            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : '40px') : (processPanelOpen ? '80%' : '40px'),
+            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : '40px') : (processPanelOpen ? '80%' : '36px'),
             height: '100%',
             display: 'flex',
             overflow: 'hidden',
@@ -294,8 +303,8 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
             position: isDesktop ? 'relative' : 'absolute', // Make it relative on desktop, absolute on mobile
             top: 0,
             right: 0,
-            transform: isDesktop ? 'none' : (processPanelOpen ? 'translateX(0)' : 'translateX(calc(100% - 40px))'),
-            zIndex: isDesktop ? 1 : 10, // Lower z-index on desktop, higher on mobile
+            transform: isDesktop ? 'none' : (processPanelOpen ? 'translateX(0)' : 'translateX(calc(100% - 36px))'),
+            zIndex: 10, // Higher z-index to ensure it always appears above the chat on mobile
             backgroundColor: theme.palette.background.paper,
             boxShadow: !isDesktop && processPanelOpen ? '-4px 0 8px rgba(0, 0, 0, 0.1)' : 'none',
           }}>

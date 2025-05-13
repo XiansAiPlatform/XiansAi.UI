@@ -6,11 +6,9 @@ import { mockAgents } from './definitions';
 
 const AgentsRoutes = () => {
   const navigate = useNavigate();
-  const [selectedAgent, setSelectedAgent] = useState(null);
   const [initialPrompt, setInitialPrompt] = useState('');
   
   const handleSelectAgent = (agent) => {
-    setSelectedAgent(agent);
     navigate(`/agents/chat/${agent.id}`);
   };
   
@@ -28,7 +26,6 @@ const AgentsRoutes = () => {
       if (agentId) {
         const agent = mockAgents.find(a => a.id === agentId);
         if (agent) {
-          setSelectedAgent(agent);
           setLoadedAgent(agent);
         }
       }
