@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import AgentsLayout from './Components/Layout/AgentsLayout';
 import AgentsLanding from './Components/Landing/AgentsLanding';
+import { mockAgents } from './definitions';
 
 const AgentsRoutes = () => {
   const navigate = useNavigate();
@@ -10,11 +11,47 @@ const AgentsRoutes = () => {
   
   const handleSelectAgent = (agent) => {
     setSelectedAgent(agent);
-    navigate('/agents/chat');
+    navigate(`/agents/chat/${agent.id}`);
   };
   
   const handleSelectPrompt = (prompt) => {
     setInitialPrompt(prompt);
+  };
+
+  const AgentChatRoute = () => {
+    const { agentId } = useParams();
+    const [loadedAgent, setLoadedAgent] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    // Find and set the agent from the URL parameter
+    useEffect(() => {
+      if (agentId) {
+        const agent = mockAgents.find(a => a.id === agentId);
+        if (agent) {
+          setSelectedAgent(agent);
+          setLoadedAgent(agent);
+        }
+      }
+      setLoading(false);
+    }, [agentId]);
+    
+    // If loading, show nothing yet
+    if (loading) {
+      return null;
+    }
+    
+    // If no agent found with that ID, redirect to explore
+    if (!loadedAgent) {
+      return <Navigate to="/agents/explore" replace />;
+    }
+    
+    // If agent was found, show the chat
+    return (
+      <AgentsLayout 
+        selectedAgent={loadedAgent}
+        initialPrompt={initialPrompt}
+      />
+    );
   };
   
   return (
@@ -29,15 +66,8 @@ const AgentsRoutes = () => {
           />
         } 
       />
-      <Route 
-        path="/agents/chat" 
-        element={
-          <AgentsLayout 
-            selectedAgent={selectedAgent}
-            initialPrompt={initialPrompt}
-          />
-        } 
-      />
+      <Route path="/agents/chat/:agentId" element={<AgentChatRoute />} />
+      <Route path="/agents/chat" element={<Navigate to="/agents/explore" replace />} />
     </Routes>
   );
 };

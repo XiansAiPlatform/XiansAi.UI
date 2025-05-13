@@ -23,6 +23,7 @@ import HomeIcon from '@mui/icons-material/Home';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import MenuIcon from '@mui/icons-material/Menu';
 import { mockAgents } from '../../definitions';
+import { useNavigate } from 'react-router-dom';
 
 // Agent avatar component
 const AgentAvatar = ({ agent, size = 42 }) => (
@@ -55,6 +56,7 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   
   const filteredAgents = mockAgents.filter(agent => 
     agent.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -62,6 +64,7 @@ const AgentSidebar = ({ selectedAgent, setSelectedAgent, mobileOpen, setMobileOp
   
   const handleAgentSelect = (agent) => {
     setSelectedAgent(agent);
+    navigate(`/agents/chat/${agent.id}`);
     if (isMobile) {
       setMobileOpen(false);
     }
