@@ -257,22 +257,22 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
           onToggleCollapse={handleToggleSidebar}
         />
         
-        {/* Main content container with chat and process panel side by side */}
+        {/* Main content container with chat and process panel */}
         <Box sx={{ 
           flex: 1, 
           display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' }, 
+          flexDirection: 'row', // Always row layout for both mobile and desktop
           overflow: 'hidden',
           maxHeight: '100%',
           position: 'relative'
         }}>
-          {/* Chat panel - width limited based on process panel state */}
+          {/* Chat panel - adjust width dynamically based on process panel state */}
           <Box sx={{ 
-            width: getChatWidth(),
-            height: !isDesktop && processPanelOpen ? '50%' : '100%',
+            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : 'calc(100% - 40px)') : '100%',
+            height: '100%',
             display: 'flex',
             overflow: 'hidden',
-            transition: 'width 0.3s ease, height 0.3s ease'
+            transition: 'width 0.3s ease',
           }}>
             <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
               <AgentChat 
@@ -282,17 +282,22 @@ const AgentsLayout = ({ selectedAgent: initialSelectedAgent, initialPrompt }) =>
             </Box>
           </Box>
           
-          {/* Process Visualization panel - always at right side */}
+          {/* Process Visualization panel - slides over on mobile, side by side on desktop */}
           <Box sx={{ 
-            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : '40px') : '100%',
-            height: !isDesktop ? (processPanelOpen ? '50%' : '40px') : '100%',
+            width: isDesktop ? (processPanelOpen ? 'calc(50% - 1px)' : '40px') : (processPanelOpen ? '80%' : '40px'),
+            height: '100%',
             display: 'flex',
             overflow: 'hidden',
-            borderLeft: isDesktop ? '1px solid' : 'none',
-            borderTop: !isDesktop && processPanelOpen ? '1px solid' : 'none',
+            borderLeft: '1px solid',
             borderColor: 'divider',
-            transition: 'width 0.3s ease, height 0.3s ease',
-            position: !isDesktop && processPanelOpen ? 'relative' : 'static' // Only use relative positioning on mobile when expanded
+            transition: 'width 0.3s ease, transform 0.3s ease',
+            position: isDesktop ? 'relative' : 'absolute', // Make it relative on desktop, absolute on mobile
+            top: 0,
+            right: 0,
+            transform: isDesktop ? 'none' : (processPanelOpen ? 'translateX(0)' : 'translateX(calc(100% - 40px))'),
+            zIndex: isDesktop ? 1 : 10, // Lower z-index on desktop, higher on mobile
+            backgroundColor: theme.palette.background.paper,
+            boxShadow: !isDesktop && processPanelOpen ? '-4px 0 8px rgba(0, 0, 0, 0.1)' : 'none',
           }}>
             <ProcessPanel 
               selectedAgent={selectedAgent}
