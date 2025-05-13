@@ -22,45 +22,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import HomeIcon from '@mui/icons-material/Home';
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import MenuIcon from '@mui/icons-material/Menu';
-
-// Mock data - would come from an API in a real app
-const mockAgents = [
-  { 
-    id: 'a1', 
-    name: 'General Assistant', 
-    description: 'General purpose AI assistant', 
-    avatarColor: '#E0F2FE', 
-    iconColor: '#7DD3FC' 
-  },
-  { 
-    id: 'a2', 
-    name: 'Code Helper', 
-    description: 'Helps with programming tasks', 
-    avatarColor: '#DCFCE7', 
-    iconColor: '#86EFAC' 
-  },
-  { 
-    id: 'a3', 
-    name: 'Creative Writer', 
-    description: 'Assists with creative writing', 
-    avatarColor: '#FEF3C7', 
-    iconColor: '#FDE68A' 
-  },
-  { 
-    id: 'a4', 
-    name: 'Math Tutor', 
-    description: 'Helps solve mathematical problems', 
-    avatarColor: '#FECDD3', 
-    iconColor: '#FDA4AF' 
-  },
-  { 
-    id: 'a5', 
-    name: 'Research Assistant', 
-    description: 'Helps gather information', 
-    avatarColor: '#E9D5FF', 
-    iconColor: '#D8B4FE' 
-  },
-];
+import { mockAgents } from '../../definitions';
 
 // Agent avatar component
 const AgentAvatar = ({ agent, size = 42 }) => (

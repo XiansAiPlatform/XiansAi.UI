@@ -75,7 +75,7 @@ const Message = ({ message, isUser, agent }) => (
         maxWidth: '80%',
         borderRadius: 2,
         backgroundColor: isUser 
-          ? 'black' 
+          ? 'primary.light' 
           : agent && agent.avatarColor 
             ? `${agent.avatarColor}33` // 20% opacity
             : 'background.paper',

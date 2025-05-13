@@ -10,70 +10,7 @@ import {
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-
-// Mock data - would come from an API in a real app
-const mockAgents = [
-  { 
-    id: 'a1', 
-    name: 'General Assistant', 
-    description: 'All-purpose AI assistant for various tasks.', 
-    avatarColor: '#E0F2FE', // Pastel blue
-    iconColor: '#7DD3FC',   // Lighter blue for icon
-    prompts: [
-      "Tell me about the latest advancements in renewable energy",
-      "How can I improve my productivity?",
-      "What are some healthy meal prep ideas?"
-    ]
-  },
-  { 
-    id: 'a2', 
-    name: 'Code Helper', 
-    description: 'Assists with programming tasks and debugging.', 
-    avatarColor: '#DCFCE7', // Pastel green
-    iconColor: '#86EFAC',   // Lighter green for icon
-    prompts: [
-      "Debug this React component that's not rendering correctly",
-      "Explain how async/await works in JavaScript",
-      "Help me optimize this SQL query for better performance"
-    ]
-  },
-  { 
-    id: 'a3', 
-    name: 'Creative Writer', 
-    description: 'Helps with writing and content creation.', 
-    avatarColor: '#FEF3C7', // Pastel yellow
-    iconColor: '#FDE68A',   // Lighter yellow for icon
-    prompts: [
-      "Write a short story about a time traveler",
-      "Help me create an engaging introduction for my blog post",
-      "Suggest ways to overcome writer's block"
-    ]
-  },
-  { 
-    id: 'a4', 
-    name: 'Math Tutor', 
-    description: 'Solves and explains mathematical problems.', 
-    avatarColor: '#FECDD3', // Pastel red/pink
-    iconColor: '#FDA4AF',   // Lighter pink for icon
-    prompts: [
-      "Solve this calculus problem and explain your approach",
-      "Explain the concept of probability distributions",
-      "Help me understand linear algebra transformations"
-    ]
-  },
-  { 
-    id: 'a5', 
-    name: 'Research Assistant', 
-    description: 'Helps gather and analyze information on various topics.', 
-    avatarColor: '#E9D5FF', // Pastel purple
-    iconColor: '#D8B4FE',   // Lighter purple for icon
-    prompts: [
-      "Compare and contrast different renewable energy sources",
-      "Summarize the current state of AI ethics research",
-      "What are the latest findings in nutrition science?"
-    ]
-  },
-];
+import { mockAgents } from '../../definitions';
 
 const AgentsLanding = ({ onSelectAgent, onSelectPrompt }) => {
   const theme = useTheme();

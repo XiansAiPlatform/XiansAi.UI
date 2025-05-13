@@ -775,10 +775,10 @@ const ProcessPanel = ({ selectedAgent, currentProcess, historicalProcesses = [],
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="subtitle1" fontWeight="medium">Process Visualization</Typography>
+          <Typography variant="subtitle1" fontWeight="medium">{selectedAgent.name}</Typography>
           {selectedAgent && (
             <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-              ({selectedAgent.name})
+              - Activity Details
             </Typography>
           )}
         </Box>
