@@ -31,7 +31,7 @@ import PersonIcon from '@mui/icons-material/Person';
 const Logo = ({ onClick, isMobile }) => (
   <Box
     component="img"
-    src="/images/logo.png" // Replace with your actual logo path
+    src="/images/temp/logo.png" // Replace with your actual logo path
     alt="Logo"
     sx={{
       height: 32,
