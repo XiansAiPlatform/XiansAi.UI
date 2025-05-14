@@ -2,13 +2,11 @@ import React from 'react';
 import { 
   Box, 
   Tooltip,
-  IconButton,
   Divider,
   useMediaQuery,
   keyframes
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import HistoryIcon from '@mui/icons-material/History';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 

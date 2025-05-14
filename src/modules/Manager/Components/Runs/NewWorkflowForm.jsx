@@ -34,8 +34,8 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   const [flowId, setFlowId] = useState(definition ? 
     `${definition.agent.trim()}:${definition.workflowType.trim()}`.replace(/\s+/g, '') : 
     '');
-  const [queueType, setQueueType] = useState('default'); // 'default' or 'named'
-  const [queueName, setQueueName] = useState('');
+  const [queueType] = useState('default'); // 'default' or 'named'
+  const [queueName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const api = useWorkflowApi();
@@ -81,9 +81,9 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
     setRunType(event.target.value);
   };
 
-  const handleQueueTypeChange = (event) => {
-    setQueueType(event.target.value);
-  };
+  // const handleQueueTypeChange = (event) => {
+  //   setQueueType(event.target.value);
+  // };
 
   const handleFlowIdChange = (e) => {
     // Remove all whitespace from the input
@@ -235,7 +235,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         )}
       </Box>
 
-      <Box sx={{ mb: 2 }}>
+      {/* <Box sx={{ mb: 2 }}>
         <Typography variant={isMobile ? "h7" : "h6"} sx={{ mb: 1 }}>
           Priority Queue
         </Typography>
@@ -295,7 +295,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
             </Box>
           </Paper>
         )}
-      </Box>
+      </Box> */}
 
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
         <Button
