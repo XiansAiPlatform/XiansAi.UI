@@ -262,7 +262,6 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
         </Box>
 
       </Box>
-      {JSON.stringify(workflowLogs)}
       {/* Logs Modal */}
       <Dialog
         open={logsModalOpen}

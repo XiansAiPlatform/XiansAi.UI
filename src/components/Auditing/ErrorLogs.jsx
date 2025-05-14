@@ -20,11 +20,12 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import LinkIcon from '@mui/icons-material/Link';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
-const ErrorLogs = () => {
-    const [errorLogs, setErrorLogs] = useState([]);
+const CriticalLogs = () => {
+    const [criticalLogs, setCriticalLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [expandedAgents, setExpandedAgents] = useState({});
@@ -32,6 +33,7 @@ const ErrorLogs = () => {
     const [timeFilter, setTimeFilter] = useState('24hours');
     const [autoRefresh, setAutoRefresh] = useState(false);
     
+    const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
 
@@ -82,27 +84,27 @@ const ErrorLogs = () => {
         }));
     };
 
-    const fetchErrorLogs = useCallback(async () => {
+    const fetchCriticalLogs = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
             const { startTime, endTime } = getTimeRange();
-            const result = await auditingApi.getErrorLogs(startTime, endTime);
-            setErrorLogs(result);
+            const result = await auditingApi.getCriticalLogs(startTime, endTime);
+            setCriticalLogs(result);
         } catch (err) {
-            setError('Failed to fetch error logs');
-            showError(`Error fetching error logs: ${err.message}`);
+            setError('Failed to fetch critical logs');
+            showError(`Error fetching critical logs: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
     }, [auditingApi, showError, getTimeRange]);
 
     useEffect(() => {
-        fetchErrorLogs();
+        fetchCriticalLogs();
 
         let intervalId;
         if (autoRefresh) {
-            intervalId = setInterval(fetchErrorLogs, 30000); // Refresh every 30 seconds
+            intervalId = setInterval(fetchCriticalLogs, 30000); // Refresh every 30 seconds
         }
 
         return () => {
@@ -110,7 +112,7 @@ const ErrorLogs = () => {
                 clearInterval(intervalId);
             }
         };
-    }, [fetchErrorLogs, autoRefresh]);
+    }, [fetchCriticalLogs, autoRefresh]);
 
     if (isLoading) {
         return (
@@ -128,7 +130,7 @@ const ErrorLogs = () => {
         );
     }
 
-    if (!errorLogs || errorLogs.length === 0) {
+    if (!criticalLogs || criticalLogs.length === 0) {
         return (
             <Box sx={{ mt: 4 }}>
                 <Box sx={{ 
@@ -140,7 +142,7 @@ const ErrorLogs = () => {
                     gap: { xs: 2, md: 0 }
                 }}>
                     <Typography variant="h6">
-                        Recent Error Logs Across All Agents
+                        Failed Workflow Runs
                     </Typography>
                     <Stack direction="row" spacing={2} alignItems="center">
                         <FormControlLabel
@@ -155,7 +157,7 @@ const ErrorLogs = () => {
                         />
                         <Tooltip title="Refresh logs">
                             <IconButton 
-                                onClick={fetchErrorLogs} 
+                                onClick={fetchCriticalLogs} 
                                 disabled={isLoading}
                                 size="small"
                             >
@@ -188,7 +190,7 @@ const ErrorLogs = () => {
                     </Stack>
                 </Box>
                 <Alert severity="info">
-                    No error logs found for the selected time period.
+                    No critical logs found for the selected time period.
                 </Alert>
             </Box>
         );
@@ -205,7 +207,7 @@ const ErrorLogs = () => {
                 gap: { xs: 2, md: 0 }
             }}>
                 <Typography variant="h6">
-                    Recent Error Logs Across All Agents
+                    Failed Workflow Runs
                 </Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
                     <FormControlLabel
@@ -220,7 +222,7 @@ const ErrorLogs = () => {
                     />
                     <Tooltip title="Refresh logs">
                         <IconButton 
-                            onClick={fetchErrorLogs} 
+                            onClick={fetchCriticalLogs} 
                             disabled={isLoading}
                             size="small"
                         >
@@ -253,7 +255,7 @@ const ErrorLogs = () => {
                 </Stack>
             </Box>
             
-            {errorLogs.map((agentGroup, agentIndex) => (
+            {criticalLogs.map((agentGroup, agentIndex) => (
                 <Accordion 
                     key={`agent-${agentIndex}`} 
                     expanded={expandedAgents[agentIndex] || false}
@@ -272,7 +274,7 @@ const ErrorLogs = () => {
                                     label={`${agentGroup.workflowTypes.reduce((total, type) => 
                                         total + type.workflows.reduce((workflowTotal, workflow) => 
                                             workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => 
-                                                runTotal + run.errorLogs.length, 0), 0), 0)} Error(s)`}
+                                                runTotal + run.criticalLogs.length, 0), 0), 0)} Error(s)`}
                                     icon={<ErrorOutlineIcon />}
                                     sx={{ ml: 2 }}
                                 />
@@ -298,7 +300,7 @@ const ErrorLogs = () => {
                                                 color="error" 
                                                 label={`${workflowTypeGroup.workflows.reduce((total, workflow) => 
                                                     total + workflow.workflowRuns.reduce((runTotal, run) => 
-                                                        runTotal + run.errorLogs.length, 0), 0)} Error(s)`}
+                                                        runTotal + run.criticalLogs.length, 0), 0)} Error(s)`}
                                                 icon={<ErrorOutlineIcon />}
                                                 sx={{ ml: 2 }}
                                             />
@@ -316,10 +318,22 @@ const ErrorLogs = () => {
                                                     <Typography variant="body2" fontWeight="medium">
                                                         Workflow: {workflowGroup.workflowId}
                                                     </Typography>
+                                                    <Tooltip title="View workflow run">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                window.open(`${baseUrl}/runs/${workflowGroup.workflowId}/${workflowGroup.workflowRuns[0].workflowRunId}`, '_blank');
+                                                            }}
+                                                            sx={{ ml: 1 }}
+                                                        >
+                                                            <LinkIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
                                                     <Chip 
                                                         size="small" 
                                                         color="error" 
-                                                        label={`${workflowGroup.workflowRuns.reduce((total, run) => total + run.errorLogs.length, 0)} Error(s)`}
+                                                        label={`${workflowGroup.workflowRuns.reduce((total, run) => total + run.criticalLogs.length, 0)} Error(s)`}
                                                         icon={<ErrorOutlineIcon />}
                                                         sx={{ ml: 2 }}
                                                     />
@@ -342,10 +356,10 @@ const ErrorLogs = () => {
                                                             </Typography>
                                                         </Box>
                             
-                                                        {runGroup.errorLogs.map((errorLog, logIndex) => (
+                                                        {runGroup.criticalLogs.map((criticalLog, logIndex) => (
                                                             <Box key={`log-${logIndex}`} sx={{ mb: 2 }}>
                                                                 <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                                                                    <strong>Timestamp:</strong> {new Date(errorLog.createdAt).toLocaleString()}
+                                                                    <strong>Timestamp:</strong> {new Date(criticalLog.createdAt).toLocaleString()}
                                                                 </Typography>
                                                                 
                                                                 <Typography 
@@ -359,10 +373,10 @@ const ErrorLogs = () => {
                                                                         borderRadius: 1
                                                                     }}
                                                                 >
-                                                                    {errorLog.message}
+                                                                    {criticalLog.message}
                                                                 </Typography>
                                                                 
-                                                                {errorLog.exception && (
+                                                                {criticalLog.exception && (
                                                                     <Typography 
                                                                         variant="body2" 
                                                                         sx={{ 
@@ -375,7 +389,7 @@ const ErrorLogs = () => {
                                                                             borderRadius: 1
                                                                         }}
                                                                     >
-                                                                        {errorLog.exception}
+                                                                        {criticalLog.exception}
                                                                     </Typography>
                                                                 )}
                                                             </Box>
@@ -395,4 +409,4 @@ const ErrorLogs = () => {
     );
 };
 
-export default ErrorLogs; 
+export default CriticalLogs; 

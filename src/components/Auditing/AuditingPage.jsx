@@ -3,7 +3,8 @@ import {
     Box,
     Typography,
     Alert,
-    Divider
+    Tabs,
+    Tab
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -18,10 +19,10 @@ import ErrorLogs from './ErrorLogs';
 const AuditingPage = () => {
     // --- State --- 
     const [selectedAgentName, setSelectedAgentName] = useState(null);
-    const [selectedUserId, setSelectedUserId] = useState(null);
     const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
     const [selectedWorkflowTypeId, setSelectedWorkflowTypeId] = useState(null);
     const [error, setError] = useState(null);
+    const [activeTab, setActiveTab] = useState(0);
     
     // --- Hooks ---
     const auditingApi = useAuditingApi(); 
@@ -30,15 +31,8 @@ const AuditingPage = () => {
     // --- Callbacks --- 
     const handleAgentSelected = useCallback((agentName) => {
         setSelectedAgentName(agentName);
-        setSelectedUserId(null); // Reset user selection
         setSelectedWorkflowId(null); // Reset workflow selection
         setSelectedWorkflowTypeId(null); // Reset workflow type selection
-        setError(null);
-    }, []);
-
-    const handleUserSelected = useCallback((userId) => {
-        setSelectedUserId(userId);
-        setSelectedWorkflowId(null); // Reset workflow selection
         setError(null);
     }, []);
 
@@ -51,6 +45,10 @@ const AuditingPage = () => {
         setSelectedWorkflowTypeId(workflowTypeId);
         setError(null);
     }, []);
+
+    const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue);
+    };
 
     return (
         <Box sx={{
@@ -66,39 +64,42 @@ const AuditingPage = () => {
             {/* Display top-level error if any */} 
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
-            {/* Error Logs Section */}
-            <ErrorLogs />
-            
-            <Divider sx={{ my: 4 }} />
-            
-            <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-                Workflow Log Explorer
-            </Typography>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Tabs value={activeTab} onChange={handleTabChange}>
+                    <Tab label="Workflow Log Explorer" />
+                    <Tab label="Failed Workflow Runs" />
+                </Tabs>
+            </Box>
 
-            <AgentSelector
-                auditingApi={auditingApi}
-                showError={showError}
-                onAgentSelected={handleAgentSelected}
-            />
+            {activeTab === 0 && (
+                <>
+                    <AgentSelector
+                        auditingApi={auditingApi}
+                        showError={showError}
+                        onAgentSelected={handleAgentSelected}
+                    />
 
-            {selectedAgentName && (
-                <WorkflowSelector
-                    selectedAgentName={selectedAgentName}
-                    selectedUserId={selectedUserId}
-                    selectedWorkflowId={selectedWorkflowId}
-                    selectedWorkflowTypeId={selectedWorkflowTypeId}
-                    onUserSelected={handleUserSelected}
-                    onWorkflowSelected={handleWorkflowSelected}
-                    onWorkflowTypeSelected={handleWorkflowTypeSelected}
-                />
+                    {selectedAgentName && (
+                        <WorkflowSelector
+                            selectedAgentName={selectedAgentName}
+                            selectedWorkflowId={selectedWorkflowId}
+                            selectedWorkflowTypeId={selectedWorkflowTypeId}
+                            onWorkflowSelected={handleWorkflowSelected}
+                            onWorkflowTypeSelected={handleWorkflowTypeSelected}
+                        />
+                    )}
+
+                    <WorkflowLogs
+                        selectedAgentName={selectedAgentName}
+                        selectedWorkflowId={selectedWorkflowId}
+                        selectedWorkflowTypeId={selectedWorkflowTypeId}
+                    />
+                </>
             )}
 
-            <WorkflowLogs
-                selectedAgentName={selectedAgentName}
-                selectedUserId={selectedUserId}
-                selectedWorkflowId={selectedWorkflowId}
-                selectedWorkflowTypeId={selectedWorkflowTypeId}
-            />
+            {activeTab === 1 && (
+                <ErrorLogs />
+            )}
         </Box>
     );
 };

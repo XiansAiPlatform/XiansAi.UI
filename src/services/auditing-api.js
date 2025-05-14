@@ -101,13 +101,13 @@ export const useAuditingApi = () => {
         }
       },
 
-      getErrorLogs: async (startTime = null, endTime = null) => {
+      getCriticalLogs: async (startTime = null, endTime = null) => {
         try {
           const params = {};
           if (startTime) params.startTime = startTime;
           if (endTime) params.endTime = endTime;
           
-          return await apiClient.get('/api/client/auditing/error-logs', params);
+          return await apiClient.get('/api/client/auditing/critical-logs', params);
         } catch (error) {
           console.error('Error fetching error logs:', error);
           throw error;
