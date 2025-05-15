@@ -359,6 +359,7 @@ const Knowledge = () => {
                     onDeleteOneKnowledge={handleDeleteOneKnowledge}
                     isExpanded={expandedId === knowledge.id}
                     onToggleExpand={() => handleVersionToggle(knowledge.id)}
+                    permissionLevel={knowledge.permissionLevel}
                   />
                 </div>
               ))}
