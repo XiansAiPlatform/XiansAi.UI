@@ -15,7 +15,12 @@ import {
     IconButton,
     Tooltip,
     Switch,
-    FormControlLabel
+    FormControlLabel,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    Button
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
@@ -32,7 +37,10 @@ const CriticalLogs = () => {
     const [expandedTypes, setExpandedTypes] = useState({});
     const [timeFilter, setTimeFilter] = useState('24hours');
     const [autoRefresh, setAutoRefresh] = useState(false);
-    
+    const [selectedRun, setSelectedRun] = useState(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
+
     const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
     const auditingApi = useAuditingApi();
     const { showError } = useNotification();
@@ -114,6 +122,18 @@ const CriticalLogs = () => {
         };
     }, [fetchCriticalLogs, autoRefresh]);
 
+    const handleOpenDialog = (runGroup, workflowId) => {
+        setSelectedRun(runGroup);
+        setSelectedWorkflowId(workflowId);
+        setIsDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setSelectedRun(null);
+        setSelectedWorkflowId(null);
+    };
+
     if (isLoading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -133,10 +153,10 @@ const CriticalLogs = () => {
     if (!criticalLogs || criticalLogs.length === 0) {
         return (
             <Box sx={{ mt: 4 }}>
-                <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between', 
-                    alignItems: 'center', 
+                <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                     mb: 4,
                     flexDirection: { xs: 'column', md: 'row' },
                     gap: { xs: 2, md: 0 }
@@ -156,8 +176,8 @@ const CriticalLogs = () => {
                             label="Auto-refresh"
                         />
                         <Tooltip title="Refresh logs">
-                            <IconButton 
-                                onClick={fetchCriticalLogs} 
+                            <IconButton
+                                onClick={fetchCriticalLogs}
                                 disabled={isLoading}
                                 size="small"
                             >
@@ -169,7 +189,7 @@ const CriticalLogs = () => {
                             exclusive
                             onChange={handleTimeFilterChange}
                             size="small"
-                            sx={{ 
+                            sx={{
                                 '& .MuiToggleButton-root': {
                                     borderColor: 'var(--border-light)',
                                     color: 'var(--text-secondary)',
@@ -198,10 +218,10 @@ const CriticalLogs = () => {
 
     return (
         <Box sx={{ mt: 4 }}>
-            <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
+            <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 mb: 4,
                 flexDirection: { xs: 'column', md: 'row' },
                 gap: { xs: 2, md: 0 }
@@ -221,8 +241,8 @@ const CriticalLogs = () => {
                         label="Auto-refresh"
                     />
                     <Tooltip title="Refresh logs">
-                        <IconButton 
-                            onClick={fetchCriticalLogs} 
+                        <IconButton
+                            onClick={fetchCriticalLogs}
                             disabled={isLoading}
                             size="small"
                         >
@@ -234,7 +254,7 @@ const CriticalLogs = () => {
                         exclusive
                         onChange={handleTimeFilterChange}
                         size="small"
-                        sx={{ 
+                        sx={{
                             '& .MuiToggleButton-root': {
                                 borderColor: 'var(--border-light)',
                                 color: 'var(--text-secondary)',
@@ -254,10 +274,10 @@ const CriticalLogs = () => {
                     </ToggleButtonGroup>
                 </Stack>
             </Box>
-            
+
             {criticalLogs.map((agentGroup, agentIndex) => (
-                <Accordion 
-                    key={`agent-${agentIndex}`} 
+                <Accordion
+                    key={`agent-${agentIndex}`}
                     expanded={expandedAgents[agentIndex] || false}
                     sx={{ mb: 2 }}
                     onChange={handleAgentChange(agentIndex)}
@@ -268,12 +288,12 @@ const CriticalLogs = () => {
                                 {agentGroup.agentName}
                             </Typography>
                             {!expandedAgents[agentIndex] && (
-                                <Chip 
-                                    size="small" 
-                                    color="error" 
-                                    label={`${agentGroup.workflowTypes.reduce((total, type) => 
-                                        total + type.workflows.reduce((workflowTotal, workflow) => 
-                                            workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => 
+                                <Chip
+                                    size="small"
+                                    color="error"
+                                    label={`${agentGroup.workflowTypes.reduce((total, type) =>
+                                        total + type.workflows.reduce((workflowTotal, workflow) =>
+                                            workflowTotal + workflow.workflowRuns.reduce((runTotal, run) =>
                                                 runTotal + run.criticalLogs.length, 0), 0), 0)} Error(s)`}
                                     icon={<ErrorOutlineIcon />}
                                     sx={{ ml: 2 }}
@@ -283,8 +303,8 @@ const CriticalLogs = () => {
                     </AccordionSummary>
                     <AccordionDetails>
                         {agentGroup.workflowTypes.map((workflowTypeGroup, typeIndex) => (
-                            <Accordion 
-                                key={`type-${agentIndex}-${typeIndex}`} 
+                            <Accordion
+                                key={`type-${agentIndex}-${typeIndex}`}
                                 expanded={expandedTypes[`${agentIndex}-${typeIndex}`] || false}
                                 sx={{ mb: 2, backgroundColor: 'background.paper' }}
                                 onChange={handleTypeChange(agentIndex, typeIndex)}
@@ -295,11 +315,11 @@ const CriticalLogs = () => {
                                             {workflowTypeGroup.workflowTypeName}
                                         </Typography>
                                         {!expandedTypes[`${agentIndex}-${typeIndex}`] && (
-                                            <Chip 
-                                                size="small" 
-                                                color="error" 
-                                                label={`${workflowTypeGroup.workflows.reduce((total, workflow) => 
-                                                    total + workflow.workflowRuns.reduce((runTotal, run) => 
+                                            <Chip
+                                                size="small"
+                                                color="error"
+                                                label={`${workflowTypeGroup.workflows.reduce((total, workflow) =>
+                                                    total + workflow.workflowRuns.reduce((runTotal, run) =>
                                                         runTotal + run.criticalLogs.length, 0), 0)} Error(s)`}
                                                 icon={<ErrorOutlineIcon />}
                                                 sx={{ ml: 2 }}
@@ -309,95 +329,61 @@ const CriticalLogs = () => {
                                 </AccordionSummary>
                                 <AccordionDetails>
                                     {workflowTypeGroup.workflows.map((workflowGroup, workflowIndex) => (
-                                        <Accordion 
+                                        <Box
                                             key={`workflow-${agentIndex}-${typeIndex}-${workflowIndex}`}
-                                            sx={{ mb: 1, backgroundColor: 'background.default' }}
+                                            sx={{ mb: 2, p: 2, backgroundColor: 'background.default', borderRadius: 1 }}
                                         >
-                                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography variant="body2" fontWeight="medium">
-                                                        Workflow: {workflowGroup.workflowId}
-                                                    </Typography>
-                                                    <Tooltip title="View workflow run">
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                window.open(`${baseUrl}/runs/${workflowGroup.workflowId}/${workflowGroup.workflowRuns[0].workflowRunId}`, '_blank');
-                                                            }}
-                                                            sx={{ ml: 1 }}
-                                                        >
-                                                            <LinkIcon fontSize="small" />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Chip 
-                                                        size="small" 
-                                                        color="error" 
-                                                        label={`${workflowGroup.workflowRuns.reduce((total, run) => total + run.criticalLogs.length, 0)} Error(s)`}
-                                                        icon={<ErrorOutlineIcon />}
-                                                        sx={{ ml: 2 }}
-                                                    />
-                                                </Box>
-                                            </AccordionSummary>
-                                            <AccordionDetails>
-                                                {workflowGroup.workflowRuns.map((runGroup, runIndex) => (
-                                                    <Paper 
-                                                        key={`run-${agentIndex}-${typeIndex}-${workflowIndex}-${runIndex}`}
-                                                        sx={{ 
-                                                            p: 2, 
-                                                            mb: 1, 
-                                                            backgroundColor: 'rgba(211, 47, 47, 0.08)',
-                                                            borderLeft: '4px solid #d32f2f'
-                                                        }}
-                                                    >
-                                                        <Box sx={{ mb: 1 }}>
-                                                            <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                                                                <strong>Workflow Run ID:</strong> {runGroup.workflowRunId}
-                                                            </Typography>
+                                                    <Typography variant="body2" fontWeight="medium" sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Box sx={{ 
+                                                            width: '10rem',
+                                                            color: 'text.secondary',
+                                                            fontSize: '0.75rem',
+                                                            mr: 1.5
+                                                        }}>
+                                                            {workflowGroup.workflowRuns[0]?.criticalLogs[0]?.createdAt 
+                                                                ? new Date(workflowGroup.workflowRuns[0].criticalLogs[0].createdAt).toLocaleString()
+                                                                : ''
+                                                            }
                                                         </Box>
-                            
-                                                        {runGroup.criticalLogs.map((criticalLog, logIndex) => (
-                                                            <Box key={`log-${logIndex}`} sx={{ mb: 2 }}>
-                                                                <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
-                                                                    <strong>Timestamp:</strong> {new Date(criticalLog.createdAt).toLocaleString()}
-                                                                </Typography>
-                                                                
-                                                                <Typography 
-                                                                    variant="body2" 
-                                                                    sx={{ 
-                                                                        fontFamily: 'monospace',
-                                                                        whiteSpace: 'pre-wrap',
-                                                                        wordBreak: 'break-word',
-                                                                        p: 1,
-                                                                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                                                        borderRadius: 1
-                                                                    }}
-                                                                >
-                                                                    {criticalLog.message}
-                                                                </Typography>
-                                                                
-                                                                {criticalLog.exception && (
-                                                                    <Typography 
-                                                                        variant="body2" 
-                                                                        sx={{ 
-                                                                            fontFamily: 'monospace',
-                                                                            whiteSpace: 'pre-wrap',
-                                                                            wordBreak: 'break-word',
-                                                                            p: 1,
-                                                                            mt: 1,
-                                                                            backgroundColor: 'rgba(211, 47, 47, 0.14)',
-                                                                            borderRadius: 1
-                                                                        }}
-                                                                    >
-                                                                        {criticalLog.exception}
-                                                                    </Typography>
-                                                                )}
-                                                            </Box>
-                                                        ))}
-                                                    </Paper>
-                                                ))}
-                                            </AccordionDetails>
-                                        </Accordion>
+                                                        <Box sx={{ 
+                                                            minWidth: '12rem',
+                                                            maxWidth: '35rem',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap'
+                                                        }}>
+                                                            {workflowGroup.workflowId}
+                                                        </Box>
+                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, flexShrink: 0 }}>
+                                                        <Tooltip title="View workflow run">
+                                                            <IconButton
+                                                                size="small"
+                                                                onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
+                                                            >
+                                                                <LinkIcon fontSize="small" />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Chip 
+                                                            size="small" 
+                                                            color="error" 
+                                                            label={`${workflowGroup.workflowRuns.reduce((total, run) => total + run.criticalLogs.length, 0)} Error(s)`}
+                                                            icon={<ErrorOutlineIcon />}
+                                                            sx={{ ml: 1 }}
+                                                        />
+                                                    </Box>
+                                                </Box>
+                                                <Button
+                                                    variant="outlined"
+                                                    size="small"
+                                                    onClick={() => handleOpenDialog(workflowGroup.workflowRuns[0], workflowGroup.workflowId)}
+                                                >
+                                                    View Details
+                                                </Button>
+                                            </Box>
+                                        </Box>
                                     ))}
                                 </AccordionDetails>
                             </Accordion>
@@ -405,6 +391,87 @@ const CriticalLogs = () => {
                     </AccordionDetails>
                 </Accordion>
             ))}
+
+            <Dialog
+                open={isDialogOpen}
+                onClose={handleCloseDialog}
+                maxWidth="md"
+                fullWidth
+            >
+                {selectedRun && (
+                    <>
+                        <DialogTitle>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Box>
+                                    <Typography variant="h6">Workflow Run Details</Typography>
+                                    <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+                                        Run ID: {selectedRun.workflowRunId}
+                                    </Typography>
+                                </Box>
+                                <Tooltip title="View workflow run">
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
+                                    >
+                                        <LinkIcon fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        </DialogTitle>
+                        <DialogContent>
+                            {selectedRun.criticalLogs.map((criticalLog, logIndex) => (
+                                <Paper
+                                    key={`log-${logIndex}`}
+                                    sx={{
+                                        p: 2,
+                                        mb: 2,
+                                        backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                        borderLeft: '4px solid #d32f2f'
+                                    }}
+                                >
+                                    <Typography variant="caption" sx={{ display: 'block', mb: 0.5 }}>
+                                        <strong>Timestamp:</strong> {new Date(criticalLog.createdAt).toLocaleString()}
+                                    </Typography>
+
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            fontFamily: 'monospace',
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                            p: 1,
+                                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                            borderRadius: 1
+                                        }}
+                                    >
+                                        {criticalLog.message}
+                                    </Typography>
+
+                                    {criticalLog.exception && (
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontFamily: 'monospace',
+                                                whiteSpace: 'pre-wrap',
+                                                wordBreak: 'break-word',
+                                                p: 1,
+                                                mt: 1,
+                                                backgroundColor: 'rgba(211, 47, 47, 0.14)',
+                                                borderRadius: 1
+                                            }}
+                                        >
+                                            {criticalLog.exception}
+                                        </Typography>
+                                    )}
+                                </Paper>
+                            ))}
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseDialog}>Close</Button>
+                        </DialogActions>
+                    </>
+                )}
+            </Dialog>
         </Box>
     );
 };
