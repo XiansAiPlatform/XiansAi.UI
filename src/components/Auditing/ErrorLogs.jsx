@@ -290,12 +290,11 @@ const CriticalLogs = () => {
                             {!expandedAgents[agentIndex] && (
                                 <Chip
                                     size="small"
-                                    color="error"
+                                    color="primary"
                                     label={`${agentGroup.workflowTypes.reduce((total, type) =>
                                         total + type.workflows.reduce((workflowTotal, workflow) =>
                                             workflowTotal + workflow.workflowRuns.reduce((runTotal, run) =>
-                                                runTotal + run.criticalLogs.length, 0), 0), 0)} Error(s)`}
-                                    icon={<ErrorOutlineIcon />}
+                                                runTotal + run.criticalLogs.length, 0), 0), 0)} Total`}
                                     sx={{ ml: 2 }}
                                 />
                             )}
@@ -317,11 +316,10 @@ const CriticalLogs = () => {
                                         {!expandedTypes[`${agentIndex}-${typeIndex}`] && (
                                             <Chip
                                                 size="small"
-                                                color="error"
+                                                color="primary"
                                                 label={`${workflowTypeGroup.workflows.reduce((total, workflow) =>
                                                     total + workflow.workflowRuns.reduce((runTotal, run) =>
-                                                        runTotal + run.criticalLogs.length, 0), 0)} Error(s)`}
-                                                icon={<ErrorOutlineIcon />}
+                                                        runTotal + run.criticalLogs.length, 0), 0)} Total`}
                                                 sx={{ ml: 2 }}
                                             />
                                         )}
@@ -366,13 +364,6 @@ const CriticalLogs = () => {
                                                                 <LinkIcon fontSize="small" />
                                                             </IconButton>
                                                         </Tooltip>
-                                                        <Chip 
-                                                            size="small" 
-                                                            color="error" 
-                                                            label={`${workflowGroup.workflowRuns.reduce((total, run) => total + run.criticalLogs.length, 0)} Error(s)`}
-                                                            icon={<ErrorOutlineIcon />}
-                                                            sx={{ ml: 1 }}
-                                                        />
                                                     </Box>
                                                 </Box>
                                                 <Button
