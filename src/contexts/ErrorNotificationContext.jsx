@@ -41,8 +41,6 @@ export const ErrorNotificationProvider = ({ children }) => {
         try {
             const now = new Date();
             const startTime = lastCheckedTimeRef.current;
-
-            console.log('ErrorNotificationContext: Fetching error count at', now.toISOString());
             
             const result = await auditingApi.getCriticalLogs(
                 startTime.toISOString(),
@@ -92,8 +90,6 @@ export const ErrorNotificationProvider = ({ children }) => {
                 clearInterval(pollingIntervalRef.current);
             }
 
-            // Set up new polling interval
-            console.log('ErrorNotificationContext: Setting up new polling interval');
             pollingIntervalRef.current = setInterval(fetchErrorCount, POLLING_INTERVAL);
 
             // Cleanup on unmount or when auth state changes
@@ -104,8 +100,7 @@ export const ErrorNotificationProvider = ({ children }) => {
                 }
             };
         } else if (isAuditingPage && pollingIntervalRef.current) {
-            // Clear interval if we're on the auditing page
-            console.log('ErrorNotificationContext: Clearing polling interval on auditing page');
+          
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
         }
