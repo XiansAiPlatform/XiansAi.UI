@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ErrorNotificationProvider } from './contexts/ErrorNotificationContext';
 import WorkflowList from './components/Runs/WorkflowList';
 import WorkflowDetails from './components/Runs/WorkflowDetails/WorkflowDetails';
 import Layout from './components/Layout/Layout';
@@ -49,62 +50,64 @@ function App() {
     <BrowserRouter>
         <NotificationProvider>
           <OrganizationProvider>
-            <ThemeProvider theme={theme}>
-              <LoadingProvider>
-                <SliderProvider>
-                  <Toaster />
-                  <Routes>
-                    <Route path="/callback" element={<Callback />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={ <Home /> } />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
-                    <Route element={<Layout />}>
-                      <Route path="/runs" element={
-                        <ProtectedRoute>
-                          <WorkflowList />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/definitions" element={
-                        <ProtectedRoute>
-                          <DefinitionList />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/runs/:id/:runId" element={
-                        <ProtectedRoute>
-                          <WorkflowDetails />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/agents" element={
-                        <ProtectedRoute>
-                          <NotImplemented />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/knowledge" element={
-                        <ProtectedRoute>
-                          <Knowledge />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/settings" element={
-                        <ProtectedRoute>
-                          <Settings />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/messaging" element={
-                        <ProtectedRoute>
-                          <MessagingPage />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/auditing" element={
-                        <ProtectedRoute>
-                          <AuditingPage />
-                        </ProtectedRoute>
-                      } />
-                    </Route>
-                  </Routes>
-                </SliderProvider>
-              </LoadingProvider>
-            </ThemeProvider>
+            <ErrorNotificationProvider>
+              <ThemeProvider theme={theme}>
+                <LoadingProvider>
+                  <SliderProvider>
+                    <Toaster />
+                    <Routes>
+                      <Route path="/callback" element={<Callback />} />
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/" element={ <Home /> } />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
+                      <Route element={<Layout />}>
+                        <Route path="/runs" element={
+                          <ProtectedRoute>
+                            <WorkflowList />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/definitions" element={
+                          <ProtectedRoute>
+                            <DefinitionList />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/runs/:id/:runId" element={
+                          <ProtectedRoute>
+                            <WorkflowDetails />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/agents" element={
+                          <ProtectedRoute>
+                            <NotImplemented />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/knowledge" element={
+                          <ProtectedRoute>
+                            <Knowledge />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/settings" element={
+                          <ProtectedRoute>
+                            <Settings />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/messaging" element={
+                          <ProtectedRoute>
+                            <MessagingPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/auditing" element={
+                          <ProtectedRoute>
+                            <AuditingPage />
+                          </ProtectedRoute>
+                        } />
+                      </Route>
+                    </Routes>
+                  </SliderProvider>
+                </LoadingProvider>
+              </ThemeProvider>
+            </ErrorNotificationProvider>
           </OrganizationProvider>
         </NotificationProvider>
         <ToastContainer />

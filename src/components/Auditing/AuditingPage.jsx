@@ -1,13 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     Box,
     Typography,
     Alert,
     Tabs,
-    Tab
+    Tab,
+    Badge
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
 import AgentSelector from './AgentSelector';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
@@ -27,6 +29,7 @@ const AuditingPage = () => {
     // --- Hooks ---
     const auditingApi = useAuditingApi(); 
     const { showError } = useNotification();
+    const { tabErrorCount, resetTabErrorCount } = useErrorNotification();
 
     // --- Callbacks --- 
     const handleAgentSelected = useCallback((agentName) => {
@@ -48,6 +51,11 @@ const AuditingPage = () => {
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
+        
+        // Reset tab error count when switching to the Failed Workflow Runs tab
+        if (newValue === 1 && tabErrorCount > 0) {
+            resetTabErrorCount();
+        }
     };
 
     return (
@@ -67,7 +75,27 @@ const AuditingPage = () => {
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                 <Tabs value={activeTab} onChange={handleTabChange}>
                     <Tab label="Workflow Log Explorer" />
-                    <Tab label="Failed Workflow Runs" />
+                    <Tab 
+                        label={
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                Failed Workflow Runs
+                                {tabErrorCount > 0 && (
+                                    <Badge 
+                                        badgeContent={tabErrorCount} 
+                                        color="error"
+                                        sx={{ 
+                                            ml: 1,
+                                            '& .MuiBadge-badge': {
+                                                fontSize: '0.65rem',
+                                                height: '18px',
+                                                minWidth: '18px',
+                                            }
+                                        }}
+                                    />
+                                )}
+                            </Box>
+                        } 
+                    />
                 </Tabs>
             </Box>
 

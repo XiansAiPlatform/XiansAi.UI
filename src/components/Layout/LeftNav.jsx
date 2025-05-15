@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
+import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider, Badge } from '@mui/material';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
@@ -7,6 +7,7 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
+import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
 const NAV_ITEMS = [
   {
     to: '/runs',
@@ -47,7 +48,7 @@ const NAV_ITEMS = [
 ];
 
 // Reusable NavItem component
-const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick }) => {
+const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeCount = 0 }) => {
   const selected = isSelected(pathname);
   
   return (
@@ -72,7 +73,23 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick }) => {
           opacity: selected ? 1 : 0.7
         }}
       >
-        {icon}
+        {badgeCount > 0 ? (
+          <Badge
+            badgeContent={badgeCount}
+            color="error"
+            sx={{
+              '& .MuiBadge-badge': {
+                fontSize: '0.65rem',
+                height: '18px',
+                minWidth: '18px',
+              }
+            }}
+          >
+            {icon}
+          </Badge>
+        ) : (
+          icon
+        )}
       </ListItemIcon>
       <ListItemText
         primary={label}
@@ -93,8 +110,13 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick }) => {
 const LeftNav = ({ isOpen, onClose }) => {
   const { pathname } = useLocation();
   const isMobile = window.innerWidth <= 768;
+  const { navErrorCount, resetNavErrorCount } = useErrorNotification();
 
-  const handleNavItemClick = () => {
+  const handleNavItemClick = (to) => {
+    if (to === '/auditing' && navErrorCount > 0) {
+      resetNavErrorCount();
+    }
+    
     if (isMobile && onClose) {
       onClose();
     }
@@ -131,7 +153,8 @@ const LeftNav = ({ isOpen, onClose }) => {
                   key={item.to}
                   {...item}
                   pathname={pathname}
-                  onNavItemClick={handleNavItemClick}
+                  onNavItemClick={() => handleNavItemClick(item.to)}
+                  badgeCount={item.to === '/auditing' ? navErrorCount : 0}
                 />
               ))}
             </List>
