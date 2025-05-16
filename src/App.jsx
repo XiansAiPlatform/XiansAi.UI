@@ -1,126 +1,23 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { NotificationProvider } from './contexts/NotificationContext';
-import { ErrorNotificationProvider } from './contexts/ErrorNotificationContext';
-import WorkflowList from './components/Runs/WorkflowList';
-import WorkflowDetails from './components/Runs/WorkflowDetails/WorkflowDetails';
-import Layout from './components/Layout/Layout';
-import { SliderProvider } from './contexts/SliderContext';
-import { LoadingProvider } from './contexts/LoadingContext';
-import Toaster from './components/Common/Toaster/Toaster';
-import ProtectedRoute from './auth/ProtectedRoute';
-import Callback from './auth/Callback';
+import { BrowserRouter } from 'react-router-dom';
+import PublicRoutes from './modules/Public/PublicRoutes';
+import ManagerRoutes from './modules/Manager/ManagerRoutes';
+import AgentsRoutes from './modules/Agents/AgentsRoutes';
+import AuthProvider from './modules/Manager/auth/AuthProvider';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import NotImplemented from './components/NotImplemented/NotImplemented';
-import { ThemeProvider } from '@mui/material/styles';
-import { theme } from './theme/mui-theme';
-import Settings from './components/Settings/Settings';
-import Knowledge from './components/Knowledge/Knowledge';
-import { OrganizationProvider } from './contexts/OrganizationContext';
-import DefinitionList from './components/Definitions/DefinitionList';
-import Home from './components/Public/Home/Home';
-import Login from './auth/Login';
-import Register from './components/Public/Register/Register';
-import { useAuth0 } from "@auth0/auth0-react";
-import MessagingPage from './components/Messaging/MessagingPage';
-import AuditingPage from './components/Auditing/AuditingPage';
 
 function App() {
-  const { isLoading, error, logout } = useAuth0();
-
-  if (error) {
-    console.error(error);
-    return <div>Oops... {error.message}</div>;
-  }
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  const handleLogout = () => {
-    logout({ 
-      logoutParams: {
-        returnTo: window.location.origin + '/login'
-      }
-    });
-  };
-
   return (
     <BrowserRouter>
-        <NotificationProvider>
-          <OrganizationProvider>
-            <ErrorNotificationProvider>
-              <ThemeProvider theme={theme}>
-                <LoadingProvider>
-                  <SliderProvider>
-                    <Toaster />
-                    <Routes>
-                      <Route path="/callback" element={<Callback />} />
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/" element={ <Home /> } />
-                      <Route path="/register" element={<Register />} />
-                      <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
-                      <Route element={<Layout />}>
-                        <Route path="/runs" element={
-                          <ProtectedRoute>
-                            <WorkflowList />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/definitions" element={
-                          <ProtectedRoute>
-                            <DefinitionList />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/runs/:id/:runId" element={
-                          <ProtectedRoute>
-                            <WorkflowDetails />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/agents" element={
-                          <ProtectedRoute>
-                            <NotImplemented />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/knowledge" element={
-                          <ProtectedRoute>
-                            <Knowledge />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/settings" element={
-                          <ProtectedRoute>
-                            <Settings />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/messaging" element={
-                          <ProtectedRoute>
-                            <MessagingPage />
-                          </ProtectedRoute>
-                        } />
-                        <Route path="/auditing" element={
-                          <ProtectedRoute>
-                            <AuditingPage />
-                          </ProtectedRoute>
-                        } />
-                      </Route>
-                    </Routes>
-                  </SliderProvider>
-                </LoadingProvider>
-              </ThemeProvider>
-            </ErrorNotificationProvider>
-          </OrganizationProvider>
-        </NotificationProvider>
+      <AuthProvider>
+        <PublicRoutes />
+        <AgentsRoutes />
+        <ManagerRoutes />
         <ToastContainer />
+      </AuthProvider>
     </BrowserRouter>
   );
-}
-
-function LogoutHandler({ onLogout }) {
-  React.useEffect(() => {
-    onLogout();
-  }, [onLogout]);
-
-  return null;
 }
 
 export default App; 
