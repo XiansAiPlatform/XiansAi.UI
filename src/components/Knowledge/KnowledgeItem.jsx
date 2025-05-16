@@ -18,13 +18,14 @@ import { useKnowledgeApi } from '../../services/knowledge-api';
 import { ReactComponent as AgentKnowledgeIcon } from '../../theme/agent-knowledge.svg';
 import { keyframes } from '@emotion/react';
 
-const KnowledgeItem = ({ 
+const KnowledgeItem = ({
   knowledge,
   onUpdateKnowledge,
   onDeleteAllKnowledge,
   onDeleteOneKnowledge,
   isExpanded,
-  onToggleExpand
+  onToggleExpand,
+  permissionLevel
 }) => {
   const { openSlider, closeSlider } = useSlider();
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
@@ -78,7 +79,7 @@ const KnowledgeItem = ({
 
   const handleEdit = () => {
     openSlider(
-      <KnowledgeEditor 
+      <KnowledgeEditor
         mode="edit"
         knowledge={knowledge}
         onSave={(updatedKnowledge) => {
@@ -95,10 +96,10 @@ const KnowledgeItem = ({
     try {
       // Fetch the latest version from server by ID
       const knowledgeDetails = await knowledgeApi.getKnowledge(knowledge.id);
-      
+
       openSlider(
-        <KnowledgeViewer 
-          knowledge={knowledgeDetails} 
+        <KnowledgeViewer
+          knowledge={knowledgeDetails}
           onEdit={handleEdit}
           onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
           title={`View: ${knowledge.name}`}
@@ -109,8 +110,8 @@ const KnowledgeItem = ({
       console.error('Error fetching knowledge details:', error);
       // Fallback to existing data if fetch fails
       openSlider(
-        <KnowledgeViewer 
-          knowledge={knowledge} 
+        <KnowledgeViewer
+          knowledge={knowledge}
           onEdit={handleEdit}
           onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
           title={`View: ${knowledge.name}`}
@@ -157,9 +158,9 @@ const KnowledgeItem = ({
     try {
       // Fetch the specific version by ID
       const versionDetails = await knowledgeApi.getKnowledge(version.id);
-      
+
       openSlider(
-        <KnowledgeViewer 
+        <KnowledgeViewer
           knowledge={versionDetails}
           onEdit={handleEdit}
           onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
@@ -171,7 +172,7 @@ const KnowledgeItem = ({
       console.error('Error fetching knowledge version:', error);
       // Continue with existing data as fallback
       openSlider(
-        <KnowledgeViewer 
+        <KnowledgeViewer
           knowledge={{ ...knowledge, ...version }}
           onEdit={handleEdit}
           onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
@@ -210,7 +211,7 @@ const KnowledgeItem = ({
 
   return (
     <>
-      <Box 
+      <Box
         className="instruction-card"
         onClick={handleView}
         sx={{
@@ -230,28 +231,28 @@ const KnowledgeItem = ({
         <Box>
           <Box className="card-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{ 
+              <Box sx={{
                 mr: 0,
-                display: 'flex', 
+                display: 'flex',
                 alignItems: 'center',
                 backgroundColor: 'white',
                 borderRadius: '50%',
                 p: '5px',
-                boxShadow: wasRecentlyUpdated 
-                  ? '0 0 0 1px var(--success)' 
+                boxShadow: wasRecentlyUpdated
+                  ? '0 0 0 1px var(--success)'
                   : '0 0 0 1px var(--border-light)',
                 ...(wasRecentlyUpdated && {
                   animation: `${pulse} 2s infinite`,
                 })
               }}>
-                <AgentKnowledgeIcon style={{ 
-                  width: 32, 
+                <AgentKnowledgeIcon style={{
+                  width: 32,
                   height: 32,
-                  opacity: wasRecentlyUpdated ? 1 : 0.85 
+                  opacity: wasRecentlyUpdated ? 1 : 0.85
                 }} />
               </Box>
-              <Typography 
-                variant="h6" 
+              <Typography
+                variant="h6"
                 className="instruction-name"
                 sx={{
                   fontWeight: 500,
@@ -266,59 +267,66 @@ const KnowledgeItem = ({
                   label="New"
                   size="small"
                   color="success"
-                  sx={{ 
+                  sx={{
                     height: '22px',
                     fontSize: '0.7rem',
                   }}
                 />
               )}
             </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {permissionLevel === 'edit' ? (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Tooltip title="Edit" arrow>
-                <IconButton 
-                  size="small" 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleEdit();
-                  }}
-                  sx={{
-                    color: 'primary.main',
-                    width: 28,
-                    height: 28,
-                    borderRadius: '50%',
-                    mr: 2,
-                    '&:hover': {
-                      bgcolor: 'primary.lighter',
-                    }
-                  }}
-                >
-                  <Edit fontSize="small" />
-                </IconButton>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit();
+                    }}
+                    sx={{
+                      color: 'primary.main',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      mr: 2,
+                      '&:hover': {
+                        bgcolor: 'primary.lighter',
+                      }
+                    }}
+                  >
+                    <Edit fontSize="small" />
+                  </IconButton>
+                </span>
               </Tooltip>
               <Tooltip title="Delete all versions" arrow>
-                <IconButton 
-                  size="small" 
-                  onClick={handleDeleteAllClick}
-                  sx={{
-                    color: 'error.main',
-                    width: 28,
-                    height: 28,
-                    borderRadius: '50%',
-                    '&:hover': {
-                      bgcolor: 'error.light',
-                    }
-                  }}
-                >
-                  <Delete fontSize="small" />
-                </IconButton>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={handleDeleteAllClick}
+                    sx={{
+                      color: 'error.main',
+                      width: 28,
+                      height: 28,
+                      borderRadius: '50%',
+                      '&:hover': {
+                        bgcolor: 'error.light',
+                      }
+                    }}
+                  >
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Box>
+          ) : null}
+
           </Box>
-          
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1, ml: 8 }}>
-            <Chip 
-              size="small" 
-              label={knowledge.type || 'No Type'} 
+            <Chip
+              size="small"
+              label={knowledge.type || 'No Type'}
               className="type-chip"
               variant="outlined"
               sx={{
@@ -328,9 +336,9 @@ const KnowledgeItem = ({
               }}
             />
             {knowledge.agent && (
-              <Chip 
-                size="small" 
-                label={knowledge.agent} 
+              <Chip
+                size="small"
+                label={knowledge.agent}
                 className="agent-chip"
                 variant="outlined"
                 sx={{
@@ -344,7 +352,7 @@ const KnowledgeItem = ({
               size="small"
               onClick={handleVersions}
               endIcon={
-                <KeyboardArrowDown 
+                <KeyboardArrowDown
                   sx={{
                     transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                     transition: 'transform 0.2s',
@@ -362,27 +370,27 @@ const KnowledgeItem = ({
             </Button>
           </Box>
 
-          <Collapse 
-            in={isExpanded} 
-            timeout={300} 
+          <Collapse
+            in={isExpanded}
+            timeout={300}
             unmountOnExit
-            style={{ 
+            style={{
               transformOrigin: 'top center',
               willChange: 'height, opacity'
             }}
           >
-            <Box 
+            <Box
               className="versions-panel"
-              sx={{ 
-                mt: 2, 
+              sx={{
+                mt: 2,
                 pt: 2,
                 borderTop: '1px dashed',
                 borderColor: 'divider'
               }}
             >
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   mb: 1,
                   fontWeight: 'medium',
                   color: 'text.secondary'
@@ -390,14 +398,14 @@ const KnowledgeItem = ({
               >
                 Version History
               </Typography>
-              
+
               {isLoading ? (
                 <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
                   Loading versions...
                 </Typography>
               ) : versions.length > 0 ? (
-                <Box sx={{ 
-                  display: 'flex', 
+                <Box sx={{
+                  display: 'flex',
                   flexDirection: 'column',
                   gap: 1
                 }}>
@@ -434,27 +442,31 @@ const KnowledgeItem = ({
                           )}
                         </Typography>
                       </Box>
-                      
-                      <Tooltip title="Delete this version" arrow>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteOne(version);
-                          }}
-                          sx={{
-                            color: 'error.main',
-                            width: 28,
-                            height: 28,
-                            borderRadius: '50%',
-                            '&:hover': {
-                              bgcolor: 'error.light',
-                            }
-                          }}
-                        >
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+
+                      {permissionLevel === 'edit' ? (
+                        <Tooltip title="Delete this version" arrow>
+                          <span>
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteOne(version);
+                              }}
+                              sx={{
+                                color: 'error.main',
+                                width: 28,
+                                height: 28,
+                                borderRadius: '50%',
+                                '&:hover': {
+                                  bgcolor: 'error.light',
+                                }
+                              }}
+                            >
+                              <Delete fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                         ) : null} 
                     </Box>
                   ))}
                 </Box>
