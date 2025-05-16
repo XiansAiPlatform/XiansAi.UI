@@ -55,28 +55,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     if (!workflowLogs.length) return false;
     
     // Check by log level
-    if (workflowLogs[0]?.level === 4) return true;
-    
-    // Check last log message for error information in JSON structure
-    const lastLog = workflowLogs[0]; // First log is the latest
-    if (lastLog?.message) {
-      try {
-        // Find JSON object in message if it exists
-        const match = lastLog.message.match(/\{.*\}/s);
-        if (match) {
-          const jsonObj = JSON.parse(match[0]);
-          // Check for the specific error structure
-          return jsonObj.result && 
-                 jsonObj.result.failed && 
-                 jsonObj.result.failed.failure;
-        }
-      } catch (e) {
-        // If parsing fails, it's not a valid JSON error structure
-        console.debug('Error parsing log message JSON:', e);
-      }
-    }
-    
-    return false;
+    return workflowLogs[0]?.level === 4;
   }, [workflowLogs]);
 
   // Helper function to convert UI value to API value
@@ -283,7 +262,6 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
         </Box>
 
       </Box>
-
       {/* Logs Modal */}
       <Dialog
         open={logsModalOpen}
@@ -448,26 +426,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                     }
                   };
 
-                  // Check if this log contains error information in the message
-                  const hasErrorMessage = log.message && (() => {
-                    try {
-                      // Find JSON object in message if it exists
-                      const match = log.message.match(/\{.*\}/s);
-                      if (match) {
-                        const jsonObj = JSON.parse(match[0]);
-                        // Check for the specific error structure
-                        return jsonObj.result && 
-                               jsonObj.result.failed && 
-                               jsonObj.result.failed.failure;
-                      }
-                      return false;
-                    } catch (e) {
-                      // If parsing fails, it's not a valid JSON error structure
-                      return false;
-                    }
-                  })();
-
-                  const logLevelClass = hasErrorMessage ? 'error' : getLogLevelClass(log.level);
+                  const logLevelClass = getLogLevelClass(log.level);
                   
                   // Create a guaranteed unique key for each log
                   const logKey = log.id || `log-${log.createdAt}-${index}-${log.level}-${log.message?.substring(0, 20)}`;
@@ -482,7 +441,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                             color: getLogLevelColor(log.level)
                           }}
                         >
-                          {hasErrorMessage ? 'FAILED' : getLogLevelLabel(log.level)}
+                          {getLogLevelLabel(log.level)}
                         </Box>
                         <Box className="log-time">
                           {new Date(log.createdAt).toLocaleString()}

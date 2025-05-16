@@ -43,8 +43,8 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
 
     if (knowledge.type?.toLowerCase() === 'json') {
       try {
-        const jsonContent = typeof knowledge.content === 'string' 
-          ? JSON.parse(knowledge.content) 
+        const jsonContent = typeof knowledge.content === 'string'
+          ? JSON.parse(knowledge.content)
           : knowledge.content;
         return <JsonDisplay data={jsonContent} />;
       } catch (error) {
@@ -82,7 +82,7 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ 
+      <Box sx={{
         display: 'flex',
         justifyContent: 'space-between',
         mb: 3,
@@ -96,9 +96,9 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
           </Typography>
 
           <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-            <Chip 
-              size="small" 
-              label={knowledge.type || 'No Type'} 
+            <Chip
+              size="small"
+              label={knowledge.type || 'No Type'}
               variant="outlined"
               sx={{
                 color: 'var(--tag-text)',
@@ -107,10 +107,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
               }}
             />
             {knowledge.agent && (
-              <Chip 
-                size="small" 
+              <Chip
+                size="small"
                 label={knowledge.agent}
-                variant="outlined" 
+                variant="outlined"
                 sx={{
                   color: 'var(--tag-text)',
                   borderColor: 'divider',
@@ -118,9 +118,9 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
                 }}
               />
             )}
-            <Chip 
-              size="small" 
-              label={`v.${knowledge.version?.substring(0, 7) || 'unknown'}`} 
+            <Chip
+              size="small"
+              label={`v.${knowledge.version?.substring(0, 7) || 'unknown'}`}
               variant="outlined"
               sx={{
                 color: 'text.secondary',
@@ -131,17 +131,17 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
             />
           </Stack>
 
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             mt: 1.5,
             color: 'text.secondary',
             fontSize: '0.85rem'
           }}>
-            <Typography 
-              variant="body2" 
-              component="span" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              component="span"
+              sx={{
                 mr: 0.5,
                 display: 'flex',
                 alignItems: 'center',
@@ -150,10 +150,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
             >
               Created {formatDateTime(knowledge.createdAt)}
             </Typography>
-            <Typography 
+            <Typography
               variant="body2"
               component="span"
-              sx={{ 
+              sx={{
                 mx: 0.5,
                 color: 'text.disabled',
                 fontSize: '0.75rem',
@@ -162,12 +162,12 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
             >
               ({formatTimeAgo(knowledge.createdAt)})
             </Typography>
-            
+
             {knowledge.createdBy && (
               <>
-                <Box 
-                  component="span" 
-                  sx={{ 
+                <Box
+                  component="span"
+                  sx={{
                     mx: 1,
                     width: '4px',
                     height: '4px',
@@ -176,10 +176,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
                     display: 'inline-block'
                   }}
                 />
-                <Typography 
-                  variant="body2" 
+                <Typography
+                  variant="body2"
                   component="span"
-                  sx={{ 
+                  sx={{
                     ml: 0.5,
                     display: 'flex',
                     alignItems: 'center',
@@ -198,33 +198,19 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
             <IconButton
               onClick={onEdit}
               size="small"
-              sx={{
-                color: 'primary.main',
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                '&:hover': {
-                  backgroundColor: 'primary.lighter',
-                }
-              }}
+              disabled={knowledge.permissionLevel !== 'edit'}
+              className={`icon-button ${knowledge.permissionLevel !== 'edit' ? 'disabled' : ''}`}
             >
               <Edit fontSize="small" />
             </IconButton>
           </Tooltip>
-          
+
           <Tooltip title="Delete">
             <IconButton
               onClick={() => onDelete(knowledge)}
               size="small"
-              sx={{
-                color: 'error.main',
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                '&:hover': {
-                  backgroundColor: 'error.lighter',
-                }
-              }}
+              disabled={knowledge.permissionLevel !== 'edit'}
+              className={`icon-button ${knowledge.permissionLevel !== 'edit' ? 'disabled' : ''}`}
             >
               <Delete fontSize="small" />
             </IconButton>
