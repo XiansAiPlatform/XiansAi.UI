@@ -36,7 +36,8 @@ export const ErrorNotificationProvider = ({ children }) => {
     }, [isAuthenticated, authLoading, getAccessTokenSilently]);
 
     const fetchErrorCount = useCallback(async () => {
-        if (!isAuthenticated || authLoading || !isTokenReady) return;
+        // Skip if not authenticated, loading, token not ready, or on home page
+        if (!isAuthenticated || authLoading || !isTokenReady || location.pathname === '/') return;
 
         try {
             const now = new Date();
@@ -70,20 +71,21 @@ export const ErrorNotificationProvider = ({ children }) => {
         } catch (error) {
             console.error('Error fetching error count:', error);
         }
-    }, [auditingApi, isAuthenticated, authLoading, isTokenReady]);
+    }, [auditingApi, isAuthenticated, authLoading, isTokenReady, location.pathname]);
 
     // Initial fetch
     useEffect(() => {
-        if (isAuthenticated && !authLoading && isTokenReady) {
+        if (isAuthenticated && !authLoading && isTokenReady && location.pathname !== '/') {
             fetchErrorCount();
         }
-    }, [fetchErrorCount, isAuthenticated, authLoading, isTokenReady]);
+    }, [fetchErrorCount, isAuthenticated, authLoading, isTokenReady, location.pathname]);
 
     // Setup polling
     useEffect(() => {
         const isAuditingPage = location.pathname.startsWith('/auditing');
+        const isHomePage = location.pathname === '/';
         
-        if (isAuthenticated && !authLoading && isTokenReady && !isAuditingPage) {
+        if (isAuthenticated && !authLoading && isTokenReady && !isAuditingPage && !isHomePage) {
             // Clear any existing interval
             if (pollingIntervalRef.current) {
                 console.log('ErrorNotificationContext: Clearing existing polling interval');
@@ -99,8 +101,7 @@ export const ErrorNotificationProvider = ({ children }) => {
                     clearInterval(pollingIntervalRef.current);
                 }
             };
-        } else if (isAuditingPage && pollingIntervalRef.current) {
-          
+        } else if ((isAuditingPage || isHomePage) && pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
         }
