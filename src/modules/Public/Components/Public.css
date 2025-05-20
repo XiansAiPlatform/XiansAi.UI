@@ -201,6 +201,7 @@ body {
   box-shadow: 
     0 6px 20px rgba(14, 165, 233, 0.35),
     0 0 0 1px rgba(14, 165, 233, 0.2);
+  color: var(--home-primary); /* Darker text color on hover */
 }
 
 .home-btn-secondary {
