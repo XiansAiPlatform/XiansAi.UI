@@ -167,7 +167,7 @@ var newBlogPosts = new List<string>();`
                     </div>
                     <div className="home-nav-auth">
                         <nav className="home-nav">
-                            <a href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/" target="_blank" rel="noopener noreferrer" className="home-nav-link">
+                            <a href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/1-getting-started/0-index/" target="_blank" rel="noopener noreferrer" className="home-nav-link">
                                 Documentation
                             </a>
                         </nav>
@@ -253,7 +253,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                         <button 
                             className="home-btn home-btn-secondary" 
-                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/', '_blank')}
+                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/1-getting-started/0-index/', '_blank')}
                         >
                             Documentation
                         </button>
@@ -528,7 +528,7 @@ var newBlogPosts = new List<string>();`
                                 Learn more about the Xians.ai platform and how to use it's capabilities to build your own AI Agents and Workflows.
                             </p>
                             <a 
-                                href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/" 
+                                href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/1-getting-started/0-index/" 
                                 target="_blank" 
                                 rel="noopener noreferrer" 
                                 className="home-btn home-btn-primary"
@@ -707,7 +707,7 @@ var newBlogPosts = new List<string>();`
                         )}
                         <button 
                             className="home-btn home-btn-secondary" 
-                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/', '_blank')}
+                            onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs/1-getting-started/0-index/', '_blank')}
                         >
                             Read the Docs
                         </button>
