@@ -1,15 +1,29 @@
 import React, { createContext, useContext } from 'react';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 const NotificationContext = createContext();
 
 export function NotificationProvider({ children }) {
   const showError = (message) => {
-    toast.error(message);
+    toast.error(message, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   const showSuccess = (message) => {
-    toast.success(message);
+    toast.success(message, {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
   };
 
   return (

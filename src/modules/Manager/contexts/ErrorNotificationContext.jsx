@@ -37,7 +37,7 @@ export const ErrorNotificationProvider = ({ children }) => {
 
     const fetchErrorCount = useCallback(async () => {
         // Skip if not authenticated, loading, token not ready, or on home page
-        if (!isAuthenticated || authLoading || !isTokenReady || location.pathname === '/') return;
+        if (!isAuthenticated || authLoading || !isTokenReady || location.pathname === '/' || location.pathname === '/register') return;
 
         try {
             const now = new Date();

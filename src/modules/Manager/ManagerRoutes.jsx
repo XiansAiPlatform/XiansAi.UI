@@ -7,7 +7,6 @@ import WorkflowDetails from './Components/Runs/WorkflowDetails/WorkflowDetails';
 import Layout from './Components/Layout/Layout';
 import { SliderProvider } from './contexts/SliderContext';
 import { LoadingProvider } from './contexts/LoadingContext';
-import Toaster from './Components/Common/Toaster/Toaster';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme/mui-theme';
 import './theme/theme.css';
@@ -23,7 +22,6 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
 
-
 function ManagerRoutes() {
   const { logout, isLoading, error} = useAuth0();
 
@@ -35,7 +33,6 @@ function ManagerRoutes() {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
 
   const handleLogout = () => {
     logout({
@@ -53,7 +50,6 @@ function ManagerRoutes() {
             <ToastContainer />
             <LoadingProvider>
               <SliderProvider>
-                <Toaster />
                 <Routes>
                   <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
                   <Route element={<Layout />}>
@@ -108,7 +104,6 @@ function ManagerRoutes() {
   );
 }
 
-
 function LogoutHandler({ onLogout }) {
   React.useEffect(() => {
     onLogout();
@@ -116,8 +111,5 @@ function LogoutHandler({ onLogout }) {
 
   return null;
 }
-
-
-
 
 export default ManagerRoutes; 
