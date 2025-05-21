@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
-import FlowServerSettings from './FlowServerSettings';
 import './Settings.css';
 
 const Settings = () => {
@@ -27,9 +26,9 @@ const Settings = () => {
           Settings
         </Typography>
         <Alert severity="info" className="info-alert">
-          These settings are required for your flow server to run.
+          These settings are required for your app server to run.
           <br />
-          Configure the certificate and key paths in the Flow Runner settings.
+          Configure the certificate and key paths in the App Server settings.
         </Alert>
         
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
@@ -39,13 +38,11 @@ const Settings = () => {
             aria-label="settings tabs"
           >
             <Tab label="App Server" />
-            <Tab label="Flow Server" />
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
           {currentTab === 0 && <CACertificates />}
-          {currentTab === 1 && <FlowServerSettings />}
         </Box>
       </Box>
     </Container>
