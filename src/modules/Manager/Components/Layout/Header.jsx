@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
 import './Layout.css'; // Import the CSS file
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../../auth/AuthContext';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 
 const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
-  const { user, logout } = useAuth0();
+  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
@@ -39,11 +39,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
   };
 
   const handleLogout = () => {
-    logout({   
-      logoutParams: {
-        returnTo: window.location.origin + '/login'
-      }
-    });
+    logout({ returnTo: window.location.origin + '/login' });
   };
 
   return (
@@ -164,7 +160,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
               onClick={handleMenu}
               className="user-avatar"
               src={user?.picture}
-              alt={user?.nickname || 'User'}
+              alt={user?.name || 'User'}
               sx={{
                 border: '2px solid transparent',
                 transition: 'all 0.2s ease',

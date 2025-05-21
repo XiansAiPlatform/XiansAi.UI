@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuditingApi } from '../services/auditing-api';
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from '../../../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const ErrorNotificationContext = createContext();
@@ -12,7 +12,7 @@ export const ErrorNotificationProvider = ({ children }) => {
     const [lastCheckedTime, setLastCheckedTime] = useState(new Date());
     const lastCheckedTimeRef = useRef(new Date());
     const auditingApi = useAuditingApi();
-    const { isAuthenticated, isLoading: authLoading, getAccessTokenSilently } = useAuth0();
+    const { isAuthenticated, isLoading: authLoading, getAccessTokenSilently, accessToken } = useAuth();
     const pollingIntervalRef = useRef(null);
     const [isTokenReady, setIsTokenReady] = useState(false);
     const location = useLocation();
@@ -22,10 +22,20 @@ export const ErrorNotificationProvider = ({ children }) => {
         const checkToken = async () => {
             if (isAuthenticated && !authLoading) {
                 try {
-                    await getAccessTokenSilently();
-                    setIsTokenReady(true);
+                    // Ensure we have an access token. 
+                    // getAccessTokenSilently from useAuth might return it directly if already fetched,
+                    // or fetch it if necessary.
+                    const token = accessToken || await getAccessTokenSilently();
+                    if (token) {
+                        setIsTokenReady(true);
+                    } else {
+                        // This case might indicate an issue with token retrieval not throwing an error
+                        // but also not returning a token.
+                        setIsTokenReady(false);
+                        console.warn('Access token is null or undefined after checkToken.');
+                    }
                 } catch (error) {
-                    console.error('Error getting access token:', error);
+                    console.error('Error getting access token in ErrorNotificationContext:', error);
                     setIsTokenReady(false);
                 }
             } else {
@@ -33,7 +43,7 @@ export const ErrorNotificationProvider = ({ children }) => {
             }
         };
         checkToken();
-    }, [isAuthenticated, authLoading, getAccessTokenSilently]);
+    }, [isAuthenticated, authLoading, getAccessTokenSilently, accessToken]);
 
     const fetchErrorCount = useCallback(async () => {
         // Skip if not authenticated, loading, token not ready, or on home page

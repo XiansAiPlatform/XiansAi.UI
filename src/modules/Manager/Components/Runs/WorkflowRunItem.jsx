@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
 import { formatDistanceToNow, formatDistance } from 'date-fns';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../../auth/AuthContext';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const WorkflowRunItem = ({ run, isMobile }) => {
-  const { user } = useAuth0();
+  const { user } = useAuth();
   const formattedTime = formatDistanceToNow(new Date(run.startTime), { addSuffix: true });
   
   const formatWorkflowType = (type) => {
@@ -30,7 +30,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
   const getOwnerDisplay = () => {
     if (!run.permissions?.ownerAccess?.length) return null;
     const owner = run.permissions.ownerAccess[0];
-    const isCurrentUser = owner === user?.sub;
+    const isCurrentUser = owner === user?.id;
     
     if (isMobile) {
       return isCurrentUser ? 'me' : owner.substring(0, 10) + '...';
@@ -109,7 +109,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
               {!isMobile && <span className="metadata-separator">•</span>}
               
               {getOwnerDisplay() && (
-                <span className={`owner-name ${run.permissions?.ownerAccess?.[0] === user?.sub ? 'current-user' : ''}`}>
+                <span className={`owner-name ${run.permissions?.ownerAccess?.[0] === user?.id ? 'current-user' : ''}`}>
                   Owner: {getOwnerDisplay()}
                 </span>
               )}

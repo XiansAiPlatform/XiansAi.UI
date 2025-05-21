@@ -5,10 +5,10 @@ import { BiLogoGithub} from 'react-icons/bi';
 import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine, RiOpenSourceFill } from 'react-icons/ri';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../../auth/AuthContext';
 
 export default function Home() {
-    const { isAuthenticated, loginWithRedirect, logout } = useAuth0();
+    const { isAuthenticated, login, logout } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
     const [activeCodeTab, setActiveCodeTab] = useState('flow');
     const [activeFeatureTab, setActiveFeatureTab] = useState(0);
@@ -191,13 +191,13 @@ var newBlogPosts = new List<string>();`
                                 <>
                                     <button 
                                         className="home-btn home-btn-secondary" 
-                                        onClick={() => loginWithRedirect()}
+                                        onClick={() => login()}
                                     >
                                         Login
                                     </button>
                                     <button 
                                         className="home-btn home-btn-primary" 
-                                        onClick={() => loginWithRedirect()}
+                                        onClick={() => login()}
                                     >
                                         <BiLogoGithub />
                                         Sign up with GitHub
@@ -699,7 +699,7 @@ var newBlogPosts = new List<string>();`
                         {!isAuthenticated && (
                             <button 
                                 className="home-btn home-btn-primary" 
-                                onClick={() => loginWithRedirect()}
+                                onClick={() => login()}
                             >
                                 <BiLogoGithub className="home-btn-icon" />
                                 Sign up with GitHub

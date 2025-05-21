@@ -1,4 +1,5 @@
-import { useAuth0 } from '@auth0/auth0-react';
+// import { useAuth0 } from '@auth0/auth0-react'; // Old import
+import { useAuth } from '../../../auth/AuthContext'; // New import
 import { handleApiError } from '../utils/errorHandler';
 import { getConfig } from '../../../config';
 import { useMemo } from 'react';
@@ -28,7 +29,8 @@ export const getTimeRangeParams = (timeFilter) => {
 };
 
 export const useApiClient = () => {
-  const { getAccessTokenSilently } = useAuth0();
+  // const { getAccessTokenSilently } = useAuth0(); // Old hook
+  const { getAccessTokenSilently } = useAuth(); // New hook
   const { selectedOrg } = useSelectedOrg();
 
   return useMemo(() => {

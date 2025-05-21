@@ -17,13 +17,13 @@ import DefinitionList from './Components/Definitions/DefinitionList';
 import NotImplemented from './Components/NotImplemented/NotImplemented';
 import MessagingPage from './Components/Messaging/MessagingPage';
 import ProtectedRoute from './auth/ProtectedRoute';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../auth/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
 
 function ManagerRoutes() {
-  const { logout, isLoading, error} = useAuth0();
+  const { logout, isLoading, error } = useAuth();
 
   if (error) {
     console.error(error);
@@ -35,11 +35,7 @@ function ManagerRoutes() {
   }
 
   const handleLogout = () => {
-    logout({
-      logoutParams: {
-        returnTo: window.location.origin + '/login'
-      }
-    });
+    logout({ returnTo: window.location.origin + '/login' });
   };
 
   return (

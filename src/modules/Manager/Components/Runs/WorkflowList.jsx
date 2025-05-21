@@ -16,7 +16,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
 import { Link } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../../auth/AuthContext';
 
 const INITIAL_STATS = {
   running: 0,
@@ -33,7 +33,7 @@ const WorkflowList = () => {
   const [ownerFilter, setOwnerFilter] = useState('mine');
   const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
-  const { user } = useAuth0();
+  const { user } = useAuth();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
 
@@ -57,7 +57,7 @@ const WorkflowList = () => {
 
   const groupWorkflows = useCallback((runs) => {
     return runs
-      .filter(run => ownerFilter === 'all' || (ownerFilter === 'mine' && run.owner === user?.sub))
+      .filter(run => ownerFilter === 'all' || (ownerFilter === 'mine' && run.owner === user?.id))
       .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
       .reduce((acc, run) => {
         const groupKey = run.agent;
@@ -67,7 +67,7 @@ const WorkflowList = () => {
         acc[groupKey].push(run);
         return acc;
       }, {});
-  }, [ownerFilter, user?.sub]);
+  }, [ownerFilter, user?.id]);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
