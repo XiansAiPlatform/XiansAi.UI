@@ -30,7 +30,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       Object.fromEntries(definition.parameterDefinitions.map(param => [param.name, ''])) : 
       {}
   );
-  const [runType, setRunType] = useState('unique'); // 'unique' or 'singleton'
+  const [runType, setRunType] = useState('singleton'); // 'unique' or 'singleton'
   const [flowId, setFlowId] = useState(definition ? 
     `${definition.agent.trim()}:${definition.workflowType.trim()}`.replace(/\s+/g, '') : 
     '');
@@ -170,23 +170,23 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
           >
             <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, mr: 2 }}>
               <FormControlLabel 
-                value="unique" 
-                control={<Radio />} 
-                label="New Unique Run" 
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
-                A unique flow ID will be generated for this run. Multiple runs can co-exist.
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <FormControlLabel 
                 value="singleton" 
                 control={<Radio />} 
                 label="Named Singleton Run" 
               />
               <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
                 Using a custom Flow ID. Only one run with this ID can exist at a time.
+              </Typography>
+            </Box>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+              <FormControlLabel 
+                value="unique" 
+                control={<Radio />} 
+                label="New Unique Run" 
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
+                A unique flow ID will be generated for this run. Multiple runs can co-exist.
               </Typography>
             </Box>
           </RadioGroup>
