@@ -8,9 +8,7 @@ export const useSettingsApi = () => {
     return {
       generateApiKey: async () => {
         try {
-          return await apiClient.post('/api/client/certificates/generate/base64', {
-            fileName: 'AppServerApiKey',
-          });
+          return await apiClient.post('/api/client/settings/appserver/base64cert');
         } catch (error) {
           console.error('Failed to generate API key:', error);
           throw error;
@@ -28,7 +26,7 @@ export const useSettingsApi = () => {
 
       getFlowServerApiKey: async () => {
         try {
-          return await apiClient.get('/api/client/certificates/flowserver/base64');
+          return await apiClient.get('/api/client/settings/flowserver/base64cert');
         } catch (error) {
           console.error('Failed to fetch Flow Server API key:', error);
           throw error;
