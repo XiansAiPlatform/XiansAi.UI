@@ -48,7 +48,7 @@ class Auth0Service {
   }
 
   async login(options) {
-    await this.auth0Client.loginWithRedirect(options);
+    await this.auth0Client.loginWithRedirect();
   }
 
   async logout(options) {

@@ -8,7 +8,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../../../Manager/auth/AuthContext';
 
 export default function Home() {
-    const { isAuthenticated, login, logout } = useAuth();
+    const { isAuthenticated, login } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
     const [activeCodeTab, setActiveCodeTab] = useState('flow');
     const [activeFeatureTab, setActiveFeatureTab] = useState(0);
@@ -173,31 +173,23 @@ var newBlogPosts = new List<string>();`
                         </nav>
                         <div className="home-auth-buttons">
                             {isAuthenticated ? (
-                                <>
-                                    <button 
-                                        className="home-btn home-btn-primary" 
-                                        onClick={() => window.location.href = '/runs'}
-                                    >
-                                        Enter Application
-                                    </button>
-                                    <button 
-                                        className="home-btn home-btn-secondary" 
-                                        onClick={() => logout({ returnTo: window.location.origin })}
-                                    >
-                                        Logout
-                                    </button>
-                                </>
+                                <button 
+                                    className="home-btn home-btn-primary" 
+                                    onClick={() => window.location.href = '/runs'}
+                                >
+                                    Enter Application
+                                </button>
                             ) : (
                                 <>
                                     <button 
                                         className="home-btn home-btn-secondary" 
-                                        onClick={() => login()}
+                                        onClick={() => login({ returnTo: window.location.origin })}
                                     >
                                         Login
                                     </button>
                                     <button 
                                         className="home-btn home-btn-primary" 
-                                        onClick={() => login()}
+                                        onClick={() => login({ returnTo: window.location.origin })}
                                     >
                                         <BiLogoGithub />
                                         Sign up with GitHub
