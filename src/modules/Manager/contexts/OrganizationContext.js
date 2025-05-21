@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { useAuth0 } from '@auth0/auth0-react'; // Old import
-import { useAuth } from '../../../auth/AuthContext'; // New import
+import { useAuth } from '../auth/AuthContext'; // New import
 import { useNotification } from './NotificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getConfig } from '../../../config';
 
 const OrganizationContext = createContext();
 const STORAGE_KEY = 'selectedOrganization';
@@ -11,7 +11,6 @@ export function OrganizationProvider({ children }) {
   const [selectedOrg, setSelectedOrg] = useState('');
   const [organizations, setOrganizations] = useState([]);
   const [isOrgLoading, setIsOrgLoading] = useState(true);
-  // const { getAccessTokenSilently, isAuthenticated } = useAuth0(); // Old hook
   const { getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading, user } = useAuth(); // New hook, added isAuthLoading and user
   const { showError } = useNotification();
   const navigate = useNavigate();

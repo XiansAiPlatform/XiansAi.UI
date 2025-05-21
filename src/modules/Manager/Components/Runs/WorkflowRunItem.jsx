@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
 import { formatDistanceToNow, formatDistance } from 'date-fns';
-import { useAuth } from '../../../auth/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const WorkflowRunItem = ({ run, isMobile }) => {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
 import './Layout.css'; // Import the CSS file
-import { useAuth } from '../../../auth/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import MenuIcon from '@mui/icons-material/Menu';

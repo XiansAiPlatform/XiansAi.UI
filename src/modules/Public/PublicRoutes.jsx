@@ -19,7 +19,11 @@ function PublicRoutes() {
         </NotificationProvider>
       } />
       <Route path="/login" element={<Login />} />
-      <Route path="/callback" element={<Callback />} />
+      <Route path="/callback" element={
+        <NotificationProvider>
+          <Callback />
+        </NotificationProvider>
+      } />
     </Routes>
   );
 }

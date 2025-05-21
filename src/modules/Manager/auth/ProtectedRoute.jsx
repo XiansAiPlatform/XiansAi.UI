@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useNotification } from '../contexts/NotificationContext';
 import { useSelectedOrg } from '../contexts/OrganizationContext';
-import { useAuth } from '../../../auth/AuthContext';
+import { useAuth } from './AuthContext';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, login, error } = useAuth();

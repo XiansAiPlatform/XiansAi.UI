@@ -5,7 +5,7 @@ import { BiLogoGithub} from 'react-icons/bi';
 import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine, RiOpenSourceFill } from 'react-icons/ri';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useAuth } from '../../../auth/AuthContext';
+import { useAuth } from '../../../Manager/auth/AuthContext';
 
 export default function Home() {
     const { isAuthenticated, login, logout } = useAuth();

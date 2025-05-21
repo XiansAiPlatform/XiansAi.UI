@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -10,6 +10,7 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
+  const redirectCallbackHandled = useRef(false);
 
   useEffect(() => {
     if (AuthProviderInstance) {
@@ -22,30 +23,46 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
           setIsAuthenticated(authState.isAuthenticated);
           setAccessToken(authState.accessToken);
         } catch (e) {
+          console.error("Error during initAuth:", e);
           setError(e);
         } finally {
           setIsLoading(false);
         }
       };
-      initAuth();
 
-      const handleRedirectCallback = async () => {
-        try {
-          await AuthProviderInstance.handleRedirectCallback();
-          const authState = AuthProviderInstance.getAuthState();
-          setUser(authState.user);
-          setIsAuthenticated(authState.isAuthenticated);
-          setAccessToken(authState.accessToken);
-        } catch (e) {
-          setError(e);
-        }
-      };
-
-      // Check if the URL contains redirect parameters
-      if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
+      // Only call this if we're not in the callback URL or if we're in the callback URL 
+      // and haven't handled the callback yet (to avoid infinite loop)
+      const hasAuthParams = window.location.search.includes("code=") && window.location.search.includes("state=");
+      
+      if (!hasAuthParams) {
+        // Normal init if not in a callback URL
+        initAuth();
+      } else if (hasAuthParams && !redirectCallbackHandled.current) {
+        // We're in a callback URL and haven't handled it yet
+        redirectCallbackHandled.current = true;
+        
+        const handleRedirectCallback = async () => {
+          try {
+            console.log("Handling Auth redirect callback...");
+            await AuthProviderInstance.handleRedirectCallback();
+            const authState = AuthProviderInstance.getAuthState();
+            setUser(authState.user);
+            setIsAuthenticated(authState.isAuthenticated);
+            setAccessToken(authState.accessToken);
+            // Clear URL parameters after successful handling
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState({}, document.title, window.location.pathname);
+            }
+          } catch (e) {
+            console.error("Error handling redirect callback:", e);
+            setError(e);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        
         handleRedirectCallback();
       }
-
 
       AuthProviderInstance.onAuthStateChanged((authState) => {
         setUser(authState.user);

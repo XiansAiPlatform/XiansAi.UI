@@ -1,9 +1,7 @@
 import React from 'react';
-// import { useAuth0 } from '@auth0/auth0-react'; // Old import
-import { useAuth } from '../../../auth/AuthContext'; // New import
+import { useAuth } from '../../Manager/auth/AuthContext'; // New import
 
 function Login() {
-  // const { loginWithRedirect } = useAuth0(); // Old hook
   const { login, isLoading, isAuthenticated, error } = useAuth(); // New hook, login is now the generic login function
 
   React.useEffect(() => {

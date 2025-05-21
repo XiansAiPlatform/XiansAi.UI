@@ -12,14 +12,14 @@ import NewWorkflowForm from '../Runs/NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
 import DefinitionAgents from './DefinitionAgents';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../auth/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { useDefinitionsApi } from '../../services/definitions-api';
 
 const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDeleteSuccess }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
-  const { user } = useAuth0();
+  const { user } = useAuth();
   const definitionsApi = useDefinitionsApi();
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -124,13 +124,13 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
 
   const hasMarkdown = definition.markdown && definition.markdown.trim().length > 0;
 
-  const isCurrentUser = user?.sub === definition.owner;
+  const isCurrentUser = user?.id === definition.owner;
 
   const getPermissionLevel = () => {
-    if (!user?.sub) return 'Read';
-    if (definition.permissions?.ownerAccess?.includes(user.sub)) return 'Owner';
-    if (definition.permissions?.writeAccess?.includes(user.sub)) return 'Write';
-    if (definition.permissions?.readAccess?.includes(user.sub)) return 'Read';
+    if (!user?.id) return 'Read';
+    if (definition.permissions?.ownerAccess?.includes(user.id)) return 'Owner';
+    if (definition.permissions?.writeAccess?.includes(user.id)) return 'Write';
+    if (definition.permissions?.readAccess?.includes(user.id)) return 'Read';
     return 'Read'; // Default to Read if no explicit permissions
   };
 

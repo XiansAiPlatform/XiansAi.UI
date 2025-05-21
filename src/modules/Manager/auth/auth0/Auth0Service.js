@@ -1,5 +1,5 @@
 import { Auth0Client } from '@auth0/auth0-spa-js';
-import { getConfig } from '../../config'; // Assuming config is two levels up
+import { getConfig } from '../../../../config'; // Assuming config is two levels up
 
 class Auth0Service {
   constructor() {
@@ -23,13 +23,7 @@ class Auth0Service {
 
   async init() {
     try {
-      // Check if there are redirect parameters from Auth0
-      if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-        const { appState } = await this.auth0Client.handleRedirectCallback();
-        // You can use appState for redirecting to a specific route after login
-        // window.history.replaceState({}, document.title, window.location.pathname);
-      }
-      
+      // Don't handle redirect callback here anymore - we do it in AuthContext
       const isAuthenticated = await this.auth0Client.isAuthenticated();
       if (isAuthenticated) {
         const auth0User = await this.auth0Client.getUser();
@@ -91,31 +85,25 @@ class Auth0Service {
   }
 
   async handleRedirectCallback() {
-    // This is now handled in init, but you might want to expose it if needed for specific scenarios
-    // For example, if you want to call it explicitly outside of init.
-    // Ensure this aligns with how Auth0Provider in AuthContext.js expects it.
     try {
-        if (window.location.search.includes("code=") && window.location.search.includes("state=")) {
-            await this.auth0Client.handleRedirectCallback();
-            const isAuthenticated = await this.auth0Client.isAuthenticated();
-            if (isAuthenticated) {
-                const auth0User = await this.auth0Client.getUser();
-                const accessToken = await this.auth0Client.getTokenSilently();
-                const user = auth0User ? {
-                  id: auth0User.sub,
-                  name: auth0User.name,
-                  email: auth0User.email,
-                  picture: auth0User.picture,
-                  ...auth0User,
-                } : null;
-                this.authState = { user, isAuthenticated, accessToken };
-            } else {
-                 this.authState = { user: null, isAuthenticated: false, accessToken: null };
-            }
-            this._notifyStateChange();
-            // Clear the URL parameters
-            window.history.pushState({}, document.title, window.location.pathname);
+        console.log("Auth0Service: Handling redirect callback");
+        await this.auth0Client.handleRedirectCallback();
+        const isAuthenticated = await this.auth0Client.isAuthenticated();
+        if (isAuthenticated) {
+            const auth0User = await this.auth0Client.getUser();
+            const accessToken = await this.auth0Client.getTokenSilently();
+            const user = auth0User ? {
+              id: auth0User.sub,
+              name: auth0User.name,
+              email: auth0User.email,
+              picture: auth0User.picture,
+              ...auth0User,
+            } : null;
+            this.authState = { user, isAuthenticated, accessToken };
+        } else {
+            this.authState = { user: null, isAuthenticated: false, accessToken: null };
         }
+        this._notifyStateChange();
     } catch (error) {
         console.error("Error handling redirect callback in Auth0Service:", error);
         this.authState = { user: null, isAuthenticated: false, accessToken: null };

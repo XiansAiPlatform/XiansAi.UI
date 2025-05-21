@@ -16,7 +16,7 @@ import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../../auth/AuthContext';
+import { useAuth } from '../../auth/AuthContext';
 
 const INITIAL_STATS = {
   running: 0,

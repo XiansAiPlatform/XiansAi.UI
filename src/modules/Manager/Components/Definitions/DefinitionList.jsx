@@ -7,7 +7,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import DefinitionRow from './DefinitionRow';
 import EmptyState from './EmptyState';
 import { tableStyles } from './styles';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../auth/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -18,7 +18,7 @@ import ShareIcon from '@mui/icons-material/Share';
 
 const DefinitionList = () => {
   const [definitions, setDefinitions] = useState([]);
-  const { user } = useAuth0();
+  const { user } = useAuth();
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const definitionsApi = useDefinitionsApi();
@@ -60,8 +60,8 @@ const DefinitionList = () => {
   const isUserOwnerOfAllWorkflows = (agentName) => {
     const agentDefinitions = definitions.filter(def => def.agent === agentName);
     return agentDefinitions.every(def => {
-      if (!user?.sub) return false;
-      if (def.permissions?.ownerAccess?.includes(user.sub)) return true;
+      if (!user?.id) return false;
+      if (def.permissions?.ownerAccess?.includes(user.id)) return true;
       return false;
     });
   };

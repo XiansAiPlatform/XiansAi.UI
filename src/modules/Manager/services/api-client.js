@@ -1,5 +1,4 @@
-// import { useAuth0 } from '@auth0/auth0-react'; // Old import
-import { useAuth } from '../../../auth/AuthContext'; // New import
+import { useAuth } from '../auth/AuthContext'; // New import
 import { handleApiError } from '../utils/errorHandler';
 import { getConfig } from '../../../config';
 import { useMemo } from 'react';

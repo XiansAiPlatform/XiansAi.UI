@@ -7,8 +7,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { getConfig } from './config';
-import Auth0ProviderWrapper from './auth/auth0/Auth0ProviderWrapper';
-import EntraIdProviderWrapper from './auth/entraId/EntraIdProviderWrapper';
+import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrapper';
+import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
 
 // Dynamically select the Auth Provider based on configuration
 const AppAuthProvider = ({ children }) => {

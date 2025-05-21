@@ -17,7 +17,7 @@ import DefinitionList from './Components/Definitions/DefinitionList';
 import NotImplemented from './Components/NotImplemented/NotImplemented';
 import MessagingPage from './Components/Messaging/MessagingPage';
 import ProtectedRoute from './auth/ProtectedRoute';
-import { useAuth } from '../../auth/AuthContext';
+import { useAuth } from './auth/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';

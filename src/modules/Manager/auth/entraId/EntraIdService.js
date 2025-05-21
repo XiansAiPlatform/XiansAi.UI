@@ -1,5 +1,5 @@
 import { PublicClientApplication } from '@azure/msal-browser';
-import { getConfig } from '../../config'; // Assuming config is two levels up
+import { getConfig } from '../../../../config'; // Assuming config is two levels up
 
 class EntraIdService {
   constructor() {
@@ -28,15 +28,12 @@ class EntraIdService {
   async init() {
     await this.publicClientApplication.initialize();
     try {
-      const redirectResponse = await this.publicClientApplication.handleRedirectPromise();
-      if (redirectResponse) {
-        this.activeAccount = this.publicClientApplication.getActiveAccount();
-      } else {
-        const accounts = this.publicClientApplication.getAllAccounts();
-        if (accounts.length > 0) {
-          this.activeAccount = accounts[0];
-          this.publicClientApplication.setActiveAccount(this.activeAccount);
-        }
+      // Don't handle redirect here anymore - we do it in AuthContext
+      // Just check for active accounts
+      const accounts = this.publicClientApplication.getAllAccounts();
+      if (accounts.length > 0) {
+        this.activeAccount = accounts[0];
+        this.publicClientApplication.setActiveAccount(this.activeAccount);
       }
 
       if (this.activeAccount) {
@@ -59,7 +56,7 @@ class EntraIdService {
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
       }
     } catch (error) {
-      console.error("Error initializing EntraIdService or handling redirect:", error);
+      console.error("Error initializing EntraIdService:", error);
       this.authState = { user: null, isAuthenticated: false, accessToken: null };
     }
     this._notifyStateChange();
@@ -144,11 +141,11 @@ class EntraIdService {
 
   async handleRedirectCallback() {
     try {
+        console.log("EntraIdService: Handling redirect callback");
         const response = await this.publicClientApplication.handleRedirectPromise();
         if (response) {
             this.activeAccount = this.publicClientApplication.getActiveAccount();
-            // User state will be set by _notifyStateChange or subsequent calls
-        } 
+        }
         // Refresh state regardless of whether response was processed, to pick up active account
         await this._updateStateFromActiveAccount(); 
         this._notifyStateChange();

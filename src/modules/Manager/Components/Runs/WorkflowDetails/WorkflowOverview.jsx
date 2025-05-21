@@ -22,7 +22,7 @@ import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
 import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../../auth/AuthContext';
 import WorkflowLogComponent from './WorkflowLogComponent';
 
 
@@ -33,7 +33,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const open = Boolean(anchorEl);
   const { showSuccess, showError } = useNotification();
   const api = useWorkflowApi();
-  const { user } = useAuth0();
+  const { user } = useAuth();
 
 
   // Add a helper function to safely convert status to string (moved this up to avoid initialization error)
@@ -142,8 +142,8 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   };
 
   const isOwner = useMemo(() => {
-    return workflow?.owner === user?.sub;
-  }, [workflow?.owner, user?.sub]);
+    return workflow?.owner === user?.id;
+  }, [workflow?.owner, user?.id]);
 
   // Get a display value that shows N/A only if workflow is null
   const getDisplayValue = (value) => {

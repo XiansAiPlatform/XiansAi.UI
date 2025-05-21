@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuditingApi } from '../services/auditing-api';
-import { useAuth } from '../../../auth/AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const ErrorNotificationContext = createContext();
