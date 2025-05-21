@@ -35,23 +35,34 @@ export const useApiClient = () => {
   return useMemo(() => {
     const getAccessToken = async () => {
       try {
-        return await getAccessTokenSilently();
+        const token = await getAccessTokenSilently();
+        if (!token) {
+          console.warn('Access token is empty or null. Auth may not be complete.');
+          throw new Error('No valid access token available');
+        }
+        return token;
       } catch (error) {
         console.error('Error getting access token:', error);
-        return null;
+        throw error; // Re-throw to prevent API calls without a valid token
       }
     };
 
-    const createAuthHeaders = async () => ({
-      'Authorization': `Bearer ${await getAccessToken()}`,
-      'Content-Type': 'application/json',
-      'X-Tenant-Id': selectedOrg || '',
-    });
+    const createAuthHeaders = async () => {
+      const token = await getAccessToken();
+      return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Tenant-Id': selectedOrg || '',
+      };
+    };
 
     const request = async (endpoint, options = {}) => {
       try {
+        // First, ensure we have valid auth headers
         const headers = await createAuthHeaders();
         const url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
+        
+        console.log(`Making ${options.method || 'GET'} request to: ${url}`);
         
         const response = await fetch(url, {
           headers,
@@ -60,6 +71,9 @@ export const useApiClient = () => {
 
         if (!response.ok) {
           const errorResult = await handleApiError(response);
+          if (response.status === 401) {
+            console.error('Authentication error (401). Token may be invalid or expired.');
+          }
           throw errorResult;
         }
 
