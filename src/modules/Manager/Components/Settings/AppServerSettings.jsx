@@ -4,14 +4,15 @@ import {
   Typography, 
   TextField, 
   Button, 
-  Box
+  Box,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSettingsApi } from '../../services/settings-api';
 import { toast } from 'react-toastify';
 import './Settings.css';
 import { getConfig } from '../../../../config';
-
-
 
 const AppServerSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +34,15 @@ const AppServerSettings = () => {
     }
   };
 
+  const handleCopy = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
+    } catch (error) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
   return (
     <Paper className="ca-certificates-paper">
       <Typography variant="h6" gutterBottom>
@@ -40,29 +50,50 @@ const AppServerSettings = () => {
       </Typography>
 
       <Box className="server-url-container">
-        <TextField
-          label="App Server URL"
-          value={apiBaseUrl}
-          fullWidth
-          InputProps={{ 
-            readOnly: true,
-            className: 'readonly-input'
-          }}
-          className="app-server-url"
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <TextField
+            label="App Server URL"
+            value={apiBaseUrl}
+            fullWidth
+            InputProps={{ 
+              readOnly: true,
+              className: 'readonly-input'
+            }}
+            className="app-server-url"
+          />
+          <Tooltip title="Copy URL">
+            <IconButton 
+              onClick={() => handleCopy(apiBaseUrl, 'Server URL')}
+              size="small"
+            >
+              <ContentCopyIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
       <Box className="form-container">
-        <TextField
-          label="API Key"
-          value={apiKey}
-          fullWidth
-          multiline
-          rows={3}
-          InputProps={{ readOnly: true }}
-          className="input-field"
-          sx={{ mb: 2 }}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
+          <TextField
+            label="API Key"
+            value={apiKey}
+            fullWidth
+            multiline
+            rows={3}
+            InputProps={{ readOnly: true }}
+            className="input-field"
+          />
+          <Tooltip title="Copy API Key">
+            <IconButton 
+              onClick={() => handleCopy(apiKey, 'API Key')}
+              size="small"
+              sx={{ mt: 1 }}
+              disabled={!apiKey}
+            >
+              <ContentCopyIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <Button
           variant="contained"
           onClick={generateApiKey}
