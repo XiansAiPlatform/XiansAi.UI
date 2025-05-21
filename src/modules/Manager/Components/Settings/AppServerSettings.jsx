@@ -84,14 +84,16 @@ const AppServerSettings = () => {
             className="input-field"
           />
           <Tooltip title="Copy API Key">
-            <IconButton 
-              onClick={() => handleCopy(apiKey, 'API Key')}
-              size="small"
-              sx={{ mt: 1 }}
-              disabled={!apiKey}
-            >
-              <ContentCopyIcon />
-            </IconButton>
+            <span>
+              <IconButton 
+                onClick={() => handleCopy(apiKey, 'API Key')}
+                size="small"
+                sx={{ mt: 1 }}
+                disabled={!apiKey}
+              >
+                <ContentCopyIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         </Box>
         <Button

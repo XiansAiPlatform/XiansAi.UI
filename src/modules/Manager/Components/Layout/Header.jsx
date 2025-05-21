@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
 import './Layout.css'; // Import the CSS file
-import { useAuth0 } from '@auth0/auth0-react';
+import { useAuth } from '../../auth/AuthContext';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -10,10 +10,25 @@ import { Link } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 
 const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
-  const { user, logout } = useAuth0();
+  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });
+
+  useEffect(() => {
+    // Update user data when auth context changes
+    if (user) {
+      console.log('Auth user data:', user);
+      // Use nickname if name is empty, or extract from email as last resort
+      const displayName = user.name || user.nickname || user.email?.split('@')[0] || 'User';
+      setUserData({
+        name: displayName,
+        email: user.email || '',
+        id: user.id || user.sub || ''
+      });
+    }
+  }, [user]);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -39,11 +54,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
   };
 
   const handleLogout = () => {
-    logout({   
-      logoutParams: {
-        returnTo: window.location.origin + '/login'
-      }
-    });
+    logout({ returnTo: window.location.origin });
   };
 
   return (
@@ -159,25 +170,52 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
             </Box>
           </Tooltip>
 
-          <Tooltip title={user?.name || "Account"}>
-            <Avatar
-              onClick={handleMenu}
-              className="user-avatar"
-              src={user?.picture}
-              alt={user?.nickname || 'User'}
-              sx={{
-                border: '2px solid transparent',
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-                '&:hover': {
-                  borderColor: 'var(--primary)',
-                  transform: 'scale(1.05)'
-                }
-              }}
-            >
-              {!user?.picture && <PersonIcon />}
-            </Avatar>
-          </Tooltip>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px',
+            cursor: 'pointer',
+            padding: '4px 12px',
+            borderRadius: 'var(--radius-lg)',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              backgroundColor: 'var(--bg-hover)',
+            }
+          }} 
+          onClick={handleMenu}
+          >
+            {!isMobile && (
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 500,
+                  color: 'text.secondary',
+                  maxWidth: '120px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {userData.name}
+              </Typography>
+            )}
+            <Tooltip title={userData.name}>
+              <Avatar
+                className="user-avatar"
+                src={user?.picture}
+                alt={userData.name}
+                sx={{
+                  border: '2px solid transparent',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'var(--primary)'
+                  }
+                }}
+              >
+                {!user?.picture && <PersonIcon />}
+              </Avatar>
+            </Tooltip>
+          </Box>
 
           <Menu
             id="menu-appbar"
@@ -197,7 +235,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
               className: "user-menu-paper",
               elevation: 3,
               sx: {
-                minWidth: 180,
+                minWidth: 200,
                 mt: 1,
                 overflow: 'visible',
                 filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.08))',
@@ -218,13 +256,33 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
               }
             }}
           >
-            <Box className="user-info">
-              <Typography className="user-info-name" variant="subtitle1">
-                {user?.name}
+            <Box className="user-info" sx={{ padding: '8px 16px' }}>
+              <Typography className="user-info-name" variant="subtitle1" sx={{ fontWeight: 500 }}>
+                {userData.name}
               </Typography>
-              <Typography className="user-info-email" variant="caption">
-                {user?.email}
-              </Typography>
+              {userData.email && (
+                <Typography className="user-info-email" variant="caption" sx={{ 
+                  display: 'block',
+                  color: 'text.secondary',
+                  mb: 0.5
+                }}>
+                  {userData.email}
+                </Typography>
+              )}
+              {userData.id && (
+                <Typography className="user-info-id" variant="caption" sx={{ 
+                  display: 'block',
+                  color: 'text.secondary',
+                  fontSize: '0.7rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '100%',
+                  opacity: 0.8
+                }}>
+                  ID: {userData.id}
+                </Typography>
+              )}
             </Box>
             <MenuItem 
               className="user-menu-item logout"
@@ -235,8 +293,9 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
                 margin: '4px',
                 borderRadius: 'var(--radius-md)',
                 '&:hover': {
-                  backgroundColor: 'error.light',
-                  color: 'error.contrastText'
+                  backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                  color: 'error.dark',
+                  fontWeight: 500
                 }
               }}
             >

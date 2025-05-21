@@ -3,19 +3,33 @@ import { BrowserRouter } from 'react-router-dom';
 import PublicRoutes from './modules/Public/PublicRoutes';
 import ManagerRoutes from './modules/Manager/ManagerRoutes';
 import AgentsRoutes from './modules/Agents/AgentsRoutes';
-import AuthProvider from './modules/Manager/auth/AuthProvider';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import { getConfig } from './config';
+import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrapper';
+import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
+
+// Dynamically select the Auth Provider based on configuration
+const AppAuthProvider = ({ children }) => {
+  const config = getConfig();
+
+  if (config.authProvider === 'entraId') {
+    return <EntraIdProviderWrapper>{children}</EntraIdProviderWrapper>;
+  }
+  // Default to Auth0
+  return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
+};
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <AppAuthProvider>
         <PublicRoutes />
         <AgentsRoutes />
         <ManagerRoutes />
         <ToastContainer />
-      </AuthProvider>
+      </AppAuthProvider>
     </BrowserRouter>
   );
 }
