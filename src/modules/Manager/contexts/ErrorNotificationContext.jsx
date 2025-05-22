@@ -48,7 +48,7 @@ export const ErrorNotificationProvider = ({ children }) => {
         if (isAuthenticated && !authLoading) {
             const timer = setTimeout(() => {
                 checkToken();
-            }, 1000); // 1 second delay
+            }, 2*60*1000); // 2 minute delay
             return () => clearTimeout(timer);
         } else {
             setIsTokenReady(false);

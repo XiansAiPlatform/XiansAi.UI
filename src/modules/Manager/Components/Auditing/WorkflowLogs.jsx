@@ -134,7 +134,7 @@ const WorkflowLogs = ({
 
         let intervalId;
         if (autoRefresh) {
-            intervalId = setInterval(fetchLogs, 30000); // Refresh every 30 seconds
+            intervalId = setInterval(fetchLogs, 60*1000); // Refresh every 2 minutes
         }
 
         return () => {
