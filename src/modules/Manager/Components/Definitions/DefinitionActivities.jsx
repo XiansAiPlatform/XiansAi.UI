@@ -5,7 +5,6 @@ import {
   Card, 
   CardContent,
   Grid,
-  Chip,
   ToggleButtonGroup,
   ToggleButton,
   Table,
@@ -14,39 +13,14 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import { useSlider } from '../../contexts/SliderContext';
-import { useKnowledgeApi } from '../../services/knowledge-api';
-import KnowledgeViewer from '../Knowledge/KnowledgeViewer';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
 
 const DefinitionActivities = ({ activities, agentName }) => {
-  const { openSlider } = useSlider();
-  const knowledgeApi = useKnowledgeApi();
   const [viewMode, setViewMode] = React.useState('card');
 
   const formatText = (text) => {
     return text.replace(/([A-Z])/g, ' $1').trim();
-  };
-
-  const handleInstructionClick = async (knowledgeName, activity) => {
-    try {
-      const agent = agentName;
-      const knowledge = await knowledgeApi.getKnowledgeByName(knowledgeName, agent);
-      showKnowledge(knowledge);
-    } catch (error) {
-      console.error('Error fetching knowledge by name:', error);
-    }
-  };
-
-  const showKnowledge = (knowledge) => {
-    const knowledgeContent = (
-      <KnowledgeViewer
-        knowledge={knowledge}
-        hideActions={true}
-      />
-    );
-    openSlider(knowledgeContent, knowledge.name);
   };
 
   const handleViewChange = (event, newView) => {
@@ -67,25 +41,7 @@ const DefinitionActivities = ({ activities, agentName }) => {
               padding: 'var(--spacing-sm)',
               borderBottom: '2px solid var(--primary-dark)'
             }}>
-              Action
-            </TableCell>
-            <TableCell sx={{ 
-              fontWeight: 'bold', 
-              backgroundColor: 'var(--primary-light)', 
-              color: 'var(--text-primary)', 
-              padding: 'var(--spacing-sm)',
-              borderBottom: '2px solid var(--primary-dark)'
-            }}>
-              Tools
-            </TableCell>
-            <TableCell sx={{ 
-              fontWeight: 'bold', 
-              backgroundColor: 'var(--primary-light)', 
-              color: 'var(--text-primary)', 
-              padding: 'var(--spacing-sm)',
-              borderBottom: '2px solid var(--primary-dark)'
-            }}>
-              Knowledge
+              Activity
             </TableCell>
             <TableCell sx={{ 
               fontWeight: 'bold', 
@@ -103,59 +59,7 @@ const DefinitionActivities = ({ activities, agentName }) => {
         {activities?.map((activity, index) => (
           <TableRow key={index}>
             <TableCell>{formatText(activity.activityName)}</TableCell>
-            <TableCell>
-              {activity.agentToolNames?.length > 0 ? (
-                activity.agentToolNames.map((agentTool, idx) => {
-                  const [name, type] = agentTool.split(' [');
-                  return (
-                    <Box key={idx} sx={{ mb: 1 }}>
-                      <Chip
-                        label={name}
-                        size="small"
-                        sx={{
-                          backgroundColor: 'var(--primary-light)',
-                          mb: 0.5
-                        }}
-                      />
-                      {type && (
-                        <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
-                          Type: {type.replace(']', '')}
-                        </Typography>
-                      )}
-                    </Box>
-                  )
-                })
-              ) : (
-                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                  No tools
-                </Typography>
-              )}
-            </TableCell>
-            <TableCell>
-              {activity.knowledgeIds?.length > 0 ? (
-                activity.knowledgeIds.map((instruction, idx) => (
-                  <Chip
-                    key={idx}
-                    label={instruction}
-                    onClick={() => handleInstructionClick(instruction, activity)}
-                    sx={{
-                      m: 0.5,
-                      backgroundColor: 'var(--primary-light)',
-                      cursor: 'pointer',
-                      '&:hover': {
-                        backgroundColor: 'var(--primary-dark)',
-                        transform: 'scale(1.05)'
-                      },
-                      transition: 'transform 0.2s, background-color 0.2s'
-                    }}
-                  />
-                ))
-              ) : (
-                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                  No knowledge
-                </Typography>
-              )}
-            </TableCell>
+            
             <TableCell>
               {activity.parameterDefinitions?.length > 0 ? (
                 activity.parameterDefinitions.map((param, idx) => (
@@ -190,7 +94,7 @@ const DefinitionActivities = ({ activities, agentName }) => {
             }
           }}>
             <CardContent>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h7" gutterBottom>
                 {formatText(activity.activityName)}
               </Typography>
 
@@ -205,62 +109,6 @@ const DefinitionActivities = ({ activities, agentName }) => {
                 </Box>
               )}
 
-              <Typography variant="subtitle2" gutterBottom>Tools:</Typography>
-              <Box sx={{ mb: 2 }}>
-                {activity.agentToolNames?.length > 0 ? (
-                  activity.agentToolNames.map((agentTool, idx) => {
-                    const [name, type] = agentTool.split(' [');
-                    return (
-                      <Box key={idx} sx={{ mb: 1 }}>
-                        <Chip
-                          label={name}
-                          size="small"
-                          sx={{
-                            backgroundColor: 'var(--primary-light)',
-                            mb: 0.5
-                          }}
-                        />
-                        {type && (
-                          <Typography variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
-                            Type: {type.replace(']', '')}
-                          </Typography>
-                        )}
-                      </Box>
-                    )
-                  })
-                ) : (
-                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                    No tools
-                  </Typography>
-                )}
-              </Box>
-
-              <Typography variant="subtitle2" gutterBottom>Knowledge:</Typography>
-              <Box>
-                {activity.knowledgeIds?.length > 0 ? (
-                  activity.knowledgeIds.map((instruction, idx) => (
-                    <Chip
-                      key={idx}
-                      label={instruction}
-                      onClick={() => handleInstructionClick(instruction, activity)}
-                      sx={{
-                        m: 0.5,
-                        backgroundColor: 'var(--primary-light)',
-                        cursor: 'pointer',
-                        '&:hover': {
-                          backgroundColor: 'var(--primary-dark)',
-                          transform: 'scale(1.05)'
-                        },
-                        transition: 'transform 0.2s, background-color 0.2s'
-                      }}
-                    />
-                  ))
-                ) : (
-                  <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
-                    No knowledge
-                  </Typography>
-                )}
-              </Box>
             </CardContent>
           </Card>
         </Grid>
@@ -277,7 +125,7 @@ const DefinitionActivities = ({ activities, agentName }) => {
         mb: 2 
       }}>
         <Typography variant="h6" className="section-title">
-          Agent Activities <span className="section-count">({activities?.length || 0})</span>
+          Activities <span className="section-count">({activities?.length || 0})</span>
         </Typography>
         
         <ToggleButtonGroup

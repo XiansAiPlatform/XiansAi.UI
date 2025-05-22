@@ -286,7 +286,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
-                      Agent Activities <span className="section-count">(0)</span>
+                      Activities <span className="section-count">(0)</span>
                     </Typography>
                     <Box sx={{ padding: '8px 16px' }}>
                       <Typography color="text.secondary" variant="body2">No activities to show</Typography>
@@ -298,7 +298,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
-                      Agent Inputs <span className="section-count">(0)</span>
+                      Inputs <span className="section-count">(0)</span>
                     </Typography>
                     <Box sx={{ padding: '8px 16px' }}>
                       <Typography color="text.secondary" variant="body2">No inputs to show</Typography>
