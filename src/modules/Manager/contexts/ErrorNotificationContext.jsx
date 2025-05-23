@@ -75,32 +75,38 @@ export const ErrorNotificationProvider = ({ children }) => {
             const executeRequest = async () => {
                 try {
                     const now = new Date();
-                    const startTime = lastCheckedTimeRef.current;      
+                    const startTime = lastCheckedTimeRef.current;    
                     const result = await auditingApi.getCriticalLogs(
                         startTime.toISOString(),
                         now.toISOString()
                     );
-                    
                     // Update lastCheckedTime immediately upon successful response
                     lastCheckedTimeRef.current = now;
                     setLastCheckedTime(now);
+                    
                     
                     // Calculate new errors since last check
                     const newErrors = result.reduce((total, agentGroup) => {
                         return total + agentGroup.workflowTypes.reduce((typeTotal, typeGroup) => {
                             return typeTotal + typeGroup.workflows.reduce((workflowTotal, workflow) => {
                                 return workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => {
-                                    return runTotal + run.criticalLogs.filter(log => 
-                                        new Date(log.createdAt) > lastCheckedTimeRef.current
-                                    ).length;
+                                    // Debug: Log each log and whether it passes the filter
+                                    const newLogsInThisRun = run.criticalLogs.filter(log => {
+                                        const logTime = new Date(log.createdAt);
+                                        const isNew = logTime > startTime;
+                                        return isNew;
+                                    });
+                                     return runTotal + newLogsInThisRun.length;
                                 }, 0);
                             }, 0);
                         }, 0);
                     }, 0);
 
                     if (newErrors > 0) {
-                        // Update both counts when new errors are found
-                        setNavErrorCount(prev => prev + newErrors);
+                        // Update both counts when new errors are found  
+                        setNavErrorCount(prev => {      
+                            return prev + newErrors;
+                        });
                         setTabErrorCount(prev => prev + newErrors);
                     }
                 } catch (error) {
@@ -113,7 +119,6 @@ export const ErrorNotificationProvider = ({ children }) => {
         } catch (error) {
             if (retries < maxRetries) {
                 retries++;
-                console.log(`Retry attempt ${retries} for fetchErrorCount`);
                 setTimeout(() => fetchErrorCount(), 1000 * retries); // Backoff with each retry
             } else {
                 console.error('Max retries reached. Unable to fetch error count.');
