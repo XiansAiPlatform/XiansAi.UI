@@ -17,11 +17,11 @@ import {
 import {
   Description as LogsIcon,
   Close as CloseIcon,
-  ErrorOutline as ErrorOutlineIcon
+  ErrorOutline as ErrorOutlineIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
-import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
 
 
@@ -29,9 +29,10 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
   const [workflowLogs, setWorkflowLogs] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const [skip, setSkip] = useState(0);
-  const limit = 4;
+  const limit = 100;
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [logsModalOpen, setLogsModalOpen] = useState(false);
   const { showError } = useNotification();
   const api = useWorkflowApi();
@@ -93,53 +94,6 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     fetchLogsWithNewLevel();
   }, [selectedLogLevel, runId, workflow, api, showError, getApiLogLevel]);
 
-  // Add a helper function to safely convert status to string (moved this up to avoid initialization error)
-  const getStatusString = (status) => {
-    if (status === null || status === undefined) return '';
-    return String(status);
-  };
-
-  const fetchLatestLogs = useCallback(async () => {
-    if (isLoading || !runId || !workflow) return;
-    const currentWorkflow = workflow;
-    if (!currentWorkflow || getStatusString(currentWorkflow?.status).toUpperCase() !== 'RUNNING') return;
-    
-    try {
-      // Always fetch latest logs from the beginning
-      const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
-      if (newLogs?.length) {
-        setWorkflowLogs((prev) => {
-          // Create a Set of existing log IDs for fast lookup
-          const existingLogIds = new Set();
-          prev.forEach(log => {
-            // Use id as primary identifier, fallback to unique signature if id is not available
-            const logIdentifier = log.id || `${log.level}-${log.createdAt}-${log.message?.substring(0, 50)}`;
-            existingLogIds.add(logIdentifier);
-          });
-          
-          // Filter out logs that already exist in our state
-          const uniqueNewLogs = newLogs.filter(log => {
-            const logIdentifier = log.id || `${log.level}-${log.createdAt}-${log.message?.substring(0, 50)}`;
-            return !existingLogIds.has(logIdentifier);
-          });
-          
-          // Only add unique logs
-          if (uniqueNewLogs.length === 0) {
-            return prev; // No changes if no new unique logs
-          }
-          
-          const updatedLogs = [...uniqueNewLogs, ...prev];
-          // Update skip to match the total count
-          setSkip(updatedLogs.length);
-          
-          return updatedLogs;
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch logs on interval:', error);
-    }
-  }, [runId, api, limit, isLoading, workflow, selectedLogLevel, getApiLogLevel]);
-
   const fetchInitialLogs = useCallback(async () => {
     if (!runId || !workflow) return;
     try {
@@ -163,21 +117,29 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     }
   }, [runId, workflow, fetchInitialLogs]);
 
-  const isRunning = workflow && getStatusString(workflow?.status).toUpperCase() === 'RUNNING';
- 
-  useInterval(
-    () => {
-      fetchLatestLogs();
-    },
-    isRunning ? 30000 : null
-  );
+  const handleRefreshLogs = useCallback(async () => {
+    if (isRefreshing || !runId || !workflow) return;
+    setIsRefreshing(true);
+    try {
+      const newLogs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
+      setWorkflowLogs(newLogs);
+      setSkip(newLogs.length);
+      if (newLogs.length < limit) setHasMore(false);
+    } catch (error) {
+      console.error('Failed to refresh logs:', error);
+      showError('Failed to refresh workflow logs');
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [runId, workflow, isRefreshing, api, limit, getApiLogLevel, selectedLogLevel, showError]);
 
-  // Update the refresh useEffect when an action is completed
+
+  // Update the refresh when an action is completed
   useEffect(() => {
     if (onActionComplete) {
-   fetchLatestLogs();
+      handleRefreshLogs();
     }
-  }, [onActionComplete, fetchLatestLogs]);
+  }, [onActionComplete, handleRefreshLogs]);
 
   const loadMoreLogs = async () => {
     if (isLoadingMore || !runId || !workflow) return;
@@ -201,6 +163,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
 
   const handleLogsClick = () => {
     setLogsModalOpen(true);
+    handleRefreshLogs(); // Fetch latest logs when opening the modal
   };
 
   const handleLogsClose = () => {
@@ -298,6 +261,14 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                 ))}
               </Select>
             </FormControl>
+            <IconButton
+              onClick={handleRefreshLogs}
+              disabled={isRefreshing}
+              sx={{ color: 'text.secondary' }}
+              title="Refresh logs"
+            >
+              <RefreshIcon />
+            </IconButton>
             <IconButton
               aria-label="close"
               onClick={handleLogsClose}
@@ -475,7 +446,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                   }}
                 >
                   <Button 
-                    onClick={loadMoreLogs} 
+                    onClick={loadMoreLogs}
                     disabled={isLoadingMore}
                     startIcon={isLoadingMore ? <CircularProgress size={16} /> : null}
                     variant="outlined"
