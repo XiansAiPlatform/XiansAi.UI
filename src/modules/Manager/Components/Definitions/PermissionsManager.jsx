@@ -269,7 +269,7 @@ const PermissionsManager = ({ agentName }) => {
             placeholder="e.g., github|123456"
           />
           <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Permission Level</InputLabel>
+            <InputLabel>Permission</InputLabel>
             <Select
               value={selectedPermission}
               onChange={(e) => setSelectedPermission(e.target.value)}
