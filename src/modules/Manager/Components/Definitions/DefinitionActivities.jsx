@@ -99,8 +99,8 @@ const DefinitionActivities = ({ activities, agentName }) => {
               </Typography>
 
               {activity.parameterDefinitions?.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" gutterBottom>Parameters:</Typography>
+                <Box sx={{ mt: 3, mb: 0 }}>
+                  <Typography variant="subtitle2">Parameters:</Typography>
                   {activity.parameterDefinitions.map((param, idx) => (
                     <Typography key={idx} variant="caption" sx={{ color: 'var(--text-secondary)', display: 'block' }}>
                       {param.name}: {param.type}
