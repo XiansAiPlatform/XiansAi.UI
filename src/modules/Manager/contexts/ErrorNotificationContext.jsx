@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const ErrorNotificationContext = createContext();
-const POLLING_INTERVAL = 30000; // 30 seconds
+const POLLING_INTERVAL = 120000; // 2 minutes
 
 export const ErrorNotificationProvider = ({ children }) => {
     const [navErrorCount, setNavErrorCount] = useState(0);
@@ -75,10 +75,7 @@ export const ErrorNotificationProvider = ({ children }) => {
             const executeRequest = async () => {
                 try {
                     const now = new Date();
-                    const startTime = lastCheckedTimeRef.current;
-                    
-                    console.log('Fetching critical logs from', startTime.toISOString(), 'to', now.toISOString());
-                    
+                    const startTime = lastCheckedTimeRef.current;      
                     const result = await auditingApi.getCriticalLogs(
                         startTime.toISOString(),
                         now.toISOString()
@@ -130,7 +127,6 @@ export const ErrorNotificationProvider = ({ children }) => {
             // Delay the initial fetch to ensure token is fully processed
             const timer = setTimeout(() => {
                 if (location.pathname !== '/' && location.pathname !== '/register') {
-                    console.log('Running initial error count fetch');
                     fetchErrorCount();
                 }
             }, 2000); // 2 second delay after token is ready
@@ -147,7 +143,6 @@ export const ErrorNotificationProvider = ({ children }) => {
         if (isAuthenticated && !authLoading && isTokenReady && !isAuditingPage && !isHomePage) {
             // Clear any existing interval
             if (pollingIntervalRef.current) {
-                console.log('ErrorNotificationContext: Clearing existing polling interval');
                 clearInterval(pollingIntervalRef.current);
             }
 
@@ -156,7 +151,6 @@ export const ErrorNotificationProvider = ({ children }) => {
             // Cleanup on unmount or when auth state changes
             return () => {
                 if (pollingIntervalRef.current) {
-                    console.log('ErrorNotificationContext: Cleaning up polling interval');
                     clearInterval(pollingIntervalRef.current);
                 }
             };
