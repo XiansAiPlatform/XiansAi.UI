@@ -16,6 +16,7 @@ import { useSlider } from '../../contexts/SliderContext';
 import KnowledgeEditor from './KnowledgeEditor';
 import KnowledgeItem from './KnowledgeItem';
 import { useKnowledgeApi } from '../../services/knowledge-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const Knowledge = () => {
@@ -24,6 +25,7 @@ const Knowledge = () => {
   const [isLoadingItem, setIsLoadingItem] = useState(false);
   const { openSlider, closeSlider } = useSlider();
   const knowledgeApi = useKnowledgeApi();
+  const agentsApi = useAgentsApi();
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgent, setSelectedAgent] = useState('');
@@ -85,7 +87,7 @@ const Knowledge = () => {
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
-        const response = await knowledgeApi.getAgents();
+        const response = await agentsApi.getAllAgents();
         setAgents(response.data || response || []);
       } catch (error) {
         console.error('Failed to fetch agents:', error);
@@ -95,7 +97,7 @@ const Knowledge = () => {
     };
 
     fetchAgents();
-  }, [knowledgeApi]);
+  }, [agentsApi]);
 
   useEffect(() => {
     const fetchKnowledge = async () => {

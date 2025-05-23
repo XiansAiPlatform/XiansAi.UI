@@ -8,6 +8,7 @@ import {
     Typography,
     Alert} from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const SendMessageForm = ({ 
@@ -37,6 +38,7 @@ const SendMessageForm = ({
     const [error, setError] = useState(null);
     
     const messagingApi = useMessagingApi();
+    const agentsApi = useAgentsApi();
     const { showError, showSuccess } = useNotification();
     const contentInputRef = useRef(null);
 
@@ -62,7 +64,7 @@ const SendMessageForm = ({
             setIsLoadingTypes(true);
             setError(null);
             try {
-                const response = await messagingApi.getAgentsAndTypes();
+                const response = await agentsApi.getGroupedDefinitions();
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
                     .filter(wf => wf.agent === agentName)
@@ -78,7 +80,7 @@ const SendMessageForm = ({
         };
         
         fetchWorkflowTypes();
-    }, [agentName, messagingApi, showError]);
+    }, [agentName, agentsApi, showError]);
 
     // Fetch workflow instances when workflow type changes
     useEffect(() => {
@@ -94,7 +96,7 @@ const SendMessageForm = ({
             setIsLoadingInstances(true);
             setError(null);
             try {
-                const response = await messagingApi.getWorkflows(agentName, workflowType);
+                const response = await agentsApi.getWorkflowInstances(agentName, workflowType);
                 const workflows = response.data || response || [];
                 setWorkflowInstances(Array.isArray(workflows) ? workflows : []);
             } catch (err) {
@@ -108,7 +110,7 @@ const SendMessageForm = ({
         };
         
         fetchWorkflowInstances();
-    }, [agentName, workflowType, messagingApi, showError, initialWorkflowId]);
+    }, [agentName, workflowType, agentsApi, showError, initialWorkflowId]);
 
     // Validate metadata when it changes
     useEffect(() => {

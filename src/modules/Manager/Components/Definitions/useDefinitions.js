@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDefinitionsApi } from '../../services/definitions-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../auth/AuthContext';
@@ -20,11 +21,11 @@ export const useDefinitions = () => {
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('all');
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState(null);
 
   const definitionsApi = useDefinitionsApi();
+  const agentsApi = useAgentsApi();
   const { setLoading } = useLoading();
   const { showSuccess, showError } = useNotification();
   const { user } = useAuth();
@@ -73,30 +74,11 @@ export const useDefinitions = () => {
     }
   };
 
-  const handleDeleteSuccess = (deletedDefinitionId) => {
-    setDefinitions(prevDefinitions => 
-      prevDefinitions.filter(def => def.id !== deletedDefinitionId)
-    );
-  };
-
-  const handleMenuClick = (event, agentName) => {
-    if (event && event.stopPropagation) {
-      event.stopPropagation();
-    }
-    setMenuAnchorEl(event?.currentTarget || null);
-    setSelectedAgentName(agentName);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-  };
-
   const setSelectedAgent = (agentName) => {
     setSelectedAgentName(agentName);
   };
 
   const handleDeleteAllClick = () => {
-    handleMenuClose();
     setDeleteDialogOpen(true);
   };
 
@@ -115,28 +97,22 @@ export const useDefinitions = () => {
     
     try {
       setLoading(true);
-      // Get definitions for the selected agent from the original definitions array
-      const agentDefinitions = definitions.filter(def => def.agent === selectedAgentName);
-      const deletePromises = agentDefinitions.map(def => definitionsApi.deleteDefinition(def.id));
-      await Promise.all(deletePromises);
+      // Use the new agents API to delete the entire agent and all its definitions
+      await agentsApi.deleteAgent(selectedAgentName);
       
       // Update the definitions state by removing all definitions for this agent
       setDefinitions(prevDefinitions => 
         prevDefinitions.filter(def => def.agent !== selectedAgentName)
       );
       
-      showSuccess(`Successfully deleted all definitions for ${selectedAgentName}`);
+      showSuccess(`Successfully deleted agent "${selectedAgentName}" and all its definitions`);
       setSelectedAgentName(null);
     } catch (error) {
-      console.error('Failed to delete definitions:', error);
-      showError('Failed to delete definitions. Please try again.');
+      console.error('Failed to delete agent:', error);
+      showError('Failed to delete agent. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleShareClick = () => {
-    handleMenuClose();
   };
 
   // Check if user is owner of all workflows for selected agent
@@ -151,7 +127,6 @@ export const useDefinitions = () => {
     openDefinitionId,
     searchQuery,
     timeFilter,
-    menuAnchorEl,
     deleteDialogOpen,
     selectedAgentName,
     
@@ -164,13 +139,9 @@ export const useDefinitions = () => {
     handleToggle,
     handleSearchChange,
     handleTimeFilterChange,
-    handleDeleteSuccess,
-    handleMenuClick,
-    handleMenuClose,
     handleDeleteAllClick,
     handleDeleteAllCancel,
     handleDeleteAllConfirm,
-    handleShareClick,
     setSelectedAgent,
     
     // Utilities

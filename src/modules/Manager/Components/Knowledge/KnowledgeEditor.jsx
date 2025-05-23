@@ -11,9 +11,11 @@ import {
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
 import { useKnowledgeApi } from '../../services/knowledge-api';
+import { useAgentsApi } from '../../services/agents-api';
 
 const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, onClose }) => {
   const knowledgeApi = useKnowledgeApi();
+  const agentsApi = useAgentsApi();
   const [formData, setFormData] = useState(knowledge || {
     name: '',
     content: '',
@@ -42,7 +44,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
       setIsLoadingAgents(true);
       setAgentsError(null);
       try {
-        const response = await knowledgeApi.getAgents();
+        const response = await agentsApi.getAllAgents();
         console.log('Agents API response:', response);
         if (response && Array.isArray(response)) {
           setAgents(response);
@@ -61,7 +63,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
     };
 
     fetchAgents();
-  }, [knowledgeApi]);
+  }, [agentsApi]);
 
   useEffect(() => {
     // Fetch knowledge content if in edit mode and content is not available

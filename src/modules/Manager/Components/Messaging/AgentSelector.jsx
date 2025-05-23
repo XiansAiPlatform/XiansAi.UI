@@ -9,8 +9,8 @@ import {
     Alert
 } from '@mui/material';
 
-const WorkflowSelector = ({
-    messagingApi,
+const AgentSelector = ({
+    agentsApi,
     showError,
     onAgentSelected
 }) => {
@@ -27,7 +27,7 @@ const WorkflowSelector = ({
             setSelectedAgentName('');
             onAgentSelected(null);
             try {
-                const response = await messagingApi.getAgents();
+                const response = await agentsApi.getAllAgents();
                 setAgentNames(Array.isArray(response) ? response : []);
             } catch (err) {
                 const errorMsg = 'Failed to fetch agents.';
@@ -39,7 +39,7 @@ const WorkflowSelector = ({
             }
         };
         fetchAgents();
-    }, [messagingApi, showError, onAgentSelected]);
+    }, [agentsApi, showError, onAgentSelected]);
 
     const handleAgentChange = (newValue) => {
         const newAgentName = newValue || '';
@@ -104,4 +104,4 @@ const WorkflowSelector = ({
     );
 };
 
-export default WorkflowSelector; 
+export default AgentSelector; 

@@ -6,6 +6,7 @@ import {
     Grid
 } from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useSlider } from '../../contexts/SliderContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import AgentSelector from './AgentSelector';
@@ -36,6 +37,7 @@ const MessagingPage = () => {
     // --- Hooks ---
     // Using the existing API hook from services/messaging-api.js
     const messagingApi = useMessagingApi(); 
+    const agentsApi = useAgentsApi();
     const { openSlider, closeSlider } = useSlider();
     const { showError } = useNotification();
 
@@ -188,7 +190,7 @@ const MessagingPage = () => {
 
             {/* Agent selection */}
             <AgentSelector
-                messagingApi={messagingApi}
+                agentsApi={agentsApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
             />

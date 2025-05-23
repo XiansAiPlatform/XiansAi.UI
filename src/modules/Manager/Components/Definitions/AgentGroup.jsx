@@ -26,8 +26,6 @@ const AgentGroup = ({
   latestUpdateDate, 
   openDefinitionId, 
   onToggle, 
-  onDeleteSuccess, 
-  onMenuClick,
   isOwnerOfAllWorkflows,
   onDeleteAllClick,
   onShareClick
@@ -225,7 +223,7 @@ const AgentGroup = ({
                   }
                 }}
               >
-                Delete
+                Delete Agent
               </Button>
             </Stack>
           </>
@@ -253,7 +251,6 @@ const AgentGroup = ({
                 isOpen={openDefinitionId === definition.id}
                 previousRowOpen={index > 0 && openDefinitionId === definitions[index - 1].id}
                 onToggle={onToggle}
-                onDeleteSuccess={onDeleteSuccess}
               />
             ))}
           </TableBody>

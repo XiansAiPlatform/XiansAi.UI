@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 
 const AgentSelector = ({
-    auditingApi,
+    agentsApi,
     showError,
     onAgentSelected
 }) => {
@@ -27,7 +27,7 @@ const AgentSelector = ({
             setSelectedAgentName('');
             onAgentSelected(null);
             try {
-                const response = await auditingApi.getAgents();
+                const response = await agentsApi.getAllAgents();
                 setAgentNames(Array.isArray(response) ? response : []);
             } catch (err) {
                 const errorMsg = 'Failed to fetch agents.';
@@ -39,7 +39,7 @@ const AgentSelector = ({
             }
         };
         fetchAgents();
-    }, [auditingApi, showError, onAgentSelected]);
+    }, [agentsApi, showError, onAgentSelected]);
 
     const handleAgentChange = (newValue) => {
         const newAgentName = newValue || '';

@@ -28,8 +28,6 @@ const DefinitionList = () => {
     handleToggle,
     handleSearchChange,
     handleTimeFilterChange,
-    handleDeleteSuccess,
-    handleMenuClick,
     handleDeleteAllClick,
     handleDeleteAllCancel,
     handleDeleteAllConfirm,
@@ -92,8 +90,6 @@ const DefinitionList = () => {
           latestUpdateDate={latestFlowByAgent[agentName]}
           openDefinitionId={openDefinitionId}
           onToggle={handleToggle}
-          onDeleteSuccess={handleDeleteSuccess}
-          onMenuClick={handleMenuClick}
           isOwnerOfAllWorkflows={isOwnerOfAllWorkflows(agentName)}
           onDeleteAllClick={() => handleDeleteAllForAgent(agentName)}
           onShareClick={() => handleShare(agentName)}

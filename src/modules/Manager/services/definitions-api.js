@@ -25,17 +25,7 @@ export const useDefinitionsApi = () => {
           console.error('Error fetching definitions:', error);
           throw error;
         }
-      },
-      
-      deleteDefinition: async (definitionId) => {
-        try {
-          await apiClient.delete(`/api/client/definitions/${definitionId}`);
-          return true;
-        } catch (error) {
-          console.error('Error deleting definition:', error);
-          throw error;
-        }
-      },
+      }
     };
   }, [apiClient]);
 };

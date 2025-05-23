@@ -6,16 +6,6 @@ export const useKnowledgeApi = () => {
 
   return useMemo(() => {
     return {
-
-      getAgents: async () => {
-        try {
-          return await apiClient.get('/api/client/agents/all');
-        } catch (error) {
-          console.error('Error fetching agents and types:', error);
-          throw error;
-        }
-      },
-
       createKnowledge: async (knowledgeRequest) => {
         knowledgeRequest.name = knowledgeRequest.name.trim();
         try {
