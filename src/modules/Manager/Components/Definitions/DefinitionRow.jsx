@@ -11,7 +11,6 @@ import MermaidDiagram from '../Runs/WorkflowDetails/MermaidDiagram';
 import NewWorkflowForm from '../Runs/NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
-import DefinitionAgents from './DefinitionAgents';
 import { useAuth } from '../../auth/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { useDefinitionsApi } from '../../services/definitions-api';
@@ -277,7 +276,6 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
           >
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <div className="definition-collapse-content">
-                <DefinitionAgents activities={definition.activityDefinitions || []} />
                 {definition.activityDefinitions?.length > 0 ? (
                   <DefinitionActivities 
                     activities={definition.activityDefinitions} 
