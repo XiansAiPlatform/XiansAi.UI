@@ -161,7 +161,7 @@ const CriticalLogs = () => {
                     gap: { xs: 2, md: 0 }
                 }}>
                     <Typography variant="h6">
-                        Failed Workflow Runs
+                    Activity Retry Failures
                     </Typography>
                     <Stack direction="row" spacing={2} alignItems="center">
                         <FormControlLabel
@@ -226,7 +226,7 @@ const CriticalLogs = () => {
                 gap: { xs: 2, md: 0 }
             }}>
                 <Typography variant="h6">
-                    Failed Workflow Runs
+                Activity Retry Failures
                 </Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
                     <FormControlLabel

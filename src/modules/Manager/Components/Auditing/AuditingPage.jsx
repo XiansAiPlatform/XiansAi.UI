@@ -52,7 +52,7 @@ const AuditingPage = () => {
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
         
-        // Reset tab error count when switching to the Failed Workflow Runs tab
+        // Reset tab error count when switching to the Activity Retry Failures tab
         if (newValue === 1 && tabErrorCount > 0) {
             resetTabErrorCount();
         }
@@ -74,11 +74,10 @@ const AuditingPage = () => {
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                 <Tabs value={activeTab} onChange={handleTabChange}>
-                    <Tab label="Workflow Log Explorer" />
                     <Tab 
                         label={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                Failed Workflow Runs
+                                Activity Retry Failures
                                 {tabErrorCount > 0 && (
                                     <Badge 
                                         badgeContent={tabErrorCount} 
@@ -96,10 +95,15 @@ const AuditingPage = () => {
                             </Box>
                         } 
                     />
+                    <Tab label="Workflow Log Explorer" />
                 </Tabs>
             </Box>
 
             {activeTab === 0 && (
+                <ErrorLogs />
+            )}
+
+            {activeTab === 1 && (
                 <>
                     <AgentSelector
                         auditingApi={auditingApi}
@@ -123,10 +127,6 @@ const AuditingPage = () => {
                         selectedWorkflowTypeId={selectedWorkflowTypeId}
                     />
                 </>
-            )}
-
-            {activeTab === 1 && (
-                <ErrorLogs />
             )}
         </Box>
     );
