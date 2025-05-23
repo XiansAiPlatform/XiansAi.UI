@@ -22,7 +22,6 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import SyncIcon from '@mui/icons-material/Sync';
 import { usePermissionsApi } from '../../services/permissions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -175,26 +174,6 @@ const PermissionsManager = ({ agentName }) => {
     }
   };
 
-  const handleReapplyPermissions = async (userId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await permissionsApi.updateUserPermission(agentName, userId, selectedPermission);
-      
-      if (!response.isSuccess) {
-        setError(response.errorMessage || 'Failed to reapply permissions');
-        return;
-      }
-
-      showSuccess('Permissions reapplied successfully');
-    } catch (error) {
-      setError('Failed to reapply permissions. Please try again.');
-      console.error('Error reapplying permissions:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const renderPermissionList = (users, permissionLevel) => (
     <List>
       {users.map((userId) => (
@@ -214,15 +193,6 @@ const PermissionsManager = ({ agentName }) => {
                 ))}
               </Select>
             </FormControl>
-            <Tooltip title="Reapply permissions across all flows">
-              <IconButton
-                edge="end"
-                onClick={() => handleReapplyPermissions(userId)}
-                sx={{ mr: 1 }}
-              >
-                <SyncIcon />
-              </IconButton>
-            </Tooltip>
             <Tooltip title="Remove user">
               <IconButton
                 edge="end"

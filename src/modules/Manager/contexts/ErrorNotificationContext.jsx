@@ -119,7 +119,7 @@ export const ErrorNotificationProvider = ({ children }) => {
         } catch (error) {
             if (retries < maxRetries) {
                 retries++;
-                setTimeout(() => fetchErrorCount(), 1000 * retries); // Backoff with each retry
+                setTimeout(() => fetchErrorCount(), 10000 * retries); // Backoff with each retry
             } else {
                 console.error('Max retries reached. Unable to fetch error count.');
             }

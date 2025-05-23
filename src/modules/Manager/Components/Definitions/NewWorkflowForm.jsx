@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useWorkflowApi } from '../../services/workflow-api';
-import './WorkflowList.css';
+import './Definitions.css';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
 const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
@@ -32,7 +32,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   );
   const [runType, setRunType] = useState('singleton'); // 'unique' or 'singleton'
   const [flowId, setFlowId] = useState(definition ? 
-    `${definition.agent.trim()}:${definition.workflowType.trim()}`.replace(/\s+/g, '') : 
+    `${definition.workflowType.trim()}`.replace(/\s+/g, '') : 
     '');
   const [queueType] = useState('default'); // 'default' or 'named'
   const [queueName] = useState('');

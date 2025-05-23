@@ -5,9 +5,8 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../auth/AuthContext';
 import { 
-  filterDefinitions, 
-  sortDefinitionsByDate, 
-  groupDefinitionsByAgent,
+  filterAgentGroups, 
+  sortAgentGroupsByDate,
   isUserOwnerOfAllWorkflows
 } from './definitionUtils';
 
@@ -16,7 +15,7 @@ import {
  * @returns {Object} Object containing state, handlers, and computed values
  */
 export const useDefinitions = () => {
-  const [definitions, setDefinitions] = useState([]);
+  const [agentGroups, setAgentGroups] = useState([]);
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,18 +30,39 @@ export const useDefinitions = () => {
   const { user } = useAuth();
 
   // Computed values
-  const filteredAndSortedDefinitions = sortDefinitionsByDate(
-    filterDefinitions(definitions, searchQuery)
+  const filteredAndSortedAgentGroups = sortAgentGroupsByDate(
+    filterAgentGroups(agentGroups, searchQuery)
   );
   
-  const { grouped, sortedAgentNames, latestFlowByAgent } = groupDefinitionsByAgent(filteredAndSortedDefinitions);
+  // Extract data for component compatibility
+  const grouped = {};
+  const latestFlowByAgent = {};
+  const sortedAgentNames = [];
+  
+  filteredAndSortedAgentGroups.forEach(agentGroup => {
+    const agentName = agentGroup.agent.name;
+    grouped[agentName] = agentGroup.definitions;
+    sortedAgentNames.push(agentName);
+    
+    // Find the latest flow date for this agent
+    if (agentGroup.definitions.length > 0) {
+      const latestDate = agentGroup.definitions.reduce((latest, def) => {
+        const defDate = new Date(def.createdAt);
+        return defDate > latest ? defDate : latest;
+      }, new Date(0));
+      latestFlowByAgent[agentName] = latestDate;
+    }
+  });
+
+  // Get flat list of all definitions for compatibility
+  const definitions = agentGroups.flatMap(group => group.definitions);
 
   // Fetch definitions
   const fetchDefinitions = async () => {
     try {
       setLoading(true);
       const data = await definitionsApi.getDefinitions(timeFilter);
-      setDefinitions(data);
+      setAgentGroups(data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -100,9 +120,9 @@ export const useDefinitions = () => {
       // Use the new agents API to delete the entire agent and all its definitions
       await agentsApi.deleteAgent(selectedAgentName);
       
-      // Update the definitions state by removing all definitions for this agent
-      setDefinitions(prevDefinitions => 
-        prevDefinitions.filter(def => def.agent !== selectedAgentName)
+      // Update the agent groups state by removing the agent group
+      setAgentGroups(prevAgentGroups => 
+        prevAgentGroups.filter(group => group.agent.name !== selectedAgentName)
       );
       
       showSuccess(`Successfully deleted agent "${selectedAgentName}" and all its definitions`);
@@ -117,7 +137,10 @@ export const useDefinitions = () => {
 
   // Check if user is owner of all workflows for selected agent
   const isOwnerOfAllWorkflows = (agentName) => {
-    return isUserOwnerOfAllWorkflows(agentName, definitions, user);
+    const agentGroup = agentGroups.find(group => group.agent.name === agentName);
+    if (!agentGroup) return false;
+    
+    return isUserOwnerOfAllWorkflows(agentGroup.agent, user);
   };
 
   return {

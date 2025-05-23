@@ -6,7 +6,7 @@ import DefinitionActivities from './DefinitionActivities';
 import DefinitionParameters from './DefinitionParameters';
 import { useSlider } from '../../contexts/SliderContext';
 import MermaidDiagram from '../Runs/WorkflowDetails/MermaidDiagram';
-import NewWorkflowForm from '../Runs/NewWorkflowForm';
+import NewWorkflowForm from './NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
 import { useAuth } from '../../auth/AuthContext';
