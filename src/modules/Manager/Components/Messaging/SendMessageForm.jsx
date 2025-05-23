@@ -64,7 +64,7 @@ const SendMessageForm = ({
             setIsLoadingTypes(true);
             setError(null);
             try {
-                const response = await agentsApi.getGroupedDefinitions();
+                const response = await agentsApi.getDefinitionsBasic(agentName);
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
                     .filter(wf => wf.agent === agentName)
@@ -97,7 +97,7 @@ const SendMessageForm = ({
             setError(null);
             try {
                 const response = await agentsApi.getWorkflowInstances(agentName, workflowType);
-                const workflows = response.data || response || [];
+                const workflows = response.value || response.data || response || [];
                 setWorkflowInstances(Array.isArray(workflows) ? workflows : []);
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow instances.';

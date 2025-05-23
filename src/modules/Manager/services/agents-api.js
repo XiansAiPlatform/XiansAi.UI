@@ -8,7 +8,7 @@ export const useAgentsApi = () => {
     return {
       getAllAgents: async () => {
         try {
-          return await apiClient.get('/api/client/agents/all');
+          return await apiClient.get('/api/client/agents/names');
         } catch (error) {
           console.error('Error fetching agents:', error);
           throw error;
@@ -17,7 +17,17 @@ export const useAgentsApi = () => {
 
       getGroupedDefinitions: async () => {
         try {
-          return await apiClient.get('/api/client/agents/workflows/all');
+          return await apiClient.get('/api/client/agents/definitions');
+        } catch (error) {
+          console.error('Error fetching grouped definitions:', error);
+          throw error;
+        }
+      },
+
+
+      getDefinitionsBasic: async (agentName) => {
+        try {
+          return await apiClient.get(`/api/client/agents/${agentName}/definitions/basic`);
         } catch (error) {
           console.error('Error fetching grouped definitions:', error);
           throw error;

@@ -32,7 +32,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   );
   const [runType, setRunType] = useState('singleton'); // 'unique' or 'singleton'
   const [flowId, setFlowId] = useState(definition ? 
-    `${definition.workflowType.trim()}`.replace(/\s+/g, '') : 
+    `${definition.workflowType.trim()}`: 
     '');
   const [queueType] = useState('default'); // 'default' or 'named'
   const [queueName] = useState('');

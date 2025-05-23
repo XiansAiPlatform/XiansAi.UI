@@ -20,7 +20,7 @@ export const useDefinitionsApi = () => {
             queryParams.owner = 'current';
           }
 
-          return await apiClient.get('/api/client/agents/all/definitions', queryParams);
+          return await apiClient.get('/api/client/agents/definitions', queryParams);
         } catch (error) {
           console.error('Error fetching definitions:', error);
           throw error;

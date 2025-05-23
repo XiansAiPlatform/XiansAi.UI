@@ -138,10 +138,11 @@ const WorkflowSelector = ({
                             options={workflows}
                             value={workflows.find(wf => wf.id === selectedWorkflowId) || null}
                             onChange={(event, newValue) => onWorkflowSelected(newValue?.id || null)}
-                            getOptionLabel={(option) => option.name || 'Unknown'}
+                            getOptionLabel={(option) => option.id || 'Unknown'}
                             renderOption={(props, option) => (
                                 <li {...props} key={option.id}>
-                                    {option.name || 'Unknown'}
+                                    {console.log(option)}
+                                    {option.id || 'Unknown'}
                                 </li>
                             )}
                             renderInput={(params) => (

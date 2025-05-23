@@ -46,7 +46,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
             setIsLoadingTypes(true);
             setError(null);
             try {
-                const response = await agentsApi.getGroupedDefinitions();
+                const response = await agentsApi.getGroupedDefinitionsBasic();
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
                     .filter(wf => wf.agent === agentName)
