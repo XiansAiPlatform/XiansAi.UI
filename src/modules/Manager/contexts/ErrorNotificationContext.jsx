@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const ErrorNotificationContext = createContext();
-const POLLING_INTERVAL = 30000; // 30 seconds
+const POLLING_INTERVAL = 120000; // 2 minutes
 
 export const ErrorNotificationProvider = ({ children }) => {
     const [navErrorCount, setNavErrorCount] = useState(0);
@@ -75,35 +75,38 @@ export const ErrorNotificationProvider = ({ children }) => {
             const executeRequest = async () => {
                 try {
                     const now = new Date();
-                    const startTime = lastCheckedTimeRef.current;
-                    
-                    console.log('Fetching critical logs from', startTime.toISOString(), 'to', now.toISOString());
-                    
+                    const startTime = lastCheckedTimeRef.current;    
                     const result = await auditingApi.getCriticalLogs(
                         startTime.toISOString(),
                         now.toISOString()
                     );
-                    
                     // Update lastCheckedTime immediately upon successful response
                     lastCheckedTimeRef.current = now;
                     setLastCheckedTime(now);
+                    
                     
                     // Calculate new errors since last check
                     const newErrors = result.reduce((total, agentGroup) => {
                         return total + agentGroup.workflowTypes.reduce((typeTotal, typeGroup) => {
                             return typeTotal + typeGroup.workflows.reduce((workflowTotal, workflow) => {
                                 return workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => {
-                                    return runTotal + run.criticalLogs.filter(log => 
-                                        new Date(log.createdAt) > lastCheckedTimeRef.current
-                                    ).length;
+                                    // Debug: Log each log and whether it passes the filter
+                                    const newLogsInThisRun = run.criticalLogs.filter(log => {
+                                        const logTime = new Date(log.createdAt);
+                                        const isNew = logTime > startTime;
+                                        return isNew;
+                                    });
+                                     return runTotal + newLogsInThisRun.length;
                                 }, 0);
                             }, 0);
                         }, 0);
                     }, 0);
 
                     if (newErrors > 0) {
-                        // Update both counts when new errors are found
-                        setNavErrorCount(prev => prev + newErrors);
+                        // Update both counts when new errors are found  
+                        setNavErrorCount(prev => {      
+                            return prev + newErrors;
+                        });
                         setTabErrorCount(prev => prev + newErrors);
                     }
                 } catch (error) {
@@ -116,7 +119,6 @@ export const ErrorNotificationProvider = ({ children }) => {
         } catch (error) {
             if (retries < maxRetries) {
                 retries++;
-                console.log(`Retry attempt ${retries} for fetchErrorCount`);
                 setTimeout(() => fetchErrorCount(), 1000 * retries); // Backoff with each retry
             } else {
                 console.error('Max retries reached. Unable to fetch error count.');
@@ -130,7 +132,6 @@ export const ErrorNotificationProvider = ({ children }) => {
             // Delay the initial fetch to ensure token is fully processed
             const timer = setTimeout(() => {
                 if (location.pathname !== '/' && location.pathname !== '/register') {
-                    console.log('Running initial error count fetch');
                     fetchErrorCount();
                 }
             }, 2000); // 2 second delay after token is ready
@@ -147,7 +148,6 @@ export const ErrorNotificationProvider = ({ children }) => {
         if (isAuthenticated && !authLoading && isTokenReady && !isAuditingPage && !isHomePage) {
             // Clear any existing interval
             if (pollingIntervalRef.current) {
-                console.log('ErrorNotificationContext: Clearing existing polling interval');
                 clearInterval(pollingIntervalRef.current);
             }
 
@@ -156,7 +156,6 @@ export const ErrorNotificationProvider = ({ children }) => {
             // Cleanup on unmount or when auth state changes
             return () => {
                 if (pollingIntervalRef.current) {
-                    console.log('ErrorNotificationContext: Cleaning up polling interval');
                     clearInterval(pollingIntervalRef.current);
                 }
             };

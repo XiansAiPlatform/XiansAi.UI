@@ -43,7 +43,7 @@ const WorkflowLogs = ({
     const [logs, setLogs] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [selectedLogLevel, setSelectedLogLevel] = useState('');
+    const [selectedLogLevel, setSelectedLogLevel] = useState(2);
     const [autoRefresh, setAutoRefresh] = useState(false);
     const [timeFilter, setTimeFilter] = useState('24hours');
     
