@@ -139,7 +139,8 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     if (onActionComplete) {
       handleRefreshLogs();
     }
-  }, [onActionComplete, handleRefreshLogs]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onActionComplete]);
 
   const loadMoreLogs = async () => {
     if (isLoadingMore || !runId || !workflow) return;
