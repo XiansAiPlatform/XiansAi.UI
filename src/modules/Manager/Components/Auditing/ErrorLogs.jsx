@@ -377,7 +377,6 @@ const CriticalLogs = () => {
                                                     variant="outlined"
                                                     size="small"
                                                     onClick={() => handleOpenDialog(workflowGroup.workflowRuns[0], workflowGroup.workflowId)}
-                                                    disabled={workflowGroup.workflowId === 'defaultWorkflowId'}
                                                 >
                                                     View Details
                                                 </Button>
