@@ -19,12 +19,12 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
     Button
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LinkIcon from '@mui/icons-material/Link';
+import CloseIcon from '@mui/icons-material/Close';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useNotification } from '../../contexts/NotificationContext';
 
@@ -358,7 +358,7 @@ const CriticalLogs = () => {
                                                         <Tooltip title="View workflow run">
                                                             <IconButton
                                                                 size="small"
-                                                                onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
+                                                                onClick={() => handleOpenDialog(workflowGroup.workflowRuns[0], workflowGroup.workflowId)}
                                                             >
                                                                 <LinkIcon fontSize="small" />
                                                             </IconButton>
@@ -398,14 +398,23 @@ const CriticalLogs = () => {
                                         Run ID: {selectedRun.workflowRunId}
                                     </Typography>
                                 </Box>
-                                <Tooltip title="View workflow run">
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Tooltip title="View workflow run">
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
+                                        >
+                                            <LinkIcon fontSize="small" />
+                                        </IconButton>
+                                    </Tooltip>
                                     <IconButton
                                         size="small"
-                                        onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
+                                        onClick={handleCloseDialog}
+                                        aria-label="close"
                                     >
-                                        <LinkIcon fontSize="small" />
+                                        <CloseIcon fontSize="small" />
                                     </IconButton>
-                                </Tooltip>
+                                </Box>
                             </Box>
                         </DialogTitle>
                         <DialogContent>
@@ -456,9 +465,6 @@ const CriticalLogs = () => {
                                 </Paper>
                             ))}
                         </DialogContent>
-                        <DialogActions>
-                            <Button onClick={handleCloseDialog}>Close</Button>
-                        </DialogActions>
                     </>
                 )}
             </Dialog>
