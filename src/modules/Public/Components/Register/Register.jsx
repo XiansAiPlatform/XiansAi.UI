@@ -3,11 +3,13 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FiPlusCircle } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
 import { useRegistrationApi } from '../../services/registration-api';
+import { useAuth } from '../../../Manager/auth/AuthContext';
 
 export default function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const registrationApi = useRegistrationApi();
+  const auth = useAuth();
   
   // Get step from URL or default to 1
   const getStepFromUrl = () => {
@@ -159,7 +161,10 @@ export default function Register() {
         const isValid = await registrationApi.validateVerificationCode(formData.joinEmail, code);
         if (isValid) {
           console.log('Verification successful');
-          window.location.href = '/logout';
+          // Use the auth context to properly logout instead of direct redirect
+          await auth.logout();
+          // Navigate to login page after logout
+          navigate('/login');
         } else {
           setVerificationError('Invalid verification code');
         }

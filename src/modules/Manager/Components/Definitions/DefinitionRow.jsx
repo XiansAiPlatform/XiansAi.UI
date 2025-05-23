@@ -11,7 +11,6 @@ import MermaidDiagram from '../Runs/WorkflowDetails/MermaidDiagram';
 import NewWorkflowForm from '../Runs/NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
-import DefinitionAgents from './DefinitionAgents';
 import { useAuth } from '../../auth/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { useDefinitionsApi } from '../../services/definitions-api';
@@ -277,7 +276,6 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
           >
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <div className="definition-collapse-content">
-                <DefinitionAgents activities={definition.activityDefinitions || []} />
                 {definition.activityDefinitions?.length > 0 ? (
                   <DefinitionActivities 
                     activities={definition.activityDefinitions} 
@@ -286,7 +284,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
-                      Agent Activities <span className="section-count">(0)</span>
+                      Activities <span className="section-count">(0)</span>
                     </Typography>
                     <Box sx={{ padding: '8px 16px' }}>
                       <Typography color="text.secondary" variant="body2">No activities to show</Typography>
@@ -298,7 +296,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle, onDelete
                 ) : (
                   <div className="definition-section">
                     <Typography variant="h6" className="section-title">
-                      Agent Inputs <span className="section-count">(0)</span>
+                      Inputs <span className="section-count">(0)</span>
                     </Typography>
                     <Box sx={{ padding: '8px 16px' }}>
                       <Typography color="text.secondary" variant="body2">No inputs to show</Typography>

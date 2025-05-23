@@ -64,12 +64,18 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
         handleRedirectCallback();
       }
 
-      AuthProviderInstance.onAuthStateChanged((authState) => {
+      const unsubscribe = AuthProviderInstance.onAuthStateChanged((authState) => {
         setUser(authState.user);
         setIsAuthenticated(authState.isAuthenticated);
         setAccessToken(authState.accessToken);
         setIsLoading(false);
       });
+
+      return () => {
+        if (unsubscribe && typeof unsubscribe === 'function') {
+          unsubscribe();
+        }
+      };
     }
   }, [AuthProviderInstance]);
 
@@ -86,11 +92,25 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const logout = async (options) => {
     try {
       setIsLoading(true);
-      await AuthProviderInstance.logout(options);
-      // Auth state will be updated by onAuthStateChanged
+      // Ensure federated logout is requested
+      const logoutOptions = {
+        ...options,
+        logoutParams: {
+          ...(options?.logoutParams),
+          federated: true,
+        },
+      };
+      await AuthProviderInstance.logout(logoutOptions);
+      // Explicitly set auth state to logged out
+      setUser(null);
+      setIsAuthenticated(false);
+      setAccessToken(null);
+      // Auth state will also be updated by onAuthStateChanged, but this makes it immediate
     } catch (e) {
+      console.error("Error during logout:", e);
       setError(e);
-      setIsLoading(false);
+    } finally {
+      setIsLoading(false); // Ensure loading is set to false in all cases
     }
   };
 
