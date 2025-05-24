@@ -90,7 +90,7 @@ export const useKnowledgeApi = () => {
           console.error('Error fetching knowledge versions:', error);
           throw error;
         }
-      }
+      },
     };
   }, [apiClient]);
 }; 

@@ -57,7 +57,7 @@ const Knowledge = () => {
         setIsSearchingContent(true);
         try {
           // Get all knowledge items with full content if search query is substantial
-          const fullKnowledgeItems = await knowledgeApi.getAllKnowledge();
+          const fullKnowledgeItems = await knowledgeApi.getLatestKnowledge();
           const results = fullKnowledgeItems.filter(item => 
             item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))

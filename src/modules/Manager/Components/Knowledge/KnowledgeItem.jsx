@@ -159,15 +159,13 @@ const KnowledgeItem = ({
     setVersionToDelete(knowledgeToDelete);
   };
 
-  const handleVersionSelect = async (version) => {
-    setLoading(true);
+  const handleVersionSelect = (e, version) => {
+    e.stopPropagation(); // Prevent event bubbling to parent
     try {
-      // Fetch the specific version by ID
-      const versionDetails = await knowledgeApi.getKnowledge(version.id);
-
+      // Simply pass the version ID to the viewer, let it handle the data fetching
       openSlider(
         <KnowledgeViewer
-          knowledge={versionDetails}
+          knowledgeId={version.id}
           onEdit={handleEdit}
           onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
           title={`View Knowledge (v.${version.version.substring(0, 7)})`}
@@ -175,19 +173,7 @@ const KnowledgeItem = ({
         `View Knowledge (v.${version.version.substring(0, 7)})`
       );
     } catch (error) {
-      console.error('Error fetching knowledge version:', error);
-      // Continue with existing data as fallback
-      openSlider(
-        <KnowledgeViewer
-          knowledge={{ ...knowledge, ...version }}
-          onEdit={handleEdit}
-          onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
-          title={`View Knowledge (v.${version.version.substring(0, 7)})`}
-        />,
-        `View Knowledge (v.${version.version.substring(0, 7)})`
-      );
-    } finally {
-      setLoading(false);
+      console.error('Error opening knowledge version:', error);
     }
   };
 
@@ -420,7 +406,7 @@ const KnowledgeItem = ({
                   {versions.map((version, index) => (
                     <Box
                       key={version.version}
-                      onClick={() => handleVersionSelect(version)}
+                      onClick={(e) => handleVersionSelect(e, version)}
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
