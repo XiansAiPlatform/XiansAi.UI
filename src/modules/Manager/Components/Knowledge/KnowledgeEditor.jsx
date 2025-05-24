@@ -165,9 +165,8 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
 
   return (
     <Box sx={{ 
-      height: 'auto',
-      maxHeight: 'calc(100vh - 100px)',
-      minHeight: '400px',
+      height: 'calc(100vh - 100px)',
+      minHeight: '600px',
       display: 'flex',
       flexDirection: 'column',
       backgroundColor: 'var(--background-default)',
@@ -299,7 +298,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
               </Box>
             ) : (
               <Editor
-                height="100%"
+                height="400px"
                 language={formData.type === 'json' ? 'json' : 'markdown'}
                 value={formData.content}
                 onChange={handleEditorChange}
@@ -309,7 +308,8 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
                   wordWrap: 'on',
                   fontFamily: 'var(--font-mono)',
                   padding: { top: 16, bottom: 16 },
-                  scrollBeyondLastLine: false
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true
                 }}
               />
             )}

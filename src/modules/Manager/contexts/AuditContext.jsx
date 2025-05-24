@@ -3,11 +3,11 @@ import { useAuditingApi } from '../services/auditing-api';
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
-const ErrorNotificationContext = createContext();
+const AuditContext = createContext();
 const POLLING_INTERVAL = 120000; // 2 minutes
 const MAX_CONSECUTIVE_FAILURES = 3;
 
-export const ErrorNotificationProvider = ({ children }) => {
+export const AuditProvider = ({ children }) => {
     const [navErrorCount, setNavErrorCount] = useState(0);
     const [tabErrorCount, setTabErrorCount] = useState(0);
     const [lastCheckedTime, setLastCheckedTime] = useState(new Date());
@@ -22,12 +22,6 @@ export const ErrorNotificationProvider = ({ children }) => {
     const consecutiveFailuresRef = useRef(0);
     const isCircuitOpenRef = useRef(false);
     const isApiCallInProgressRef = useRef(false);
-    
-    // State for external access (read-only)
-    const [circuitBreakerState, setCircuitBreakerState] = useState({
-        consecutiveFailures: 0,
-        isCircuitOpen: false
-    });
 
     // Create a stable reference to fetchErrorCount (will be assigned after function definition)
     const fetchErrorCountRef = useRef();
@@ -238,7 +232,7 @@ export const ErrorNotificationProvider = ({ children }) => {
     }, []);
 
     return (
-        <ErrorNotificationContext.Provider value={{
+        <AuditContext.Provider value={{
             navErrorCount,
             tabErrorCount,
             lastCheckedTime,
@@ -251,14 +245,14 @@ export const ErrorNotificationProvider = ({ children }) => {
             consecutiveFailures: consecutiveFailuresRef.current
         }}>
             {children}
-        </ErrorNotificationContext.Provider>
+        </AuditContext.Provider>
     );
 };
 
-export const useErrorNotification = () => {
-    const context = useContext(ErrorNotificationContext);
+export const useAuditContext = () => {
+    const context = useContext(AuditContext);
     if (!context) {
-        throw new Error('useErrorNotification must be used within an ErrorNotificationProvider');
+        throw new Error('useAuditContext must be used within an AuditProvider');
     }
     return context;
 }; 

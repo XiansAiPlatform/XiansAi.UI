@@ -32,7 +32,7 @@ const toastStyles = {
   },
 };
 
-export const handleApiError = async (error, customMessage = '') => {
+export const handleApiError = async (error, customMessage = '', showErrorCallback = null) => {
   let userMessage = '';
   let technicalDetails = '';
   let errorTitle = customMessage || 'Error';
@@ -106,16 +106,22 @@ export const handleApiError = async (error, customMessage = '') => {
     </div>
   );
 
-  // Show toast notification with enhanced content
-  toast.error(<ToastContent />, {
-    position: "top-right",
-    autoClose: 6000, // Increased duration to allow reading
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    style: { maxWidth: '800px', width: '100%' }, // Increased width for better readability
-  });
+  // Use provided callback if available, otherwise fallback to direct toast
+  if (showErrorCallback && typeof showErrorCallback === 'function') {
+    const fullErrorMessage = `${finalMessage.title}: ${finalMessage.description}. Technical details: ${finalMessage.technical}`;
+    showErrorCallback(fullErrorMessage);
+  } else {
+    // Fallback to direct toast call for backward compatibility
+    toast.error(<ToastContent />, {
+      position: "bottom-right", // Changed to match NotificationContext
+      autoClose: 6000, // Increased duration to allow reading
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      style: { maxWidth: '800px', width: '100%' }, // Increased width for better readability
+    });
+  }
 
   return finalMessage;
 };

@@ -6,8 +6,8 @@ const NotificationContext = createContext();
 export function NotificationProvider({ children }) {
   const showError = (message) => {
     toast.error(message, {
-      position: "top-right",
-      autoClose: 5000,
+      position: "bottom-right",
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,

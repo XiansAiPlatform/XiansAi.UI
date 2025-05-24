@@ -31,8 +31,7 @@ const WorkflowDetails = () => {
           console.log('workflow', data);
           setWorkflow(data);
         } catch (error) {
-          const errorMessage = handleApiError(error, 'Failed to load workflow');
-          showError(errorMessage.description);
+          const errorMessage = await handleApiError(error, 'Failed to load workflow', showError);
           setError(errorMessage);
         } finally {
           setLoading(false);

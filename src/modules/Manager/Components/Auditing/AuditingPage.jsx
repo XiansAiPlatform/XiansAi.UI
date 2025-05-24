@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
-import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
+import { useAuditContext } from '../../contexts/AuditContext';
 import AgentSelector from './AgentSelector';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
@@ -29,7 +29,7 @@ const AuditingPage = () => {
     // --- Hooks ---
     const agentsApi = useAgentsApi();
     const { showError } = useNotification();
-    const { tabErrorCount, resetTabErrorCount } = useErrorNotification();
+    const { tabErrorCount, resetTabErrorCount } = useAuditContext();
 
     // --- Callbacks --- 
     const handleAgentSelected = useCallback((agentName) => {
