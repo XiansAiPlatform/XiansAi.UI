@@ -17,7 +17,7 @@ export const useAgentsApi = () => {
 
       getGroupedDefinitions: async () => {
         try {
-          return await apiClient.get('/api/client/agents/definitions');
+          return await apiClient.get('/api/client/agents/all');
         } catch (error) {
           console.error('Error fetching grouped definitions:', error);
           throw error;
@@ -36,11 +36,7 @@ export const useAgentsApi = () => {
 
       getWorkflowInstances: async (agentName = null, typeName = null) => {
         try {
-          const queryParams = {};
-          if (agentName) queryParams.agentName = agentName;
-          if (typeName) queryParams.typeName = typeName;
-
-          return await apiClient.get('/api/client/agents/workflows', queryParams);
+          return await apiClient.get(`/api/client/agents/${agentName}/${typeName}/runs`);
         } catch (error) {
           console.error('Error fetching workflow instances:', error);
           throw error;
@@ -49,7 +45,7 @@ export const useAgentsApi = () => {
 
       deleteAgent: async (agentName) => {
         try {
-          return await apiClient.delete(`/api/client/agents/${encodeURIComponent(agentName)}`);
+          return await apiClient.delete(`/api/client/agents/${agentName}`);
         } catch (error) {
           console.error('Error deleting agent:', error);
           throw error;

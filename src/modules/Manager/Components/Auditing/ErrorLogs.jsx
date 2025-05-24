@@ -27,6 +27,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import LinkIcon from '@mui/icons-material/Link';
 import CloseIcon from '@mui/icons-material/Close';
 import { useAuditingApi } from '../../services/auditing-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const CriticalLogs = () => {
@@ -42,6 +43,7 @@ const CriticalLogs = () => {
     const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
 
     const auditingApi = useAuditingApi();
+    const { setLoading } = useLoading();
     const { showError } = useNotification();
     const navigate = useNavigate();
 
@@ -94,6 +96,7 @@ const CriticalLogs = () => {
 
     const fetchCriticalLogs = useCallback(async () => {
         setIsLoading(true);
+        setLoading(true);
         setError(null);
         try {
             const { startTime, endTime } = getTimeRange();
@@ -104,8 +107,9 @@ const CriticalLogs = () => {
             showError(`Error fetching critical logs: ${err.message}`);
         } finally {
             setIsLoading(false);
+            setLoading(false);
         }
-    }, [auditingApi, showError, getTimeRange]);
+    }, [auditingApi, showError, getTimeRange, setLoading]);
 
     useEffect(() => {
         fetchCriticalLogs();

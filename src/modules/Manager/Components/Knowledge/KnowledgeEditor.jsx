@@ -12,10 +12,12 @@ import {
 import { Editor } from '@monaco-editor/react';
 import { useKnowledgeApi } from '../../services/knowledge-api';
 import { useAgentsApi } from '../../services/agents-api';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, onClose }) => {
   const knowledgeApi = useKnowledgeApi();
   const agentsApi = useAgentsApi();
+  const { loading, setLoading } = useLoading();
   const [formData, setFormData] = useState(knowledge || {
     name: '',
     content: '',
@@ -23,7 +25,6 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
     agent: selectedAgent || '',
   });
   const [jsonError, setJsonError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [agents, setAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
@@ -119,13 +120,13 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
-    setIsSubmitting(true);
+    setLoading(true);
     
     if (formData.type === 'json') {
       const error = validateJSON(formData.content);
       if (error) {
         setJsonError(error);
-        setIsSubmitting(false);
+        setLoading(false);
         return;
       }
     }
@@ -137,7 +138,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
       console.error('Error saving knowledge:', error);
       setSubmitError(error.message || 'Failed to save knowledge');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -350,7 +351,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
           <Button 
             variant="contained" 
             type="submit" 
-            disabled={(formData.type === 'json' && jsonError) || isSubmitting || isLoadingContent}
+            disabled={(formData.type === 'json' && jsonError) || loading || isLoadingContent}
             sx={{
               bgcolor: 'var(--primary)',
               color: '#fff',
@@ -368,7 +369,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
               }
             }}
           >
-            {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
+            {loading ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
           </Button>
         </Box>
       </form>

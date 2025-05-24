@@ -8,6 +8,7 @@ import {
 import { useMessagingApi } from '../../services/messaging-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import AgentSelector from './AgentSelector';
 import WorkflowActions from './WorkflowActions';
@@ -39,6 +40,7 @@ const MessagingPage = () => {
     const messagingApi = useMessagingApi(); 
     const agentsApi = useAgentsApi();
     const { openSlider, closeSlider } = useSlider();
+    const { setLoading } = useLoading();
     const { showError } = useNotification();
 
     // --- Callbacks --- 
@@ -108,6 +110,7 @@ const MessagingPage = () => {
         
         isProcessingHandoverRef.current = true;
         lastHandoverRefreshRef.current = now;
+        setLoading(true);
         
         console.log("Thread handover detected, refreshing thread details for:", threadId);
         
@@ -132,12 +135,13 @@ const MessagingPage = () => {
             console.error("Error refreshing thread after handover:", err);
             showError(`Failed to refresh thread: ${err.message}`);
         } finally {
+            setLoading(false);
             // Reset processing flag after a short delay to ensure stability
             setTimeout(() => {
                 isProcessingHandoverRef.current = false;
             }, 1000);
         }
-    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter]);
+    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter, setLoading]);
 
     // Handler for opening the send message slider
     const handleSendMessage = useCallback(() => {

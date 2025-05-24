@@ -21,15 +21,6 @@ export const useAuditingApi = () => {
           throw error;
         }
       },
-      
-      getAgentsAndTypes: async () => {
-        try {
-          return await apiClient.get('/api/client/messaging/agents');
-        } catch (error) {
-          console.error('Error fetching agents and types:', error);
-          throw error;
-        }
-      },
 
       getWorkflowTypes: async (agent, participantId = null) => {
         try {

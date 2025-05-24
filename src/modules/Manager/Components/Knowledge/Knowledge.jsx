@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 import KnowledgeEditor from './KnowledgeEditor';
 import KnowledgeItem from './KnowledgeItem';
 import { useKnowledgeApi } from '../../services/knowledge-api';
@@ -24,6 +25,7 @@ const Knowledge = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingItem, setIsLoadingItem] = useState(false);
   const { openSlider, closeSlider } = useSlider();
+  const { setLoading } = useLoading();
   const knowledgeApi = useKnowledgeApi();
   const agentsApi = useAgentsApi();
   const [expandedId, setExpandedId] = useState(null);
@@ -101,6 +103,7 @@ const Knowledge = () => {
 
   useEffect(() => {
     const fetchKnowledge = async () => {
+      setLoading(true);
       try {
         const data = await knowledgeApi.getLatestKnowledge();
         // Sort knowledge by createdAt in descending order
@@ -111,11 +114,12 @@ const Knowledge = () => {
         showError('Failed to fetch knowledge items');
       } finally {
         setIsLoading(false);
+        setLoading(false);
       }
     };
 
     fetchKnowledge();
-  }, [knowledgeApi, showError]);
+  }, [knowledgeApi, showError, setLoading]);
 
   const fetchKnowledgeById = async (id) => {
     setIsLoadingItem(true);
@@ -138,6 +142,7 @@ const Knowledge = () => {
         mode="add"
         selectedAgent={selectedAgent}
         onSave={async (newKnowledge) => {
+          setLoading(true);
           try {
             await knowledgeApi.createKnowledge(newKnowledge);
             // Fetch fresh data after creating
@@ -145,9 +150,12 @@ const Knowledge = () => {
             const sortedKnowledge = updatedKnowledge.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setKnowledgeItems(sortedKnowledge);
             closeSlider();
+            showSuccess('Knowledge created successfully');
           } catch (error) {
             console.error('Failed to create knowledge:', error);
             showError('Failed to create knowledge item');
+          } finally {
+            setLoading(false);
           }
         }}
         onClose={closeSlider}
@@ -157,6 +165,7 @@ const Knowledge = () => {
   };
 
   const handleUpdateKnowledge = async (updatedKnowledge) => {
+    setLoading(true);
     try {
       await knowledgeApi.createKnowledge(updatedKnowledge);
       // Fetch fresh data after updating
@@ -164,13 +173,17 @@ const Knowledge = () => {
       const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
       setKnowledgeItems(sortedKnowledgeItems);
       closeSlider();
+      showSuccess('Knowledge updated successfully');
     } catch (error) {
       console.error('Failed to update knowledge:', error);
       showError('Failed to update knowledge item');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteAllKnowledge = async (knowledge) => {
+    setLoading(true);
     try {
       const success = await knowledgeApi.deleteAllVersions(knowledge.name, knowledge.agent);
       if (success) {
@@ -188,10 +201,13 @@ const Knowledge = () => {
         errorMessage = 'Knowledge not found or already deleted';
       }
       showError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteOneKnowledge = async (knowledge) => {
+    setLoading(true);
     try {
       const success = await knowledgeApi.deleteKnowledge(knowledge.id);
       if (success) {
@@ -209,6 +225,8 @@ const Knowledge = () => {
         errorMessage = 'Version not found or already deleted';
       }
       showError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 

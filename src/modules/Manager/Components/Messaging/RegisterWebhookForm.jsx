@@ -16,6 +16,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useWorkflowApi } from '../../services/workflow-api';
 import { useAgentsApi } from '../../services/agents-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const RegisterWebhookForm = ({ agentName, onClose }) => {
@@ -23,7 +24,6 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
     const [workflowId, setWorkflowId] = useState('');
     const [url, setUrl] = useState('');
     const [eventName, setEventName] = useState('');
-    const [isRegistering, setIsRegistering] = useState(false);
     const [registeredWebhooks, setRegisteredWebhooks] = useState([]);
     const [isLoadingWebhooks, setIsLoadingWebhooks] = useState(true);
     
@@ -36,6 +36,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
     
     const workflowApi = useWorkflowApi();
     const agentsApi = useAgentsApi();
+    const { loading, setLoading } = useLoading();
     const { showError, showSuccess } = useNotification();
 
     // Fetch workflow types when agent name changes
@@ -162,12 +163,12 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
     };
 
     const handleRegister = async () => {
-        setIsRegistering(true);
         if (!url || !workflowId) {
             showError('Webhook URL and workflow selection are required');
-            setIsRegistering(false);
             return;
         }
+        
+        setLoading(true);
         try {
             const newWebhook = await workflowApi.registerWebhook(workflowId, url, eventName || null);
             showSuccess(`Webhook registered successfully! (ID: ${newWebhook.id})`);
@@ -177,17 +178,20 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
         } catch (error) {
             showError(`Error registering webhook: ${error.message}`);
         } finally {
-            setIsRegistering(false);
+            setLoading(false);
         }
     };
 
     const handleDeleteWebhook = async (webhookId) => {
+        setLoading(true);
         try {
             await workflowApi.deleteWebhook(workflowId, webhookId);
             showSuccess(`Webhook deleted successfully!`);
             setRegisteredWebhooks(prev => prev.filter(hook => hook.id !== webhookId));
         } catch (error) {
             showError(`Error deleting webhook: ${error.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -400,7 +404,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
                 fullWidth
                 margin="normal"
                 required
-                disabled={isRegistering || !workflowId}
+                disabled={loading || !workflowId}
                 onClick={(e) => e.stopPropagation()}
             />
             <TextField
@@ -410,7 +414,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
                 fullWidth
                 margin="normal"
                 helperText="Leave blank to subscribe to all events"
-                disabled={isRegistering || !workflowId}
+                disabled={loading || !workflowId}
                 onClick={(e) => e.stopPropagation()}
             />
             <Button
@@ -419,10 +423,10 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
                     e.stopPropagation();
                     handleRegister();
                 }}
-                disabled={!url || isRegistering || !workflowId}
+                disabled={!url || loading || !workflowId}
                 sx={{ mt: 2 }}
             >
-                {isRegistering ? <CircularProgress size={24} /> : 'Register Webhook'}
+                {loading ? <CircularProgress size={24} /> : 'Register Webhook'}
             </Button>
         </Box>
     );

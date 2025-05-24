@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAuditingApi } from '../../services/auditing-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
 // Microsoft logging levels
@@ -54,6 +55,7 @@ const WorkflowLogs = ({
     const [totalCount, setTotalCount] = useState(0);
     
     const auditingApi = useAuditingApi();
+    const { setLoading } = useLoading();
     const { showError } = useNotification();
 
     const getTimeRange = useCallback(() => {
@@ -97,6 +99,7 @@ const WorkflowLogs = ({
         }
 
         setIsLoading(true);
+        setLoading(true);
         setError(null);
         try {
             const { startTime, endTime } = getTimeRange();
@@ -126,8 +129,9 @@ const WorkflowLogs = ({
             showError(`Error fetching logs: ${err.message}`);
         } finally {
             setIsLoading(false);
+            setLoading(false);
         }
-    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError, getTimeRange]);
+    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError, getTimeRange, setLoading]);
 
     useEffect(() => {
         fetchLogs();

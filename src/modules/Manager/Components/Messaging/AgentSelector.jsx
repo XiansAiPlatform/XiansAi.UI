@@ -8,6 +8,7 @@ import {
     Typography,
     Alert
 } from '@mui/material';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const AgentSelector = ({
     agentsApi,
@@ -18,10 +19,12 @@ const AgentSelector = ({
     const [isLoadingAgents, setIsLoadingAgents] = useState(true);
     const [selectedAgentName, setSelectedAgentName] = useState('');
     const [error, setError] = useState(null);
+    const { setLoading } = useLoading();
 
     useEffect(() => {
         const fetchAgents = async () => {
             setIsLoadingAgents(true);
+            setLoading(true);
             setError(null);
             setAgentNames([]);
             setSelectedAgentName('');
@@ -36,10 +39,11 @@ const AgentSelector = ({
                 console.error(err);
             } finally {
                 setIsLoadingAgents(false);
+                setLoading(false);
             }
         };
         fetchAgents();
-    }, [agentsApi, showError, onAgentSelected]);
+    }, [agentsApi, showError, onAgentSelected, setLoading]);
 
     const handleAgentChange = (newValue) => {
         const newAgentName = newValue || '';

@@ -26,13 +26,13 @@ const INITIAL_STATS = {
   total: 0
 };
 
-
 const WorkflowList = () => {  
-  const [workflows, setWorkflows] = useState({});
+  const [agentGroups, setAgentGroups] = useState([]);
   const [stats, setStats] = useState(INITIAL_STATS);
   const [ownerFilter, setOwnerFilter] = useState('mine');
   const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
+  const [autoRefreshCount, setAutoRefreshCount] = useState(0);
   const { user } = useAuth();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
@@ -40,10 +40,12 @@ const WorkflowList = () => {
   const { setLoading, isLoading } = useLoading();
   const api = useWorkflowApi();
 
-  const calculateStats = useCallback((runs) => {
-    return runs.reduce((acc, run) => {
+  const calculateStats = useCallback((agentGroups) => {
+    const allWorkflows = agentGroups.flatMap(group => group.workflows || []);
+    
+    return allWorkflows.reduce((acc, workflow) => {
       acc.total++;
-      const status = (run.status || '').toUpperCase();
+      const status = (workflow.status || '').toUpperCase();
       if (status === 'TERMINATED' || status === 'CANCELED') {
         acc.terminated++;
       } else if (status === 'CONTINUEDASNEW') {
@@ -55,47 +57,93 @@ const WorkflowList = () => {
     }, { ...INITIAL_STATS });
   }, []);
 
-  const groupWorkflows = useCallback((runs) => {
-    return runs
-      .filter(run => ownerFilter === 'all' || (ownerFilter === 'mine' && run.owner === user?.id))
-      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
-      .reduce((acc, run) => {
-        const groupKey = run.agent;
-        if (!acc[groupKey]) {
-          acc[groupKey] = [];
+  const filterAgentGroups = useCallback((agentGroups) => {
+    if (!agentGroups || !Array.isArray(agentGroups)) return [];
+    
+    return agentGroups
+      .map(group => {
+        const filteredWorkflows = (group.workflows || []).filter(workflow => {
+          return ownerFilter === 'all' || (ownerFilter === 'mine' && workflow.owner === user?.id);
+        });
+        
+        if (filteredWorkflows.length > 0) {
+          return {
+            ...group,
+            workflows: filteredWorkflows.sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+          };
         }
-        acc[groupKey].push(run);
-        return acc;
-      }, {});
+        return null;
+      })
+      .filter(Boolean);
   }, [ownerFilter, user?.id]);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
     try {
-      const runs = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
-      if (runs && runs.length > 0) {
-        setStats(calculateStats(runs));
-        setWorkflows(groupWorkflows(runs));
+      const data = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
+      
+      if (data && Array.isArray(data) && data.length > 0) {
+        // Validate that each item in the array has the expected structure
+        const validData = data.filter(item => 
+          item && 
+          typeof item === 'object' && 
+          item.agent && 
+          Array.isArray(item.workflows)
+        );
+        
+        if (validData.length > 0) {
+          const filteredGroups = filterAgentGroups(validData);
+          setAgentGroups(filteredGroups);
+          setStats(calculateStats(validData));
+        } else {
+          console.warn('No valid agent groups found in server response');
+          setAgentGroups([]);
+          setStats(INITIAL_STATS);
+        }
       } else {
-        setWorkflows({});
+        setAgentGroups([]);
         setStats(INITIAL_STATS);
       }
     } catch (error) {
       console.error('Error loading workflows:', error);
-      setWorkflows({});
+      setAgentGroups([]);
       setStats(INITIAL_STATS);
     } finally {
       setLoading(false);
     }
-  }, [calculateStats, groupWorkflows, setLoading, api, timeFilter, ownerFilter, statusFilter]);
+  }, [calculateStats, filterAgentGroups, setLoading, api, timeFilter, ownerFilter, statusFilter]);
 
   useEffect(() => {
     loadWorkflows();
   }, [loadWorkflows]);
 
+  // Auto-refresh effect - runs every 5 seconds for 3 times
+  useEffect(() => {
+    let timeoutId;
+    
+    const scheduleNextRefresh = () => {
+      if (autoRefreshCount < 3) {
+        timeoutId = setTimeout(() => {
+          loadWorkflows();
+          setAutoRefreshCount(count => count + 1);
+        }, 5000);
+      }
+    };
+    
+    // Start the auto-refresh cycle
+    scheduleNextRefresh();
+    
+    // Cleanup timeout on unmount or when auto-refresh is complete
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [autoRefreshCount, loadWorkflows]);
+
   const hasWorkflows = useMemo(() => {
-    return Object.keys(workflows).length > 0;
-  }, [workflows]);
+    return agentGroups.length > 0;
+  }, [agentGroups]);
 
   const handleOwnerFilterChange = (event, newOwnerFilter) => {
     if (newOwnerFilter !== null) {
@@ -251,12 +299,12 @@ const WorkflowList = () => {
 
       <Box sx={{ px: isMobile ? 2 : 0, position: 'relative', zIndex: 1 }}>
         {hasWorkflows ? (
-          Object.entries(workflows).map(([type, runs]) => {
+          agentGroups.map((agentGroup) => {
             return (
               <WorkflowAccordion
-                key={type}
-                type={type}
-                runs={runs}
+                key={agentGroup.agent?.id || agentGroup.agent?.name}
+                agentInfo={agentGroup.agent}
+                runs={agentGroup.workflows}
                 isMobile={isMobile}
               />
             );
@@ -274,19 +322,30 @@ const WorkflowList = () => {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              {isLoading ? 'Loading...' : 'Find Your Flow Runs here'}
+              {isLoading ? 'Loading...' : 'It can take a few seconds to load the workflows'}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
               To get started, <Link to="/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
             </Typography>
-            <Button
-              component={Link}
-              to="/definitions"
-              variant="contained"
-              color="primary"
-            >
-              Go to Agent Definitions
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                onClick={loadWorkflows}
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                startIcon={<RefreshIcon />}
+              >
+                Refresh
+              </Button>
+              <Button
+                component={Link}
+                to="/definitions"
+                variant="outlined"
+                color="primary"
+              >
+                Go to Agent Definitions
+              </Button>
+            </Box>
           </Paper>
         )}
       </Box>

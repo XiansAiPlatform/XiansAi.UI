@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { Delete, KeyboardArrowDown, Edit } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 import KnowledgeEditor from './KnowledgeEditor';
 import KnowledgeViewer from './KnowledgeViewer';
 import './Knowledge.css';
@@ -28,6 +29,7 @@ const KnowledgeItem = ({
   permissionLevel
 }) => {
   const { openSlider, closeSlider } = useSlider();
+  const { setLoading } = useLoading();
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
   const [deleteOneDialogOpen, setDeleteOneDialogOpen] = useState(false);
   const [versions, setVersions] = useState([]);
@@ -93,6 +95,7 @@ const KnowledgeItem = ({
   };
 
   const handleView = async () => {
+    setLoading(true);
     try {
       // Fetch the latest version from server by ID
       const knowledgeDetails = await knowledgeApi.getKnowledge(knowledge.id);
@@ -118,6 +121,8 @@ const KnowledgeItem = ({
         />,
         `${knowledge.name}`
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,6 +160,7 @@ const KnowledgeItem = ({
   };
 
   const handleVersionSelect = async (version) => {
+    setLoading(true);
     try {
       // Fetch the specific version by ID
       const versionDetails = await knowledgeApi.getKnowledge(version.id);
@@ -180,6 +186,8 @@ const KnowledgeItem = ({
         />,
         `View Knowledge (v.${version.version.substring(0, 7)})`
       );
+    } finally {
+      setLoading(false);
     }
   };
 
