@@ -9,13 +9,11 @@ import MermaidDiagram from '../Runs/WorkflowDetails/MermaidDiagram';
 import NewWorkflowForm from './NewWorkflowForm';
 import { useLoading } from '../../contexts/LoadingContext';
 import './Definitions.css';
-import { useAuth } from '../../auth/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 
 const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
-  const { user } = useAuth();
 
   const formatTypeName = (typeName) => {
     return typeName
