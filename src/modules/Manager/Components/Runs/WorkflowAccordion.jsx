@@ -13,18 +13,23 @@ import {
   ListItemIcon,
   ListItemText,
   CircularProgress,
+  Chip,
+  Tooltip,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import StopIcon from '@mui/icons-material/Stop';
+import PersonIcon from '@mui/icons-material/Person';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import WorkflowRunItem from './WorkflowRunItem';
 import './WorkflowAccordion.css';
 import { ReactComponent as AgentActivatedSvgIcon } from '../../theme/agent-activated.svg';
 import { useWorkflowApi } from '../../services/workflow-api';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useLoading } from '../../contexts/LoadingContext';
+import { useAuth } from '../../auth/AuthContext';
 
-const WorkflowAccordion = ({ type, runs, isMobile }) => {
+const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [isTerminating, setIsTerminating] = useState(false);
@@ -32,6 +37,13 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
   const api = useWorkflowApi();
   const { showSuccess, showError } = useNotification();
   const { setLoading } = useLoading();
+  const { user } = useAuth();
+
+  // Safety checks
+  if (!agentInfo || !runs || !Array.isArray(runs)) {
+    console.warn('WorkflowAccordion: Invalid props received', { agentInfo, runs });
+    return null;
+  }
 
   // Create a beacon effect animation
   const beaconEffect = keyframes`
@@ -39,7 +51,7 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
       box-shadow: 0 0 0 0 rgba(184, 224, 255, 0.7);
     }
     70% {
-      box-shadow: 0 0 0 10px rgba(184, 224, 255, 0);
+      box-shadow: 0 0 0 15px rgba(184, 224, 255, 0);
     }
     100% {
       box-shadow: 0 0 0 0 rgba(184, 224, 255, 0);
@@ -71,11 +83,21 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
     }
   `;
 
-  const formatWorkflowType = (type) => {
-    return type 
+  const formatAgentName = (name) => {
+    if (!name) return 'Unknown Agent';
+    return name
       .replace(/([A-Z])/g, ' $1')
       .trim();
   };
+
+  const formatCreatedBy = (createdBy) => {
+    if (!createdBy) return null;
+    // Remove provider prefix (e.g., "github|")
+    const cleanedCreatedBy = createdBy.includes('|') ? createdBy.split('|')[1] : createdBy;
+    return cleanedCreatedBy;
+  };
+
+  const isOwner = agentInfo?.permissions?.ownerAccess?.includes(user?.id);
 
   const runningWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'running').length;
   const hasRunningWorkflows = runningWorkflowsCount > 0;
@@ -88,11 +110,6 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
   
   const terminatedWorkflowsCount = runs.filter(run => (run.status.toLowerCase() === 'terminated' || run.status.toLowerCase() === 'canceled')).length;
   const hasTerminatedWorkflows = terminatedWorkflowsCount > 0;
-
-  const uniqueAssignments = [...new Set(runs.map(run => run.assignment))];
-  const assignmentText = uniqueAssignments.length > 1 
-    ? `${uniqueAssignments.length} assignments` 
-    : uniqueAssignments[0];
 
   const handleChange = (event, expanded) => {
     setIsExpanded(expanded);
@@ -138,6 +155,16 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
           '&:before': {
             display: 'none',
           },
+          '&.Mui-expanded': {
+            margin: '8px 0',
+          },
+          '& .MuiAccordionDetails-root': {
+            backgroundColor: '#fff',
+            borderRadius: '0 0 12px 12px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            border: 'none',
+            margin: '0 0 8px 0'
+          },
           position: 'relative',
           zIndex: 1
         }}
@@ -153,138 +180,167 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
             '&:hover': {
               backgroundColor: '#f8f9fa',
             },
-            padding: isMobile ? '8px 12px' : '12px 16px',
+            '&.Mui-expanded': {
+              borderRadius: '12px 12px 0 0',
+              marginBottom: 0,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              '& .MuiAccordionSummary-expandIconWrapper': {
+                transform: 'rotate(180deg) !important',
+              }
+            },
+            '& .MuiAccordionSummary-expandIconWrapper': {
+              transition: 'transform 0.3s ease-in-out !important',
+              transform: 'rotate(0deg)',
+            },
+            '& .expand-icon': {
+              transition: 'transform 0.3s ease-in-out',
+            },
+            padding: isMobile ? '6px 12px' : '8px 16px',
+            minHeight: isMobile ? '40px' : '44px',
+            '& .MuiAccordionSummary-content': {
+              margin: '2px 0',
+            }
           }}
         >
-          <div className="workflow-header-content" style={{ 
+          <div style={{ 
             width: '100%', 
             display: 'flex', 
-            flexDirection: isMobile ? 'column' : 'row',
-            justifyContent: 'space-between', 
-            alignItems: isMobile ? 'flex-start' : 'center',
-            gap: isMobile ? '8px' : '0'
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: isMobile ? '8px' : '12px'
           }}>
-            <div className="workflow-title-section" style={{
+            {/* Left section: Icon + Name + Status */}
+            <div style={{
               display: 'flex',
-              flexDirection: isMobile ? 'row' : 'row',
               alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: isMobile ? '8px' : '16px',
-              width: '100%'
+              gap: isMobile ? '6px' : '8px',
+              flex: 1,
+              minWidth: 0
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography 
-                  className="workflow-type-title"
-                  variant={isMobile ? "h6" : "h5"}
-                  sx={{
-                    fontWeight: 600,
-                    fontSize: isMobile ? '1.1rem' : '1.5rem',
-                    color: '#1a1a1a',
-                    marginBottom: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <Box 
-                    sx={{ 
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: 'white',
-                      border: 'none',
-                      borderRadius: '50%',
-                      p: '4px',
-                      mr: 1,
-                      width: '36px',
-                      height: '36px',
-                      boxShadow: 'none',
-                      ...(hasRunningWorkflows && {
-                        animation: `${beaconEffect} 2s infinite`,
-                        boxShadow: '0 0 0 1px #1e4976',
-                      })
-                    }}
-                  >
-                    <style>{hasRunningWorkflows ? runningAgentStyle : ''}</style>
-                    <AgentActivatedSvgIcon 
-                      className={hasRunningWorkflows ? 'running-agent-icon' : ''}
-                      style={{ 
-                        width: '28px', 
-                        height: '28px',
-                      }} 
-                    />
-                  </Box>
-                  <span>{formatWorkflowType(type)}</span>
-                </Typography>
-              </div>
-              <div className="status-indicators" style={{
+              <Box sx={{ 
+                width: isMobile ? 32 : 40, 
+                height: isMobile ? 32 : 40,
+                animation: hasRunningWorkflows ? `${beaconEffect} 2s infinite` : 'none',
+                flexShrink: 0,
                 display: 'flex',
-                gap: isMobile ? '8px' : '16px',
-                marginLeft: '0',
-                flexWrap: 'nowrap'
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '50%',
+                backgroundColor: hasRunningWorkflows ? 'rgba(184, 224, 255, 0.1)' : 'transparent'
               }}>
-                <div className="total-indicator">
-                  {runs.length} total
+                <AgentActivatedSvgIcon 
+                  className={hasRunningWorkflows ? 'running-agent-icon' : ''}
+                  style={{
+                    width: isMobile ? '24px' : '32px',
+                    height: isMobile ? '24px' : '32px'
+                  }}
+                />
+                <style>{runningAgentStyle}</style>
+              </Box>
+              
+              <Typography 
+                className="workflow-type-title"
+                variant={isMobile ? "subtitle1" : "h6"}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: isMobile ? '1.0rem' : '1.25rem',
+                  color: '#1a1a1a',
+                  margin: 0,
+                  lineHeight: 1.3,
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: isMobile ? '120px' : '200px'
+                }}
+              >
+                {formatAgentName(agentInfo?.name)}
+              </Typography>
+              
+              {/* Status indicators */}
+              {hasRunningWorkflows && (
+                <div className="running-indicator" style={{ flexShrink: 0 }}>
+                  {runningWorkflowsCount} running
                 </div>
-                {hasRunningWorkflows && (
-                  <div className="running-indicator">
-                    {runningWorkflowsCount} running
-                  </div>
-                )}
-                {isExpanded && hasContinuedAsNewWorkflows && (
-                  <div className="continuedAsNew-indicator">
-                    {continuedAsNewWorkflowsCount} continued
-                  </div>
-                )}
-                {isExpanded && hasCompletedWorkflows && (
-                  <div className="completed-indicator">
-                    {completedWorkflowsCount} completed
-                  </div>
-                )}
-                {isExpanded && hasTerminatedWorkflows && (
-                  <div className="terminated-indicator">
-                    {terminatedWorkflowsCount} terminated
-                  </div>
-                )}
-              </div>
+              )}
+              {isExpanded && hasContinuedAsNewWorkflows && (
+                <div className="continuedAsNew-indicator" style={{ flexShrink: 0 }}>
+                  {continuedAsNewWorkflowsCount} continued
+                </div>
+              )}
+              {isExpanded && hasCompletedWorkflows && (
+                <div className="completed-indicator" style={{ flexShrink: 0 }}>
+                  {completedWorkflowsCount} completed
+                </div>
+              )}
+              {isExpanded && hasTerminatedWorkflows && (
+                <div className="terminated-indicator" style={{ flexShrink: 0 }}>
+                  {terminatedWorkflowsCount} terminated
+                </div>
+              )}
             </div>
             
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              marginLeft: isMobile ? '0' : '16px'
+            {/* Right section: Metadata + Actions */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: isMobile ? '8px' : '12px',
+              flexShrink: 0
             }}>
-              {uniqueAssignments.length > 0 && (
-                <span style={{
-                  fontSize: '.75rem',
-                  color: '#666',
-                  backgroundColor: '#f5f5f5',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
+              {agentInfo?.createdBy && (
+                <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  marginRight: isMobile ? '0' : '16px',
-                  marginTop: isMobile ? '4px' : '0',
-                  alignSelf: isMobile ? 'flex-start' : 'center',
-                  maxWidth: isMobile ? 'fit-content' : 'auto'
+                  gap: '6px'
                 }}>
-                  {uniqueAssignments.length > 1 ? (
-                    <span style={{ opacity: 0.75 }}>{assignmentText}</span>
-                  ) : (
-                    <>
-                      <span style={{ opacity: 0.75 }}>Assignment: </span>
-                      <span style={{ 
-                        marginLeft: '4px', 
-                        fontWeight: 600,
-                        color: '#444'
-                      }}>
-                        {assignmentText}
-                      </span>
-                    </>
+                  <Tooltip title="Created by">
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '4px',
+                      color: 'text.secondary',
+                      fontSize: isMobile ? '0.75rem' : '0.85rem',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      <PersonIcon sx={{ fontSize: isMobile ? 12 : 14 }} />
+                      <span>{formatCreatedBy(agentInfo.createdBy)}</span>
+                    </Box>
+                  </Tooltip>
+                  
+                  {isOwner && (
+                    <Chip 
+                      label="Owner" 
+                      size="small" 
+                      color="primary" 
+                      variant="outlined"
+                      sx={{ 
+                        fontSize: isMobile ? '0.65rem' : '0.7rem',
+                        height: isMobile ? '16px' : '18px',
+                        '& .MuiChip-label': {
+                          padding: '0 6px'
+                        }
+                      }} 
+                    />
                   )}
-                </span>
+                </div>
               )}
+              
+              {agentInfo?.createdAt && !isMobile && (
+                <Tooltip title="Created on">
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '4px',
+                    color: 'text.secondary',
+                    fontSize: '0.8rem',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    <CalendarTodayIcon sx={{ fontSize: 14 }} />
+                    <span>{new Date(agentInfo.createdAt).toLocaleDateString()}</span>
+                  </Box>
+                </Tooltip>
+              )}
+              
               {hasRunningWorkflows && (
                 <IconButton
                   onClick={handleMenuClick}
@@ -308,9 +364,21 @@ const WorkflowAccordion = ({ type, runs, isMobile }) => {
           </div>
         </AccordionSummary>
         <AccordionDetails className="workflow-accordion-details" sx={{
-          padding: isMobile ? '8px' : '16px'
+          padding: 0,
+          paddingTop: 0,
+          marginTop: 0,
+          '&.MuiAccordionDetails-root': {
+            paddingTop: 0,
+            borderTop: 'none'
+          }
         }}>
-          <List sx={{ padding: 0 }}>
+          <List sx={{ 
+            padding: 0,
+            margin: 0,
+            '& .MuiListItem-root:first-of-type': {
+              paddingTop: 0
+            }
+          }}>
             {runs.map((run, index) => (
               <WorkflowRunItem 
                 key={`${run.runId}-${index}`} 

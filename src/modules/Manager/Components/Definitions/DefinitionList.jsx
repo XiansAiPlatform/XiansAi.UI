@@ -23,13 +23,12 @@ const DefinitionList = () => {
     grouped,
     sortedAgentNames,
     latestFlowByAgent,
+    agentsByName,
     
     // Handlers
     handleToggle,
     handleSearchChange,
     handleTimeFilterChange,
-    handleDeleteSuccess,
-    handleMenuClick,
     handleDeleteAllClick,
     handleDeleteAllCancel,
     handleDeleteAllConfirm,
@@ -88,12 +87,11 @@ const DefinitionList = () => {
         <AgentGroup
           key={agentName}
           agentName={agentName}
+          agent={agentsByName[agentName]}
           definitions={grouped[agentName]}
           latestUpdateDate={latestFlowByAgent[agentName]}
           openDefinitionId={openDefinitionId}
           onToggle={handleToggle}
-          onDeleteSuccess={handleDeleteSuccess}
-          onMenuClick={handleMenuClick}
           isOwnerOfAllWorkflows={isOwnerOfAllWorkflows(agentName)}
           onDeleteAllClick={() => handleDeleteAllForAgent(agentName)}
           onShareClick={() => handleShare(agentName)}

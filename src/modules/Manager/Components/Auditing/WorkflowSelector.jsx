@@ -8,6 +8,7 @@ import {
     Alert
 } from '@mui/material';
 import { useAuditingApi } from '../../services/auditing-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const WorkflowSelector = ({
@@ -24,6 +25,7 @@ const WorkflowSelector = ({
     const [error, setError] = useState(null);
     
     const auditingApi = useAuditingApi();
+    const { setLoading } = useLoading();
     const { showError } = useNotification();
 
     // Get workflow types for the selected agent
@@ -35,6 +37,7 @@ const WorkflowSelector = ({
 
         const fetchWorkflowTypes = async () => {
             setIsLoadingWorkflowTypes(true);
+            setLoading(true);
             setError(null);
             try {
                 // Fetch workflow types without participantId
@@ -51,11 +54,12 @@ const WorkflowSelector = ({
                 showError(`Error fetching workflow types: ${err.message}`);
             } finally {
                 setIsLoadingWorkflowTypes(false);
+                setLoading(false);
             }
         };
 
         fetchWorkflowTypes();
-    }, [selectedAgentName, auditingApi, showError]);
+    }, [selectedAgentName, auditingApi, showError, setLoading]);
     
     // Get workflows for the selected agent and workflow type
     useEffect(() => {
@@ -66,6 +70,7 @@ const WorkflowSelector = ({
 
         const fetchWorkflows = async () => {
             setIsLoadingWorkflows(true);
+            setLoading(true);
             setError(null);
             try {
                 const workflowsData = await auditingApi.getWorkflowIds(
@@ -84,11 +89,12 @@ const WorkflowSelector = ({
                 showError(`Error fetching workflows: ${err.message}`);
             } finally {
                 setIsLoadingWorkflows(false);
+                setLoading(false);
             }
         };
 
         fetchWorkflows();
-    }, [selectedAgentName, selectedWorkflowTypeId, auditingApi, showError]);
+    }, [selectedAgentName, selectedWorkflowTypeId, auditingApi, showError, setLoading]);
 
     return (
         <Box>
@@ -138,10 +144,11 @@ const WorkflowSelector = ({
                             options={workflows}
                             value={workflows.find(wf => wf.id === selectedWorkflowId) || null}
                             onChange={(event, newValue) => onWorkflowSelected(newValue?.id || null)}
-                            getOptionLabel={(option) => option.name || 'Unknown'}
+                            getOptionLabel={(option) => option.id || 'Unknown'}
                             renderOption={(props, option) => (
                                 <li {...props} key={option.id}>
-                                    {option.name || 'Unknown'}
+                                    {console.log(option)}
+                                    {option.id || 'Unknown'}
                                 </li>
                             )}
                             renderInput={(params) => (

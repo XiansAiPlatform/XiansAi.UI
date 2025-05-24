@@ -6,6 +6,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import DefinitionRow from './DefinitionRow';
 import { formatAgentName, formatLastUpdated, isRecentlyUpdated } from './definitionUtils';
 import { tableStyles } from './styles';
+import { useAuth } from '../../auth/AuthContext';
 
 // Define a keyframe animation for the pulsing effect
 const pulse = keyframes`
@@ -21,17 +22,39 @@ const pulse = keyframes`
 `;
 
 const AgentGroup = ({ 
-  agentName, 
+  agentName,
+  agent,
   definitions, 
   latestUpdateDate, 
   openDefinitionId, 
   onToggle, 
-  onDeleteSuccess, 
-  onMenuClick,
   isOwnerOfAllWorkflows,
   onDeleteAllClick,
   onShareClick
 }) => {
+  const { user } = useAuth();
+
+  // Function to determine current user's permission level
+  const getUserPermissionLevel = () => {
+    if (!user?.id || !agent?.permissions || agentName === 'Ungrouped') {
+      return null;
+    }
+
+    if (agent.permissions.ownerAccess?.includes(user.id)) {
+      return { level: 'Owner', color: 'primary' };
+    }
+    if (agent.permissions.writeAccess?.includes(user.id)) {
+      return { level: 'Can Write', color: 'secondary' };
+    }
+    if (agent.permissions.readAccess?.includes(user.id)) {
+      return { level: 'Can Read', color: 'default' };
+    }
+    
+    return null;
+  };
+
+  const permissionInfo = getUserPermissionLevel();
+
   return (
     <Box 
       sx={{ 
@@ -157,6 +180,23 @@ const AgentGroup = ({
               }}
             />
           )}
+          
+          {permissionInfo && (
+            <Chip
+              label={permissionInfo.level}
+              size="small"
+              color={permissionInfo.color}
+              sx={{ 
+                height: '22px',
+                fontSize: '0.7rem',
+                fontWeight: 500,
+                borderRadius: '10px',
+                '& .MuiChip-label': {
+                  px: 1
+                }
+              }}
+            />
+          )}
         </Stack>
         
         {agentName !== 'Ungrouped' && (
@@ -225,7 +265,7 @@ const AgentGroup = ({
                   }
                 }}
               >
-                Delete
+                Delete Agent
               </Button>
             </Stack>
           </>
@@ -253,7 +293,6 @@ const AgentGroup = ({
                 isOpen={openDefinitionId === definition.id}
                 previousRowOpen={index > 0 && openDefinitionId === definitions[index - 1].id}
                 onToggle={onToggle}
-                onDeleteSuccess={onDeleteSuccess}
               />
             ))}
           </TableBody>

@@ -1,17 +1,9 @@
 import React from 'react';
-import { Typography, IconButton, Box, Tooltip, Dialog, DialogTitle, DialogContent, List, ListItem, ListItemText, Button } from '@mui/material';
+import { Typography, Box, Tooltip, Button } from '@mui/material';
 import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } from '@mui/lab';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import { useTheme } from '@mui/material/styles';
 import './WorkflowDetails.css';
-import { useSlider } from '../../../contexts/SliderContext';
-import { useActivitiesApi } from '../../../services/activities-api';
-import { useKnowledgeApi } from '../../../services/knowledge-api';
-import KnowledgeViewer from '../../Knowledge/KnowledgeViewer';
-import { styled } from '@mui/material/styles';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { useLoading } from '../../../contexts/LoadingContext';
-import CloseIcon from '@mui/icons-material/Close';
 
 const ArrowDot = ({ ascending }) => {
   const theme = useTheme();
@@ -40,66 +32,7 @@ const ArrowDot = ({ ascending }) => {
   );
 };
 
-const ModernDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialog-paper': {
-    borderRadius: 12,
-    padding: theme.spacing(1),
-    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
-  }
-}));
-
-const ModernDialogTitle = styled(DialogTitle)(({ theme }) => ({
-  padding: theme.spacing(2),
-  '& .MuiTypography-root': {
-    fontSize: '1.25rem',
-    fontWeight: 600,
-  }
-}));
-
-const ModernDialogContent = styled(DialogContent)(({ theme }) => ({
-  padding: theme.spacing(1),
-  '& .MuiList-root': {
-    padding: 0,
-  },
-  '& .MuiListItem-root': {
-    borderRadius: 8,
-    marginBottom: theme.spacing(0.5),
-    '&:hover': {
-      backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(255, 255, 255, 0.08)'
-        : 'rgba(0, 0, 0, 0.04)',
-    }
-  }
-}));
-
-const ModernListItem = styled(ListItem)(({ theme }) => ({
-  padding: theme.spacing(1.5, 2),
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    transform: 'translateX(4px)',
-  }
-}));
-
-const NoInstructionsBox = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(4),
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  color: theme.palette.text.secondary,
-  backgroundColor: theme.palette.mode === 'dark' 
-    ? 'rgba(255, 255, 255, 0.03)'
-    : 'rgba(0, 0, 0, 0.02)',
-  borderRadius: 8,
-  margin: theme.spacing(1),
-}));
-
 const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlighted, workflowId, isMobile }) => {
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [knowledgeItems, setKnowledgeItems] = React.useState([]);
-  const { openSlider } = useSlider();
-  const activitiesApi = useActivitiesApi();
-  const knowledgeApi = useKnowledgeApi();
-  const { setLoading } = useLoading();
 
   // Helper function to format timestamp
   const formatTimestamp = (timestamp) => {
@@ -113,49 +46,6 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
       minute: '2-digit',
       second: '2-digit'
     });
-  };
-
-  const handleInstructionClick = async () => {
-    setLoading(true);
-    try {
-      const activity = await activitiesApi.getWorkflowActivity(
-        workflowId,
-        event.ActivityId
-      );
-
-      const knowledgeIds = activity?.knowledgeIds || [];
-      if (knowledgeIds.length === 0) {
-        setKnowledgeItems([]);
-        setIsDialogOpen(true);
-      } else if (knowledgeIds.length === 1) {
-        const knowledge = await knowledgeApi.getKnowledge(knowledgeIds[0]);
-        showKnowledge(knowledge);
-      } else {
-        const knowledgePromises = knowledgeIds.map(id => 
-          knowledgeApi.getKnowledge(id)
-        );
-        const fetchedKnowledge = await Promise.all(knowledgePromises);
-        setKnowledgeItems(fetchedKnowledge);
-        setIsDialogOpen(true);
-      }
-    } catch (error) {
-      console.error('Error fetching knowledge:', error);
-      setKnowledgeItems([]);
-      setIsDialogOpen(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const showKnowledge = (knowledge) => {
-    const knowledgeContent = (
-      <KnowledgeViewer
-        knowledge={knowledge}
-        hideActions={true}
-      />
-    );
-    openSlider(knowledgeContent, knowledge.name);
-    setIsDialogOpen(false);
   };
 
   // Updated helper function to format text
@@ -331,23 +221,6 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
               }}
             >
               <Button
-                onClick={handleInstructionClick}
-                size={isMobile ? "small" : "medium"}
-                startIcon={<DescriptionOutlinedIcon fontSize={isMobile ? "small" : "medium"} />}
-                sx={{ 
-                  padding: isMobile ? '4px 8px' : '6px 12px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  textTransform: 'none',
-                  borderRadius: '4px',
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.08)'
-                  }
-                }}
-              >
-                Knowledge
-              </Button>
-              
-              <Button
                 onClick={() => onShowDetails(event)}
                 size={isMobile ? "small" : "medium"}
                 startIcon={<InfoOutlinedIcon fontSize={isMobile ? "small" : "medium"} />}
@@ -367,58 +240,6 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
           </Box>
         </TimelineContent>
       </TimelineItem>
-      
-      {/* Instructions Dialog */}
-      <ModernDialog
-        open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <ModernDialogTitle>
-          Knowledge
-          <IconButton
-            aria-label="close"
-            onClick={() => setIsDialogOpen(false)}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </ModernDialogTitle>
-        <ModernDialogContent>
-          {knowledgeItems.length > 0 ? (
-            <List>
-              {knowledgeItems.map((knowledge) => (
-                <ModernListItem 
-                  button 
-                  key={knowledge.id} 
-                  onClick={() => showKnowledge(knowledge)}
-                >
-                  <ListItemText 
-                    primary={knowledge.name} 
-                    secondary={knowledge.description}
-                    primaryTypographyProps={{
-                      fontWeight: 500,
-                      fontSize: isMobile ? '0.875rem' : '1rem'
-                    }}
-                    secondaryTypographyProps={{
-                      fontSize: isMobile ? '0.75rem' : '0.875rem'
-                    }}
-                  />
-                </ModernListItem>
-              ))}
-            </List>
-          ) : (
-            <NoInstructionsBox>
-              <Typography variant="body1">No knowledge items available</Typography>
-            </NoInstructionsBox>
-          )}
-        </ModernDialogContent>
-      </ModernDialog>
     </>
   );
 };

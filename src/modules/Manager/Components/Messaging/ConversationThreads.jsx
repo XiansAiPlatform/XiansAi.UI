@@ -17,6 +17,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { format } from 'date-fns';
 import SendMessageForm from './SendMessageForm';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 
 /**
  * Displays a list of conversation threads for a selected agent
@@ -40,6 +41,7 @@ const ConversationThreads = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { openSlider, closeSlider } = useSlider();
+    const { setLoading } = useLoading();
     const [page, setPage] = useState(0);
     const [pageSize] = useState(20);
     const [hasMore, setHasMore] = useState(false);
@@ -66,7 +68,7 @@ const ConversationThreads = ({
         
         closeSlider();
         setPage(0); // Reset to first page
-        setIsLoading(true);
+        setLoading(true);
         try {
             const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 0, pageSize);
             setThreads(fetchedThreads || []);
@@ -86,7 +88,7 @@ const ConversationThreads = ({
         } catch (err) {
             showError(`Failed to refresh threads: ${err.message}`);
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
@@ -125,7 +127,7 @@ const ConversationThreads = ({
         }
 
         const fetchConversationThreads = async () => {
-            setIsLoading(true);
+            setLoading(true);
             setError(null);
             setPage(0); // Reset to first page when agent changes
             try {
@@ -150,12 +152,13 @@ const ConversationThreads = ({
                 onThreadSelect(null); // Deselect thread on error
             } finally {
                 setIsLoading(false);
+                setLoading(false);
             }
         };
 
         fetchConversationThreads();
         // Dependency array ensures refetch when agent name, api, or notification changes
-    }, [selectedAgentName, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize]);
+    }, [selectedAgentName, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize, setLoading]);
 
     if (isLoading) {
         return (

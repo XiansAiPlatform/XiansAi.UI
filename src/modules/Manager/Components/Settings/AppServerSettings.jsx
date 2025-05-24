@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSettingsApi } from '../../services/settings-api';
-import { toast } from 'react-toastify';
+import { useNotification } from '../../contexts/NotificationContext';
 import './Settings.css';
 import { getConfig } from '../../../../config';
 
@@ -19,6 +19,7 @@ const AppServerSettings = () => {
   const api = useSettingsApi();
   const { apiBaseUrl } = getConfig();
   const [apiKey, setApiKey] = useState('');
+  const { showError, showSuccess } = useNotification();
 
   const generateApiKey = async () => {
     setIsLoading(true);
@@ -26,9 +27,9 @@ const AppServerSettings = () => {
       const response = await api.generateApiKey();
       console.log(response);
       setApiKey(response.certificate);
-      toast.success('API Key generated successfully');
+      showSuccess('API Key generated successfully');
     } catch (error) {
-      toast.error(`Failed to generate API key: ${error.message}`);
+      showError(`Failed to generate API key: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -37,9 +38,9 @@ const AppServerSettings = () => {
   const handleCopy = async (text, label) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard`);
+      showSuccess(`${label} copied to clipboard`);
     } catch (error) {
-      toast.error('Failed to copy to clipboard');
+      showError('Failed to copy to clipboard');
     }
   };
 

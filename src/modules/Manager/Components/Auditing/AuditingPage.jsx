@@ -7,9 +7,9 @@ import {
     Tab,
     Badge
 } from '@mui/material';
-import { useAuditingApi } from '../../services/auditing-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
-import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
+import { useAuditContext } from '../../contexts/AuditContext';
 import AgentSelector from './AgentSelector';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
@@ -27,9 +27,9 @@ const AuditingPage = () => {
     const [activeTab, setActiveTab] = useState(0);
     
     // --- Hooks ---
-    const auditingApi = useAuditingApi(); 
+    const agentsApi = useAgentsApi();
     const { showError } = useNotification();
-    const { tabErrorCount, resetTabErrorCount } = useErrorNotification();
+    const { tabErrorCount, resetTabErrorCount } = useAuditContext();
 
     // --- Callbacks --- 
     const handleAgentSelected = useCallback((agentName) => {
@@ -106,7 +106,7 @@ const AuditingPage = () => {
             {activeTab === 1 && (
                 <>
                     <AgentSelector
-                        auditingApi={auditingApi}
+                        agentsApi={agentsApi}
                         showError={showError}
                         onAgentSelected={handleAgentSelected}
                     />

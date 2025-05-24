@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { Delete, KeyboardArrowDown, Edit } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 import KnowledgeEditor from './KnowledgeEditor';
 import KnowledgeViewer from './KnowledgeViewer';
 import './Knowledge.css';
@@ -28,6 +29,7 @@ const KnowledgeItem = ({
   permissionLevel
 }) => {
   const { openSlider, closeSlider } = useSlider();
+  const { setLoading } = useLoading();
   const [deleteAllDialogOpen, setDeleteAllDialogOpen] = useState(false);
   const [deleteOneDialogOpen, setDeleteOneDialogOpen] = useState(false);
   const [versions, setVersions] = useState([]);
@@ -93,6 +95,7 @@ const KnowledgeItem = ({
   };
 
   const handleView = async () => {
+    setLoading(true);
     try {
       // Fetch the latest version from server by ID
       const knowledgeDetails = await knowledgeApi.getKnowledge(knowledge.id);
@@ -118,6 +121,8 @@ const KnowledgeItem = ({
         />,
         `${knowledge.name}`
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,14 +159,13 @@ const KnowledgeItem = ({
     setVersionToDelete(knowledgeToDelete);
   };
 
-  const handleVersionSelect = async (version) => {
+  const handleVersionSelect = (e, version) => {
+    e.stopPropagation(); // Prevent event bubbling to parent
     try {
-      // Fetch the specific version by ID
-      const versionDetails = await knowledgeApi.getKnowledge(version.id);
-
+      // Simply pass the version ID to the viewer, let it handle the data fetching
       openSlider(
         <KnowledgeViewer
-          knowledge={versionDetails}
+          knowledgeId={version.id}
           onEdit={handleEdit}
           onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
           title={`View Knowledge (v.${version.version.substring(0, 7)})`}
@@ -169,17 +173,7 @@ const KnowledgeItem = ({
         `View Knowledge (v.${version.version.substring(0, 7)})`
       );
     } catch (error) {
-      console.error('Error fetching knowledge version:', error);
-      // Continue with existing data as fallback
-      openSlider(
-        <KnowledgeViewer
-          knowledge={{ ...knowledge, ...version }}
-          onEdit={handleEdit}
-          onDelete={(knowledgeToDelete) => handleDeleteOne(knowledgeToDelete)}
-          title={`View Knowledge (v.${version.version.substring(0, 7)})`}
-        />,
-        `View Knowledge (v.${version.version.substring(0, 7)})`
-      );
+      console.error('Error opening knowledge version:', error);
     }
   };
 
@@ -412,7 +406,7 @@ const KnowledgeItem = ({
                   {versions.map((version, index) => (
                     <Box
                       key={version.version}
-                      onClick={() => handleVersionSelect(version)}
+                      onClick={(e) => handleVersionSelect(e, version)}
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',

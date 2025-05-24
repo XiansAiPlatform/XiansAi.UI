@@ -3,10 +3,11 @@ import { useAuditingApi } from '../services/auditing-api';
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
-const ErrorNotificationContext = createContext();
+const AuditContext = createContext();
 const POLLING_INTERVAL = 120000; // 2 minutes
+const MAX_CONSECUTIVE_FAILURES = 3;
 
-export const ErrorNotificationProvider = ({ children }) => {
+export const AuditProvider = ({ children }) => {
     const [navErrorCount, setNavErrorCount] = useState(0);
     const [tabErrorCount, setTabErrorCount] = useState(0);
     const [lastCheckedTime, setLastCheckedTime] = useState(new Date());
@@ -16,6 +17,14 @@ export const ErrorNotificationProvider = ({ children }) => {
     const pollingIntervalRef = useRef(null);
     const [isTokenReady, setIsTokenReady] = useState(false);
     const location = useLocation();
+    
+    // Circuit breaker state - using refs to prevent unnecessary re-renders
+    const consecutiveFailuresRef = useRef(0);
+    const isCircuitOpenRef = useRef(false);
+    const isApiCallInProgressRef = useRef(false);
+
+    // Create a stable reference to fetchErrorCount (will be assigned after function definition)
+    const fetchErrorCountRef = useRef();
 
     // Check if token is ready
     useEffect(() => {
@@ -56,75 +65,85 @@ export const ErrorNotificationProvider = ({ children }) => {
     }, [isAuthenticated, authLoading, getAccessTokenSilently, accessToken]);
 
     const fetchErrorCount = useCallback(async () => {
-        // Skip if not authenticated, loading, token not ready, or on home page
-        if (!isAuthenticated || authLoading || !isTokenReady || location.pathname === '/' || location.pathname === '/register') {
+        // Skip if not authenticated, loading, token not ready, on home page, circuit open, or call in progress
+        if (!isAuthenticated || authLoading || !isTokenReady || 
+            location.pathname === '/' || location.pathname === '/register' ||
+            isCircuitOpenRef.current || isApiCallInProgressRef.current) {
             console.log('Skipping fetchErrorCount:', { 
                 isAuthenticated, 
                 authLoading, 
                 isTokenReady, 
-                path: location.pathname 
+                path: location.pathname,
+                isCircuitOpen: isCircuitOpenRef.current,
+                isApiCallInProgress: isApiCallInProgressRef.current
             });
             return;
         }
 
-        // Add a small retry mechanism with backoff
-        let retries = 0;
-        const maxRetries = 3;
+        isApiCallInProgressRef.current = true;
 
         try {
-            const executeRequest = async () => {
-                try {
-                    const now = new Date();
-                    const startTime = lastCheckedTimeRef.current;    
-                    const result = await auditingApi.getCriticalLogs(
-                        startTime.toISOString(),
-                        now.toISOString()
-                    );
-                    // Update lastCheckedTime immediately upon successful response
-                    lastCheckedTimeRef.current = now;
-                    setLastCheckedTime(now);
-                    
-                    
-                    // Calculate new errors since last check
-                    const newErrors = result.reduce((total, agentGroup) => {
-                        return total + agentGroup.workflowTypes.reduce((typeTotal, typeGroup) => {
-                            return typeTotal + typeGroup.workflows.reduce((workflowTotal, workflow) => {
-                                return workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => {
-                                    // Debug: Log each log and whether it passes the filter
-                                    const newLogsInThisRun = run.criticalLogs.filter(log => {
-                                        const logTime = new Date(log.createdAt);
-                                        const isNew = logTime > startTime;
-                                        return isNew;
-                                    });
-                                     return runTotal + newLogsInThisRun.length;
-                                }, 0);
-                            }, 0);
+            const now = new Date();
+            const startTime = lastCheckedTimeRef.current;    
+            const result = await auditingApi.getCriticalLogs(
+                startTime.toISOString(),
+                now.toISOString()
+            );
+            
+            // Success - reset circuit breaker state
+            consecutiveFailuresRef.current = 0;
+            isCircuitOpenRef.current = false;
+            
+            // Update lastCheckedTime immediately upon successful response
+            lastCheckedTimeRef.current = now;
+            setLastCheckedTime(now);
+            
+            // Calculate new errors since last check
+            const newErrors = result.reduce((total, agentGroup) => {
+                return total + agentGroup.workflowTypes.reduce((typeTotal, typeGroup) => {
+                    return typeTotal + typeGroup.workflows.reduce((workflowTotal, workflow) => {
+                        return workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => {
+                            const newLogsInThisRun = run.criticalLogs.filter(log => {
+                                const logTime = new Date(log.createdAt);
+                                const isNew = logTime > startTime;
+                                return isNew;
+                            });
+                            return runTotal + newLogsInThisRun.length;
                         }, 0);
                     }, 0);
+                }, 0);
+            }, 0);
 
-                    if (newErrors > 0) {
-                        // Update both counts when new errors are found  
-                        setNavErrorCount(prev => {      
-                            return prev + newErrors;
-                        });
-                        setTabErrorCount(prev => prev + newErrors);
-                    }
-                } catch (error) {
-                    console.error('Error fetching error count:', error);
-                    throw error; // Rethrow to trigger retry logic
-                }
-            };
-
-            await executeRequest();
-        } catch (error) {
-            if (retries < maxRetries) {
-                retries++;
-                setTimeout(() => fetchErrorCount(), 1000 * retries); // Backoff with each retry
-            } else {
-                console.error('Max retries reached. Unable to fetch error count.');
+            if (newErrors > 0) {
+                // Update both counts when new errors are found  
+                setNavErrorCount(prev => prev + newErrors);
+                setTabErrorCount(prev => prev + newErrors);
             }
+        } catch (error) {
+            console.error('Error fetching error count:', error);
+            
+            // Update circuit breaker state
+            const newFailureCount = consecutiveFailuresRef.current + 1;
+            consecutiveFailuresRef.current = newFailureCount;
+            
+            if (newFailureCount >= MAX_CONSECUTIVE_FAILURES) {
+                console.warn(`Circuit breaker opened after ${newFailureCount} consecutive failures`);
+                isCircuitOpenRef.current = true;
+                
+                // Auto-reset circuit breaker after 5 minutes
+                setTimeout(() => {
+                    console.log('Attempting to close circuit breaker after timeout');
+                    isCircuitOpenRef.current = false;
+                    consecutiveFailuresRef.current = 0; // Reset failure count on auto-recovery
+                }, 300000); // 5 minutes
+            }
+        } finally {
+            isApiCallInProgressRef.current = false;
         }
     }, [auditingApi, isAuthenticated, authLoading, isTokenReady, location.pathname]);
+
+    // Assign the function to the ref after it's defined
+    fetchErrorCountRef.current = fetchErrorCount;
 
     // Initial fetch
     useEffect(() => {
@@ -151,7 +170,16 @@ export const ErrorNotificationProvider = ({ children }) => {
                 clearInterval(pollingIntervalRef.current);
             }
 
-            pollingIntervalRef.current = setInterval(fetchErrorCount, POLLING_INTERVAL);
+            // Use a stable function that calls the current version
+            const stablePollFunction = () => {
+                if (fetchErrorCountRef.current) {
+                    fetchErrorCountRef.current();
+                }
+            };
+
+            // Use fixed interval - circuit breaker handles dynamic intervals internally
+            pollingIntervalRef.current = setInterval(stablePollFunction, POLLING_INTERVAL);
+            console.log(`Error notification polling started with interval: ${POLLING_INTERVAL}ms`);
 
             // Cleanup on unmount or when auth state changes
             return () => {
@@ -163,7 +191,7 @@ export const ErrorNotificationProvider = ({ children }) => {
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
         }
-    }, [fetchErrorCount, isAuthenticated, authLoading, isTokenReady, location.pathname]);
+    }, [isAuthenticated, authLoading, isTokenReady, location.pathname]);
 
     // Handle nav error count reset when on auditing page
     useEffect(() => {
@@ -187,6 +215,15 @@ export const ErrorNotificationProvider = ({ children }) => {
         const now = new Date();
         lastCheckedTimeRef.current = now;
         setLastCheckedTime(now);
+        // Reset circuit breaker state
+        consecutiveFailuresRef.current = 0;
+        isCircuitOpenRef.current = false;
+    }, []);
+
+    const resetCircuitBreaker = useCallback(() => {
+        consecutiveFailuresRef.current = 0;
+        isCircuitOpenRef.current = false;
+        console.log('Circuit breaker manually reset');
     }, []);
 
     const updateLastCheckedTime = useCallback((newTime) => {
@@ -195,24 +232,27 @@ export const ErrorNotificationProvider = ({ children }) => {
     }, []);
 
     return (
-        <ErrorNotificationContext.Provider value={{
+        <AuditContext.Provider value={{
             navErrorCount,
             tabErrorCount,
             lastCheckedTime,
             resetNavErrorCount,
             resetTabErrorCount,
             resetAllErrorCounts,
-            updateLastCheckedTime
+            resetCircuitBreaker,
+            updateLastCheckedTime,
+            isCircuitOpen: isCircuitOpenRef.current,
+            consecutiveFailures: consecutiveFailuresRef.current
         }}>
             {children}
-        </ErrorNotificationContext.Provider>
+        </AuditContext.Provider>
     );
 };
 
-export const useErrorNotification = () => {
-    const context = useContext(ErrorNotificationContext);
+export const useAuditContext = () => {
+    const context = useContext(AuditContext);
     if (!context) {
-        throw new Error('useErrorNotification must be used within an ErrorNotificationProvider');
+        throw new Error('useAuditContext must be used within an AuditProvider');
     }
     return context;
 }; 

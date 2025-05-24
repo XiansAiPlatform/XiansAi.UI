@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { ErrorNotificationProvider } from './contexts/ErrorNotificationContext';
+import { AuditProvider } from './contexts/AuditContext';
 import WorkflowList from './Components/Runs/WorkflowList';
 import WorkflowDetails from './Components/Runs/WorkflowDetails/WorkflowDetails';
 import Layout from './Components/Layout/Layout';
@@ -41,7 +41,7 @@ function ManagerRoutes() {
   return (
     <NotificationProvider>
       <OrganizationProvider>
-        <ErrorNotificationProvider>
+        <AuditProvider>
           <ThemeProvider theme={theme}>
             <ToastContainer />
             <LoadingProvider>
@@ -94,7 +94,7 @@ function ManagerRoutes() {
               </SliderProvider>
             </LoadingProvider>
           </ThemeProvider>
-        </ErrorNotificationProvider>
+        </AuditProvider>
       </OrganizationProvider>
     </NotificationProvider>
   );

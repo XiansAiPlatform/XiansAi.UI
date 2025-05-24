@@ -25,6 +25,93 @@
   padding: 2px 6px;
   border-radius: 4px;
 }
+
+/* Agent metadata styles */
+.agent-metadata {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.agent-metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.8rem;
+}
+
+.agent-metadata-item svg {
+  font-size: 14px;
+}
+
+/* Owner chip styles */
+.owner-chip {
+  background-color: rgba(25, 118, 210, 0.08);
+  color: rgb(25, 118, 210);
+  border: 1px solid rgba(25, 118, 210, 0.3);
+  font-size: 0.7rem;
+  height: 20px;
+  padding: 0 6px;
+}
+
+/* Enhanced status indicators */
+.status-indicators {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 0;
+}
+
+/* Compact header layout */
+.workflow-title-section {
+  gap: 4px !important;
+}
+
+/* Status indicator adjustments for compact layout */
+.total-indicator,
+.running-indicator,
+.continuedAsNew-indicator,
+.completed-indicator,
+.terminated-indicator {
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  min-width: 50px;
+  justify-content: center;
+}
+
+/* Mobile adjustments for compact header */
+@media (max-width: 768px) {
+  .workflow-title-section {
+    gap: 3px !important;
+  }
+  
+  .status-indicators {
+    gap: 4px;
+    margin-top: 2px;
+  }
+  
+  .total-indicator,
+  .running-indicator,
+  .continuedAsNew-indicator,
+  .completed-indicator,
+  .terminated-indicator {
+    height: 18px;
+    font-size: 0.65rem;
+    min-width: 45px;
+    padding: 0 6px;
+  }
+}
+
 /* Common card styles - can be reused for similar components */
 .card-base {
   border: 1px solid var(--border-color);
@@ -159,6 +246,21 @@
   white-space: nowrap;
 }
 
+/* Enhanced last message display */
+.last-message {
+  display: inline-block;
+  background-color: rgba(0, 0, 0, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border-left: 3px solid rgba(0, 0, 0, 0.2);
+}
+
+.last-message.error {
+  background-color: rgba(211, 47, 47, 0.08);
+  border-left-color: #d32f2f;
+  color: #d32f2f !important;
+}
+
 @media (max-width: 600px) {
   .start-new-button {
     padding: var(--spacing-xs) !important;
@@ -181,13 +283,6 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
-}
-
-.status-indicators {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  margin-left: var(--spacing-md);
 }
 
 .total-indicator {
