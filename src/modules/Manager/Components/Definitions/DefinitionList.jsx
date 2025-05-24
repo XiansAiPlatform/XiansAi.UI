@@ -23,6 +23,7 @@ const DefinitionList = () => {
     grouped,
     sortedAgentNames,
     latestFlowByAgent,
+    agentsByName,
     
     // Handlers
     handleToggle,
@@ -86,6 +87,7 @@ const DefinitionList = () => {
         <AgentGroup
           key={agentName}
           agentName={agentName}
+          agent={agentsByName[agentName]}
           definitions={grouped[agentName]}
           latestUpdateDate={latestFlowByAgent[agentName]}
           openDefinitionId={openDefinitionId}

@@ -37,11 +37,13 @@ export const useDefinitions = () => {
   // Extract data for component compatibility
   const grouped = {};
   const latestFlowByAgent = {};
+  const agentsByName = {};
   const sortedAgentNames = [];
   
   filteredAndSortedAgentGroups.forEach(agentGroup => {
     const agentName = agentGroup.agent.name;
     grouped[agentName] = agentGroup.definitions;
+    agentsByName[agentName] = agentGroup.agent;
     sortedAgentNames.push(agentName);
     
     // Find the latest flow date for this agent
@@ -157,6 +159,7 @@ export const useDefinitions = () => {
     grouped,
     sortedAgentNames,
     latestFlowByAgent,
+    agentsByName,
     
     // Handlers
     handleToggle,

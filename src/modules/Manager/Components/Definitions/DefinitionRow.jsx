@@ -75,16 +75,6 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
 
   const hasMarkdown = definition.markdown && definition.markdown.trim().length > 0;
 
-  const isCurrentUser = user?.id === definition.owner;
-
-  const getPermissionLevel = () => {
-    if (!user?.id) return 'Read';
-    if (definition.permissions?.ownerAccess?.includes(user.id)) return 'Owner';
-    if (definition.permissions?.writeAccess?.includes(user.id)) return 'Write';
-    if (definition.permissions?.readAccess?.includes(user.id)) return 'Read';
-    return 'Read'; // Default to Read if no explicit permissions
-  };
-
   const formatCreatedTime = (date) => {
     try {
       return `Created ${formatDistanceToNow(new Date(date), { addSuffix: true })}`;
@@ -132,14 +122,6 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
                     {formatUpdatedTime(definition.updatedAt)}
                   </span>
                 )}
-                <span className="definition-stat">
-                  Permission: <span style={{ 
-                    color: isCurrentUser ? 'var(--primary)' : 'inherit',
-                    fontWeight: isCurrentUser ? 600 : 'inherit'
-                  }}>
-                    {getPermissionLevel()}
-                  </span>
-                </span>
               </Typography>
             </Box>
             <Stack direction="row" spacing={1} sx={{ marginRight: 2 }}>
