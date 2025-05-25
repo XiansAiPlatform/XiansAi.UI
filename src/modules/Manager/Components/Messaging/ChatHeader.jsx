@@ -75,8 +75,8 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onThreadDel
                 bgcolor: theme.palette.background.paper, 
                 borderBottom: '1px solid',
                 borderColor: theme.palette.divider,
-                borderTopLeftRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
-                borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`
+                borderTopLeftRadius: 1,
+                borderTopRightRadius: 1
             }}
         >
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>

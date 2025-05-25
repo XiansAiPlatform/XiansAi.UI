@@ -240,7 +240,7 @@ const ChatConversation = ({
                 bgcolor: theme.palette.background.default,
                 border: '1px solid',
                 borderColor: theme.palette.divider,
-                borderRadius: theme.shape.borderRadius,
+                borderRadius: 2,
                 overflow: 'hidden',
                 width: '100%'
             }}

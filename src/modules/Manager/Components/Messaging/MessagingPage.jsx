@@ -182,7 +182,8 @@ const MessagingPage = () => {
             p: 3,
             display: 'flex',
             flexDirection: 'column',
-            width: '100%'
+            width: '100%',
+            borderRadius: 2
         }}
         >
             <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
@@ -190,7 +191,7 @@ const MessagingPage = () => {
             </Typography>
 
             {/* Display top-level error if any */} 
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
             {/* Agent selection */}
             <AgentSelector

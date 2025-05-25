@@ -56,7 +56,7 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: '6px',
+          borderRadius: '4px',
           boxShadow: 'none',
         },
         containedPrimary: {

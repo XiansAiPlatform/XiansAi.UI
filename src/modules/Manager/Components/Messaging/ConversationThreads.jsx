@@ -179,7 +179,7 @@ const ConversationThreads = ({
                 bgcolor: theme.palette.background.paper,
                 border: '1px solid',
                 borderColor: theme.palette.divider,
-                borderRadius: theme.shape.borderRadius,
+                borderRadius: 2,
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column'
@@ -190,8 +190,8 @@ const ConversationThreads = ({
                     borderBottom: '1px solid', 
                     borderColor: theme.palette.divider,
                     backgroundColor: theme.palette.background.paper,
-                    borderTopLeftRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
-                    borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
+                    borderTopLeftRadius: 1,
+                    borderTopRightRadius: 1,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'

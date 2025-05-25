@@ -18,17 +18,8 @@ import './WorkflowList.css';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
 
-const INITIAL_STATS = {
-  running: 0,
-  completed: 0,
-  terminated: 0,
-  continuedAsNew: 0,
-  total: 0
-};
-
 const WorkflowList = () => {  
   const [agentGroups, setAgentGroups] = useState([]);
-  const [stats, setStats] = useState(INITIAL_STATS);
   const [ownerFilter, setOwnerFilter] = useState('mine');
   const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
@@ -39,23 +30,6 @@ const WorkflowList = () => {
 
   const { setLoading, isLoading } = useLoading();
   const api = useWorkflowApi();
-
-  const calculateStats = useCallback((agentGroups) => {
-    const allWorkflows = agentGroups.flatMap(group => group.workflows || []);
-    
-    return allWorkflows.reduce((acc, workflow) => {
-      acc.total++;
-      const status = (workflow.status || '').toUpperCase();
-      if (status === 'TERMINATED' || status === 'CANCELED') {
-        acc.terminated++;
-      } else if (status === 'CONTINUEDASNEW') {
-        acc.continuedAsNew++;
-      } else if (acc[status.toLowerCase()] !== undefined) {
-        acc[status.toLowerCase()]++;
-      }
-      return acc;
-    }, { ...INITIAL_STATS });
-  }, []);
 
   const filterAgentGroups = useCallback((agentGroups) => {
     if (!agentGroups || !Array.isArray(agentGroups)) return [];
@@ -94,24 +68,20 @@ const WorkflowList = () => {
         if (validData.length > 0) {
           const filteredGroups = filterAgentGroups(validData);
           setAgentGroups(filteredGroups);
-          setStats(calculateStats(validData));
         } else {
           console.warn('No valid agent groups found in server response');
           setAgentGroups([]);
-          setStats(INITIAL_STATS);
         }
       } else {
         setAgentGroups([]);
-        setStats(INITIAL_STATS);
       }
     } catch (error) {
       console.error('Error loading workflows:', error);
       setAgentGroups([]);
-      setStats(INITIAL_STATS);
     } finally {
       setLoading(false);
     }
-  }, [calculateStats, filterAgentGroups, setLoading, api, timeFilter, ownerFilter, statusFilter]);
+  }, [filterAgentGroups, setLoading, api, timeFilter, ownerFilter, statusFilter]);
 
   useEffect(() => {
     loadWorkflows();
@@ -122,11 +92,11 @@ const WorkflowList = () => {
     let timeoutId;
     
     const scheduleNextRefresh = () => {
-      if (autoRefreshCount < 3) {
+      if (autoRefreshCount < 2) {
         timeoutId = setTimeout(() => {
           loadWorkflows();
           setAutoRefreshCount(count => count + 1);
-        }, 5000);
+        }, 10000);
       }
     };
     
@@ -282,16 +252,16 @@ const WorkflowList = () => {
               All
             </ToggleButton>
             <ToggleButton value="running" className="running">
-              Running {stats.running > 0 && `(${stats.running})`}
+              Running
             </ToggleButton>
             <ToggleButton value="completed" className="completed">
-              Completed {stats.completed > 0 && `(${stats.completed})`}
+              Completed
             </ToggleButton>
             <ToggleButton value="continuedAsNew" className="continuedAsNew">
-              Continued As New {stats.continuedAsNew > 0 && `(${stats.continuedAsNew})`}
+              Continued As New
             </ToggleButton>
             <ToggleButton value="terminated" className="terminated">
-              Terminated {stats.terminated > 0 && `(${stats.terminated})`}
+              Terminated
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
