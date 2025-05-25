@@ -161,10 +161,8 @@ export default function Register() {
         const isValid = await registrationApi.validateVerificationCode(formData.joinEmail, code);
         if (isValid) {
           console.log('Verification successful');
-          // Immediately redirect to home page for better UX
-          navigate('/');
           // Use the auth context to properly logout in the background
-          await auth.logout();
+          await auth.logout({ returnTo: window.location.origin + '/login' });
         } else {
           setVerificationError('Invalid verification code');
         }
