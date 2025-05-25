@@ -310,7 +310,6 @@ const Knowledge = () => {
                     </MenuItem>
                   ))
                 )}
-                <MenuItem value="--SYSTEM--">--SYSTEM--</MenuItem>
               </Select>
             </FormControl>
             <Fab 

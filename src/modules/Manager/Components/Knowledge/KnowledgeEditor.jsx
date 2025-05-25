@@ -266,7 +266,6 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
                   </MenuItem>
                 ))
               )}
-              <MenuItem value="--SYSTEM--">--SYSTEM--</MenuItem>
             </Select>
           </FormControl>
 

@@ -40,24 +40,28 @@ export const useDefinitions = () => {
   const agentsByName = {};
   const sortedAgentNames = [];
   
-  filteredAndSortedAgentGroups.forEach(agentGroup => {
-    const agentName = agentGroup.agent.name;
-    grouped[agentName] = agentGroup.definitions;
-    agentsByName[agentName] = agentGroup.agent;
-    sortedAgentNames.push(agentName);
-    
-    // Find the latest flow date for this agent
-    if (agentGroup.definitions.length > 0) {
-      const latestDate = agentGroup.definitions.reduce((latest, def) => {
-        const defDate = new Date(def.createdAt);
-        return defDate > latest ? defDate : latest;
-      }, new Date(0));
-      latestFlowByAgent[agentName] = latestDate;
-    }
-  });
+  if (filteredAndSortedAgentGroups && Array.isArray(filteredAndSortedAgentGroups)) {
+    filteredAndSortedAgentGroups.forEach(agentGroup => {
+      const agentName = agentGroup.agent.name;
+      grouped[agentName] = agentGroup.definitions;
+      agentsByName[agentName] = agentGroup.agent;
+      sortedAgentNames.push(agentName);
+      
+      // Find the latest flow date for this agent
+      if (agentGroup.definitions.length > 0) {
+        const latestDate = agentGroup.definitions.reduce((latest, def) => {
+          const defDate = new Date(def.createdAt);
+          return defDate > latest ? defDate : latest;
+        }, new Date(0));
+        latestFlowByAgent[agentName] = latestDate;
+      }
+    });
+  }
 
   // Get flat list of all definitions for compatibility
-  const definitions = agentGroups.flatMap(group => group.definitions);
+  const definitions = agentGroups && Array.isArray(agentGroups) 
+    ? agentGroups.flatMap(group => group.definitions) 
+    : [];
 
   // Fetch definitions
   const fetchDefinitions = async () => {
@@ -124,7 +128,9 @@ export const useDefinitions = () => {
       
       // Update the agent groups state by removing the agent group
       setAgentGroups(prevAgentGroups => 
-        prevAgentGroups.filter(group => group.agent.name !== selectedAgentName)
+        prevAgentGroups && Array.isArray(prevAgentGroups)
+          ? prevAgentGroups.filter(group => group.agent.name !== selectedAgentName)
+          : []
       );
       
       showSuccess(`Successfully deleted agent "${selectedAgentName}" and all its definitions`);
@@ -139,6 +145,10 @@ export const useDefinitions = () => {
 
   // Check if user is owner of all workflows for selected agent
   const isOwnerOfAllWorkflows = (agentName) => {
+    if (!agentGroups || !Array.isArray(agentGroups)) {
+      return false;
+    }
+    
     const agentGroup = agentGroups.find(group => group.agent.name === agentName);
     if (!agentGroup) return false;
     

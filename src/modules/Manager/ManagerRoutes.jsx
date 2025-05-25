@@ -15,12 +15,14 @@ import Knowledge from './Components/Knowledge/Knowledge';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import DefinitionList from './Components/Definitions/DefinitionList';
 import NotImplemented from './Components/NotImplemented/NotImplemented';
+import NotAuthorized from './Components/NotAuthorized';
 import MessagingPage from './Components/Messaging/MessagingPage';
 import ProtectedRoute from './auth/ProtectedRoute';
 import { useAuth } from './auth/AuthContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
+import { useNavigate } from 'react-router-dom';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -35,7 +37,7 @@ function ManagerRoutes() {
   }
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin + '/login' });
+    logout({ returnTo: window.location.origin });
   };
 
   return (
@@ -49,6 +51,7 @@ function ManagerRoutes() {
                 <Routes>
                   <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
                   <Route element={<Layout />}>
+                    <Route path="/unauthorized" element={<NotAuthorized />} />
                     <Route path="/runs" element={
                       <ProtectedRoute>
                         <WorkflowList />
@@ -101,9 +104,15 @@ function ManagerRoutes() {
 }
 
 function LogoutHandler({ onLogout }) {
+  const navigate = useNavigate();
+  
   React.useEffect(() => {
+    // Immediately redirect to home page for better UX
+    navigate('/');
+    
+    // Perform logout in the background
     onLogout();
-  }, [onLogout]);
+  }, [onLogout, navigate]);
 
   return null;
 }

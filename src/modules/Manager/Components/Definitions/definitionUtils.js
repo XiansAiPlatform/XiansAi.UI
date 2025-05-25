@@ -7,6 +7,10 @@ import { formatDistanceToNow } from 'date-fns';
  * @returns {Array} Filtered agent groups array
  */
 export const filterAgentGroups = (agentGroups, searchQuery) => {
+  if (!agentGroups || !Array.isArray(agentGroups)) {
+    return [];
+  }
+  
   if (!searchQuery) return agentGroups;
   
   const searchLower = searchQuery.toLowerCase();
@@ -35,6 +39,10 @@ export const filterAgentGroups = (agentGroups, searchQuery) => {
  * @returns {Array} Sorted agent groups array
  */
 export const sortAgentGroupsByDate = (agentGroups) => {
+  if (!agentGroups || !Array.isArray(agentGroups)) {
+    return [];
+  }
+  
   return agentGroups.sort((a, b) => {
     // Get the most recent definition date for each agent group
     const getLatestDate = (group) => {

@@ -10,17 +10,18 @@ import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import { useAuditContext } from '../../contexts/AuditContext';
 const NAV_ITEMS = [
   {
-    to: '/runs',
-    icon: <AirIcon />,
-    label: 'Agent Runs',
-    isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
-  },
-  {
     to: '/definitions',
     icon: <CodeOutlinedIcon />,
     label: 'Agent Definitions',
     isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
+  {
+    to: '/runs',
+    icon: <AirIcon />,
+    label: 'Agent Runs',
+    isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
+  },
+
   {
     to: '/knowledge',
     icon: <MenuBookOutlinedIcon />,

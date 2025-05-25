@@ -54,8 +54,7 @@ class Auth0Service {
   async logout(options) {
     await this.auth0Client.logout({
       logoutParams: {
-        returnTo: window.location.origin + '/login',
-        federated: true,
+        returnTo: options?.returnTo || '/',
         ...(options?.logoutParams || {}),
       }
     });

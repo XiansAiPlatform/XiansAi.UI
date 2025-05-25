@@ -19,7 +19,7 @@ const Callback = () => {
     
     // Redirect to application main route after successful auth
     if (!isLoading && isAuthenticated) {
-      navigate('/runs');
+      navigate('/definitions');
     }
   }, [isAuthenticated, error, isLoading, navigate, showError]);
 

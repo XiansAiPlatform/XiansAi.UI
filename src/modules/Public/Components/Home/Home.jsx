@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../Public.css';
 import { FiCpu, FiLock, FiSettings, FiStar, FiGitBranch } from 'react-icons/fi';
 import { BiLogoGithub} from 'react-icons/bi';
@@ -8,6 +9,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../../../Manager/auth/AuthContext';
 
 export default function Home() {
+    const navigate = useNavigate();
     const { isAuthenticated, login } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
     const [activeCodeTab, setActiveCodeTab] = useState('flow');
@@ -172,15 +174,7 @@ var newBlogPosts = new List<string>();`
                             </a>
                         </nav>
                         <div className="home-auth-buttons">
-                            {isAuthenticated ? (
-                                <button 
-                                    className="home-btn home-btn-primary" 
-                                    onClick={() => window.location.href = '/runs'}
-                                >
-                                    Enter Application
-                                </button>
-                            ) : (
-                                <>
+                            <>
                                     <button 
                                         className="home-btn home-btn-secondary" 
                                         onClick={() => login({ returnTo: window.location.origin })}
@@ -189,13 +183,12 @@ var newBlogPosts = new List<string>();`
                                     </button>
                                     <button 
                                         className="home-btn home-btn-primary" 
-                                        onClick={() => login({ returnTo: window.location.origin })}
+                                        onClick={() => navigate('/register')}
                                     >
                                         <BiLogoGithub />
-                                        Sign up with GitHub
+                                        Register
                                     </button>
-                                </>
-                            )}
+                            </>
                         </div>
                     </div>
                 </div>

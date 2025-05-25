@@ -99,7 +99,7 @@ export const AuditProvider = ({ children }) => {
             setLastCheckedTime(now);
             
             // Calculate new errors since last check
-            const newErrors = result.reduce((total, agentGroup) => {
+            const newErrors = result && Array.isArray(result) ? result.reduce((total, agentGroup) => {
                 return total + agentGroup.workflowTypes.reduce((typeTotal, typeGroup) => {
                     return typeTotal + typeGroup.workflows.reduce((workflowTotal, workflow) => {
                         return workflowTotal + workflow.workflowRuns.reduce((runTotal, run) => {
@@ -112,7 +112,7 @@ export const AuditProvider = ({ children }) => {
                         }, 0);
                     }, 0);
                 }, 0);
-            }, 0);
+            }, 0) : 0;
 
             if (newErrors > 0) {
                 // Update both counts when new errors are found  

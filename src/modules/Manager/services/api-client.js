@@ -3,6 +3,7 @@ import { handleApiError } from '../utils/errorHandler';
 import { getConfig } from '../../../config';
 import { useMemo } from 'react';
 import { useSelectedOrg } from '../contexts/OrganizationContext';
+import { useNavigate } from 'react-router-dom';
 
 const { apiBaseUrl } = getConfig();
 
@@ -27,10 +28,23 @@ export const getTimeRangeParams = (timeFilter) => {
   return { startTime, endTime };
 };
 
+/**
+ * Custom hook that provides an API client with authentication and error handling.
+ * 
+ * Features:
+ * - Automatic token management and header injection
+ * - 403 Forbidden error handling with automatic redirect to home page
+ * - Comprehensive error handling for various HTTP status codes
+ * - Support for different response types (JSON, blob, text)
+ * - Event streaming capabilities
+ * 
+ * @returns {Object} API client with methods: get, post, put, patch, delete, getBlob, stream
+ */
 export const useApiClient = () => {
   // const { getAccessTokenSilently } = useAuth0(); // Old hook
   const { getAccessTokenSilently } = useAuth(); // New hook
   const { selectedOrg } = useSelectedOrg();
+  const navigate = useNavigate();
 
   return useMemo(() => {
     const getAccessToken = async () => {
@@ -70,6 +84,21 @@ export const useApiClient = () => {
         });
 
         if (!response.ok) {
+          // Handle 403 Forbidden error by redirecting to home page
+          // This prevents users from seeing permission-related errors and provides
+          // a clean user experience by redirecting them to a safe location
+          if (response.status === 403) {
+            console.error('Access forbidden (403). Redirecting to home page.');
+            navigate('/unauthorized');
+            return; // Exit early to prevent further error handling
+          }
+
+          if (response.status === 400) {
+            const errorText = await response.text();
+            console.error(errorText);
+            throw new Error(errorText);
+          }
+          
           const errorResult = await handleApiError(response);
           if (response.status === 401) {
             console.error('Authentication error (401). Token may be invalid or expired.');
@@ -156,6 +185,15 @@ export const useApiClient = () => {
           });
 
           if (!response.ok) {
+            // Handle 403 Forbidden error by redirecting to home page
+            // This prevents users from seeing permission-related errors and provides
+            // a clean user experience by redirecting them to a safe location
+            if (response.status === 403) {
+              console.error('Access forbidden (403). Redirecting to home page.');
+              navigate('/unauthorized');
+              return; // Exit early to prevent further error handling
+            }
+            
             const errorResult = await handleApiError(response);
             throw errorResult;
           }
@@ -199,5 +237,5 @@ export const useApiClient = () => {
         }
       }
     };
-  }, [getAccessTokenSilently, selectedOrg]);
+  }, [getAccessTokenSilently, selectedOrg, navigate]);
 };

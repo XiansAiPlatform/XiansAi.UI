@@ -79,7 +79,7 @@ class EntraIdService {
     try {
       await this.publicClientApplication.logoutRedirect({
         account: account,
-        postLogoutRedirectUri: (options?.returnTo || window.location.origin + '/login'), // Use returnTo from options if provided
+        postLogoutRedirectUri: (options?.returnTo || window.location.origin), // Use returnTo from options if provided
         ...(options || {}),
       });
     } catch (error) {
