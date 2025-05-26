@@ -1,3 +1,4 @@
+import { getConfig } from '../../../../config';
 
 class EntraIdTokenService {
   getOrganizations(decodedToken) {
