@@ -3,7 +3,7 @@ class EntraIdTokenService {
   getOrganizations(decodedToken) {
     // The claim for tenant/organization info for Entra ID.
     // This should be configurable, e.g., 'roles', 'groups', or a custom claim like 'tid' for tenant ID.
-    const orgClaimPath = 'roles';
+    const orgClaimPath = getConfig().organizationClaim;
 
     let orgInfo = decodedToken[orgClaimPath];
 
