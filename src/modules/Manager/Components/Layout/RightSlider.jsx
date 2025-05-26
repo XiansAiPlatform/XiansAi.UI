@@ -77,12 +77,20 @@ const RightSlider = ({ onClose, children, title }) => {
           zIndex: 1,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
+          gap: 2
         }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'grey.900' }}>
+          <Typography variant="h6" sx={{ 
+            fontWeight: 600, 
+            color: 'grey.900',
+            flex: 1,
+            pr: 2,
+            wordBreak: 'break-word',
+            lineHeight: 1.2
+          }}>
             {title}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1, flexShrink: 0 }}>
             <IconButton 
               onClick={() => setIsFullScreen(!isFullScreen)}
               sx={{ 

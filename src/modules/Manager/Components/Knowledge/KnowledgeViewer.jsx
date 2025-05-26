@@ -154,10 +154,6 @@ const KnowledgeViewer = ({ knowledge, knowledgeId, onEdit, onDelete, title }) =>
         borderColor: 'divider'
       }}>
         <Box>
-          <Typography variant="h5" component="h2" sx={{ mb: 1, fontWeight: 'medium' }}>
-            {knowledgeData.name}
-          </Typography>
-
           <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
             <Chip
               size="small"

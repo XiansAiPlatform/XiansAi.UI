@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -18,10 +18,11 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
   const knowledgeApi = useKnowledgeApi();
   const agentsApi = useAgentsApi();
   const { loading, setLoading } = useLoading();
+  const nameFieldRef = useRef(null);
   const [formData, setFormData] = useState(knowledge || {
     name: '',
     content: '',
-    type: null,
+    type: 'markdown',
     agent: selectedAgent || '',
   });
   const [jsonError, setJsonError] = useState(null);
@@ -30,6 +31,13 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [agentsError, setAgentsError] = useState(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+
+  // Focus on name field when component mounts
+  useEffect(() => {
+    if (nameFieldRef.current) {
+      nameFieldRef.current.focus();
+    }
+  }, []);
 
   const normalizeType = (type) => {
     if (!type) return '';
@@ -47,13 +55,23 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
       try {
         const response = await agentsApi.getAllAgents();
         console.log('Agents API response:', response);
+        let agentsList = [];
         if (response && Array.isArray(response)) {
-          setAgents(response);
+          agentsList = response;
         } else if (response && Array.isArray(response.data)) {
-          setAgents(response.data);
+          agentsList = response.data;
         } else {
           console.error('Unexpected agents response format:', response);
-          setAgents([]);
+          agentsList = [];
+        }
+        setAgents(agentsList);
+        
+        // Auto-select agent if there's only one and no agent is already selected
+        if (agentsList.length === 1 && !formData.agent && !selectedAgent) {
+          setFormData(prev => ({
+            ...prev,
+            agent: agentsList[0]
+          }));
         }
       } catch (error) {
         console.error('Error fetching agents:', error);
@@ -64,7 +82,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
     };
 
     fetchAgents();
-  }, [agentsApi]);
+  }, [agentsApi, formData.agent, selectedAgent]);
 
   useEffect(() => {
     // Fetch knowledge content if in edit mode and content is not available
@@ -196,6 +214,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
             }}
             required
             disabled={mode === 'edit'}
+            inputRef={nameFieldRef}
           />
 
           <FormControl fullWidth sx={{ mb: 2 }} required>
