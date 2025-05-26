@@ -16,6 +16,8 @@ export function getConfig() {
     config.entraIdAuthority = process.env.REACT_APP_ENTRA_ID_AUTHORITY;
     config.entraIdScopes = process.env.REACT_APP_ENTRA_ID_SCOPES ? process.env.REACT_APP_ENTRA_ID_SCOPES.split(',') : ['User.Read'];
     config.organizationClaim = process.env.REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM || 'roles';
+    config.knownAuthorities = process.env.REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES ? process.env.REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES.split(',') : [];
+
   }
 
   return config;
