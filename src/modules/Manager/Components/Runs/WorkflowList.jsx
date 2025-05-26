@@ -8,22 +8,27 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
-  IconButton
+  IconButton,
+  Alert,
+  Collapse
 } from '@mui/material';
 import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const WorkflowList = () => {  
   const [agentGroups, setAgentGroups] = useState([]);
   const [ownerFilter, setOwnerFilter] = useState('mine');
   const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
+  const [showHint, setShowHint] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
 
@@ -52,6 +57,8 @@ const WorkflowList = () => {
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
+    // Hide hint when refreshing
+    setShowHint(false);
     try {
       const data = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
       
@@ -85,6 +92,22 @@ const WorkflowList = () => {
   useEffect(() => {
     loadWorkflows();
   }, [loadWorkflows]);
+
+  // Show hint when navigated from NewWorkflowForm
+  useEffect(() => {
+    if (location.state?.fromNewWorkflow) {
+      setShowHint(true);
+      // Clear the navigation state to prevent showing hint on refresh
+      window.history.replaceState({}, document.title);
+      
+      // Auto-hide hint after 10 seconds
+      const timer = setTimeout(() => {
+        setShowHint(false);
+      }, 10000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   const hasWorkflows = useMemo(() => {
     return agentGroups.length > 0;
@@ -161,6 +184,51 @@ const WorkflowList = () => {
           </Button>
         )}
       </Box>
+
+      {/* Hint message for newly activated workflow */}
+      <Collapse in={showHint}>
+        <Box sx={{ px: isMobile ? 2 : 0, mb: 2 }}>
+          <Alert 
+            severity="success" 
+            icon={<CheckCircleIcon />}
+            onClose={() => setShowHint(false)}
+            sx={{
+              borderRadius: 2,
+              backgroundColor: 'rgba(76, 175, 80, 0.08)',
+              border: '1px solid rgba(76, 175, 80, 0.2)',
+              color: 'text.primary',
+              '& .MuiAlert-icon': {
+                color: 'success.main'
+              }
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Workflow activated successfully!{' '}
+              <Button
+                onClick={loadWorkflows}
+                disabled={isLoading}
+                size="small"
+                variant="text"
+                sx={{
+                  minWidth: 'auto',
+                  p: 0,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  color: 'success.main',
+                  textDecoration: 'underline',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                Refresh now
+              </Button>{' '}
+              to see the newly activated flow. It can take a few seconds to appear.
+            </Typography>
+          </Alert>
+        </Box>
+      </Collapse>
 
       <Box 
         className="filter-controls"

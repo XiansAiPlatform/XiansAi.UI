@@ -1,5 +1,4 @@
 import { useAuth } from '../auth/AuthContext'; // New import
-import { handleApiError } from '../utils/errorHandler';
 import { getConfig } from '../../../config';
 import { useMemo } from 'react';
 import { useSelectedOrg } from '../contexts/OrganizationContext';
@@ -34,9 +33,17 @@ export const getTimeRangeParams = (timeFilter) => {
  * Features:
  * - Automatic token management and header injection
  * - 403 Forbidden error handling with automatic redirect to home page
+ * - Standardized error handling for server responses in format: { error: "message" }
  * - Comprehensive error handling for various HTTP status codes
  * - Support for different response types (JSON, blob, text)
  * - Event streaming capabilities
+ * 
+ * Error Handling:
+ * All server error responses are expected to follow the format: { error: "descriptive message" }
+ * The client automatically parses this format and creates Error objects with:
+ * - error.message: Contains the server's error message
+ * - error.status: HTTP status code
+ * - error.statusText: HTTP status text
  * 
  * @returns {Object} API client with methods: get, post, put, patch, delete, getBlob, stream
  */
@@ -93,17 +100,31 @@ export const useApiClient = () => {
             return; // Exit early to prevent further error handling
           }
 
-          if (response.status === 400) {
-            const errorText = await response.text();
-            console.error(errorText);
-            throw new Error(errorText);
+          // Parse error response according to standard server format: { error: "message" }
+          let errorMessage = 'An error occurred';
+          try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch (parseError) {
+            // If JSON parsing fails, try to get text response
+            try {
+              errorMessage = await response.text() || errorMessage;
+            } catch (textError) {
+              console.warn('Could not parse error response:', textError);
+            }
           }
           
-          const errorResult = await handleApiError(response);
           if (response.status === 401) {
             console.error('Authentication error (401). Token may be invalid or expired.');
           }
-          throw errorResult;
+          
+          console.error(`API Error ${response.status}:`, errorMessage);
+          const error = new Error(errorMessage);
+          error.status = response.status;
+          error.statusText = response.statusText;
+          throw error;
         }
 
         // Check if the response is empty
@@ -194,8 +215,27 @@ export const useApiClient = () => {
               return; // Exit early to prevent further error handling
             }
             
-            const errorResult = await handleApiError(response);
-            throw errorResult;
+            // Parse error response according to standard server format: { error: "message" }
+            let errorMessage = 'An error occurred';
+            try {
+              const errorData = await response.json();
+              if (errorData && errorData.error) {
+                errorMessage = errorData.error;
+              }
+            } catch (parseError) {
+              // If JSON parsing fails, try to get text response
+              try {
+                errorMessage = await response.text() || errorMessage;
+              } catch (textError) {
+                console.warn('Could not parse error response:', textError);
+              }
+            }
+            
+            console.error(`Stream API Error ${response.status}:`, errorMessage);
+            const error = new Error(errorMessage);
+            error.status = response.status;
+            error.statusText = response.statusText;
+            throw error;
           }
 
           const reader = response.body.getReader();

@@ -60,7 +60,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         queueNameToSend
       );
       onSuccess();
-      navigate('/runs');
+      navigate('/runs', { state: { fromNewWorkflow: true } });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -100,13 +100,22 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       {error && (
         <Alert 
           severity="error" 
-          sx={{ mb: 2 }}
+          sx={{ 
+            mb: 2,
+            backgroundColor: '#ffebee',
+            border: '1px solid #f44336',
+            color: '#d32f2f',
+            '& .MuiAlert-icon': {
+              color: '#f44336'
+            }
+          }}
           action={
             <IconButton
               aria-label="close"
               color="inherit"
               size="small"
               onClick={() => setError(null)}
+              sx={{ color: '#d32f2f' }}
             >
               <CloseIcon fontSize="inherit" />
             </IconButton>
