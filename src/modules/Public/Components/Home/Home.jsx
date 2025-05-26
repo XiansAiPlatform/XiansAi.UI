@@ -183,10 +183,10 @@ var newBlogPosts = new List<string>();`
                                     </button>
                                     <button 
                                         className="home-btn home-btn-primary" 
-                                        onClick={() => navigate('/register')}
+                                        onClick={() => login({ returnTo: window.location.origin })}
                                     >
                                         <BiLogoGithub />
-                                        Register
+                                        Sign up
                                     </button>
                             </>
                         </div>
