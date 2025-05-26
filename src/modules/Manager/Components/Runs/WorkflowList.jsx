@@ -23,7 +23,6 @@ const WorkflowList = () => {
   const [ownerFilter, setOwnerFilter] = useState('mine');
   const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
-  const [autoRefreshCount, setAutoRefreshCount] = useState(0);
   const { user } = useAuth();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
@@ -86,30 +85,6 @@ const WorkflowList = () => {
   useEffect(() => {
     loadWorkflows();
   }, [loadWorkflows]);
-
-  // Auto-refresh effect - runs every 5 seconds for 3 times
-  useEffect(() => {
-    let timeoutId;
-    
-    const scheduleNextRefresh = () => {
-      if (autoRefreshCount < 2) {
-        timeoutId = setTimeout(() => {
-          loadWorkflows();
-          setAutoRefreshCount(count => count + 1);
-        }, 10000);
-      }
-    };
-    
-    // Start the auto-refresh cycle
-    scheduleNextRefresh();
-    
-    // Cleanup timeout on unmount or when auto-refresh is complete
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [autoRefreshCount, loadWorkflows]);
 
   const hasWorkflows = useMemo(() => {
     return agentGroups.length > 0;
