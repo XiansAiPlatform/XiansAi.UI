@@ -32,8 +32,7 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
 
       // Only call this if we're not in the callback URL or if we're in the callback URL 
       // and haven't handled the callback yet (to avoid infinite loop)
-      const hasAuthParams = window.location.search.includes("code=") && window.location.search.includes("state=");
-      
+      const hasAuthParams = (window.location.search.includes("code=") && window.location.search.includes("state=")) || (window.location.hash.includes("code=") && window.location.hash.includes("state="));
       if (!hasAuthParams) {
         // Normal init if not in a callback URL
         initAuth();

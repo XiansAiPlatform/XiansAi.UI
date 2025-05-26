@@ -9,6 +9,7 @@ class EntraIdService {
         clientId: config.entraIdClientId, // e.g., 'YOUR_ENTRA_CLIENT_ID'
         authority: config.entraIdAuthority, // e.g., 'https://login.microsoftonline.com/YOUR_TENANT_ID'
         redirectUri: window.location.origin + '/callback', // Must match redirect URI in Azure App Registration
+        knownAuthorities : config.knownAuthorities
       },
       cache: {
         cacheLocation: 'localStorage', // This configures where your cache will be stored
