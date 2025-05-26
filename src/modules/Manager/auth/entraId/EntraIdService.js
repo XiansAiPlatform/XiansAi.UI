@@ -80,6 +80,7 @@ class EntraIdService {
       await this.publicClientApplication.logoutRedirect({
         account: account,
         postLogoutRedirectUri: (options?.returnTo || window.location.origin), // Use returnTo from options if provided
+        idTokenHint: account.idToken,
         ...(options || {}),
       });
     } catch (error) {
