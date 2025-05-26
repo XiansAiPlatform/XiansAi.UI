@@ -61,10 +61,12 @@ const AgentGroup = ({
         mb: 4,
         borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
-        boxShadow: agentName !== 'Ungrouped' && 'none',
+        boxShadow: agentName !== 'Ungrouped' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08)'
+          : 'none',
         border: agentName !== 'Ungrouped' ? isRecentlyUpdated(latestUpdateDate) 
-          ? '1px solid var(--border-color)'
-          : '1px solid var(--border-color)' 
+          ? '1px solid rgba(34, 197, 94, 0.3)'
+          : '1px solid rgba(226, 232, 240, 0.8)' 
           : 'none',
         transition: 'var(--transition-fast)',
         ...(agentName !== 'Ungrouped' && {
@@ -85,21 +87,14 @@ const AgentGroup = ({
           backgroundColor: agentName !== 'Ungrouped' 
             ? isRecentlyUpdated(latestUpdateDate)
               ? 'var(--success-ultralight)'
-              : 'var(--bg-subtle)'
+              : 'rgba(248, 250, 252, 0.8)'
             : 'transparent',
+          backdropFilter: agentName !== 'Ungrouped' ? 'blur(8px)' : 'none',
+          borderBottom: agentName !== 'Ungrouped' ? '1px solid rgba(226, 232, 240, 0.8)' : 'none',
           borderTopLeftRadius: 'var(--radius-lg)',
           borderTopRightRadius: 'var(--radius-lg)',
           mb: 0,
-          position: 'relative',
-          '&:after': agentName !== 'Ungrouped' ? {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '1px',
-            backgroundColor: 'var(--border-light)'
-          } : {}
+          position: 'relative'
         }}
       >
         <Stack 

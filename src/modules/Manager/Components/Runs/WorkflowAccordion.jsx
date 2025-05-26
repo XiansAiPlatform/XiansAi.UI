@@ -161,8 +161,9 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
           '& .MuiAccordionDetails-root': {
             backgroundColor: '#fff',
             borderRadius: '0 0 12px 12px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-            border: 'none',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.06)',
+            borderTop: 'none',
             margin: '0 0 8px 0'
           },
           position: 'relative',
@@ -174,19 +175,28 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
           className="workflow-accordion-header"
           sx={{
             backgroundColor: '#fff',
-            borderRadius: '12px',
+            borderRadius: '12px !important',
             margin: '8px 0',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+            border: '1px solid rgba(0,0,0,0.06)',
             '&:hover': {
               backgroundColor: '#f8f9fa',
+              boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
+              border: '1px solid rgba(0,0,0,0.08)',
+              transform: 'translateY(-1px)',
             },
             '&.Mui-expanded': {
-              borderRadius: '12px 12px 0 0',
+              borderRadius: '12px 12px 0 0 !important',
               marginBottom: 0,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              border: '1px solid rgba(0,0,0,0.06)',
+              borderBottom: 'none',
               '& .MuiAccordionSummary-expandIconWrapper': {
                 transform: 'rotate(180deg) !important',
               }
+            },
+            '&:not(.Mui-expanded)': {
+              borderRadius: '12px !important',
             },
             '& .MuiAccordionSummary-expandIconWrapper': {
               transition: 'transform 0.3s ease-in-out !important',
@@ -195,8 +205,9 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
             '& .expand-icon': {
               transition: 'transform 0.3s ease-in-out',
             },
-            padding: isMobile ? '6px 12px' : '8px 16px',
-            minHeight: isMobile ? '40px' : '44px',
+            padding: isMobile ? '8px 14px' : '12px 18px',
+            minHeight: isMobile ? '44px' : '48px',
+            transition: 'all 0.2s ease-in-out',
             '& .MuiAccordionSummary-content': {
               margin: '2px 0',
             }
@@ -213,7 +224,7 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: isMobile ? '6px' : '8px',
+              gap: isMobile ? '10px' : '14px',
               flex: 1,
               minWidth: 0
             }}>
@@ -259,7 +270,10 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
               
               {/* Status indicators */}
               {hasRunningWorkflows && (
-                <div className="running-indicator" style={{ flexShrink: 0 }}>
+                <div className="running-indicator" style={{ 
+                  flexShrink: 0,
+                  marginLeft: isMobile ? '10px' : '14px'
+                }}>
                   {runningWorkflowsCount} running
                 </div>
               )}
@@ -284,7 +298,7 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: isMobile ? '8px' : '12px',
+              gap: isMobile ? '12px' : '18px',
               flexShrink: 0
             }}>
               {agentInfo?.createdBy && (
