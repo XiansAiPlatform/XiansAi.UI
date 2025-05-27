@@ -33,11 +33,11 @@ const TypingIndicator = () => {
   const getPhaseText = () => {
     switch (phase) {
       case 'connecting':
-        return 'connecting';
+        return 'contacting agent';
       case 'thinking':
         return 'thinking';
       case 'error':
-        return 'Error, check if agent is running';
+        return 'Error, check if agent is running!';
       default:
         return 'thinking';
     }
@@ -52,15 +52,15 @@ const TypingIndicator = () => {
       };
     } else if (isConnecting) {
       return {
-        primary: theme.palette.primary.main,
-        light: theme.palette.primary.light,
-        dark: theme.palette.primary.dark,
-      };
-    } else {
-      return {
         primary: theme.palette.secondary.main,
         light: theme.palette.secondary.light,
         dark: theme.palette.secondary.dark,
+      };
+    } else {
+      return {
+        primary: theme.palette.primary.main,
+        light: theme.palette.primary.light,
+        dark: theme.palette.primary.dark,
       };
     }
   };
@@ -97,7 +97,7 @@ const TypingIndicator = () => {
             p: 2.5,
             pl: 3,
             pr: 3,
-            maxWidth: isError ? '280px' : '240px',
+            maxWidth: isError ? '420px' : '360px',
             background: `linear-gradient(135deg, ${colors.light}15, ${colors.primary}10)`,
             backdropFilter: 'blur(10px)',
             color: theme.palette.text.primary,
