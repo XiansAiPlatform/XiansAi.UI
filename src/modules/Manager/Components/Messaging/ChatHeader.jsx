@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, useTheme, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, Button, useTheme, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, Chip } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { getRelativeTimeString } from './utils/ConversationUtils';
 import { useMessagingApi } from '../../services/messaging-api';
@@ -79,17 +79,47 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onThreadDel
                 borderTopRightRadius: 1
             }}
         >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography 
-                    variant={selectedThread.isInternalThread ? "subtitle2" : "h8"} 
-                    sx={{ 
-                        fontWeight: '500', 
-                        color: selectedThread.isInternalThread ? theme.palette.text.secondary : theme.palette.primary.main
-                    }}
-                >
-                    {selectedThread.participantId || 'User'}, {selectedThread.workflowType || 'Bot'}
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1, gap: 2 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
+                        <Tooltip title={selectedThread.participantId || 'User'} arrow>
+                            <Chip 
+                                label={selectedThread.participantId || 'User'}
+                                size="small"
+                                color={selectedThread.isInternalThread ? "default" : "primary"}
+                                variant="outlined"
+                                sx={{ 
+                                    maxWidth: '200px',
+                                    '& .MuiChip-label': {
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }
+                                }}
+                            />
+                        </Tooltip>
+                        <Typography variant="body2" color="text.secondary">
+                            ↔
+                        </Typography>
+                        <Tooltip title={selectedThread.workflowType || 'Bot'} arrow>
+                            <Chip 
+                                label={selectedThread.workflowType || 'Bot'}
+                                size="small"
+                                color="secondary"
+                                variant="outlined"
+                                sx={{ 
+                                    maxWidth: '200px',
+                                    '& .MuiChip-label': {
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }
+                                }}
+                            />
+                        </Tooltip>
+                    </Box>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                     {!selectedThread.isInternalThread && (
                         <Button 
                             variant="outlined" 
@@ -124,16 +154,48 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onThreadDel
                     </Menu>
                 </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
                 {selectedThread.id && (
-                    <Typography variant="body2" color="text.secondary">
-                        <strong>Thread ID:</strong> {selectedThread.id}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            Thread ID:
+                        </Typography>
+                        <Tooltip title={selectedThread.id} arrow>
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ 
+                                    maxWidth: '150px',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {selectedThread.id}
+                            </Typography>
+                        </Tooltip>
+                    </Box>
                 )}
                 {selectedThread.title && (
-                    <Typography variant="body2" color="text.secondary">
-                        <strong>Topic:</strong> {selectedThread.title}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                            Topic:
+                        </Typography>
+                        <Tooltip title={selectedThread.title} arrow>
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ 
+                                    maxWidth: '200px',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {selectedThread.title}
+                            </Typography>
+                        </Tooltip>
+                    </Box>
                 )}
                 {lastUpdateTime && (
                     <Typography variant="body2" color="text.secondary">

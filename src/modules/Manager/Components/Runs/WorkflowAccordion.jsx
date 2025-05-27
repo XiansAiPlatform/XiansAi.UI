@@ -83,12 +83,6 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
     }
   `;
 
-  const formatAgentName = (name) => {
-    if (!name) return 'Unknown Agent';
-    return name
-      .replace(/([A-Z])/g, ' $1')
-      .trim();
-  };
 
   const formatCreatedBy = (createdBy) => {
     if (!createdBy) return null;
@@ -226,7 +220,8 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
               alignItems: 'center',
               gap: isMobile ? '10px' : '14px',
               flex: 1,
-              minWidth: 0
+              minWidth: 0,
+              overflow: 'hidden'
             }}>
               <Box sx={{ 
                 width: isMobile ? 32 : 40, 
@@ -249,49 +244,65 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
                 <style>{runningAgentStyle}</style>
               </Box>
               
-              <Typography 
-                className="workflow-type-title"
-                variant={isMobile ? "subtitle1" : "h6"}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: isMobile ? '1.0rem' : '1.25rem',
-                  color: '#1a1a1a',
-                  margin: 0,
-                  lineHeight: 1.3,
-                  flexShrink: 0,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: isMobile ? '120px' : '200px'
-                }}
-              >
-                {formatAgentName(agentInfo?.name)}
-              </Typography>
-              
-              {/* Status indicators */}
-              {hasRunningWorkflows && (
-                <div className="running-indicator" style={{ 
-                  flexShrink: 0,
-                  marginLeft: isMobile ? '10px' : '14px'
+              <div style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: isMobile ? 'flex-start' : 'center',
+                gap: isMobile ? '2px' : '12px',
+                flex: 1,
+                minWidth: 0,
+                overflow: 'hidden'
+              }}>
+                <Typography 
+                  className="workflow-type-title"
+                  variant={isMobile ? "subtitle1" : "h6"}
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: isMobile ? '1.0rem' : '1.25rem',
+                    color: '#1a1a1a',
+                    margin: 0,
+                    lineHeight: 1.3,
+                    flexShrink: 1,
+                    minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                  title={agentInfo?.name} // Add tooltip to show full name on hover
+                >
+                  {agentInfo?.name}
+                </Typography>
+                
+                {/* Status indicators */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: isMobile ? '4px' : '8px',
+                  flexWrap: isMobile ? 'wrap' : 'nowrap',
+                  flexShrink: 0
                 }}>
-                  {runningWorkflowsCount} running
+                  {hasRunningWorkflows && (
+                    <div className="running-indicator" style={{ flexShrink: 0 }}>
+                      {runningWorkflowsCount} running
+                    </div>
+                  )}
+                  {isExpanded && hasContinuedAsNewWorkflows && (
+                    <div className="continuedAsNew-indicator" style={{ flexShrink: 0 }}>
+                      {continuedAsNewWorkflowsCount} continued
+                    </div>
+                  )}
+                  {isExpanded && hasCompletedWorkflows && (
+                    <div className="completed-indicator" style={{ flexShrink: 0 }}>
+                      {completedWorkflowsCount} completed
+                    </div>
+                  )}
+                  {isExpanded && hasTerminatedWorkflows && (
+                    <div className="terminated-indicator" style={{ flexShrink: 0 }}>
+                      {terminatedWorkflowsCount} terminated
+                    </div>
+                  )}
                 </div>
-              )}
-              {isExpanded && hasContinuedAsNewWorkflows && (
-                <div className="continuedAsNew-indicator" style={{ flexShrink: 0 }}>
-                  {continuedAsNewWorkflowsCount} continued
-                </div>
-              )}
-              {isExpanded && hasCompletedWorkflows && (
-                <div className="completed-indicator" style={{ flexShrink: 0 }}>
-                  {completedWorkflowsCount} completed
-                </div>
-              )}
-              {isExpanded && hasTerminatedWorkflows && (
-                <div className="terminated-indicator" style={{ flexShrink: 0 }}>
-                  {terminatedWorkflowsCount} terminated
-                </div>
-              )}
+              </div>
             </div>
             
             {/* Right section: Metadata + Actions */}
