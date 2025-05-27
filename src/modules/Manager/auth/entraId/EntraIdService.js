@@ -52,6 +52,7 @@ class EntraIdService {
             this.authState.accessToken = tokenResponse;
         } catch (error) {
             console.warn("Silent token acquisition failed on init:", error);
+            this.authState.accessToken = null;
         }
       } else {
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
@@ -103,7 +104,6 @@ class EntraIdService {
     try {
       const response = await this.publicClientApplication.acquireTokenSilent(tokenRequest);
       this.authState.accessToken = response.accessToken;
-      this._notifyStateChange();
       return response.accessToken;
     } catch (error) {
       console.error("Silent token acquisition failed:", error);
@@ -172,14 +172,7 @@ class EntraIdService {
             email: account.username,
             rawClaims: account.idTokenClaims,
         };
-        try {
-            const token = await this.getAccessTokenSilently();
-            this.authState.accessToken = token;
-        } catch (error) {
-            console.warn("Failed to get access token during state update:", error);
-            // Decide if failing to get a token here should de-authenticate or just leave token as null
-            this.authState.accessToken = null; 
-        }
+        this.authState.accessToken = null;
     } else {
         this.activeAccount = null;
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
