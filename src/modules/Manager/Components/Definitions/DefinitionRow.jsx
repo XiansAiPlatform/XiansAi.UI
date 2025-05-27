@@ -15,14 +15,6 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
 
-  const formatTypeName = (typeName) => {
-    return typeName
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/_/g, ' ')
-      .trim()
-      .replace(/^\w/, c => c.toUpperCase());
-  };
-
   const handleActivate = async () => {
     const formContent = (
       <NewWorkflowForm 
@@ -101,7 +93,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
               <Typography 
                 className="definition-title"
               >
-                {formatTypeName(definition.workflowType)}
+                {definition.workflowType}
               </Typography>
               <Typography variant="caption">
                 <span className="definition-stat">

@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 
 const Header = ({ pageTitle = "", toggleNav }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
@@ -55,14 +55,11 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   };
 
   const handleLogout = () => {
-    // Immediately redirect to home page for better UX
-    navigate('/');
-    
+    console.log('Logging out');
     // Close the menu
     handleClose();
-    
     // Perform logout in the background
-    //logout({ returnTo: '/'});
+    logout();
   };
 
   return (
