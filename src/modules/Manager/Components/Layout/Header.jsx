@@ -15,6 +15,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
   const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });
+  const [logoImage, setLogoImage] = React.useState(null);
 
   useEffect(() => {
     // Update user data when auth context changes
@@ -29,6 +30,16 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
       });
     }
   }, [user]);
+
+
+  // Fetch tenant logo when selected organization changes
+  useEffect(() => {
+    const fetchTenantLogo = async () => {
+      // Get Logo from the server
+    };
+
+    fetchTenantLogo();
+  }, []);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -62,7 +73,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
       <Box className="header-content">
         {isMobile && (
           <Tooltip title="Toggle menu">
-            <IconButton 
+            <IconButton
               className="menu-button"
               onClick={toggleNav}
               size="medium"
@@ -81,29 +92,39 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
             </IconButton>
           </Tooltip>
         )}
-        
-        <Box sx={{ 
-          display: 'flex', 
+
+        <Box sx={{
+          display: 'flex',
           alignItems: 'center',
-          gap: 2 
-        }}>
-          <Link to="/" className="logo-link">
+          gap: 2
+        }}>          <Link to="/" className="logo-link">
             <Typography className="logo-text">
-              <span className="logo-text-primary">Xians</span>
-              <span className="logo-text-accent">.ai</span>
+              {logoImage !== null ? (
+                <img 
+                  src={`data:image/png;base64,${logoImage}`} 
+                  alt="Tenant Logo" 
+                  className="logo-image" 
+                  style={{ maxHeight: '32px', maxWidth: '140px' }}
+                />
+              ) : (
+                <>
+                  <span className="logo-text-primary">Xians</span>
+                  <span className="logo-text-accent">.ai</span>
+                </>
+              )}
             </Typography>
           </Link>
-          
+
           {pageTitle && !isMobile && (
             <>
-              <Box sx={{ 
-                color: 'text.secondary', 
+              <Box sx={{
+                color: 'text.secondary',
                 mx: 2,
                 opacity: 0.4,
                 fontSize: '1.5rem',
                 fontWeight: 200
               }}>/</Box>
-              <Typography variant="h6" sx={{ 
+              <Typography variant="h6" sx={{
                 fontWeight: 500,
                 color: 'text.primary',
                 opacity: 0.85,
@@ -114,15 +135,15 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
             </>
           )}
         </Box>
-        
-        <Box className="header-controls" sx={{ 
-          display: 'flex', 
+
+        <Box className="header-controls" sx={{
+          display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '12px' : '20px'
         }}>
           <Tooltip title="Select organization">
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               alignItems: 'center',
               gap: '8px',
               backgroundColor: 'var(--bg-paper)',
@@ -135,7 +156,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
                 borderColor: 'var(--border-color)'
               }
             }}>
-              <BusinessIcon sx={{ 
+              <BusinessIcon sx={{
                 color: 'text.secondary',
                 fontSize: '20px',
                 opacity: 0.7
@@ -170,9 +191,9 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
             </Box>
           </Tooltip>
 
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: '8px',
             cursor: 'pointer',
             padding: '4px 12px',
@@ -181,8 +202,8 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
             '&:hover': {
               backgroundColor: 'var(--bg-hover)',
             }
-          }} 
-          onClick={handleMenu}
+          }}
+            onClick={handleMenu}
           >
             {!isMobile && (
               <Typography
@@ -261,7 +282,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
                 {userData.name}
               </Typography>
               {userData.email && (
-                <Typography className="user-info-email" variant="caption" sx={{ 
+                <Typography className="user-info-email" variant="caption" sx={{
                   display: 'block',
                   color: 'text.secondary',
                   mb: 0.5
@@ -270,7 +291,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
                 </Typography>
               )}
               {userData.id && (
-                <Typography className="user-info-id" variant="caption" sx={{ 
+                <Typography className="user-info-id" variant="caption" sx={{
                   display: 'block',
                   color: 'text.secondary',
                   fontSize: '0.7rem',
@@ -284,7 +305,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
                 </Typography>
               )}
             </Box>
-            <MenuItem 
+            <MenuItem
               className="user-menu-item logout"
               onClick={handleLogout}
               sx={{
