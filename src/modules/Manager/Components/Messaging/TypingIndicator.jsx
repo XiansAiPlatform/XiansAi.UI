@@ -16,28 +16,36 @@ const TypingIndicator = () => {
       setPhase('thinking');
     }, 2000);
     
+    const delayTimer = setTimeout(() => {
+      setPhase('delay');
+    }, 15000);
+    
     const errorTimer = setTimeout(() => {
       setPhase('error');
-    }, 15000);
+    }, 25000);
     
     return () => {
       clearTimeout(thinkingTimer);
+      clearTimeout(delayTimer);
       clearTimeout(errorTimer);
     };
   }, []);
 
   const isDarkMode = theme.palette.mode === 'dark';
   const isConnecting = phase === 'connecting';
+  const isDelay = phase === 'delay';
   const isError = phase === 'error';
   
   const getPhaseText = () => {
     switch (phase) {
       case 'connecting':
-        return 'connecting';
+        return 'contacting agent';
       case 'thinking':
         return 'thinking';
+      case 'delay':
+        return 'Delay, is agent running?';
       case 'error':
-        return 'Error, check if agent is running';
+        return 'Error, check if agent is running without errors!';
       default:
         return 'thinking';
     }
@@ -50,17 +58,23 @@ const TypingIndicator = () => {
         light: theme.palette.error.light,
         dark: theme.palette.error.dark,
       };
-    } else if (isConnecting) {
+    } else if (isDelay) {
       return {
-        primary: theme.palette.primary.main,
-        light: theme.palette.primary.light,
-        dark: theme.palette.primary.dark,
+        primary: theme.palette.warning.main,
+        light: theme.palette.warning.light,
+        dark: theme.palette.warning.dark,
       };
-    } else {
+    } else if (isConnecting) {
       return {
         primary: theme.palette.secondary.main,
         light: theme.palette.secondary.light,
         dark: theme.palette.secondary.dark,
+      };
+    } else {
+      return {
+        primary: theme.palette.primary.main,
+        light: theme.palette.primary.light,
+        dark: theme.palette.primary.dark,
       };
     }
   };
@@ -97,7 +111,7 @@ const TypingIndicator = () => {
             p: 2.5,
             pl: 3,
             pr: 3,
-            maxWidth: isError ? '280px' : '240px',
+            maxWidth: (isError || isDelay) ? '420px' : '360px',
             background: `linear-gradient(135deg, ${colors.light}15, ${colors.primary}10)`,
             backdropFilter: 'blur(10px)',
             color: theme.palette.text.primary,
@@ -209,8 +223,8 @@ const TypingIndicator = () => {
               {getPhaseText()}
             </Typography>
             
-            {/* Animated dots - hide in error state */}
-            {!isError && (
+            {            /* Animated dots - hide in error and delay states */}
+            {!isError && !isDelay && (
               <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
                 {[0, 1, 2].map((dot) => (
                   <Box
