@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import PublicRoutes from './modules/Public/PublicRoutes';
-import ManagerRoutes from './modules/Manager/ManagerRoutes';
-import AgentsRoutes from './modules/Agents/AgentsRoutes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 import { getConfig } from './config';
 import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrapper';
 import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
+import LoadingSpinner from './components/LoadingSpinner';
+import ErrorBoundary from './components/ErrorBoundary';
+import lazyLoad from './utils/lazyLoad';
+
+// Use lazyLoad utility for code splitting with prefetch
+const PublicRoutes = lazyLoad(() => import('./modules/Public/PublicRoutes'), { prefetch: true });
+const ManagerRoutes = lazyLoad(() => import('./modules/Manager/ManagerRoutes'));
+const AgentsRoutes = lazyLoad(() => import('./modules/Agents/AgentsRoutes'));
 
 // Dynamically select the Auth Provider based on configuration
 const AppAuthProvider = ({ children }) => {
@@ -25,9 +30,13 @@ function App() {
   return (
     <BrowserRouter>
       <AppAuthProvider>
-        <PublicRoutes />
-        <AgentsRoutes />
-        <ManagerRoutes />
+        <ErrorBoundary>
+          <Suspense fallback={<LoadingSpinner message="Loading application..." />}>
+            <PublicRoutes />
+            <AgentsRoutes />
+            <ManagerRoutes />
+          </Suspense>
+        </ErrorBoundary>
         <ToastContainer />
       </AppAuthProvider>
     </BrowserRouter>
