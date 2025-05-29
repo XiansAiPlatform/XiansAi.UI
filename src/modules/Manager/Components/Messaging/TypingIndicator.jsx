@@ -14,15 +14,15 @@ const TypingIndicator = () => {
   useEffect(() => {
     const thinkingTimer = setTimeout(() => {
       setPhase('thinking');
-    }, 2000);
+    }, 5000);
     
     const delayTimer = setTimeout(() => {
       setPhase('delay');
-    }, 15000);
+    }, 25000);
     
     const errorTimer = setTimeout(() => {
       setPhase('error');
-    }, 25000);
+    }, 60000);
     
     return () => {
       clearTimeout(thinkingTimer);
@@ -45,7 +45,7 @@ const TypingIndicator = () => {
       case 'delay':
         return 'Delay, is agent running?';
       case 'error':
-        return 'Error, check if agent is running without errors!';
+        return 'Possible error!';
       default:
         return 'thinking';
     }

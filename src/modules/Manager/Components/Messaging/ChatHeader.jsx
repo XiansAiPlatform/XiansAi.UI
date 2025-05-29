@@ -107,14 +107,6 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onThreadDel
                                 size="small"
                                 color="secondary"
                                 variant="outlined"
-                                sx={{ 
-                                    maxWidth: '200px',
-                                    '& .MuiChip-label': {
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
-                                    }
-                                }}
                             />
                         </Tooltip>
                     </Box>

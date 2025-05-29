@@ -15,6 +15,7 @@ import TypingIndicator from './TypingIndicator';
  * @param {string} props.error - Error message if there was an error loading messages
  * @param {Function} props.loadMoreMessages - Function to load more messages
  * @param {Function} props.isMessageRecent - Function to check if a message is recent
+ * @param {boolean} props.showTypingAfterHandover - Whether to show typing indicator after handover
  */
 const MessagesList = ({
     messages,
@@ -23,7 +24,8 @@ const MessagesList = ({
     hasMoreMessages,
     error,
     loadMoreMessages,
-    isMessageRecent
+    isMessageRecent,
+    showTypingAfterHandover = false
 }) => {
     // State to track when to show typing indicator
     const [showTypingIndicator, setShowTypingIndicator] = useState(false);
@@ -40,7 +42,23 @@ const MessagesList = ({
 
     // Effect to handle typing indicator visibility
     useEffect(() => {
-        if (messages.length > 0) {
+        // Show typing indicator immediately if handover just occurred
+        if (showTypingAfterHandover) {
+            setShowTypingIndicator(true);
+            
+            // Clear any existing timeout
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+                typingTimeoutRef.current = null;
+            }
+            
+            // The handover component will control when to hide it
+            return;
+        }
+        
+        // If showTypingAfterHandover is false and we were showing it due to handover,
+        // hide it now
+        if (!showTypingAfterHandover && messages.length > 0) {
             const latestMessage = sortedMessagesForDisplay[0];
             
             // Clear any existing timeout when messages change
@@ -64,6 +82,9 @@ const MessagesList = ({
                     setShowTypingIndicator(false);
                     typingTimeoutRef.current = null;
                 }, 10000);
+            } else {
+                // Hide typing indicator if no recent incoming messages
+                setShowTypingIndicator(false);
             }
         }
         
@@ -74,7 +95,7 @@ const MessagesList = ({
                 typingTimeoutRef.current = null;
             }
         };
-    }, [messages, sortedMessagesForDisplay, isMessageRecent]);
+    }, [messages, sortedMessagesForDisplay, isMessageRecent, showTypingAfterHandover]);
 
     if (isLoadingMessages && messages.length === 0) {
         return (

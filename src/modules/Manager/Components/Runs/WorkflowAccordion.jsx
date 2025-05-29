@@ -126,7 +126,7 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
       for (const workflow of runningWorkflows) {
         await api.executeWorkflowCancelAction(workflow.workflowId, true);
       }
-      showSuccess(`Termination requested for ${runningWorkflows.length} workflow(s). It may take a few minutes to complete.`);
+      showSuccess(`Termination requested for ${runningWorkflows.length} workflow(s). It may take sometime to complete.`);
       handleMenuClose();
     } catch (error) {
       showError('An unexpected error occurred while terminating workflows. Error: ' + error.message);
