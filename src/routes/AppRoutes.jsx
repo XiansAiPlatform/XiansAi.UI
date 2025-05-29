@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { ROUTES } from './routeConstants';
 import lazyLoad from '../utils/lazyLoad';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -37,30 +36,9 @@ const AppRoutes = () => {
     <Routes>
       {/* 
         Public routes - highest priority since they handle authentication
-        We keep the root path and authentication-related routes here
+        Use a wildcard route to allow PublicRoutes to handle its own paths
       */}
-      <Route path="/" element={
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading..." />}>
-            <PublicRoutes />
-          </Suspense>
-        </ErrorBoundary>
-      } />
-      <Route path="/login" element={
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading..." />}>
-            <PublicRoutes />
-          </Suspense>
-        </ErrorBoundary>
-      } />
-      <Route path="/register" element={
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading..." />}>
-            <PublicRoutes />
-          </Suspense>
-        </ErrorBoundary>
-      } />
-      <Route path="/callback" element={
+      <Route path="/*" element={
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner message="Loading..." />}>
             <PublicRoutes />
@@ -103,9 +81,6 @@ const AppRoutes = () => {
           </Suspense>
         </ErrorBoundary>
       } />
-      
-      {/* Fallback route for unmatched paths */}
-      <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
     </Routes>
   );
 };
