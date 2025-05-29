@@ -13,38 +13,38 @@ const NAV_ITEMS = [
     to: '/definitions',
     icon: <CodeOutlinedIcon />,
     label: 'Agent Definitions',
-    isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
+    isSelected: (pathname) => pathname === '/manager/definitions' || pathname.startsWith('/manager/definitions/'),
   },
   {
     to: '/runs',
     icon: <AirIcon />,
     label: 'Agent Runs',
-    isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
+    isSelected: (pathname) => pathname === '/manager/runs' || pathname.startsWith('/manager/runs/') || pathname === '/manager',
   },
 
   {
     to: '/knowledge',
     icon: <MenuBookOutlinedIcon />,
     label: 'Knowledge Base',
-    isSelected: (pathname) => pathname === '/knowledge' || pathname.startsWith('/knowledge/'),
+    isSelected: (pathname) => pathname === '/manager/knowledge' || pathname.startsWith('/manager/knowledge/'),
   },
   {
     to: '/messaging',
     icon: <ForumOutlinedIcon />,
     label: 'Messaging',
-    isSelected: (pathname) => pathname === '/messaging' || pathname.startsWith('/messaging/'),
+    isSelected: (pathname) => pathname === '/manager/messaging' || pathname.startsWith('/manager/messaging/'),
   },
   {
     to: '/auditing',
     icon: <ChecklistOutlinedIcon />,
     label: 'Auditing',
-    isSelected: (pathname) => pathname === '/auditing' || pathname.startsWith('/auditing/'),
+    isSelected: (pathname) => pathname === '/manager/auditing' || pathname.startsWith('/manager/auditing/'),
   },
   {
     to: '/settings',
     icon: <SettingsOutlinedIcon />,
     label: 'Settings',
-    isSelected: (pathname) => pathname === '/settings' || pathname.startsWith('/settings/'),
+    isSelected: (pathname) => pathname === '/manager/settings' || pathname.startsWith('/manager/settings/'),
   }
 ];
 
