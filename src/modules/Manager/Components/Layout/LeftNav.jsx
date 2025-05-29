@@ -96,11 +96,11 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeC
         primary={label}
         sx={{
           '& .MuiTypography-root': {
-            fontSize: 'var(--text-sm)',
-            fontWeight: selected ? 600 : 500,
-            color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-            fontFamily: 'var(--font-family)',
-            letterSpacing: '0.2px'
+            fontSize: 'var(--text-sm) !important',
+            fontWeight: selected ? '600 !important' : '500 !important',
+            color: selected ? 'var(--text-primary) !important' : 'var(--text-secondary) !important',
+            fontFamily: 'var(--font-family) !important',
+            letterSpacing: '0.2px !important'
           }
         }}
       />
