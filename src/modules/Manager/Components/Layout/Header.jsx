@@ -94,7 +94,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
         }}>
           <Link to="/" className="logo-link">
             <Typography className="logo-text">
-              <span className="logo-text-primary">Xians</span>
+              <span className="logo-text-primary">Parkly</span>
               <span className="logo-text-accent">.ai</span>
             </Typography>
           </Link>
