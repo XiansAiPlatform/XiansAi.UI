@@ -7,7 +7,7 @@ import {
   List,
   Box,
   keyframes,
-  IconButton,
+  Icon,
   Menu,
   MenuItem,
   ListItemIcon,
@@ -367,23 +367,25 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
               )}
               
               {hasRunningWorkflows && (
-                <IconButton
+                <Icon
                   onClick={handleMenuClick}
-                  size="small"
-                  disabled={isTerminating}
-                  sx={{
-                    color: 'text.secondary',
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                    },
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    color: 'rgba(0, 0, 0, 0.54)',
                   }}
+                  className="action-button"
                 >
                   {isTerminating ? (
                     <CircularProgress size={20} />
                   ) : (
                     <MoreVertIcon />
                   )}
-                </IconButton>
+                </Icon>
               )}
             </div>
           </div>
