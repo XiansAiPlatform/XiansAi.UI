@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { AuditProvider } from './contexts/AuditContext';
 import WorkflowList from './Components/Runs/WorkflowList';
@@ -49,50 +49,51 @@ function ManagerRoutes() {
             <LoadingProvider>
               <SliderProvider>
                 <Routes>
-                  <Route path="/logout" element={<LogoutHandler onLogout={handleLogout} />} />
+                  <Route path="logout" element={<LogoutHandler onLogout={handleLogout} />} />
                   <Route element={<Layout />}>
-                    <Route path="/unauthorized" element={<NotAuthorized />} />
-                    <Route path="/runs" element={
+                    <Route path="unauthorized" element={<NotAuthorized />} />
+                    <Route path="runs" element={
                       <ProtectedRoute>
                         <WorkflowList />
                       </ProtectedRoute>
                     } />
-                    <Route path="/definitions" element={
+                    <Route path="definitions" element={
                       <ProtectedRoute>
                         <DefinitionList />
                       </ProtectedRoute>
                     } />
-                    <Route path="/runs/:id/:runId" element={
+                    <Route path="runs/:id/:runId" element={
                       <ProtectedRoute>
                         <WorkflowDetails />
                       </ProtectedRoute>
                     } />
-                    <Route path="/agents" element={
+                    <Route path="agents" element={
                       <ProtectedRoute>
                         <NotImplemented />
                       </ProtectedRoute>
                     } />
-                    <Route path="/knowledge" element={
+                    <Route path="knowledge" element={
                       <ProtectedRoute>
                         <Knowledge />
                       </ProtectedRoute>
                     } />
-                    <Route path="/settings" element={
+                    <Route path="settings" element={
                       <ProtectedRoute>
                         <Settings />
                       </ProtectedRoute>
                     } />
-                    <Route path="/messaging" element={
+                    <Route path="messaging" element={
                       <ProtectedRoute>
                         <MessagingPage />
                       </ProtectedRoute>
                     } />
-                    <Route path="/auditing" element={
+                    <Route path="auditing" element={
                       <ProtectedRoute>
                         <AuditingPage />
                       </ProtectedRoute>
                     } />
                   </Route>
+                  <Route path="*" element={<Navigate to="/definitions" replace />} />
                 </Routes>
               </SliderProvider>
             </LoadingProvider>

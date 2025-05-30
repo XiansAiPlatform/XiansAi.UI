@@ -69,7 +69,6 @@ const AppRoutes = () => {
       <Route path="/auditing/*" element={<PreservePathRedirect from="/auditing" to="/manager/auditing" />} />
       <Route path="/unauthorized" element={<Navigate to="/manager/unauthorized" replace />} />
       <Route path="/logout" element={<Navigate to="/manager/logout" replace />} />
-      
       {/* 
         Agents routes - these already use the /agents prefix internally
         so we can use a simpler approach
