@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import lazyLoad from '../utils/lazyLoad';
 import ModuleLoader from '../components/ModuleLoader';
 import { getConfig } from '../config';
@@ -8,24 +8,6 @@ import { getConfig } from '../config';
 const PublicRoutes = lazyLoad(() => import('../modules/Public/PublicRoutes'), { prefetch: true });
 const ManagerRoutes = lazyLoad(() => import('../modules/Manager/ManagerRoutes'));
 const AgentsRoutes = lazyLoad(() => import('../modules/Agents/AgentsRoutes'));
-
-/**
- * Custom redirect component that preserves the path after the base route
- */
-const PreservePathRedirect = ({ from, to }) => {
-  const location = useLocation();
-  
-  // Extract the part of the path after the "from" prefix
-  const remainingPath = location.pathname.substring(from.length);
-  
-  // Construct the new path by combining the "to" prefix with the remaining path
-  const newPath = `${to}${remainingPath}`;
-  
-  // Preserve any query parameters
-  const queryParams = location.search ?? '';
-  
-  return <Navigate to={`${newPath}${queryParams}`} replace />;
-};
 
 /**
  * Central routing component that organizes all application routes
@@ -52,13 +34,10 @@ const AppRoutes = () => {
       
       {/* 
         Manager routes - now all prefixed with /manager/ 
-        We'll also keep the original routes for backward compatibility
-        during the transition
       */}
       {config.modules.manager && (
         <>
           {/* New /manager prefixed routes */}
-          <Route path="/manager" element={<Navigate to="/manager/definitions" replace />} />
           <Route path="/manager/*" element={
             <ModuleLoader
               moduleName="manager"
@@ -66,22 +45,11 @@ const AppRoutes = () => {
               loadingMessage="Loading manager module..."
             />
           } />
-          
-          {/* Legacy routes for backward compatibility - preserving full paths */}
-          <Route path="/runs/*" element={<PreservePathRedirect from="/runs" to="/manager/runs" />} />
-          <Route path="/definitions/*" element={<PreservePathRedirect from="/definitions" to="/manager/definitions" />} />
-          <Route path="/knowledge/*" element={<PreservePathRedirect from="/knowledge" to="/manager/knowledge" />} />
-          <Route path="/settings/*" element={<PreservePathRedirect from="/settings" to="/manager/settings" />} />
-          <Route path="/messaging/*" element={<PreservePathRedirect from="/messaging" to="/manager/messaging" />} />
-          <Route path="/auditing/*" element={<PreservePathRedirect from="/auditing" to="/manager/auditing" />} />
-          <Route path="/unauthorized" element={<Navigate to="/manager/unauthorized" replace />} />
-          <Route path="/logout" element={<Navigate to="/manager/logout" replace />} />
         </>
       )}
       
       {/* 
-        Agents routes - these already use the /agents prefix internally
-        so we can use a simpler approach
+        Agents routes
       */}
       {config.modules.agents && (
         <Route path="/agents/*" element={

@@ -10,38 +10,38 @@ import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import { useAuditContext } from '../../contexts/AuditContext';
 const NAV_ITEMS = [
   {
-    to: '/definitions',
+    to: '/manager/definitions',
     icon: <CodeOutlinedIcon />,
     label: 'Agent Definitions',
     isSelected: (pathname) => pathname === '/manager/definitions' || pathname.startsWith('/manager/definitions/'),
   },
   {
-    to: '/runs',
+    to: '/manager/runs',
     icon: <AirIcon />,
     label: 'Agent Runs',
     isSelected: (pathname) => pathname === '/manager/runs' || pathname.startsWith('/manager/runs/') || pathname === '/manager',
   },
 
   {
-    to: '/knowledge',
+    to: '/manager/knowledge',
     icon: <MenuBookOutlinedIcon />,
     label: 'Knowledge Base',
     isSelected: (pathname) => pathname === '/manager/knowledge' || pathname.startsWith('/manager/knowledge/'),
   },
   {
-    to: '/messaging',
+    to: '/manager/messaging',
     icon: <ForumOutlinedIcon />,
     label: 'Messaging',
     isSelected: (pathname) => pathname === '/manager/messaging' || pathname.startsWith('/manager/messaging/'),
   },
   {
-    to: '/auditing',
+    to: '/manager/auditing',
     icon: <ChecklistOutlinedIcon />,
     label: 'Auditing',
     isSelected: (pathname) => pathname === '/manager/auditing' || pathname.startsWith('/manager/auditing/'),
   },
   {
-    to: '/settings',
+    to: '/manager/settings',
     icon: <SettingsOutlinedIcon />,
     label: 'Settings',
     isSelected: (pathname) => pathname === '/manager/settings' || pathname.startsWith('/manager/settings/'),
