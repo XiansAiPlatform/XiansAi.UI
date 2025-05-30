@@ -1,8 +1,8 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import lazyLoad from '../utils/lazyLoad';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ErrorBoundary from '../components/ErrorBoundary';
+import ModuleLoader from '../components/ModuleLoader';
+import { getConfig } from '../config';
 
 // Lazy load route components for code splitting
 const PublicRoutes = lazyLoad(() => import('../modules/Public/PublicRoutes'), { prefetch: true });
@@ -32,53 +32,74 @@ const PreservePathRedirect = ({ from, to }) => {
  * This provides proper hierarchy and priority for routes
  */
 const AppRoutes = () => {
+  const config = getConfig();
+  
   return (
     <Routes>
       {/* 
         Public routes - highest priority since they handle authentication
         Use a wildcard route to allow PublicRoutes to handle its own paths
       */}
-      <Route path="/*" element={
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading..." />}>
-            <PublicRoutes />
-          </Suspense>
-        </ErrorBoundary>
-      } />
+      {config.modules.public && (
+        <Route path="/*" element={
+          <ModuleLoader
+            moduleName="public"
+            moduleComponent={<PublicRoutes />}
+            loadingMessage="Loading..."
+          />
+        } />
+      )}
       
       {/* 
         Manager routes - now all prefixed with /manager/ 
         We'll also keep the original routes for backward compatibility
         during the transition
       */}
-      {/* New /manager prefixed routes */}
-      <Route path="/manager/*" element={
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading manager module..." />}>
-            <ManagerRoutes />
-          </Suspense>
-        </ErrorBoundary>
-      } />
+      {config.modules.manager && (
+        <>
+          {/* New /manager prefixed routes */}
+          <Route path="/manager" element={<Navigate to="/manager/definitions" replace />} />
+          <Route path="/manager/*" element={
+            <ModuleLoader
+              moduleName="manager"
+              moduleComponent={<ManagerRoutes />}
+              loadingMessage="Loading manager module..."
+            />
+          } />
+          
+          {/* Legacy routes for backward compatibility - preserving full paths */}
+          <Route path="/runs/*" element={<PreservePathRedirect from="/runs" to="/manager/runs" />} />
+          <Route path="/definitions/*" element={<PreservePathRedirect from="/definitions" to="/manager/definitions" />} />
+          <Route path="/knowledge/*" element={<PreservePathRedirect from="/knowledge" to="/manager/knowledge" />} />
+          <Route path="/settings/*" element={<PreservePathRedirect from="/settings" to="/manager/settings" />} />
+          <Route path="/messaging/*" element={<PreservePathRedirect from="/messaging" to="/manager/messaging" />} />
+          <Route path="/auditing/*" element={<PreservePathRedirect from="/auditing" to="/manager/auditing" />} />
+          <Route path="/unauthorized" element={<Navigate to="/manager/unauthorized" replace />} />
+          <Route path="/logout" element={<Navigate to="/manager/logout" replace />} />
+        </>
+      )}
       
-      {/* Legacy routes for backward compatibility - preserving full paths */}
-      <Route path="/runs/*" element={<PreservePathRedirect from="/runs" to="/manager/runs" />} />
-      <Route path="/definitions/*" element={<PreservePathRedirect from="/definitions" to="/manager/definitions" />} />
-      <Route path="/knowledge/*" element={<PreservePathRedirect from="/knowledge" to="/manager/knowledge" />} />
-      <Route path="/settings/*" element={<PreservePathRedirect from="/settings" to="/manager/settings" />} />
-      <Route path="/messaging/*" element={<PreservePathRedirect from="/messaging" to="/manager/messaging" />} />
-      <Route path="/auditing/*" element={<PreservePathRedirect from="/auditing" to="/manager/auditing" />} />
-      <Route path="/unauthorized" element={<Navigate to="/manager/unauthorized" replace />} />
-      <Route path="/logout" element={<Navigate to="/manager/logout" replace />} />
       {/* 
         Agents routes - these already use the /agents prefix internally
         so we can use a simpler approach
       */}
-      <Route path="/agents/*" element={
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading agents module..." />}>
-            <AgentsRoutes />
-          </Suspense>
-        </ErrorBoundary>
+      {config.modules.agents && (
+        <Route path="/agents/*" element={
+          <ModuleLoader
+            moduleName="agents"
+            moduleComponent={<AgentsRoutes />}
+            loadingMessage="Loading agents module..."
+          />
+        } />
+      )}
+      
+      {/* Fallback route if no other routes match */}
+      <Route path="*" element={
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <h1>404 - Not Found</h1>
+          <p>The requested page could not be found.</p>
+          {config.modules.public && <p><a href="/">Return to home</a></p>}
+        </div>
       } />
     </Routes>
   );
