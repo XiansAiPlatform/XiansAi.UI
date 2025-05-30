@@ -295,14 +295,14 @@ var newBlogPosts = new List<string>();`
                 <div className="home-comparison-content">
                     <div className="home-comparison-text">
                         <h2>ADK Platform Comparison</h2>
-                        <p>See how Xians.ai compares to other AI agent development platforms:</p>
+                        <p>See how Parkly.ai compares to other AI agent development platforms:</p>
                     </div>
                     <div className="home-comparison-table-container">
                         <table className="home-comparison-table">
                             <thead>
                                 <tr>
                                     <th></th>
-                                    <th>Xians.ai</th>
+                                    <th>Parkly.ai</th>
                                     <th>Google ADK</th>
                                     <th>Rowboat</th>
                                     <th>OpenAI Agent SDK</th>
@@ -508,7 +508,7 @@ var newBlogPosts = new List<string>();`
                                 fontSize: 'var(--text-base)',
                                 lineHeight: '1.6'
                             }}>
-                                Learn more about the Xians.ai platform and how to use it's capabilities to build your own AI Agents and Workflows.
+                                Learn more about the Parkly.ai platform and how to use it's capabilities to build your own AI Agents and Workflows.
                             </p>
                             <a 
                                 href="https://xiansaiplatform.github.io/XiansAi.PublicDocs/1-getting-started/0-index/" 
@@ -538,7 +538,7 @@ var newBlogPosts = new List<string>();`
                 <div className="home-features-grid">
                     <div className="home-feature-card-large">
                         <h3>Escape Vendor Lock-In with Open Architecture</h3>
-                        <p>Deploy AI agents from any source—whether from Xians.ai, other providers, or your own development team. 
+                        <p>Deploy AI agents from any source—whether from Parkly.ai, other providers, or your own development team. 
                         Any containerized agent integrates seamlessly with our platform.</p>
                         <div className="home-tech-logos">
                             <img src="/images/docker-logo.png" alt="Docker" className="home-tech-logo" />
@@ -628,7 +628,7 @@ var newBlogPosts = new List<string>();`
                                 <img src="/images/deployment.png" alt="Deployment Architecture"/>
                                 <span>Agent Platform Deployment</span>
                             </div>
-                            <p style={{textAlign: 'left'}}>Deploy the Xians.ai platform and agents in your own infrastructure for complete control and compliance.</p>
+                            <p style={{textAlign: 'left'}}>Deploy the Parkly.ai platform and agents in your own infrastructure for complete control and compliance.</p>
                             <div className="self-host-features">
                                 <div className="self-host-feature">
                                     <div className="feature-icon">
@@ -677,7 +677,7 @@ var newBlogPosts = new List<string>();`
             <section className="home-get-started">
                 <div className="home-get-started-content">
                     <h2>Ready to Get Started?</h2>
-                    <p>Begin building intelligent workflows with Xians.ai today</p>
+                    <p>Begin building intelligent workflows with Parkly.ai today</p>
                     <div className="home-get-started-buttons">
                         {!isAuthenticated && (
                             <button 
@@ -696,7 +696,7 @@ var newBlogPosts = new List<string>();`
                         </button>
                         <button 
                             className="home-btn home-btn-secondary" 
-                            onClick={() => window.open('https://api.xians.ai/api-docs/', '_blank')}
+                            onClick={() => window.open('https://orange-meadow-0a2399f03.6.azurestaticapps.net/api-docs/', '_blank')}
                         >
                             API Specifications
                         </button>
@@ -708,10 +708,10 @@ var newBlogPosts = new List<string>();`
                 <div className="home-footer-content">
                     <div className="home-footer-left">
                         <div className="home-footer-logo">
-                            <span className="home-logo-flow">Xians</span>
+                            <span className="home-logo-flow">Parkly</span>
                             <span className="footer-logo-ai">.ai</span>
                         </div>
-                        <span className="home-footer-copyright">© {new Date().getFullYear()} Xians.ai. All rights reserved.</span>
+                        <span className="home-footer-copyright">© {new Date().getFullYear()} Parkly.ai. All rights reserved.</span>
                     </div>
                     <div className="home-footer-right">
                         <div className="home-footer-links">
