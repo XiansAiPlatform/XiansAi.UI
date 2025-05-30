@@ -93,7 +93,7 @@ function ManagerRoutes() {
                       </ProtectedRoute>
                     } />
                   </Route>
-                  <Route path="*" element={<Navigate to="/definitions" replace />} />
+                  <Route path="*" element={<Navigate to="/manager/definitions" replace />} />
                 </Routes>
               </SliderProvider>
             </LoadingProvider>

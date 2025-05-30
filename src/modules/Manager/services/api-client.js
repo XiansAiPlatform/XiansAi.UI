@@ -96,7 +96,7 @@ export const useApiClient = () => {
           // a clean user experience by redirecting them to a safe location
           if (response.status === 403) {
             console.error('Access forbidden (403). Redirecting to home page.');
-            navigate('/unauthorized');
+            navigate('/manager/unauthorized');
             return; // Exit early to prevent further error handling
           }
 
@@ -211,7 +211,7 @@ export const useApiClient = () => {
             // a clean user experience by redirecting them to a safe location
             if (response.status === 403) {
               console.error('Access forbidden (403). Redirecting to home page.');
-              navigate('/unauthorized');
+              navigate('/manager/unauthorized');
               return; // Exit early to prevent further error handling
             }
             
