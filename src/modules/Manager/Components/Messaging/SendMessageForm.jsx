@@ -48,6 +48,17 @@ const SendMessageForm = ({
         if (contentInputRef.current) {
             contentInputRef.current.focus();
         }
+        
+        // Load persisted metadata from localStorage
+        const savedMetadata = localStorage.getItem('sendMessageForm_metadata');
+        const savedShowMetadata = localStorage.getItem('sendMessageForm_showMetadata');
+        
+        if (savedMetadata) {
+            setMetadata(savedMetadata);
+        }
+        if (savedShowMetadata === 'true') {
+            setShowMetadata(true);
+        }
     }, []);
 
     // Update the state if the props change (e.g., when switching threads)
@@ -131,6 +142,16 @@ const SendMessageForm = ({
         }
     }, [metadata]);
 
+    // Save metadata to localStorage when it changes
+    useEffect(() => {
+        localStorage.setItem('sendMessageForm_metadata', metadata);
+    }, [metadata]);
+
+    // Save showMetadata state to localStorage when it changes
+    useEffect(() => {
+        localStorage.setItem('sendMessageForm_showMetadata', showMetadata.toString());
+    }, [showMetadata]);
+
     const handleWorkflowTypeChange = (event, newValue) => {
         // Stop event propagation to prevent the slider from closing
         if (event) {
@@ -211,6 +232,9 @@ const SendMessageForm = ({
             
             showSuccess('Message sent successfully!');
             
+            // Clear only the content, keep metadata for next message
+            setContent('');
+            
             // Call onMessageSent callback if provided, passing the thread info
             if (onMessageSent) {
                 // Create a thread object with the necessary information
@@ -222,7 +246,7 @@ const SendMessageForm = ({
                 onMessageSent(newThread);
             }
             
-            // Always close the slider after sending a message
+            // Close the form after sending a message (metadata will be persisted)
             if (onClose) {
                 onClose();
             }
@@ -240,6 +264,14 @@ const SendMessageForm = ({
         }
     };
 
+    const handleMetadataKeyDown = (e) => {
+        // Prevent form submission on Enter key in metadata field
+        if (e.key === 'Enter') {
+            e.stopPropagation();
+            // Allow default behavior for Enter in multiline text (new line)
+        }
+    };
+
     // Prevent click events from bubbling up to the slider overlay
     const handleFormClick = (e) => {
         e.stopPropagation();
@@ -254,7 +286,7 @@ const SendMessageForm = ({
                 label="Agent Name"
                 value={agentName}
                 fullWidth
-                margin="normal"
+                sx={{ mt: 0, mb: 2 }}
                 readOnly
                 inputProps={{
                   style: { 
@@ -485,6 +517,7 @@ const SendMessageForm = ({
                         error={!!metadataError}
                         helperText={metadataError || "Additional data associated with the message (optional)"}
                         onClick={(e) => e.stopPropagation()}
+                        onKeyDown={handleMetadataKeyDown}
                     />
                 </Box>
             )}
