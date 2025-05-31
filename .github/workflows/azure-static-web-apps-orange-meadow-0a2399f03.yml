@@ -1,13 +1,13 @@
-name: Azure Static Web Apps CI/CD
+name: Azure Static Web Apps CI/CD - Parkly
 
 on:
   push:
     branches:
-      - main
+      - parkly-as
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
-      - main
+      - parkly-as
 
 jobs:
   build_and_deploy_job:
