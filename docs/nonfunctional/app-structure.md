@@ -27,7 +27,7 @@ This document outlines the structure of our React application, providing an over
   - `Layout/` - Contains components for the application's layout structure
   - `Runs/` - Components for workflow runs and execution details
   - `Definitions/` - Components for workflow definitions
-  - `Instructions/` - Components for displaying and managing instructions
+  - `Knowledge/` - Components for displaying and managing knowledge
   - `Common/` - Reusable UI components like Toaster
   - `Public/` - Components for public pages like Home and Registration
   - `Settings/` - Application settings components

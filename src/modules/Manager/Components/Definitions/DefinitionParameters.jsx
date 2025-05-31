@@ -1,0 +1,38 @@
+import { Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
+import { tableStyles } from './styles';
+
+const DefinitionParameters = ({ parameters }) => (
+  <div className="definition-section">
+    <Typography variant="h6" className="section-title">
+      Agent Inputs <span className="section-count">({parameters?.length || 0})</span>
+    </Typography>
+    {parameters?.length > 0 ? (
+      <Table size="small" sx={tableStyles.nestedTable}>
+        <TableHead>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Name</TableCell>
+            <TableCell sx={{ fontWeight: 'var(--font-weight-medium)' }}>Type</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {parameters.map((param, index) => (
+            <TableRow key={index}>
+              <TableCell>{param.name}</TableCell>
+              <TableCell>
+                <Typography component="code" sx={tableStyles.codeBlock}>
+                  {param.type}
+                </Typography>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    ) : (
+      <Typography variant="body2" sx={{ color: 'var(--text-secondary)', mt: 1 }}>
+        No inputs required
+      </Typography>
+    )}
+  </div>
+);
+
+export default DefinitionParameters; 
