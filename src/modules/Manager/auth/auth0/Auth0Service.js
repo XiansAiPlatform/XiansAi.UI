@@ -52,7 +52,7 @@ class Auth0Service {
   }
 
   async logout(options) {
-    await this.auth0Client.logout({ logoutParams: { returnTo: options?.returnTo || window.location.origin + '/login' } });
+    await this.auth0Client.logout({ logoutParams: { returnTo: options?.returnTo ?? window.location.origin + '/login' } });
     this.authState = { user: null, isAuthenticated: false, accessToken: null }; // Reset state on logout
     this._notifyStateChange();
   }

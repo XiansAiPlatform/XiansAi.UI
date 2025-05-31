@@ -60,7 +60,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         queueNameToSend
       );
       onSuccess();
-      navigate('/runs', { state: { fromNewWorkflow: true } });
+      navigate('/manager/runs', { state: { fromNewWorkflow: true } });
     } catch (err) {
       setError(err.message);
     } finally {
