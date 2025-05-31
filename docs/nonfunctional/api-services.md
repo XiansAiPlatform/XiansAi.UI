@@ -226,22 +226,90 @@ const EntityComponent = () => {
 
 ### 3. Error Handling
 
-Implement consistent error handling across the application:
+The application implements standardized error handling that works with the server's consistent error response format:
+
+#### Server Error Response Format
+
+All error responses from the server follow this format:
+```json
+{
+  "error": "Descriptive error message"
+}
+```
+
+#### Client Error Handling
+
+The `useApiClient` hook automatically handles this format:
 
 ```javascript
+// The API client automatically parses server errors
+const apiClient = useApiClient();
+
 try {
-  const response = await fetch(url, options);
-  
-  if (!response.ok) {
-    throw await handleApiError(response);
-  }
-  
-  return await response.json();
+  const data = await apiClient.get('/api/endpoint');
+  return data;
 } catch (error) {
-  console.error('Operation failed:', error);
+  // error.message contains the server's error message
+  console.error('API Error:', error.message);
+  
+  // error.status contains the HTTP status code
+  console.error('Status:', error.status);
+  
+  // Re-throw for component-level handling
   throw error;
 }
 ```
+
+#### Component Error Handling
+
+Components should use the `handleApiError` utility for consistent error presentation:
+
+```javascript
+import { handleApiError } from '../utils/errorHandler';
+import { useNotification } from '../contexts/NotificationContext';
+
+const MyComponent = () => {
+  const { showError } = useNotification();
+  const apiClient = useApiClient();
+
+  const fetchData = async () => {
+    try {
+      const data = await apiClient.get('/api/data');
+      setData(data);
+    } catch (error) {
+      // This will display a clean, user-friendly toast notification
+      // Only the main error message is shown, technical details are logged to console
+      await handleApiError(error, 'Failed to load data', showError);
+    }
+  };
+};
+```
+
+#### Error Message Formatting
+
+The error handler provides different levels of detail:
+
+- **With Notification Callback**: Shows only the clean, user-friendly error message
+- **Without Callback**: Shows detailed error information including technical details
+- **Console Logging**: Always logs full error details for debugging
+
+```javascript
+// Clean notification (recommended for user-facing errors)
+await handleApiError(error, 'Operation failed', showError);
+
+// Detailed notification (fallback when no callback provided)
+await handleApiError(error, 'Operation failed');
+```
+
+#### Error Status Codes
+
+The client handles these standard HTTP status codes:
+- **400 Bad Request**: Invalid request parameters
+- **401 Unauthorized**: Authentication required or token expired
+- **403 Forbidden**: Insufficient permissions (redirects to unauthorized page)
+- **404 Not Found**: Resource not found
+- **409 Conflict**: Resource conflict
+- **500 Internal Server Error**: Server-side error
 
 ### 4. Authentication & Security
 

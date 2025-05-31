@@ -8,94 +8,110 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   useMediaQuery,
-  IconButton
+  IconButton,
+  Alert,
+  Collapse
 } from '@mui/material';
 import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../auth/AuthContext';
-
-const INITIAL_STATS = {
-  running: 0,
-  completed: 0,
-  terminated: 0,
-  continuedAsNew: 0,
-  total: 0
-};
-
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const WorkflowList = () => {  
-  const [workflows, setWorkflows] = useState({});
-  const [stats, setStats] = useState(INITIAL_STATS);
+  const [agentGroups, setAgentGroups] = useState([]);
   const [ownerFilter, setOwnerFilter] = useState('mine');
   const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
+  const [showHint, setShowHint] = useState(false);
   const { user } = useAuth();
+  const location = useLocation();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
 
   const { setLoading, isLoading } = useLoading();
   const api = useWorkflowApi();
 
-  const calculateStats = useCallback((runs) => {
-    return runs.reduce((acc, run) => {
-      acc.total++;
-      const status = (run.status || '').toUpperCase();
-      if (status === 'TERMINATED' || status === 'CANCELED') {
-        acc.terminated++;
-      } else if (status === 'CONTINUEDASNEW') {
-        acc.continuedAsNew++;
-      } else if (acc[status.toLowerCase()] !== undefined) {
-        acc[status.toLowerCase()]++;
-      }
-      return acc;
-    }, { ...INITIAL_STATS });
-  }, []);
-
-  const groupWorkflows = useCallback((runs) => {
-    return runs
-      .filter(run => ownerFilter === 'all' || (ownerFilter === 'mine' && run.owner === user?.id))
-      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
-      .reduce((acc, run) => {
-        const groupKey = run.agent;
-        if (!acc[groupKey]) {
-          acc[groupKey] = [];
+  const filterAgentGroups = useCallback((agentGroups) => {
+    if (!agentGroups || !Array.isArray(agentGroups)) return [];
+    
+    return agentGroups
+      .map(group => {
+        const filteredWorkflows = (group.workflows || []).filter(workflow => {
+          return ownerFilter === 'all' || (ownerFilter === 'mine' && workflow.owner === user?.id);
+        });
+        
+        if (filteredWorkflows.length > 0) {
+          return {
+            ...group,
+            workflows: filteredWorkflows.sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+          };
         }
-        acc[groupKey].push(run);
-        return acc;
-      }, {});
+        return null;
+      })
+      .filter(Boolean);
   }, [ownerFilter, user?.id]);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
+    // Hide hint when refreshing
+    setShowHint(false);
     try {
-      const runs = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
-      if (runs && runs.length > 0) {
-        setStats(calculateStats(runs));
-        setWorkflows(groupWorkflows(runs));
+      const data = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
+      
+      if (data && Array.isArray(data) && data.length > 0) {
+        // Validate that each item in the array has the expected structure
+        const validData = data.filter(item => 
+          item && 
+          typeof item === 'object' && 
+          item.agent && 
+          Array.isArray(item.workflows)
+        );
+        
+        if (validData.length > 0) {
+          const filteredGroups = filterAgentGroups(validData);
+          setAgentGroups(filteredGroups);
+        } else {
+          console.warn('No valid agent groups found in server response');
+          setAgentGroups([]);
+        }
       } else {
-        setWorkflows({});
-        setStats(INITIAL_STATS);
+        setAgentGroups([]);
       }
     } catch (error) {
       console.error('Error loading workflows:', error);
-      setWorkflows({});
-      setStats(INITIAL_STATS);
+      setAgentGroups([]);
     } finally {
       setLoading(false);
     }
-  }, [calculateStats, groupWorkflows, setLoading, api, timeFilter, ownerFilter, statusFilter]);
+  }, [filterAgentGroups, setLoading, api, timeFilter, ownerFilter, statusFilter]);
 
   useEffect(() => {
     loadWorkflows();
   }, [loadWorkflows]);
 
+  // Show hint when navigated from NewWorkflowForm
+  useEffect(() => {
+    if (location.state?.fromNewWorkflow) {
+      setShowHint(true);
+      // Clear the navigation state to prevent showing hint on refresh
+      window.history.replaceState({}, document.title);
+      
+      // Auto-hide hint after 10 seconds
+      const timer = setTimeout(() => {
+        setShowHint(false);
+      }, 10000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
+
   const hasWorkflows = useMemo(() => {
-    return Object.keys(workflows).length > 0;
-  }, [workflows]);
+    return agentGroups.length > 0;
+  }, [agentGroups]);
 
   const handleOwnerFilterChange = (event, newOwnerFilter) => {
     if (newOwnerFilter !== null) {
@@ -169,6 +185,51 @@ const WorkflowList = () => {
         )}
       </Box>
 
+      {/* Hint message for newly activated workflow */}
+      <Collapse in={showHint}>
+        <Box sx={{ px: isMobile ? 2 : 0, mb: 2 }}>
+          <Alert 
+            severity="success" 
+            icon={<CheckCircleIcon />}
+            onClose={() => setShowHint(false)}
+            sx={{
+              borderRadius: 2,
+              backgroundColor: 'rgba(76, 175, 80, 0.08)',
+              border: '1px solid rgba(76, 175, 80, 0.2)',
+              color: 'text.primary',
+              '& .MuiAlert-icon': {
+                color: 'success.main'
+              }
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              Workflow activated successfully!{' '}
+              <Button
+                onClick={loadWorkflows}
+                disabled={isLoading}
+                size="small"
+                variant="text"
+                sx={{
+                  minWidth: 'auto',
+                  p: 0,
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  color: 'success.main',
+                  textDecoration: 'underline',
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                    textDecoration: 'underline'
+                  }
+                }}
+              >
+                Refresh now
+              </Button>{' '}
+              to see the newly activated flow. It can take a few seconds to appear.
+            </Typography>
+          </Alert>
+        </Box>
+      </Collapse>
+
       <Box 
         className="filter-controls"
         sx={{ 
@@ -234,16 +295,16 @@ const WorkflowList = () => {
               All
             </ToggleButton>
             <ToggleButton value="running" className="running">
-              Running {stats.running > 0 && `(${stats.running})`}
+              Running
             </ToggleButton>
             <ToggleButton value="completed" className="completed">
-              Completed {stats.completed > 0 && `(${stats.completed})`}
+              Completed
             </ToggleButton>
             <ToggleButton value="continuedAsNew" className="continuedAsNew">
-              Continued As New {stats.continuedAsNew > 0 && `(${stats.continuedAsNew})`}
+              Continued As New
             </ToggleButton>
             <ToggleButton value="terminated" className="terminated">
-              Terminated {stats.terminated > 0 && `(${stats.terminated})`}
+              Terminated
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
@@ -251,12 +312,12 @@ const WorkflowList = () => {
 
       <Box sx={{ px: isMobile ? 2 : 0, position: 'relative', zIndex: 1 }}>
         {hasWorkflows ? (
-          Object.entries(workflows).map(([type, runs]) => {
+          agentGroups.map((agentGroup) => {
             return (
               <WorkflowAccordion
-                key={type}
-                type={type}
-                runs={runs}
+                key={agentGroup.agent?.id || agentGroup.agent?.name}
+                agentInfo={agentGroup.agent}
+                runs={agentGroup.workflows}
                 isMobile={isMobile}
               />
             );
@@ -274,19 +335,30 @@ const WorkflowList = () => {
             }}
           >
             <Typography variant="h6" gutterBottom>
-              {isLoading ? 'Loading...' : 'Find Your Flow Runs here'}
+              {isLoading ? 'Loading...' : 'It can take a few seconds to load the workflows'}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
               To get started, <Link to="/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
             </Typography>
-            <Button
-              component={Link}
-              to="/definitions"
-              variant="contained"
-              color="primary"
-            >
-              Go to Agent Definitions
-            </Button>
+            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Button
+                onClick={loadWorkflows}
+                variant="contained"
+                color="primary"
+                disabled={isLoading}
+                startIcon={<RefreshIcon />}
+              >
+                Refresh
+              </Button>
+              <Button
+                component={Link}
+                to="/definitions"
+                variant="outlined"
+                color="primary"
+              >
+                Go to Agent Definitions
+              </Button>
+            </Box>
           </Paper>
         )}
       </Box>

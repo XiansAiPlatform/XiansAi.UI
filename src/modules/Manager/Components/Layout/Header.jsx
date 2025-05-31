@@ -6,11 +6,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 
-const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
+const Header = ({ pageTitle = "", toggleNav }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
@@ -53,7 +54,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;
     setSelectedOrg(newOrg);
-    window.location.reload();
+    navigate('/definitions');
   };
 
   const handleMenu = (event) => {
@@ -65,7 +66,11 @@ const Header = ({ pageTitle = "", toggleNav, isNavOpen }) => {
   };
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin });
+    console.log('Logging out');
+    // Close the menu
+    handleClose();
+    // Perform logout in the background
+    logout();
   };
 
   return (

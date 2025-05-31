@@ -34,40 +34,6 @@ export const useMessagingApi = () => {
         }
       },
 
-      getAgentsAndTypes: async () => {
-        try {
-          return await apiClient.get('/api/client/agents/workflows/all');
-        } catch (error) {
-          console.error('Error fetching agents and types:', error);
-          throw error;
-        }
-      },
-
-      getAgents: async () => {
-        try {
-          return await apiClient.get('/api/client/agents/all');
-        } catch (error) {
-          console.error('Error fetching agents:', error);
-          throw error;
-        }
-      },
-
-      getWorkflows: async (agentName, workflowType) => {
-        try {
-          const url = '/api/client/agents/workflows';
-          const params = {};
-          
-          if (agentName) params.agentName = agentName;
-          if (workflowType) params.typeName = workflowType;
-          
-          const response = await apiClient.get(url, params);
-          return response.value;
-        } catch (error) {
-          console.error('Error fetching workflows:', error);
-          throw error;  
-        }
-      },
-
       sendMessage: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
         try {
           const payload = {
@@ -99,7 +65,7 @@ export const useMessagingApi = () => {
           console.error('Error deleting thread:', error);
           throw error;
         }
-      },
+      }
 
     };
   }, [apiClient]);

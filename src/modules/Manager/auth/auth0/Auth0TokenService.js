@@ -2,7 +2,7 @@ import { getConfig } from '../../../../config';
 
 class Auth0TokenService {
   getOrganizations(decodedToken) {
-    const orgInfoPath = getConfig().organizationClaim || 'https://xians.ai/tenants';
+    const orgInfoPath = getConfig().organizationClaim;
     let orgInfo = decodedToken[orgInfoPath];
     return Array.isArray(orgInfo) ? orgInfo : (orgInfo ? [orgInfo] : []);
   }

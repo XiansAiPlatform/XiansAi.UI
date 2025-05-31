@@ -7,40 +7,60 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 const WorkflowRunItem = ({ run, isMobile }) => {
   const { user } = useAuth();
-  const formattedTime = formatDistanceToNow(new Date(run.startTime), { addSuffix: true });
   
-  const formatWorkflowType = (type) => {
-    return type
-      .replace(/([A-Z])/g, ' $1')
-      .trim();
+  // Safety checks
+  if (!run || typeof run !== 'object') {
+    console.warn('WorkflowRunItem: Invalid run data received', run);
+    return null;
+  }
+
+  // Ensure required fields exist with defaults
+  const safeRun = {
+    startTime: run.startTime || new Date().toISOString(),
+    workflowType: run.workflowType || 'Unknown Workflow',
+    status: run.status || 'Unknown',
+    workflowId: run.workflowId || 'unknown-id',
+    runId: run.runId || 'unknown-run-id',
+    closeTime: run.closeTime,
+    owner: run.owner,
+    lastLog: run.lastLog,
+    ...run
   };
 
+  const formattedTime = formatDistanceToNow(new Date(safeRun.startTime), { addSuffix: true });
+  
+
   const getDuration = () => {
-    const startDate = new Date(run.startTime);
-    const endDate = run.closeTime ? new Date(run.closeTime) : new Date();
+    const startDate = new Date(safeRun.startTime);
+    const endDate = safeRun.closeTime ? new Date(safeRun.closeTime) : new Date();
     return formatDistance(startDate, endDate, { includeSeconds: true });
   };
 
   // Helper function to check if run has error in logs
   const hasError = () => {
-    if (!run.lastLog) return false;
-    return run.lastLog.level === 4;
+    if (!safeRun.lastLog) return false;
+    return safeRun.lastLog.level === 4;
   };
 
   const getOwnerDisplay = () => {
-    if (!run.permissions?.ownerAccess?.length) return null;
-    const owner = run.permissions.ownerAccess[0];
-    const isCurrentUser = owner === user?.id;
+    if (!safeRun.owner) return null;
+    const isCurrentUser = safeRun.owner === user?.id;
     
     if (isMobile) {
-      return isCurrentUser ? 'me' : owner.substring(0, 10) + '...';
+      return isCurrentUser ? 'me' : safeRun.owner.substring(0, 10) + '...';
     }
-    return `${owner}${isCurrentUser ? ' (me)' : ''}`;
+    return `${safeRun.owner}${isCurrentUser ? ' (me)' : ''}`;
+  };
+
+  const formatCreatedBy = (createdBy) => {
+    if (!createdBy) return createdBy;
+    // Remove provider prefix (e.g., "github|")
+    return createdBy.includes('|') ? createdBy.split('|')[1] : createdBy;
   };
 
   return (
     <Link 
-      to={`/runs/${run.workflowId}/${run.runId}`} 
+      to={`/runs/${safeRun.workflowId}/${safeRun.runId}`} 
       className="workflow-run-item"
       style={{
         padding: isMobile ? '12px' : '16px',
@@ -65,7 +85,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             alignItems: 'center',
             gap: '4px'
           }}>
-            {formatWorkflowType(run.workflowType)}
+            {safeRun.workflowId}
             {hasError() && (
               <ErrorOutlineIcon 
                 style={{ 
@@ -77,10 +97,15 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             )}
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%'
+          }}>
             <StatusChip 
-              status={run.status.toLowerCase()} 
-              label={run.status} 
+              status={safeRun.status.toLowerCase()} 
+              label={safeRun.status} 
               size={isMobile ? "small" : "medium"}
             />
           </div>
@@ -91,8 +116,9 @@ const WorkflowRunItem = ({ run, isMobile }) => {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'flex-start',
-            gap: '4px'
+            gap: '6px'
           }}>
+            {/* First row: Basic metadata */}
             <div style={{ 
               display: 'flex', 
               flexDirection: isMobile ? 'column' : 'row',
@@ -105,24 +131,49 @@ const WorkflowRunItem = ({ run, isMobile }) => {
               <span className="run-duration">Duration: {getDuration()}</span>
               {!isMobile && <span className="metadata-separator">•</span>}
               
-              <span className="agent-name">Agent: {run.agent}</span>
-              {!isMobile && <span className="metadata-separator">•</span>}
-              
               {getOwnerDisplay() && (
-                <span className={`owner-name ${run.permissions?.ownerAccess?.[0] === user?.id ? 'current-user' : ''}`}>
-                  Owner: {getOwnerDisplay()}
+                <span className={`owner-name ${safeRun.owner === user?.id ? 'current-user' : ''}`}>
+                  Owner: {formatCreatedBy(getOwnerDisplay())}
                 </span>
               )}
             </div>
-            
+
+                        
+            {/* Third row: Workflow ID */}
             <div style={{ 
               fontSize: '12px', 
               color: 'rgba(0, 0, 0, 0.6)',
               fontWeight: '400',
               marginTop: '2px'
             }}>
-              ID: {run.workflowId}
+              Flow Type: {safeRun.workflowType}
             </div>
+            
+            {/* Second row: Last log message */}
+            {safeRun.lastLog?.message && (
+              <div style={{
+                width: '100%',
+                marginTop: '2px'
+              }}>
+                <span className={`last-message ${hasError() ? 'error' : ''}`} style={{
+                  fontSize: isMobile ? '11px' : '12px',
+                  color: hasError() ? '#d32f2f' : 'rgba(0, 0, 0, 0.6)',
+                  fontStyle: 'italic',
+                  maxWidth: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  display: 'inline-block',
+                  backgroundColor: hasError() ? 'rgba(211, 47, 47, 0.08)' : 'rgba(0, 0, 0, 0.04)',
+                  padding: '3px 8px',
+                  borderRadius: '4px',
+                  borderLeft: hasError() ? '3px solid #d32f2f' : '3px solid rgba(0, 0, 0, 0.2)'
+                }}>
+                  Last Log: {safeRun.lastLog.message}
+                </span>
+              </div>
+            )}
+
           </div>
         </div>
       </div>

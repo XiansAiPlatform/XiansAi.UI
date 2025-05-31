@@ -335,6 +335,15 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workers: </Box> {getDisplayValue(workflow?.numOfWorkers)}
               </Typography>
+               <Typography
+                sx={{
+                  color: 'text.secondary',
+                  fontSize: 'inherit',
+                  wordBreak: 'break-word'
+                }}
+              >
+                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Queue: </Box> {getDisplayValue(workflow?.taskQueue)}
+              </Typography>
               {workflow?.parentId && (
                 <Typography
                   sx={{

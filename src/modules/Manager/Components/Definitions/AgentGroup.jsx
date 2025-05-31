@@ -6,6 +6,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import DefinitionRow from './DefinitionRow';
 import { formatAgentName, formatLastUpdated, isRecentlyUpdated } from './definitionUtils';
 import { tableStyles } from './styles';
+import { useAuth } from '../../auth/AuthContext';
 
 // Define a keyframe animation for the pulsing effect
 const pulse = keyframes`
@@ -21,27 +22,51 @@ const pulse = keyframes`
 `;
 
 const AgentGroup = ({ 
-  agentName, 
+  agentName,
+  agent,
   definitions, 
   latestUpdateDate, 
   openDefinitionId, 
   onToggle, 
-  onDeleteSuccess, 
-  onMenuClick,
   isOwnerOfAllWorkflows,
   onDeleteAllClick,
   onShareClick
 }) => {
+  const { user } = useAuth();
+
+  // Function to determine current user's permission level
+  const getUserPermissionLevel = () => {
+    if (!user?.id || !agent?.permissions || agentName === 'Ungrouped') {
+      return null;
+    }
+
+    if (agent.permissions.ownerAccess?.includes(user.id)) {
+      return { level: 'Owner', color: 'primary' };
+    }
+    if (agent.permissions.writeAccess?.includes(user.id)) {
+      return { level: 'Can Write', color: 'secondary' };
+    }
+    if (agent.permissions.readAccess?.includes(user.id)) {
+      return { level: 'Can Read', color: 'default' };
+    }
+    
+    return null;
+  };
+
+  const permissionInfo = getUserPermissionLevel();
+
   return (
     <Box 
       sx={{ 
         mb: 4,
         borderRadius: 'var(--radius-lg)',
         overflow: 'hidden',
-        boxShadow: agentName !== 'Ungrouped' && 'none',
+        boxShadow: agentName !== 'Ungrouped' 
+          ? '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08)'
+          : 'none',
         border: agentName !== 'Ungrouped' ? isRecentlyUpdated(latestUpdateDate) 
-          ? '1px solid var(--border-color)'
-          : '1px solid var(--border-color)' 
+          ? '1px solid rgba(34, 197, 94, 0.3)'
+          : '1px solid rgba(226, 232, 240, 0.8)' 
           : 'none',
         transition: 'var(--transition-fast)',
         ...(agentName !== 'Ungrouped' && {
@@ -62,21 +87,14 @@ const AgentGroup = ({
           backgroundColor: agentName !== 'Ungrouped' 
             ? isRecentlyUpdated(latestUpdateDate)
               ? 'var(--success-ultralight)'
-              : 'var(--bg-subtle)'
+              : 'rgba(248, 250, 252, 0.8)'
             : 'transparent',
+          backdropFilter: agentName !== 'Ungrouped' ? 'blur(8px)' : 'none',
+          borderBottom: agentName !== 'Ungrouped' ? '1px solid rgba(226, 232, 240, 0.8)' : 'none',
           borderTopLeftRadius: 'var(--radius-lg)',
           borderTopRightRadius: 'var(--radius-lg)',
           mb: 0,
-          position: 'relative',
-          '&:after': agentName !== 'Ungrouped' ? {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: '1px',
-            backgroundColor: 'var(--border-light)'
-          } : {}
+          position: 'relative'
         }}
       >
         <Stack 
@@ -157,6 +175,23 @@ const AgentGroup = ({
               }}
             />
           )}
+          
+          {permissionInfo && (
+            <Chip
+              label={permissionInfo.level}
+              size="small"
+              color={permissionInfo.color}
+              sx={{ 
+                height: '22px',
+                fontSize: '0.7rem',
+                fontWeight: 500,
+                borderRadius: '10px',
+                '& .MuiChip-label': {
+                  px: 1
+                }
+              }}
+            />
+          )}
         </Stack>
         
         {agentName !== 'Ungrouped' && (
@@ -225,7 +260,7 @@ const AgentGroup = ({
                   }
                 }}
               >
-                Delete
+                Delete Agent
               </Button>
             </Stack>
           </>
@@ -253,7 +288,6 @@ const AgentGroup = ({
                 isOpen={openDefinitionId === definition.id}
                 previousRowOpen={index > 0 && openDefinitionId === definitions[index - 1].id}
                 onToggle={onToggle}
-                onDeleteSuccess={onDeleteSuccess}
               />
             ))}
           </TableBody>

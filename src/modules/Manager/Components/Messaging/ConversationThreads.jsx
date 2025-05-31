@@ -11,12 +11,14 @@ import {
     Badge,
     useTheme,
     IconButton,
-    Button
+    Button,
+    Tooltip
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { format } from 'date-fns';
 import SendMessageForm from './SendMessageForm';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 
 /**
  * Displays a list of conversation threads for a selected agent
@@ -40,6 +42,7 @@ const ConversationThreads = ({
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { openSlider, closeSlider } = useSlider();
+    const { setLoading } = useLoading();
     const [page, setPage] = useState(0);
     const [pageSize] = useState(20);
     const [hasMore, setHasMore] = useState(false);
@@ -66,7 +69,7 @@ const ConversationThreads = ({
         
         closeSlider();
         setPage(0); // Reset to first page
-        setIsLoading(true);
+        setLoading(true);
         try {
             const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 0, pageSize);
             setThreads(fetchedThreads || []);
@@ -86,7 +89,7 @@ const ConversationThreads = ({
         } catch (err) {
             showError(`Failed to refresh threads: ${err.message}`);
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
@@ -125,7 +128,7 @@ const ConversationThreads = ({
         }
 
         const fetchConversationThreads = async () => {
-            setIsLoading(true);
+            setLoading(true);
             setError(null);
             setPage(0); // Reset to first page when agent changes
             try {
@@ -150,12 +153,13 @@ const ConversationThreads = ({
                 onThreadSelect(null); // Deselect thread on error
             } finally {
                 setIsLoading(false);
+                setLoading(false);
             }
         };
 
         fetchConversationThreads();
         // Dependency array ensures refetch when agent name, api, or notification changes
-    }, [selectedAgentName, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize]);
+    }, [selectedAgentName, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize, setLoading]);
 
     if (isLoading) {
         return (
@@ -176,7 +180,7 @@ const ConversationThreads = ({
                 bgcolor: theme.palette.background.paper,
                 border: '1px solid',
                 borderColor: theme.palette.divider,
-                borderRadius: theme.shape.borderRadius,
+                borderRadius: 2,
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column'
@@ -187,8 +191,8 @@ const ConversationThreads = ({
                     borderBottom: '1px solid', 
                     borderColor: theme.palette.divider,
                     backgroundColor: theme.palette.background.paper,
-                    borderTopLeftRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
-                    borderTopRightRadius: `calc(${theme.shape.borderRadius}px - 1px)`,
+                    borderTopLeftRadius: 1,
+                    borderTopRightRadius: 1,
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center'
@@ -232,6 +236,7 @@ const ConversationThreads = ({
                                     sx={{
                                         px: 2,
                                         py: 1.5,
+                                        minWidth: 0,
                                         '&.Mui-selected': {
                                             bgcolor: theme.palette.action.selected,
                                             borderLeft: '3px solid',
@@ -244,52 +249,105 @@ const ConversationThreads = ({
                                 >
                                     <ListItemText 
                                         primary={
-                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                                <Typography 
-                                                    variant="body1" 
-                                                    component="span" 
-                                                    fontWeight={400}
-                                                    sx={{ 
-                                                        wordBreak: 'break-word',
-                                                        pr: 1
-                                                    }}
-                                                >
-                                                    {thread.participantId || 'Unknown Participant'}
-                                                </Typography>
+                                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', minWidth: 0 }}>
+                                                <Tooltip title={thread.participantId || 'Unknown Participant'} arrow placement="top">
+                                                    <Typography 
+                                                        variant="body1" 
+                                                        component="span" 
+                                                        fontWeight={400}
+                                                        sx={{ 
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap',
+                                                            pr: 1,
+                                                            flex: 1,
+                                                            minWidth: 0,
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {thread.participantId || 'Unknown Participant'}
+                                                    </Typography>
+                                                </Tooltip>
                                                 {thread.hasUnread && (
                                                     <Badge badgeContent=" " color="primary" variant="dot" sx={{ ml: 1, flexShrink: 0 }} />
                                                 )}
                                             </Box>
                                         }
                                         secondary={
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5 }}>
+                                            <Box sx={{ display: 'flex', flexDirection: 'column', mt: 0.5, minWidth: 0 }}>
+                                                {thread.title && (
+                                                    <Tooltip title={thread.title} arrow placement="bottom">
+                                                        <Typography 
+                                                            variant="caption" 
+                                                            color="text.primary" 
+                                                            sx={{ 
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                fontWeight: 500,
+                                                                mb: 0.5,
+                                                                cursor: 'pointer'
+                                                            }}
+                                                        >
+                                                            {thread.title}
+                                                        </Typography>
+                                                    </Tooltip>
+                                                )}
                                                 <Typography 
                                                     variant="caption" 
                                                     color="text.secondary" 
                                                     sx={{ 
-                                                        wordBreak: 'break-word',
-                                                        whiteSpace: 'normal'
+                                                        overflow: 'hidden',
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap'
                                                     }}
                                                 >
                                                     {thread.updatedAt ? format(new Date(thread.updatedAt), 'MMM d, h:mm a') : 'No messages yet.'}
                                                 </Typography>
-                                                {thread.lastMessageTime && (
+                                                {thread.lastMessageTime && thread.lastMessageTime !== thread.updatedAt && (
                                                     <Typography 
                                                         variant="caption" 
                                                         color="text.secondary" 
-                                                        sx={{ mt: 0.5 }}
+                                                        sx={{ 
+                                                            mt: 0.5,
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap'
+                                                        }}
                                                     >
-                                                        {format(new Date(thread.lastMessageTime), 'MMM d, h:mm a')}
+                                                        Last: {format(new Date(thread.lastMessageTime), 'MMM d, h:mm a')}
                                                     </Typography>
+                                                )}
+                                                {thread.workflowType && (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                                                        <Typography 
+                                                            variant="caption" 
+                                                            color="text.secondary"
+                                                            sx={{ fontStyle: 'italic' }}
+                                                        >
+                                                            Agent:
+                                                        </Typography>
+                                                        <Tooltip title={thread.workflowType} arrow placement="bottom">
+                                                            <Typography 
+                                                                variant="caption" 
+                                                                color="text.secondary" 
+                                                                sx={{ 
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    fontStyle: 'italic',
+                                                                    cursor: 'pointer',
+                                                                    flex: 1,
+                                                                    minWidth: 0
+                                                                }}
+                                                            >
+                                                                {thread.workflowType}
+                                                            </Typography>
+                                                        </Tooltip>
+                                                    </Box>
                                                 )}
                                             </Box>
                                         }
-                                        primaryTypographyProps={{ 
-                                            sx: { 
-                                                whiteSpace: 'normal',
-                                                wordBreak: 'break-word'
-                                            }
-                                        }}
                                     />
                                 </ListItemButton>
                                 <Divider component="li" />

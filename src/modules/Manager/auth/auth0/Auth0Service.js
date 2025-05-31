@@ -47,18 +47,12 @@ class Auth0Service {
     this._notifyStateChange();
   }
 
-  async login(options) {
+  async login() {
     await this.auth0Client.loginWithRedirect();
   }
 
   async logout(options) {
-    await this.auth0Client.logout({
-      logoutParams: {
-        returnTo: window.location.origin + '/login',
-        federated: true,
-        ...(options?.logoutParams || {}),
-      }
-    });
+    await this.auth0Client.logout({ logoutParams: { returnTo: options?.returnTo || window.location.origin + '/login' } });
     this.authState = { user: null, isAuthenticated: false, accessToken: null }; // Reset state on logout
     this._notifyStateChange();
   }

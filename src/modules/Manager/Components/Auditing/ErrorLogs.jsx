@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
@@ -19,13 +20,14 @@ import {
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogActions,
     Button
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import LinkIcon from '@mui/icons-material/Link';
+import CloseIcon from '@mui/icons-material/Close';
 import { useAuditingApi } from '../../services/auditing-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const CriticalLogs = () => {
@@ -40,9 +42,10 @@ const CriticalLogs = () => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedWorkflowId, setSelectedWorkflowId] = useState(null);
 
-    const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3000';
     const auditingApi = useAuditingApi();
+    const { setLoading } = useLoading();
     const { showError } = useNotification();
+    const navigate = useNavigate();
 
     const handleTimeFilterChange = (event, newTimeFilter) => {
         if (newTimeFilter !== null) {
@@ -93,6 +96,7 @@ const CriticalLogs = () => {
 
     const fetchCriticalLogs = useCallback(async () => {
         setIsLoading(true);
+        setLoading(true);
         setError(null);
         try {
             const { startTime, endTime } = getTimeRange();
@@ -103,8 +107,9 @@ const CriticalLogs = () => {
             showError(`Error fetching critical logs: ${err.message}`);
         } finally {
             setIsLoading(false);
+            setLoading(false);
         }
-    }, [auditingApi, showError, getTimeRange]);
+    }, [auditingApi, showError, getTimeRange, setLoading]);
 
     useEffect(() => {
         fetchCriticalLogs();
@@ -161,7 +166,7 @@ const CriticalLogs = () => {
                     gap: { xs: 2, md: 0 }
                 }}>
                     <Typography variant="h6">
-                        Failed Workflow Runs
+                        Activity Retry Failures
                     </Typography>
                     <Stack direction="row" spacing={2} alignItems="center">
                         <FormControlLabel
@@ -175,13 +180,15 @@ const CriticalLogs = () => {
                             label="Auto-refresh"
                         />
                         <Tooltip title="Refresh logs">
-                            <IconButton
-                                onClick={fetchCriticalLogs}
-                                disabled={isLoading}
-                                size="small"
-                            >
-                                <RefreshIcon />
-                            </IconButton>
+                            <span>
+                                <IconButton
+                                    onClick={fetchCriticalLogs}
+                                    disabled={isLoading}
+                                    size="small"
+                                >
+                                    <RefreshIcon />
+                                </IconButton>
+                            </span>
                         </Tooltip>
                         <ToggleButtonGroup
                             value={timeFilter}
@@ -226,7 +233,7 @@ const CriticalLogs = () => {
                 gap: { xs: 2, md: 0 }
             }}>
                 <Typography variant="h6">
-                    Failed Workflow Runs
+                    Activity Retry Failures
                 </Typography>
                 <Stack direction="row" spacing={2} alignItems="center">
                     <FormControlLabel
@@ -240,13 +247,15 @@ const CriticalLogs = () => {
                         label="Auto-refresh"
                     />
                     <Tooltip title="Refresh logs">
-                        <IconButton
-                            onClick={fetchCriticalLogs}
-                            disabled={isLoading}
-                            size="small"
-                        >
-                            <RefreshIcon />
-                        </IconButton>
+                        <span>
+                            <IconButton
+                                onClick={fetchCriticalLogs}
+                                disabled={isLoading}
+                                size="small"
+                            >
+                                <RefreshIcon />
+                            </IconButton>
+                        </span>
                     </Tooltip>
                     <ToggleButtonGroup
                         value={timeFilter}
@@ -332,19 +341,19 @@ const CriticalLogs = () => {
                                         >
                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography variant="body2" fontWeight="medium" sx={{ display: 'flex', alignItems: 'center' }}>
-                                                        <Box sx={{ 
+                                                    <Typography variant="body2" fontWeight="medium" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Box sx={{
                                                             width: '10rem',
                                                             color: 'text.secondary',
                                                             fontSize: '0.75rem',
                                                             mr: 1.5
                                                         }}>
-                                                            {workflowGroup.workflowRuns[0]?.criticalLogs[0]?.createdAt 
+                                                            {workflowGroup.workflowRuns[0]?.criticalLogs[0]?.createdAt
                                                                 ? new Date(workflowGroup.workflowRuns[0].criticalLogs[0].createdAt).toLocaleString()
                                                                 : ''
                                                             }
                                                         </Box>
-                                                        <Box sx={{ 
+                                                        <Box sx={{
                                                             minWidth: '12rem',
                                                             maxWidth: '35rem',
                                                             overflow: 'hidden',
@@ -356,12 +365,15 @@ const CriticalLogs = () => {
                                                     </Typography>
                                                     <Box sx={{ display: 'flex', alignItems: 'center', ml: 2, flexShrink: 0 }}>
                                                         <Tooltip title="View workflow run">
-                                                            <IconButton
-                                                                size="small"
-                                                                onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
-                                                            >
-                                                                <LinkIcon fontSize="small" />
-                                                            </IconButton>
+                                                            <span>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    onClick={() => navigate(`/runs/${workflowGroup.workflowId}/${workflowGroup.workflowRuns[0].workflowRunId}`)}
+                                                                    disabled={workflowGroup.workflowId === 'defaultWorkflowId'}
+                                                                >
+                                                                    <LinkIcon fontSize="small" />
+                                                                </IconButton>
+                                                            </span>
                                                         </Tooltip>
                                                     </Box>
                                                 </Box>
@@ -398,14 +410,26 @@ const CriticalLogs = () => {
                                         Run ID: {selectedRun.workflowRunId}
                                     </Typography>
                                 </Box>
-                                <Tooltip title="View workflow run">
+                                <Box sx={{ display: 'flex', gap: 1 }}>
+                                    <Tooltip title="View workflow run">
+                                        <span>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => navigate(`/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`)}
+                                                disabled={selectedWorkflowId === 'defaultWorkflowId'}
+                                            >
+                                                <LinkIcon fontSize="small" />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
                                     <IconButton
                                         size="small"
-                                        onClick={() => window.open(`${baseUrl}/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`, '_blank')}
+                                        onClick={handleCloseDialog}
+                                        aria-label="close"
                                     >
-                                        <LinkIcon fontSize="small" />
+                                        <CloseIcon fontSize="small" />
                                     </IconButton>
-                                </Tooltip>
+                                </Box>
                             </Box>
                         </DialogTitle>
                         <DialogContent>
@@ -456,9 +480,6 @@ const CriticalLogs = () => {
                                 </Paper>
                             ))}
                         </DialogContent>
-                        <DialogActions>
-                            <Button onClick={handleCloseDialog}>Close</Button>
-                        </DialogActions>
                     </>
                 )}
             </Dialog>

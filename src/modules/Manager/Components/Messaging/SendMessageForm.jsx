@@ -8,6 +8,8 @@ import {
     Typography,
     Alert} from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
+import { useAgentsApi } from '../../services/agents-api';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const SendMessageForm = ({ 
@@ -25,7 +27,6 @@ const SendMessageForm = ({
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
     const [showMetadata, setShowMetadata] = useState(false);
-    const [isSending, setIsSending] = useState(false);
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
     
@@ -37,6 +38,8 @@ const SendMessageForm = ({
     const [error, setError] = useState(null);
     
     const messagingApi = useMessagingApi();
+    const agentsApi = useAgentsApi();
+    const { loading, setLoading } = useLoading();
     const { showError, showSuccess } = useNotification();
     const contentInputRef = useRef(null);
 
@@ -62,7 +65,7 @@ const SendMessageForm = ({
             setIsLoadingTypes(true);
             setError(null);
             try {
-                const response = await messagingApi.getAgentsAndTypes();
+                const response = await agentsApi.getDefinitionsBasic(agentName);
                 const workflows = response.data || (response || []);
                 const types = [...new Set(workflows
                     .filter(wf => wf.agent === agentName)
@@ -78,7 +81,7 @@ const SendMessageForm = ({
         };
         
         fetchWorkflowTypes();
-    }, [agentName, messagingApi, showError]);
+    }, [agentName, agentsApi, showError]);
 
     // Fetch workflow instances when workflow type changes
     useEffect(() => {
@@ -94,8 +97,8 @@ const SendMessageForm = ({
             setIsLoadingInstances(true);
             setError(null);
             try {
-                const response = await messagingApi.getWorkflows(agentName, workflowType);
-                const workflows = response.data || response || [];
+                const response = await agentsApi.getWorkflowInstances(agentName, workflowType);
+                const workflows = response.value || response.data || response || [];
                 setWorkflowInstances(Array.isArray(workflows) ? workflows : []);
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow instances.';
@@ -108,7 +111,7 @@ const SendMessageForm = ({
         };
         
         fetchWorkflowInstances();
-    }, [agentName, workflowType, messagingApi, showError, initialWorkflowId]);
+    }, [agentName, workflowType, agentsApi, showError, initialWorkflowId]);
 
     // Validate metadata when it changes
     useEffect(() => {
@@ -178,13 +181,12 @@ const SendMessageForm = ({
     };
 
     const handleSend = async () => {
-        setIsSending(true);
         if (!participantId || !content || !workflowId || !workflowType) {
             showError('Participant ID, workflow type, workflow ID, and content are required');
-            setIsSending(false);
             return;
         }
         
+        setLoading(true);
         try {
             let parsedMetadata = null;
             if (metadata) {
@@ -192,7 +194,7 @@ const SendMessageForm = ({
                     parsedMetadata = JSON.parse(metadata);
                 } catch (error) {
                     showError('Invalid JSON format for metadata');
-                    setIsSending(false);
+                    setLoading(false);
                     return;
                 }
             }
@@ -207,8 +209,6 @@ const SendMessageForm = ({
                 parsedMetadata
             );
             
-            // Set isSending to false after successful message sending
-            setIsSending(false);
             showSuccess('Message sent successfully!');
             
             // Call onMessageSent callback if provided, passing the thread info
@@ -228,7 +228,8 @@ const SendMessageForm = ({
             }
         } catch (error) {
             showError(`Error sending message: ${error.message}`);
-            setIsSending(false);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -245,7 +246,7 @@ const SendMessageForm = ({
     };
 
     // Determine if the send button should be disabled
-    const isSendDisabled = isSending || !participantId || !content || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
+    const isSendDisabled = loading || !participantId || !content || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
 
     return (
         <Box sx={{ p: 3 }} onClick={handleFormClick}>
@@ -438,7 +439,7 @@ const SendMessageForm = ({
                 margin="normal"
                 required
                 helperText="ID of the participant in the conversation"
-                disabled={isSending}
+                disabled={loading}
                 onClick={(e) => e.stopPropagation()}
             />
             <TextField
@@ -451,7 +452,7 @@ const SendMessageForm = ({
                 rows={4}
                 required
                 helperText="Message content to be sent"
-                disabled={isSending}
+                disabled={loading}
                 inputRef={contentInputRef}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
@@ -479,7 +480,7 @@ const SendMessageForm = ({
                         margin="normal"
                         multiline
                         rows={4}
-                        disabled={isSending}
+                        disabled={loading}
                         InputProps={{ style: { fontFamily: 'monospace' } }}
                         error={!!metadataError}
                         helperText={metadataError || "Additional data associated with the message (optional)"}
@@ -503,7 +504,7 @@ const SendMessageForm = ({
                 disabled={isSendDisabled}
                 sx={{ mt: 2 }}
             >
-                {isSending ? <CircularProgress size={24} /> : 'Send Message'}
+                {loading ? <CircularProgress size={24} /> : 'Send Message'}
             </Button>
         </Box>
     );

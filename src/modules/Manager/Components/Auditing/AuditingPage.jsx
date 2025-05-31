@@ -7,9 +7,9 @@ import {
     Tab,
     Badge
 } from '@mui/material';
-import { useAuditingApi } from '../../services/auditing-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
-import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
+import { useAuditContext } from '../../contexts/AuditContext';
 import AgentSelector from './AgentSelector';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
@@ -27,9 +27,9 @@ const AuditingPage = () => {
     const [activeTab, setActiveTab] = useState(0);
     
     // --- Hooks ---
-    const auditingApi = useAuditingApi(); 
+    const agentsApi = useAgentsApi();
     const { showError } = useNotification();
-    const { tabErrorCount, resetTabErrorCount } = useErrorNotification();
+    const { tabErrorCount, resetTabErrorCount } = useAuditContext();
 
     // --- Callbacks --- 
     const handleAgentSelected = useCallback((agentName) => {
@@ -52,7 +52,7 @@ const AuditingPage = () => {
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
         
-        // Reset tab error count when switching to the Failed Workflow Runs tab
+        // Reset tab error count when switching to the Activity Retry Failures tab
         if (newValue === 1 && tabErrorCount > 0) {
             resetTabErrorCount();
         }
@@ -74,11 +74,10 @@ const AuditingPage = () => {
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                 <Tabs value={activeTab} onChange={handleTabChange}>
-                    <Tab label="Workflow Log Explorer" />
                     <Tab 
                         label={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                Failed Workflow Runs
+                                Activity Retry Failures
                                 {tabErrorCount > 0 && (
                                     <Badge 
                                         badgeContent={tabErrorCount} 
@@ -96,13 +95,18 @@ const AuditingPage = () => {
                             </Box>
                         } 
                     />
+                    <Tab label="Workflow Log Explorer" />
                 </Tabs>
             </Box>
 
             {activeTab === 0 && (
+                <ErrorLogs />
+            )}
+
+            {activeTab === 1 && (
                 <>
                     <AgentSelector
-                        auditingApi={auditingApi}
+                        agentsApi={agentsApi}
                         showError={showError}
                         onAgentSelected={handleAgentSelected}
                     />
@@ -123,10 +127,6 @@ const AuditingPage = () => {
                         selectedWorkflowTypeId={selectedWorkflowTypeId}
                     />
                 </>
-            )}
-
-            {activeTab === 1 && (
-                <ErrorLogs />
             )}
         </Box>
     );

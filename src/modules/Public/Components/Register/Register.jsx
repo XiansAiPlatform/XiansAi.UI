@@ -161,10 +161,8 @@ export default function Register() {
         const isValid = await registrationApi.validateVerificationCode(formData.joinEmail, code);
         if (isValid) {
           console.log('Verification successful');
-          // Use the auth context to properly logout instead of direct redirect
-          await auth.logout();
-          // Navigate to login page after logout
-          navigate('/login');
+          // Use the auth context to properly logout in the background
+          await auth.logout({ returnTo: window.location.origin + '/login' });
         } else {
           setVerificationError('Invalid verification code');
         }
@@ -327,6 +325,9 @@ export default function Register() {
               >
                 Back
               </button>
+              <Link to="/" className="register-button register-button-secondary">
+                Home
+              </Link>
               <button
                 type="submit"
                 className="register-button register-button-primary"
@@ -387,13 +388,18 @@ export default function Register() {
             
             <div className="register-button-container">
               {!isLoading && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="register-button register-button-secondary"
-                >
-                  Back
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="register-button register-button-secondary"
+                  >
+                    Back
+                  </button>
+                  <Link to="/" className="register-button register-button-secondary">
+                    Home
+                  </Link>
+                </>
               )}
               <button
                 type="submit"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   IconButton,
@@ -6,14 +6,48 @@ import {
   Chip,
   Paper,
   Stack,
-  Tooltip
+  Tooltip,
+  CircularProgress
 } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { Edit, Delete } from '@mui/icons-material';
 import MarkdownDisplay from '../Common/MarkdownDisplay';
 import JsonDisplay from '../Common/JsonDisplay';
+import { useKnowledgeApi } from '../../services/knowledge-api';
 
-const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
+const KnowledgeViewer = ({ knowledge, knowledgeId, onEdit, onDelete, title }) => {
+  const [knowledgeData, setKnowledgeData] = useState(knowledge || null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const knowledgeApi = useKnowledgeApi();
+
+  useEffect(() => {
+    // If knowledge is provided directly, use it
+    if (knowledge) {
+      setKnowledgeData(knowledge);
+      return;
+    }
+
+    // If knowledgeId is provided, fetch the knowledge
+    if (knowledgeId) {
+      const fetchKnowledge = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const fetchedKnowledge = await knowledgeApi.getKnowledge(knowledgeId);
+          setKnowledgeData(fetchedKnowledge);
+        } catch (err) {
+          console.error('Error fetching knowledge:', err);
+          setError('Failed to load knowledge');
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchKnowledge();
+    }
+  }, [knowledge, knowledgeId, knowledgeApi]);
+
   const formatDateTime = (dateTimeString) => {
     try {
       const date = new Date(dateTimeString);
@@ -33,26 +67,26 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
   };
 
   const renderContent = () => {
-    if (!knowledge.content) {
+    if (!knowledgeData?.content) {
       return <Typography sx={{ fontStyle: 'italic', color: 'text.secondary' }}>No content provided</Typography>;
     }
 
-    if (knowledge.type?.toLowerCase() === 'markdown') {
-      return <MarkdownDisplay content={knowledge.content} />;
+    if (knowledgeData.type?.toLowerCase() === 'markdown') {
+      return <MarkdownDisplay content={knowledgeData.content} />;
     }
 
-    if (knowledge.type?.toLowerCase() === 'json') {
+    if (knowledgeData.type?.toLowerCase() === 'json') {
       try {
-        const jsonContent = typeof knowledge.content === 'string'
-          ? JSON.parse(knowledge.content)
-          : knowledge.content;
+        const jsonContent = typeof knowledgeData.content === 'string'
+          ? JSON.parse(knowledgeData.content)
+          : knowledgeData.content;
         return <JsonDisplay data={jsonContent} />;
       } catch (error) {
         return (
           <Box sx={{ color: 'error.main', whiteSpace: 'pre-wrap', fontFamily: 'monospace' }}>
             Error parsing JSON: {error.message}
             <Box sx={{ mt: 2 }}>Raw content:</Box>
-            {knowledge.content}
+            {knowledgeData.content}
           </Box>
         );
       }
@@ -75,10 +109,39 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
           overflow: 'auto'
         }}
       >
-        {knowledge.content}
+        {knowledgeData.content}
       </Paper>
     );
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <CircularProgress />
+        <Typography sx={{ ml: 2 }}>Loading knowledge...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
+      </Box>
+    );
+  }
+
+  if (!knowledgeData) {
+    return (
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography color="text.secondary">
+          No knowledge data available
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ p: 2 }}>
@@ -91,14 +154,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
         borderColor: 'divider'
       }}>
         <Box>
-          <Typography variant="h5" component="h2" sx={{ mb: 1, fontWeight: 'medium' }}>
-            {knowledge.name}
-          </Typography>
-
           <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
             <Chip
               size="small"
-              label={knowledge.type || 'No Type'}
+              label={knowledgeData.type || 'No Type'}
               variant="outlined"
               sx={{
                 color: 'var(--tag-text)',
@@ -106,10 +165,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
                 fontWeight: 500
               }}
             />
-            {knowledge.agent && (
+            {knowledgeData.agent && (
               <Chip
                 size="small"
-                label={knowledge.agent}
+                label={knowledgeData.agent}
                 variant="outlined"
                 sx={{
                   color: 'var(--tag-text)',
@@ -120,7 +179,7 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
             )}
             <Chip
               size="small"
-              label={`v.${knowledge.version?.substring(0, 7) || 'unknown'}`}
+              label={`v.${knowledgeData.version?.substring(0, 7) || 'unknown'}`}
               variant="outlined"
               sx={{
                 color: 'text.secondary',
@@ -148,7 +207,7 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
                 gap: 0.5
               }}
             >
-              Created {formatDateTime(knowledge.createdAt)}
+              Created {formatDateTime(knowledgeData.createdAt)}
             </Typography>
             <Typography
               variant="body2"
@@ -160,10 +219,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
                 fontStyle: 'italic'
               }}
             >
-              ({formatTimeAgo(knowledge.createdAt)})
+              ({formatTimeAgo(knowledgeData.createdAt)})
             </Typography>
 
-            {knowledge.createdBy && (
+            {knowledgeData.createdBy && (
               <>
                 <Box
                   component="span"
@@ -186,7 +245,7 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
                     gap: 0.5
                   }}
                 >
-                  By <Box component="span" sx={{ fontWeight: 500 }}>{knowledge.createdBy}</Box>
+                  By <Box component="span" sx={{ fontWeight: 500 }}>{knowledgeData.createdBy}</Box>
                 </Typography>
               </>
             )}
@@ -198,8 +257,8 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
             <IconButton
               onClick={onEdit}
               size="small"
-              disabled={knowledge.permissionLevel !== 'edit'}
-              className={`icon-button ${knowledge.permissionLevel !== 'edit' ? 'disabled' : ''}`}
+              disabled={knowledgeData.permissionLevel !== 'edit'}
+              className={`icon-button ${knowledgeData.permissionLevel !== 'edit' ? 'disabled' : ''}`}
             >
               <Edit fontSize="small" />
             </IconButton>
@@ -207,10 +266,10 @@ const KnowledgeViewer = ({ knowledge, onEdit, onDelete, title }) => {
 
           <Tooltip title="Delete">
             <IconButton
-              onClick={() => onDelete(knowledge)}
+              onClick={() => onDelete(knowledgeData)}
               size="small"
-              disabled={knowledge.permissionLevel !== 'edit'}
-              className={`icon-button ${knowledge.permissionLevel !== 'edit' ? 'disabled' : ''}`}
+              disabled={knowledgeData.permissionLevel !== 'edit'}
+              className={`icon-button ${knowledgeData.permissionLevel !== 'edit' ? 'disabled' : ''}`}
             >
               <Delete fontSize="small" />
             </IconButton>

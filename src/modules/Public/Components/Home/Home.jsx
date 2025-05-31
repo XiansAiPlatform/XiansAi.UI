@@ -172,15 +172,7 @@ var newBlogPosts = new List<string>();`
                             </a>
                         </nav>
                         <div className="home-auth-buttons">
-                            {isAuthenticated ? (
-                                <button 
-                                    className="home-btn home-btn-primary" 
-                                    onClick={() => window.location.href = '/runs'}
-                                >
-                                    Enter Application
-                                </button>
-                            ) : (
-                                <>
+                            <>
                                     <button 
                                         className="home-btn home-btn-secondary" 
                                         onClick={() => login({ returnTo: window.location.origin })}
@@ -192,10 +184,9 @@ var newBlogPosts = new List<string>();`
                                         onClick={() => login({ returnTo: window.location.origin })}
                                     >
                                         <BiLogoGithub />
-                                        Sign up with GitHub
+                                        Sign up
                                     </button>
-                                </>
-                            )}
+                            </>
                         </div>
                     </div>
                 </div>

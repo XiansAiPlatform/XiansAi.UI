@@ -6,7 +6,9 @@ import {
     Grid
 } from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useSlider } from '../../contexts/SliderContext';
+import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import AgentSelector from './AgentSelector';
 import WorkflowActions from './WorkflowActions';
@@ -36,7 +38,9 @@ const MessagingPage = () => {
     // --- Hooks ---
     // Using the existing API hook from services/messaging-api.js
     const messagingApi = useMessagingApi(); 
+    const agentsApi = useAgentsApi();
     const { openSlider, closeSlider } = useSlider();
+    const { setLoading } = useLoading();
     const { showError } = useNotification();
 
     // --- Callbacks --- 
@@ -106,6 +110,7 @@ const MessagingPage = () => {
         
         isProcessingHandoverRef.current = true;
         lastHandoverRefreshRef.current = now;
+        setLoading(true);
         
         console.log("Thread handover detected, refreshing thread details for:", threadId);
         
@@ -130,12 +135,13 @@ const MessagingPage = () => {
             console.error("Error refreshing thread after handover:", err);
             showError(`Failed to refresh thread: ${err.message}`);
         } finally {
+            setLoading(false);
             // Reset processing flag after a short delay to ensure stability
             setTimeout(() => {
                 isProcessingHandoverRef.current = false;
             }, 1000);
         }
-    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter]);
+    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter, setLoading]);
 
     // Handler for opening the send message slider
     const handleSendMessage = useCallback(() => {
@@ -176,7 +182,8 @@ const MessagingPage = () => {
             p: 3,
             display: 'flex',
             flexDirection: 'column',
-            width: '100%'
+            width: '100%',
+            borderRadius: 2
         }}
         >
             <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
@@ -184,11 +191,11 @@ const MessagingPage = () => {
             </Typography>
 
             {/* Display top-level error if any */} 
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
 
             {/* Agent selection */}
             <AgentSelector
-                messagingApi={messagingApi}
+                agentsApi={agentsApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
             />

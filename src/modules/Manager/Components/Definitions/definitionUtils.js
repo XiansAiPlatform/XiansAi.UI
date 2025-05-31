@@ -1,40 +1,65 @@
 import { formatDistanceToNow } from 'date-fns';
 
 /**
- * Groups definitions by agent name and sorts them by most recent activity
- * @param {Array} definitions - Array of definition objects
- * @returns {Object} Object containing grouped definitions, sorted agent names, and latest activity dates
+ * Filters agent groups based on search query
+ * @param {Array} agentGroups - Array of agent group objects
+ * @param {string} searchQuery - Search query string
+ * @returns {Array} Filtered agent groups array
  */
-export const groupDefinitionsByAgent = (definitions) => {
-  const grouped = {};
-  const latestFlowByAgent = {};
+export const filterAgentGroups = (agentGroups, searchQuery) => {
+  if (!agentGroups || !Array.isArray(agentGroups)) {
+    return [];
+  }
   
-  definitions.forEach(def => {
-    const agentName = def.agent || 'Ungrouped';
-    if (!grouped[agentName]) {
-      grouped[agentName] = [];
-      latestFlowByAgent[agentName] = new Date(0);
-    }
-    grouped[agentName].push(def);
+  if (!searchQuery) return agentGroups;
+  
+  const searchLower = searchQuery.toLowerCase();
+  return agentGroups.filter(group => {
+    const agentNameLower = group.agent?.name?.toLowerCase() || '';
     
-    // Track the most recent flow creation/update date for each agent
-    const flowDate = new Date(def.createdAt);
-    if (flowDate > latestFlowByAgent[agentName]) {
-      latestFlowByAgent[agentName] = flowDate;
+    // Check if agent name matches
+    if (agentNameLower.includes(searchLower)) {
+      return true;
     }
-  });
-  
-  // Sort agent names by their most recent flow date (descending)
-  const sortedAgentNames = Object.keys(grouped).sort((a, b) => {
-    // Special case for 'Ungrouped' - always keep at the end
-    if (a === 'Ungrouped') return 1;
-    if (b === 'Ungrouped') return -1;
     
-    // Sort by most recent flow date (newest first)
-    return latestFlowByAgent[b] - latestFlowByAgent[a];
+    // Check if any definition in the group matches
+    return group.definitions.some(def => {
+      const workflowTypeLower = def.workflowType?.toLowerCase() || '';
+      const descriptionLower = def.description?.toLowerCase() || '';
+      
+      return workflowTypeLower.includes(searchLower) || 
+             descriptionLower.includes(searchLower);
+    });
   });
+};
+
+/**
+ * Sorts agent groups by their most recent definition date (newest first)
+ * @param {Array} agentGroups - Array of agent group objects
+ * @returns {Array} Sorted agent groups array
+ */
+export const sortAgentGroupsByDate = (agentGroups) => {
+  if (!agentGroups || !Array.isArray(agentGroups)) {
+    return [];
+  }
   
-  return { grouped, sortedAgentNames, latestFlowByAgent };
+  return agentGroups.sort((a, b) => {
+    // Get the most recent definition date for each agent group
+    const getLatestDate = (group) => {
+      if (!group.definitions || group.definitions.length === 0) {
+        return new Date(0);
+      }
+      return group.definitions.reduce((latest, def) => {
+        const defDate = new Date(def.createdAt);
+        return defDate > latest ? defDate : latest;
+      }, new Date(0));
+    };
+    
+    const latestA = getLatestDate(a);
+    const latestB = getLatestDate(b);
+    
+    return latestB - latestA; // Newest first
+  });
 };
 
 /**
@@ -79,7 +104,7 @@ export const formatAgentName = (name) => {
 };
 
 /**
- * Filters definitions based on search query
+ * Filters definitions based on search query (legacy function for backward compatibility)
  * @param {Array} definitions - Array of definition objects
  * @param {string} searchQuery - Search query string
  * @returns {Array} Filtered definitions array
@@ -100,7 +125,7 @@ export const filterDefinitions = (definitions, searchQuery) => {
 };
 
 /**
- * Sorts definitions by creation date (newest first)
+ * Sorts definitions by creation date (newest first) (legacy function for backward compatibility)
  * @param {Array} definitions - Array of definition objects
  * @returns {Array} Sorted definitions array
  */
@@ -110,17 +135,13 @@ export const sortDefinitionsByDate = (definitions) => {
 
 /**
  * Checks if user is owner of all workflows for a specific agent
- * @param {string} agentName - The agent name to check
- * @param {Array} definitions - Array of definition objects
+ * @param {Object} agent - The agent object containing permissions
  * @param {Object} user - Current user object
  * @returns {boolean} True if user owns all workflows for the agent
  */
-export const isUserOwnerOfAllWorkflows = (agentName, definitions, user) => {
-  if (!user?.id) return false;
+export const isUserOwnerOfAllWorkflows = (agent, user) => {
+  if (!user?.id || !agent?.permissions) return false;
   
-  const agentDefinitions = definitions.filter(def => def.agent === agentName);
-  return agentDefinitions.every(def => {
-    if (def.permissions?.ownerAccess?.includes(user.id)) return true;
-    return false;
-  });
+  // Check if user is in the owner access list for the agent
+  return agent.permissions.ownerAccess?.includes(user.id) || false;
 }; 

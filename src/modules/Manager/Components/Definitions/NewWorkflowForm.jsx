@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useWorkflowApi } from '../../services/workflow-api';
-import './WorkflowList.css';
+import './Definitions.css';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
 const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
@@ -31,9 +31,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       {}
   );
   const [runType, setRunType] = useState('singleton'); // 'unique' or 'singleton'
-  const [flowId, setFlowId] = useState(definition ? 
-    `${definition.agent.trim()}:${definition.workflowType.trim()}`.replace(/\s+/g, '') : 
-    '');
+  const [flowId, setFlowId] = useState(definition.workflowType.trim());
   const [queueType] = useState('default'); // 'default' or 'named'
   const [queueName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,7 +60,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         queueNameToSend
       );
       onSuccess();
-      navigate('/runs');
+      navigate('/runs', { state: { fromNewWorkflow: true } });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -86,9 +84,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   // };
 
   const handleFlowIdChange = (e) => {
-    // Remove all whitespace from the input
-    const trimmedValue = e.target.value.replace(/\s+/g, '');
-    setFlowId(trimmedValue);
+    setFlowId(e.target.value);
   };
 
   return (
@@ -104,13 +100,22 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       {error && (
         <Alert 
           severity="error" 
-          sx={{ mb: 2 }}
+          sx={{ 
+            mb: 2,
+            backgroundColor: '#ffebee',
+            border: '1px solid #f44336',
+            color: '#d32f2f',
+            '& .MuiAlert-icon': {
+              color: '#f44336'
+            }
+          }}
           action={
             <IconButton
               aria-label="close"
               color="inherit"
               size="small"
               onClick={() => setError(null)}
+              sx={{ color: '#d32f2f' }}
             >
               <CloseIcon fontSize="inherit" />
             </IconButton>
@@ -234,68 +239,6 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
           </Paper>
         )}
       </Box>
-
-      {/* <Box sx={{ mb: 2 }}>
-        <Typography variant={isMobile ? "h7" : "h6"} sx={{ mb: 1 }}>
-          Priority Queue
-        </Typography>
-        <FormControl component="fieldset" sx={{ width: '100%' }}>
-          <RadioGroup
-            row
-            value={queueType}
-            onChange={handleQueueTypeChange}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, mr: 2 }}>
-              <FormControlLabel 
-                value="default" 
-                control={<Radio />} 
-                label="Default Queue" 
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
-                Uses the default priority queue for this workflow
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <FormControlLabel 
-                value="named" 
-                control={<Radio />} 
-                label="Named Queue" 
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
-                Specify a custom priority queue name for this workflow
-              </Typography>
-            </Box>
-          </RadioGroup>
-        </FormControl>
-        
-        {queueType === 'named' && (
-          <Paper
-            elevation={0}
-            className="parameter-paper"
-            sx={{
-              p: isMobile ? 1.5 : 2,
-              mt: 2
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Queue Name
-              </Typography>
-              <TextField
-                fullWidth
-                value={queueName}
-                onChange={(e) => setQueueName(e.target.value)}
-                placeholder="Enter queue name"
-                size={isMobile ? "small" : "medium"}
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                Make sure workflow runners are configured to handle this queue name
-              </Typography>
-            </Box>
-          </Paper>
-        )}
-      </Box> */}
 
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
         <Button

@@ -32,44 +32,52 @@ const toastStyles = {
   },
 };
 
-export const handleApiError = async (error, customMessage = '') => {
+/**
+ * Handles API errors with consistent formatting and user-friendly notifications.
+ * 
+ * @param {Error|Response} error - The error object or Response to handle
+ * @param {string} customMessage - Custom title for the error (optional)
+ * @param {function} showErrorCallback - Callback function for displaying errors (optional)
+ *                                      When provided, receives only the clean user message
+ *                                      When not provided, shows detailed error with styling
+ * @returns {Object} Error details object with title, description, and technical info
+ */
+export const handleApiError = async (error, customMessage = '', showErrorCallback = null) => {
   let userMessage = '';
   let technicalDetails = '';
   let errorTitle = customMessage || 'Error';
   
-  // Check if the error is a Response object
+  // Check if the error is a Response object (legacy support)
   if (error instanceof Response) {
     try {
-      // Try to parse the error response as JSON
+      // Try to parse the error response as JSON with standard format { error: "message" }
       const errorData = await error.json();
       
-      // Check if the error has the structured format
-      if (errorData && typeof errorData === 'object') {
-        // Use the title from the error response if available
+      // Check if the error has the standard server format
+      if (errorData && errorData.error) {
+        userMessage = errorData.error;
+        technicalDetails = `Status: ${error.status}`;
+      } else if (errorData && typeof errorData === 'object') {
+        // Legacy support for other structured formats
         if (errorData.title) {
           errorTitle = errorData.title;
         }
         
-        // Use the detail as the user message if available
         if (errorData.detail) {
           userMessage = errorData.detail;
         } else {
-          // Fallback to status-based message
           userMessage = getStatusMessage(error.status);
         }
         
-        // Include technical details
         technicalDetails = `Status: ${errorData.status || error.status}`;
         if (errorData.type) {
           technicalDetails += ` | Type: ${errorData.type}`;
         }
       } else {
-        // Fallback to status-based message
         userMessage = getStatusMessage(error.status);
         technicalDetails = error.status ? `Status: ${error.status}` : 'Unknown error';
       }
     } catch (parseError) {
-      // If parsing fails, use status-based message
       userMessage = getStatusMessage(error.status);
       technicalDetails = error.status ? `Status: ${error.status}` : 'Unknown error';
     }
@@ -79,8 +87,15 @@ export const handleApiError = async (error, customMessage = '') => {
   } else if (error instanceof TypeError && error.message === 'Failed to fetch') {
     userMessage = 'Unable to connect to the server. Please try again later';
     technicalDetails = error.message;
+  } else if (error instanceof Error) {
+    // Handle Error objects created by the API client
+    userMessage = error.message;
+    technicalDetails = error.status ? `Status: ${error.status}` : 'Client error';
+    if (error.statusText) {
+      technicalDetails += ` | ${error.statusText}`;
+    }
   } else if (error.status) {
-    // Handle HTTP errors
+    // Handle HTTP errors (legacy support)
     userMessage = getStatusMessage(error.status);
     technicalDetails = error.message || `Status: ${error.status}`;
   } else {
@@ -106,16 +121,24 @@ export const handleApiError = async (error, customMessage = '') => {
     </div>
   );
 
-  // Show toast notification with enhanced content
-  toast.error(<ToastContent />, {
-    position: "top-right",
-    autoClose: 6000, // Increased duration to allow reading
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    style: { maxWidth: '800px', width: '100%' }, // Increased width for better readability
-  });
+  // Use provided callback if available, otherwise fallback to direct toast
+  if (showErrorCallback && typeof showErrorCallback === 'function') {
+    // Pass just the user-friendly message to the callback, without technical details
+    // This makes it more readable and less cluttered on the notification
+    showErrorCallback(finalMessage.description);
+  } else {
+    // Fallback to direct toast call for backward compatibility
+    // This shows the full detailed error with styling
+    toast.error(<ToastContent />, {
+      position: "bottom-right", // Changed to match NotificationContext
+      autoClose: 6000, // Increased duration to allow reading
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      style: { maxWidth: '800px', width: '100%' }, // Increased width for better readability
+    });
+  }
 
   return finalMessage;
 };

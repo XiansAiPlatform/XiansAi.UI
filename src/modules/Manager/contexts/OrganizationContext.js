@@ -43,7 +43,9 @@ export function OrganizationProvider({ children }) {
 
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
         const tokenService = createTokenService(); // Added
-        const orgs = tokenService.getOrganizations(decodedToken); // Changed
+        var orgs = tokenService.getOrganizations(decodedToken); // Changed
+        // remove orgs without '.' or '-'
+        orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
 
         if (orgs.length > 0) {
           setOrganizations(orgs);

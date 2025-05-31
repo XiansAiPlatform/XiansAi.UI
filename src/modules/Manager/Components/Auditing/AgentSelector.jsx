@@ -8,9 +8,10 @@ import {
     Typography,
     Alert
 } from '@mui/material';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const AgentSelector = ({
-    auditingApi,
+    agentsApi,
     showError,
     onAgentSelected
 }) => {
@@ -18,16 +19,18 @@ const AgentSelector = ({
     const [isLoadingAgents, setIsLoadingAgents] = useState(true);
     const [selectedAgentName, setSelectedAgentName] = useState('');
     const [error, setError] = useState(null);
+    const { setLoading } = useLoading();
 
     useEffect(() => {
         const fetchAgents = async () => {
             setIsLoadingAgents(true);
+            setLoading(true);
             setError(null);
             setAgentNames([]);
             setSelectedAgentName('');
             onAgentSelected(null);
             try {
-                const response = await auditingApi.getAgents();
+                const response = await agentsApi.getAllAgents();
                 setAgentNames(Array.isArray(response) ? response : []);
             } catch (err) {
                 const errorMsg = 'Failed to fetch agents.';
@@ -36,10 +39,11 @@ const AgentSelector = ({
                 console.error(err);
             } finally {
                 setIsLoadingAgents(false);
+                setLoading(false);
             }
         };
         fetchAgents();
-    }, [auditingApi, showError, onAgentSelected]);
+    }, [agentsApi, showError, onAgentSelected, setLoading]);
 
     const handleAgentChange = (newValue) => {
         const newAgentName = newValue || '';

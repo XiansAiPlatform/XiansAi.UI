@@ -7,20 +7,21 @@ import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
-import { useErrorNotification } from '../../contexts/ErrorNotificationContext';
+import { useAuditContext } from '../../contexts/AuditContext';
 const NAV_ITEMS = [
-  {
-    to: '/runs',
-    icon: <AirIcon />,
-    label: 'Agent Runs',
-    isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
-  },
   {
     to: '/definitions',
     icon: <CodeOutlinedIcon />,
     label: 'Agent Definitions',
     isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
   },
+  {
+    to: '/runs',
+    icon: <AirIcon />,
+    label: 'Agent Runs',
+    isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
+  },
+
   {
     to: '/knowledge',
     icon: <MenuBookOutlinedIcon />,
@@ -110,7 +111,7 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeC
 const LeftNav = ({ isOpen, onClose }) => {
   const { pathname } = useLocation();
   const isMobile = window.innerWidth <= 768;
-  const { navErrorCount, resetNavErrorCount } = useErrorNotification();
+  const { navErrorCount, resetNavErrorCount } = useAuditContext();
 
   const handleNavItemClick = (to) => {
     if (to === '/auditing' && navErrorCount > 0) {

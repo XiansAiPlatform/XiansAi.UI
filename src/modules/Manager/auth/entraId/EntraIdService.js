@@ -9,6 +9,7 @@ class EntraIdService {
         clientId: config.entraIdClientId, // e.g., 'YOUR_ENTRA_CLIENT_ID'
         authority: config.entraIdAuthority, // e.g., 'https://login.microsoftonline.com/YOUR_TENANT_ID'
         redirectUri: window.location.origin + '/callback', // Must match redirect URI in Azure App Registration
+        knownAuthorities : config.knownAuthorities
       },
       cache: {
         cacheLocation: 'localStorage', // This configures where your cache will be stored
@@ -51,6 +52,7 @@ class EntraIdService {
             this.authState.accessToken = tokenResponse;
         } catch (error) {
             console.warn("Silent token acquisition failed on init:", error);
+            this.authState.accessToken = null;
         }
       } else {
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
@@ -79,7 +81,8 @@ class EntraIdService {
     try {
       await this.publicClientApplication.logoutRedirect({
         account: account,
-        postLogoutRedirectUri: (options?.returnTo || window.location.origin + '/login'), // Use returnTo from options if provided
+        postLogoutRedirectUri: (options?.returnTo || window.location.origin), // Use returnTo from options if provided
+        idTokenHint: account.idToken,
         ...(options || {}),
       });
     } catch (error) {
@@ -101,7 +104,6 @@ class EntraIdService {
     try {
       const response = await this.publicClientApplication.acquireTokenSilent(tokenRequest);
       this.authState.accessToken = response.accessToken;
-      this._notifyStateChange();
       return response.accessToken;
     } catch (error) {
       console.error("Silent token acquisition failed:", error);
@@ -170,14 +172,7 @@ class EntraIdService {
             email: account.username,
             rawClaims: account.idTokenClaims,
         };
-        try {
-            const token = await this.getAccessTokenSilently();
-            this.authState.accessToken = token;
-        } catch (error) {
-            console.warn("Failed to get access token during state update:", error);
-            // Decide if failing to get a token here should de-authenticate or just leave token as null
-            this.authState.accessToken = null; 
-        }
+        this.authState.accessToken = null;
     } else {
         this.activeAccount = null;
         this.authState = { user: null, isAuthenticated: false, accessToken: null };

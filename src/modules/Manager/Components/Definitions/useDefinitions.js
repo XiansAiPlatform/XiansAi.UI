@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useDefinitionsApi } from '../../services/definitions-api';
+import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../auth/AuthContext';
 import { 
-  filterDefinitions, 
-  sortDefinitionsByDate, 
-  groupDefinitionsByAgent,
+  filterAgentGroups, 
+  sortAgentGroupsByDate,
   isUserOwnerOfAllWorkflows
 } from './definitionUtils';
 
@@ -15,33 +15,60 @@ import {
  * @returns {Object} Object containing state, handlers, and computed values
  */
 export const useDefinitions = () => {
-  const [definitions, setDefinitions] = useState([]);
+  const [agentGroups, setAgentGroups] = useState([]);
   const [error, setError] = useState(null);
   const [openDefinitionId, setOpenDefinitionId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [timeFilter, setTimeFilter] = useState('all');
-  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState(null);
 
   const definitionsApi = useDefinitionsApi();
+  const agentsApi = useAgentsApi();
   const { setLoading } = useLoading();
   const { showSuccess, showError } = useNotification();
   const { user } = useAuth();
 
   // Computed values
-  const filteredAndSortedDefinitions = sortDefinitionsByDate(
-    filterDefinitions(definitions, searchQuery)
+  const filteredAndSortedAgentGroups = sortAgentGroupsByDate(
+    filterAgentGroups(agentGroups, searchQuery)
   );
   
-  const { grouped, sortedAgentNames, latestFlowByAgent } = groupDefinitionsByAgent(filteredAndSortedDefinitions);
+  // Extract data for component compatibility
+  const grouped = {};
+  const latestFlowByAgent = {};
+  const agentsByName = {};
+  const sortedAgentNames = [];
+  
+  if (filteredAndSortedAgentGroups && Array.isArray(filteredAndSortedAgentGroups)) {
+    filteredAndSortedAgentGroups.forEach(agentGroup => {
+      const agentName = agentGroup.agent.name;
+      grouped[agentName] = agentGroup.definitions;
+      agentsByName[agentName] = agentGroup.agent;
+      sortedAgentNames.push(agentName);
+      
+      // Find the latest flow date for this agent
+      if (agentGroup.definitions.length > 0) {
+        const latestDate = agentGroup.definitions.reduce((latest, def) => {
+          const defDate = new Date(def.createdAt);
+          return defDate > latest ? defDate : latest;
+        }, new Date(0));
+        latestFlowByAgent[agentName] = latestDate;
+      }
+    });
+  }
+
+  // Get flat list of all definitions for compatibility
+  const definitions = agentGroups && Array.isArray(agentGroups) 
+    ? agentGroups.flatMap(group => group.definitions) 
+    : [];
 
   // Fetch definitions
   const fetchDefinitions = async () => {
     try {
       setLoading(true);
       const data = await definitionsApi.getDefinitions(timeFilter);
-      setDefinitions(data);
+      setAgentGroups(data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -73,30 +100,11 @@ export const useDefinitions = () => {
     }
   };
 
-  const handleDeleteSuccess = (deletedDefinitionId) => {
-    setDefinitions(prevDefinitions => 
-      prevDefinitions.filter(def => def.id !== deletedDefinitionId)
-    );
-  };
-
-  const handleMenuClick = (event, agentName) => {
-    if (event && event.stopPropagation) {
-      event.stopPropagation();
-    }
-    setMenuAnchorEl(event?.currentTarget || null);
-    setSelectedAgentName(agentName);
-  };
-
-  const handleMenuClose = () => {
-    setMenuAnchorEl(null);
-  };
-
   const setSelectedAgent = (agentName) => {
     setSelectedAgentName(agentName);
   };
 
   const handleDeleteAllClick = () => {
-    handleMenuClose();
     setDeleteDialogOpen(true);
   };
 
@@ -115,33 +123,36 @@ export const useDefinitions = () => {
     
     try {
       setLoading(true);
-      // Get definitions for the selected agent from the original definitions array
-      const agentDefinitions = definitions.filter(def => def.agent === selectedAgentName);
-      const deletePromises = agentDefinitions.map(def => definitionsApi.deleteDefinition(def.id));
-      await Promise.all(deletePromises);
+      // Use the new agents API to delete the entire agent and all its definitions
+      await agentsApi.deleteAgent(selectedAgentName);
       
-      // Update the definitions state by removing all definitions for this agent
-      setDefinitions(prevDefinitions => 
-        prevDefinitions.filter(def => def.agent !== selectedAgentName)
+      // Update the agent groups state by removing the agent group
+      setAgentGroups(prevAgentGroups => 
+        prevAgentGroups && Array.isArray(prevAgentGroups)
+          ? prevAgentGroups.filter(group => group.agent.name !== selectedAgentName)
+          : []
       );
       
-      showSuccess(`Successfully deleted all definitions for ${selectedAgentName}`);
+      showSuccess(`Successfully deleted agent "${selectedAgentName}" and all its definitions`);
       setSelectedAgentName(null);
     } catch (error) {
-      console.error('Failed to delete definitions:', error);
-      showError('Failed to delete definitions. Please try again.');
+      console.error('Failed to delete agent:', error);
+      showError('Failed to delete agent. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleShareClick = () => {
-    handleMenuClose();
-  };
-
   // Check if user is owner of all workflows for selected agent
   const isOwnerOfAllWorkflows = (agentName) => {
-    return isUserOwnerOfAllWorkflows(agentName, definitions, user);
+    if (!agentGroups || !Array.isArray(agentGroups)) {
+      return false;
+    }
+    
+    const agentGroup = agentGroups.find(group => group.agent.name === agentName);
+    if (!agentGroup) return false;
+    
+    return isUserOwnerOfAllWorkflows(agentGroup.agent, user);
   };
 
   return {
@@ -151,7 +162,6 @@ export const useDefinitions = () => {
     openDefinitionId,
     searchQuery,
     timeFilter,
-    menuAnchorEl,
     deleteDialogOpen,
     selectedAgentName,
     
@@ -159,18 +169,15 @@ export const useDefinitions = () => {
     grouped,
     sortedAgentNames,
     latestFlowByAgent,
+    agentsByName,
     
     // Handlers
     handleToggle,
     handleSearchChange,
     handleTimeFilterChange,
-    handleDeleteSuccess,
-    handleMenuClick,
-    handleMenuClose,
     handleDeleteAllClick,
     handleDeleteAllCancel,
     handleDeleteAllConfirm,
-    handleShareClick,
     setSelectedAgent,
     
     // Utilities

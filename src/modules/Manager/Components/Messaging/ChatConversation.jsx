@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Paper, Box, useTheme } from '@mui/material';
 import ChatHeader from './ChatHeader';
 import MessagesList from './MessagesList';
+import { useLoading } from '../../contexts/LoadingContext';
 import useMessagePolling from './hooks/useMessagePolling';
 
 /**
@@ -35,6 +36,7 @@ const ChatConversation = ({
     const [hasMoreMessages, setHasMoreMessages] = useState(true);
     const [error, setError] = useState(null);
     const [lastUpdateTime, setLastUpdateTime] = useState(null);
+    const { setLoading } = useLoading();
     const scrollContainerRef = useRef(null);
     const isInitialLoad = useRef(true);
     const messagePollingRef = useRef(null);
@@ -112,6 +114,7 @@ const ChatConversation = ({
     const fetchThreadMessages = useCallback(async (threadId, page = 1, isPolling = false) => {
         if (!isPolling) {
             setIsLoadingMessages(true);
+            setLoading(true);
         }
         setError(null);
         
@@ -153,9 +156,10 @@ const ChatConversation = ({
         } finally {
             if (!isPolling) {
                 setIsLoadingMessages(false);
+                setLoading(false);
             }
         }
-    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover]);
+    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading]);
     
     // Initialize the message polling hook
     const messagePolling = useMessagePolling({
@@ -236,7 +240,7 @@ const ChatConversation = ({
                 bgcolor: theme.palette.background.default,
                 border: '1px solid',
                 borderColor: theme.palette.divider,
-                borderRadius: theme.shape.borderRadius,
+                borderRadius: 2,
                 overflow: 'hidden',
                 width: '100%'
             }}

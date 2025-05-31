@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
-  Button, 
-  List, 
-  ListItem, 
-  ListItemText, 
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
   ListItemSecondaryAction,
   IconButton,
   Select,
@@ -22,7 +22,6 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import SyncIcon from '@mui/icons-material/Sync';
 import { usePermissionsApi } from '../../services/permissions-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -64,13 +63,12 @@ const PermissionsManager = ({ agentName }) => {
       setLoading(true);
       setError(null);
       const response = await permissionsApi.getPermissions(agentName);
-      
-      if (!response.isSuccess) {
-        setError(response.errorMessage || 'Failed to fetch permissions');
+      if (!response || response.errorMessage) {
+        setError(response?.errorMessage || 'Failed to fetch permissions');
         return;
       }
 
-      setPermissions(response.data || {
+      setPermissions(response || {
         ownerAccess: [],
         writeAccess: [],
         readAccess: []
@@ -95,8 +93,7 @@ const PermissionsManager = ({ agentName }) => {
       setLoading(true);
       setError(null);
       const response = await permissionsApi.addUser(agentName, newUserId, selectedPermission);
-      
-      if (!response.isSuccess) {
+      if (!response || response.errorMessage) {
         setError(response.errorMessage || 'Failed to add user');
         return;
       }
@@ -124,8 +121,7 @@ const PermissionsManager = ({ agentName }) => {
       }
 
       const response = await permissionsApi.removeUser(agentName, userId);
-      
-      if (!response.isSuccess) {
+      if (!response || response.errorMessage) {
         setError(response.errorMessage || 'Failed to remove user');
         return;
       }
@@ -144,52 +140,28 @@ const PermissionsManager = ({ agentName }) => {
     try {
       setLoading(true);
       setError(null);
-      
       // Prevent changing the last owner's permission
       if (currentPermission === 'ownerAccess' && permissions.ownerAccess.length === 1) {
         setError('Cannot change the last owner\'s permission level');
         return;
       }
-      
       // First remove from current permission level
       const removeResponse = await permissionsApi.removeUser(agentName, userId);
       if (!removeResponse.isSuccess) {
         setError(removeResponse.errorMessage || 'Failed to update permission');
         return;
       }
-      
       // Then add to new permission level
       const addResponse = await permissionsApi.addUser(agentName, userId, newPermission);
       if (!addResponse.isSuccess) {
         setError(addResponse.errorMessage || 'Failed to update permission');
         return;
       }
-      
       await fetchPermissions();
       showSuccess('Permission updated successfully');
     } catch (error) {
       setError('Failed to update permission. Please try again.');
       console.error('Error updating permission:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReapplyPermissions = async (userId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await permissionsApi.updateUserPermission(agentName, userId, selectedPermission);
-      
-      if (!response.isSuccess) {
-        setError(response.errorMessage || 'Failed to reapply permissions');
-        return;
-      }
-
-      showSuccess('Permissions reapplied successfully');
-    } catch (error) {
-      setError('Failed to reapply permissions. Please try again.');
-      console.error('Error reapplying permissions:', error);
     } finally {
       setLoading(false);
     }
@@ -214,15 +186,6 @@ const PermissionsManager = ({ agentName }) => {
                 ))}
               </Select>
             </FormControl>
-            <Tooltip title="Reapply permissions across all flows">
-              <IconButton
-                edge="end"
-                onClick={() => handleReapplyPermissions(userId)}
-                sx={{ mr: 1 }}
-              >
-                <SyncIcon />
-              </IconButton>
-            </Tooltip>
             <Tooltip title="Remove user">
               <IconButton
                 edge="end"
@@ -282,8 +245,8 @@ const PermissionsManager = ({ agentName }) => {
               ))}
             </Select>
           </FormControl>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleAddUser}
             disabled={!newUserId.trim()}
           >
@@ -312,9 +275,9 @@ const PermissionsManager = ({ agentName }) => {
             <Typography variant="subtitle1" sx={{ mr: 1 }}>
               {level.label}
             </Typography>
-            <Chip 
-              label={`${permissions[level.value]?.length || 0} users`} 
-              size="small" 
+            <Chip
+              label={`${permissions[level.value]?.length || 0} users`}
+              size="small"
             />
           </Box>
           <Collapse in={showDetails}>

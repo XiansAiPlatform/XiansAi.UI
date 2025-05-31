@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -11,22 +11,33 @@ import {
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
 import { useKnowledgeApi } from '../../services/knowledge-api';
+import { useAgentsApi } from '../../services/agents-api';
+import { useLoading } from '../../contexts/LoadingContext';
 
 const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, onClose }) => {
   const knowledgeApi = useKnowledgeApi();
+  const agentsApi = useAgentsApi();
+  const { loading, setLoading } = useLoading();
+  const nameFieldRef = useRef(null);
   const [formData, setFormData] = useState(knowledge || {
     name: '',
     content: '',
-    type: null,
+    type: 'markdown',
     agent: selectedAgent || '',
   });
   const [jsonError, setJsonError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [agents, setAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [agentsError, setAgentsError] = useState(null);
   const [isLoadingContent, setIsLoadingContent] = useState(false);
+
+  // Focus on name field when component mounts
+  useEffect(() => {
+    if (nameFieldRef.current) {
+      nameFieldRef.current.focus();
+    }
+  }, []);
 
   const normalizeType = (type) => {
     if (!type) return '';
@@ -42,15 +53,25 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
       setIsLoadingAgents(true);
       setAgentsError(null);
       try {
-        const response = await knowledgeApi.getAgents();
+        const response = await agentsApi.getAllAgents();
         console.log('Agents API response:', response);
+        let agentsList = [];
         if (response && Array.isArray(response)) {
-          setAgents(response);
+          agentsList = response;
         } else if (response && Array.isArray(response.data)) {
-          setAgents(response.data);
+          agentsList = response.data;
         } else {
           console.error('Unexpected agents response format:', response);
-          setAgents([]);
+          agentsList = [];
+        }
+        setAgents(agentsList);
+        
+        // Auto-select agent if there's only one and no agent is already selected
+        if (agentsList.length === 1 && !formData.agent && !selectedAgent) {
+          setFormData(prev => ({
+            ...prev,
+            agent: agentsList[0]
+          }));
         }
       } catch (error) {
         console.error('Error fetching agents:', error);
@@ -61,7 +82,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
     };
 
     fetchAgents();
-  }, [knowledgeApi]);
+  }, [agentsApi, formData.agent, selectedAgent]);
 
   useEffect(() => {
     // Fetch knowledge content if in edit mode and content is not available
@@ -117,13 +138,13 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
-    setIsSubmitting(true);
+    setLoading(true);
     
     if (formData.type === 'json') {
       const error = validateJSON(formData.content);
       if (error) {
         setJsonError(error);
-        setIsSubmitting(false);
+        setLoading(false);
         return;
       }
     }
@@ -135,7 +156,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
       console.error('Error saving knowledge:', error);
       setSubmitError(error.message || 'Failed to save knowledge');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -162,214 +183,232 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
 
   return (
     <Box sx={{ 
-      p: 3,
+      height: 'calc(100vh - 100px)',
+      minHeight: '600px',
+      display: 'flex',
+      flexDirection: 'column',
       backgroundColor: 'var(--background-default)',
       borderRadius: 'var(--radius-lg)',
+      overflow: 'hidden'
     }}>
-
-      
-      <form onSubmit={handleSubmit}>
-        <TextField
-          fullWidth
-          label="Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          sx={{ 
-            mb: 2,
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: 'var(--background-light)',
-              borderRadius: 'var(--radius-sm)',
-              '& fieldset': {
-                borderColor: 'var(--border-color)'
-              }
-            }
-          }}
-          required
-          disabled={mode === 'edit'}
-        />
-
-        <FormControl fullWidth sx={{ mb: 2 }} required>
-          <InputLabel sx={{ 
-            backgroundColor: '#fff', 
-            px: 0.5,
-            zIndex: 1,
-            '&.Mui-focused, &.MuiFormLabel-filled': {
-              backgroundColor: '#fff',
-              padding: '0 8px',
-              marginLeft: '-4px',
-              zIndex: 1
-            }
-          }}>Type</InputLabel>
-          <Select
-            value={normalizeType(formData.type)}
-            onChange={handleTypeChange}
-            sx={{
-              backgroundColor: 'var(--background-light)',
-              borderRadius: 'var(--radius-sm)',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--border-color)'
+      <Box sx={{ 
+        flex: 1,
+        overflow: 'auto',
+        p: 3
+      }}>
+        <form onSubmit={handleSubmit} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+          <TextField
+            fullWidth
+            label="Name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: 'var(--background-light)',
+                borderRadius: 'var(--radius-sm)',
+                '& fieldset': {
+                  borderColor: 'var(--border-color)'
+                }
               }
             }}
             required
-          >
-            <MenuItem value="text">Text</MenuItem>
-            <MenuItem value="markdown">Markdown</MenuItem>
-            <MenuItem value="json">JSON</MenuItem>
-          </Select>
-        </FormControl>
+            disabled={mode === 'edit'}
+            inputRef={nameFieldRef}
+          />
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel sx={{ 
-            backgroundColor: '#fff', 
-            px: 0.5,
-            zIndex: 1,
-            '&.Mui-focused, &.MuiFormLabel-filled': {
-              backgroundColor: '#fff',
-              padding: '0 8px',
-              marginLeft: '-4px',
-              zIndex: 1
-            }
-          }}>Agent</InputLabel>
-          <Select
-            value={formData.agent || ''}
-            onChange={(e) => setFormData({ ...formData, agent: e.target.value })}
-            sx={{
-              backgroundColor: 'var(--background-light)',
-              borderRadius: 'var(--radius-sm)',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--border-color)'
+          <FormControl fullWidth sx={{ mb: 2 }} required>
+            <InputLabel sx={{ 
+              backgroundColor: '#fff', 
+              px: 0.5,
+              zIndex: 1,
+              '&.Mui-focused, &.MuiFormLabel-filled': {
+                backgroundColor: '#fff',
+                padding: '0 8px',
+                marginLeft: '-4px',
+                zIndex: 1
               }
-            }}
-            disabled={isLoadingAgents}
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            {isLoadingAgents ? (
-              <MenuItem disabled><em>Loading agents...</em></MenuItem>
-            ) : agentsError ? (
-              <MenuItem disabled><em>{agentsError}</em></MenuItem>
-            ) : agents.length === 0 ? (
-              <MenuItem disabled><em>No agents available</em></MenuItem>
-            ) : (
-              agents.map(agent => (
-                <MenuItem key={agent} value={agent}>
-                  {agent}
-                </MenuItem>
-              ))
-            )}
-            <MenuItem value="--SYSTEM--">--SYSTEM--</MenuItem>
-          </Select>
-        </FormControl>
-
-        <Box sx={{ 
-          mb: 2, 
-          border: 1, 
-          borderColor: 'var(--border-color)',
-          borderRadius: 'var(--radius-sm)',
-          overflow: 'hidden',
-          '& .monaco-editor': {
-            backgroundColor: 'var(--background-light) !important'
-          },
-          '& .monaco-editor .cursors-layer': {
-            '& .cursor': {
-              borderLeft: '2px solid var(--primary) !important',
-              borderRadius: '1px',
-            }
-          },
-          '& .monaco-editor .current-line': {
-            border: 'none !important',
-            backgroundColor: 'var(--background-subtle) !important'
-          }
-        }}>
-          {isLoadingContent ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-              <CircularProgress size={40} />
-            </Box>
-          ) : (
-            <Editor
-              height="400px"
-              language={formData.type === 'json' ? 'json' : 'markdown'}
-              value={formData.content}
-              onChange={handleEditorChange}
-              theme="light"
-              options={{
-                minimap: { enabled: false },
-                wordWrap: 'on',
-                fontFamily: 'var(--font-mono)',
-                padding: { top: 16, bottom: 16 },
-                scrollBeyondLastLine: false
+            }}>Type</InputLabel>
+            <Select
+              value={normalizeType(formData.type)}
+              onChange={handleTypeChange}
+              sx={{
+                backgroundColor: 'var(--background-light)',
+                borderRadius: 'var(--radius-sm)',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--border-color)'
+                }
               }}
-            />
-          )}
-          {jsonError && (
+              required
+            >
+              <MenuItem value="text">Text</MenuItem>
+              <MenuItem value="markdown">Markdown</MenuItem>
+              <MenuItem value="json">JSON</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth sx={{ mb: 2 }} required>
+            <InputLabel sx={{ 
+              backgroundColor: '#fff', 
+              px: 0.5,
+              zIndex: 1,
+              '&.Mui-focused, &.MuiFormLabel-filled': {
+                backgroundColor: '#fff',
+                padding: '0 8px',
+                marginLeft: '-4px',
+                zIndex: 1
+              }
+            }}>Agent</InputLabel>
+            <Select
+              value={formData.agent || ''}
+              onChange={(e) => setFormData({ ...formData, agent: e.target.value })}
+              sx={{
+                backgroundColor: 'var(--background-light)',
+                borderRadius: 'var(--radius-sm)',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--border-color)'
+                }
+              }}
+              disabled={isLoadingAgents}
+              required
+            >
+              {isLoadingAgents ? (
+                <MenuItem disabled><em>Loading agents...</em></MenuItem>
+              ) : agentsError ? (
+                <MenuItem disabled><em>{agentsError}</em></MenuItem>
+              ) : agents.length === 0 ? (
+                <MenuItem disabled><em>No agents available</em></MenuItem>
+              ) : (
+                agents.map(agent => (
+                  <MenuItem key={agent} value={agent}>
+                    {agent}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+
+          <Box sx={{ 
+            flex: 1,
+            minHeight: '300px',
+            mb: 2, 
+            border: 1, 
+            borderColor: 'var(--border-color)',
+            borderRadius: 'var(--radius-sm)',
+            overflow: 'hidden',
+            '& .monaco-editor': {
+              backgroundColor: 'var(--background-light) !important'
+            },
+            '& .monaco-editor .cursors-layer': {
+              '& .cursor': {
+                borderLeft: '2px solid var(--primary) !important',
+                borderRadius: '1px',
+              }
+            },
+            '& .monaco-editor .current-line': {
+              border: 'none !important',
+              backgroundColor: 'var(--background-subtle) !important'
+            }
+          }}>
+            {isLoadingContent ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                <CircularProgress size={40} />
+              </Box>
+            ) : (
+              <Editor
+                height="400px"
+                language={formData.type === 'json' ? 'json' : 'markdown'}
+                value={formData.content}
+                onChange={handleEditorChange}
+                theme="light"
+                options={{
+                  minimap: { enabled: false },
+                  wordWrap: 'on',
+                  fontFamily: 'var(--font-mono)',
+                  padding: { top: 16, bottom: 16 },
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true
+                }}
+              />
+            )}
+            {jsonError && (
+              <Box sx={{ 
+                p: 1, 
+                color: 'error.main',
+                borderTop: 1,
+                borderColor: 'error.main',
+                fontSize: '0.875rem'
+              }}>
+                {jsonError}
+              </Box>
+            )}
+          </Box>
+
+          {submitError && (
             <Box sx={{ 
-              p: 1, 
+              mb: 2,
+              p: 2,
               color: 'error.main',
-              borderTop: 1,
-              borderColor: 'error.main',
-              fontSize: '0.875rem'
+              bgcolor: 'error.light',
+              borderRadius: 'var(--radius-sm)'
             }}>
-              {jsonError}
+              {submitError}
             </Box>
           )}
-        </Box>
+        </form>
+      </Box>
 
-        {submitError && (
-          <Box sx={{ 
-            mb: 2,
-            p: 2,
-            color: 'error.main',
-            bgcolor: 'error.light',
-            borderRadius: 'var(--radius-sm)'
-          }}>
-            {submitError}
-          </Box>
-        )}
-
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-          <Button 
-            variant="outlined" 
-            onClick={onClose}
-            sx={{
+      {/* Fixed button bar at the bottom */}
+      <Box sx={{ 
+        p: 3,
+        borderTop: 1,
+        borderColor: 'var(--border-color)',
+        backgroundColor: 'var(--background-default)',
+        display: 'flex', 
+        gap: 2, 
+        justifyContent: 'flex-end'
+      }}>
+        <Button 
+          variant="outlined" 
+          onClick={onClose}
+          sx={{
+            borderColor: 'var(--border-color)',
+            color: 'var(--text-secondary)',
+            fontWeight: 'var(--font-weight-medium)',
+            borderRadius: 'var(--radius-sm)',
+            textTransform: 'none',
+            '&:hover': {
               borderColor: 'var(--border-color)',
-              color: 'var(--text-secondary)',
-              fontWeight: 'var(--font-weight-medium)',
-              borderRadius: 'var(--radius-sm)',
-              textTransform: 'none',
-              '&:hover': {
-                borderColor: 'var(--border-color)',
-                bgcolor: 'var(--background-subtle)'
-              }
-            }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            variant="contained" 
-            type="submit" 
-            disabled={(formData.type === 'json' && jsonError) || isSubmitting || isLoadingContent}
-            sx={{
+              bgcolor: 'var(--background-subtle)'
+            }
+          }}
+        >
+          Cancel
+        </Button>
+        <Button 
+          variant="contained" 
+          onClick={handleSubmit}
+          disabled={(formData.type === 'json' && jsonError) || loading || isLoadingContent}
+          sx={{
+            bgcolor: 'var(--primary)',
+            color: '#fff',
+            fontWeight: 'var(--font-weight-medium)',
+            borderRadius: 'var(--radius-sm)',
+            textTransform: 'none',
+            '&:hover': {
               bgcolor: 'var(--primary)',
-              color: '#fff',
-              fontWeight: 'var(--font-weight-medium)',
-              borderRadius: 'var(--radius-sm)',
-              textTransform: 'none',
-              '&:hover': {
-                bgcolor: 'var(--primary)',
-                opacity: 0.9
-              },
-              '&.Mui-disabled': {
-                bgcolor: 'var(--primary)',
-                opacity: 0.5,
-                color: '#fff'
-              }
-            }}
-          >
-            {isSubmitting ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
-          </Button>
-        </Box>
-      </form>
+              opacity: 0.9
+            },
+            '&.Mui-disabled': {
+              bgcolor: 'var(--primary)',
+              opacity: 0.5,
+              color: '#fff'
+            }
+          }}
+        >
+          {loading ? 'Saving...' : mode === 'add' ? 'Create' : 'Save New Version'}
+        </Button>
+      </Box>
     </Box>
   );
 };

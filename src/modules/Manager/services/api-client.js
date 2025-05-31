@@ -1,8 +1,8 @@
 import { useAuth } from '../auth/AuthContext'; // New import
-import { handleApiError } from '../utils/errorHandler';
 import { getConfig } from '../../../config';
 import { useMemo } from 'react';
 import { useSelectedOrg } from '../contexts/OrganizationContext';
+import { useNavigate } from 'react-router-dom';
 
 const { apiBaseUrl } = getConfig();
 
@@ -27,10 +27,31 @@ export const getTimeRangeParams = (timeFilter) => {
   return { startTime, endTime };
 };
 
+/**
+ * Custom hook that provides an API client with authentication and error handling.
+ * 
+ * Features:
+ * - Automatic token management and header injection
+ * - 403 Forbidden error handling with automatic redirect to home page
+ * - Standardized error handling for server responses in format: { error: "message" }
+ * - Comprehensive error handling for various HTTP status codes
+ * - Support for different response types (JSON, blob, text)
+ * - Event streaming capabilities
+ * 
+ * Error Handling:
+ * All server error responses are expected to follow the format: { error: "descriptive message" }
+ * The client automatically parses this format and creates Error objects with:
+ * - error.message: Contains the server's error message
+ * - error.status: HTTP status code
+ * - error.statusText: HTTP status text
+ * 
+ * @returns {Object} API client with methods: get, post, put, patch, delete, getBlob, stream
+ */
 export const useApiClient = () => {
   // const { getAccessTokenSilently } = useAuth0(); // Old hook
   const { getAccessTokenSilently } = useAuth(); // New hook
   const { selectedOrg } = useSelectedOrg();
+  const navigate = useNavigate();
 
   return useMemo(() => {
     const getAccessToken = async () => {
@@ -70,11 +91,40 @@ export const useApiClient = () => {
         });
 
         if (!response.ok) {
-          const errorResult = await handleApiError(response);
+          // Handle 403 Forbidden error by redirecting to home page
+          // This prevents users from seeing permission-related errors and provides
+          // a clean user experience by redirecting them to a safe location
+          if (response.status === 403) {
+            console.error('Access forbidden (403). Redirecting to home page.');
+            navigate('/unauthorized');
+            return; // Exit early to prevent further error handling
+          }
+
+          // Parse error response according to standard server format: { error: "message" }
+          let errorMessage = 'An error occurred';
+          try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch (parseError) {
+            // If JSON parsing fails, try to get text response
+            try {
+              errorMessage = await response.text() || errorMessage;
+            } catch (textError) {
+              console.warn('Could not parse error response:', textError);
+            }
+          }
+          
           if (response.status === 401) {
             console.error('Authentication error (401). Token may be invalid or expired.');
           }
-          throw errorResult;
+          
+          console.error(`API Error ${response.status}:`, errorMessage);
+          const error = new Error(errorMessage);
+          error.status = response.status;
+          error.statusText = response.statusText;
+          throw error;
         }
 
         // Check if the response is empty
@@ -156,8 +206,36 @@ export const useApiClient = () => {
           });
 
           if (!response.ok) {
-            const errorResult = await handleApiError(response);
-            throw errorResult;
+            // Handle 403 Forbidden error by redirecting to home page
+            // This prevents users from seeing permission-related errors and provides
+            // a clean user experience by redirecting them to a safe location
+            if (response.status === 403) {
+              console.error('Access forbidden (403). Redirecting to home page.');
+              navigate('/unauthorized');
+              return; // Exit early to prevent further error handling
+            }
+            
+            // Parse error response according to standard server format: { error: "message" }
+            let errorMessage = 'An error occurred';
+            try {
+              const errorData = await response.json();
+              if (errorData && errorData.error) {
+                errorMessage = errorData.error;
+              }
+            } catch (parseError) {
+              // If JSON parsing fails, try to get text response
+              try {
+                errorMessage = await response.text() || errorMessage;
+              } catch (textError) {
+                console.warn('Could not parse error response:', textError);
+              }
+            }
+            
+            console.error(`Stream API Error ${response.status}:`, errorMessage);
+            const error = new Error(errorMessage);
+            error.status = response.status;
+            error.statusText = response.statusText;
+            throw error;
           }
 
           const reader = response.body.getReader();
@@ -199,5 +277,5 @@ export const useApiClient = () => {
         }
       }
     };
-  }, [getAccessTokenSilently, selectedOrg]);
+  }, [getAccessTokenSilently, selectedOrg, navigate]);
 };
