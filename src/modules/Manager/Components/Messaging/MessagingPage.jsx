@@ -15,7 +15,7 @@ import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
 import ConversationThreads from './ConversationThreads';
-import ChatConversation from './ChatConversation';
+import ChatConversation from './Conversation/ChatConversation';
 
 
 /**
@@ -232,6 +232,7 @@ const MessagingPage = () => {
                             onSendMessage={handleSendMessage}
                             onHandover={handleThreadHandover}
                             onRefresh={handleRefresh}
+                            agentName={selectedAgentName}
                             onThreadDeleted={(threadId) => {
                                 // Clear the selected thread when it's deleted
                                 if (threadId === selectedThreadId) {

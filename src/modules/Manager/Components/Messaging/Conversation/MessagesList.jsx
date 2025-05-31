@@ -67,7 +67,22 @@ const MessagesList = ({
                 typingTimeoutRef.current = null;
             }
             
-            // If latest message is outgoing, hide the indicator immediately
+            // Check if latest message is a system message (empty content)
+            const isSystemMessage = !latestMessage.content || 
+                                  latestMessage.content === null || 
+                                  latestMessage.content === undefined || 
+                                  latestMessage.content === '' || 
+                                  latestMessage.content.toString().trim() === '' ||
+                                  latestMessage.content === 'null' ||
+                                  latestMessage.content === 'undefined';
+            
+            // Don't hide indicator for Handover messages or system messages
+            if (latestMessage.direction === 'Handover' || isSystemMessage) {
+                setShowTypingIndicator(true);
+                return;
+            }
+            
+            // If latest message is outgoing (but not handover or system), hide the indicator immediately
             if (latestMessage.direction === 'Outgoing') {
                 setShowTypingIndicator(false);
                 return;
