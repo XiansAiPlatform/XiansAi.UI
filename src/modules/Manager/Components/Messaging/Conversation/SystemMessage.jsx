@@ -28,6 +28,15 @@ const SystemMessage = ({ message }) => {
     const [systemExpanded, setSystemExpanded] = useState(false);
     const formattedDate = message.createdAt ? format(new Date(message.createdAt), 'MMM d, yyyy h:mm a') : '';
 
+    // Determine the system message text based on direction
+    const getSystemMessageText = () => {
+        if (message.direction === 'Incoming') {
+            return 'System message from user';
+        } else {
+            return 'System message from agent';
+        }
+    };
+
     const handleSystemExpandClick = (e) => {
         e.stopPropagation();
         setSystemExpanded(!systemExpanded);
@@ -64,7 +73,7 @@ const SystemMessage = ({ message }) => {
                         }
                     }}
                 >
-                    System message from agent • {formattedDate}
+                    {getSystemMessageText()} • {formattedDate}
                 </Typography>
             ) : (
                 /* Detailed expanded view */
@@ -110,7 +119,7 @@ const SystemMessage = ({ message }) => {
                                 flexGrow: 1
                             }}
                         >
-                            System Message from Agent
+                            {getSystemMessageText()}
                         </Typography>
                         <Typography 
                             variant="caption" 

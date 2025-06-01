@@ -67,6 +67,21 @@ const MessagesList = ({
                 typingTimeoutRef.current = null;
             }
             
+            // Check if this is a metadata-only message FIRST (highest priority)
+            // Metadata-only messages can be both Incoming and Outgoing
+            const isMetadataOnlyMessage = (latestMessage.content === null || 
+                                         latestMessage.content === 'null' || 
+                                         latestMessage.content === undefined ||
+                                         latestMessage.content === 'undefined' ||
+                                         latestMessage.content === '') &&
+                                         latestMessage.metadata;
+            
+            // If it's a metadata-only message (any direction), never show typing indicator
+            if (isMetadataOnlyMessage) {
+                setShowTypingIndicator(false);
+                return;
+            }
+            
             // Check if latest message is a system message (empty content)
             const isSystemMessage = !latestMessage.content || 
                                   latestMessage.content === null || 
@@ -82,7 +97,7 @@ const MessagesList = ({
                 return;
             }
             
-            // If latest message is outgoing (but not handover or system), hide the indicator immediately
+            // If latest message is outgoing, hide the indicator immediately
             if (latestMessage.direction === 'Outgoing') {
                 setShowTypingIndicator(false);
                 return;

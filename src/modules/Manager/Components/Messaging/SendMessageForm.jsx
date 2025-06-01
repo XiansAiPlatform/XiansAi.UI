@@ -27,6 +27,7 @@ const SendMessageForm = ({
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
     const [showMetadata, setShowMetadata] = useState(false);
+    const [metadataOnly, setMetadataOnly] = useState(false);
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
     
@@ -152,6 +153,13 @@ const SendMessageForm = ({
         localStorage.setItem('sendMessageForm_showMetadata', showMetadata.toString());
     }, [showMetadata]);
 
+    // Clear content when metadataOnly is checked
+    useEffect(() => {
+        if (metadataOnly) {
+            setContent('');
+        }
+    }, [metadataOnly]);
+
     const handleWorkflowTypeChange = (event, newValue) => {
         // Stop event propagation to prevent the slider from closing
         if (event) {
@@ -202,7 +210,7 @@ const SendMessageForm = ({
     };
 
     const handleSend = async () => {
-        if (!participantId || !content || !workflowId || !workflowType) {
+        if (!participantId || (!content && !metadataOnly) || !workflowId || !workflowType) {
             showError('Participant ID, workflow type, workflow ID, and content are required');
             return;
         }
@@ -226,7 +234,7 @@ const SendMessageForm = ({
                 workflowType,
                 workflowId,
                 participantId,
-                content,
+                metadataOnly ? null : content,
                 parsedMetadata
             );
             
@@ -278,7 +286,7 @@ const SendMessageForm = ({
     };
 
     // Determine if the send button should be disabled
-    const isSendDisabled = loading || !participantId || !content || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
+    const isSendDisabled = loading || !participantId || (!content && !metadataOnly) || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
 
     return (
         <Box sx={{ p: 3 }} onClick={handleFormClick}>
@@ -482,14 +490,35 @@ const SendMessageForm = ({
                 margin="normal"
                 multiline
                 rows={4}
-                required
-                helperText="Message content to be sent"
-                disabled={loading}
+                required={!metadataOnly}
+                helperText={metadataOnly ? "Content disabled (Metadata Only mode)" : "Message content to be sent"}
+                disabled={loading || metadataOnly}
                 inputRef={contentInputRef}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
             />
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                        type="checkbox"
+                        checked={metadataOnly}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            setMetadataOnly(e.target.checked);
+                            if (e.target.checked && !showMetadata) {
+                                setShowMetadata(true);
+                            }
+                        }}
+                        style={{ 
+                            marginRight: '8px',
+                            transform: 'scale(1.1)',
+                            cursor: 'pointer'
+                        }}
+                    />
+                    <Typography variant="body2" sx={{ ml: 0.5, fontSize: '0.875rem' }}>
+                        Metadata Only
+                    </Typography>
+                </Box>
                 <Button 
                     onClick={(e) => {
                         e.stopPropagation();
