@@ -8,6 +8,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
+import { useTenantApi } from '../../services/tenant-api';
+import { useTenant } from '../../contexts/TenantContext'; // Assuming this is the correct path to your TenantContext
 
 const Header = ({ pageTitle = "", toggleNav }) => {
   const { user, logout } = useAuth();
@@ -17,33 +19,49 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
   const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });
   const [logoImage, setLogoImage] = React.useState(null);
+  const { tenantData, loading, error, fetchTenant, tenantLogo, teanantId } = useTenant();
 
-  useEffect(() => {
+  useEffect(() => {  
     // Update user data when auth context changes
     if (user) {
       console.log('Auth user data:', user);
       // Use nickname if name is empty, or extract from email as last resort
       const displayName = user.name || user.nickname || user.email?.split('@')[0] || 'User';
-      setUserData({
+      setUserData({ 
         name: displayName,
         email: user.email || '',
         id: user.id || user.sub || ''
       });
-    }
+    } 
   }, [user]);
 
 
-  // Fetch tenant logo when selected organization changes
-  useEffect(() => {
-    const fetchTenantLogo = async () => {
+  // Fetch tenant logo 
+  const tenantApi = useTenantApi();
+  useEffect(() => { 
+    const fetchTenantLogo = async () => { 
       // Get Logo from the server
-    };
+      if (!selectedOrg) {
+        console.warn('No organization selected, cannot fetch tenant logo');
+        setLogoImage(null);  
+      } 
+      else{ 
+        try {
+          await fetchTenant(selectedOrg); 
+          setLogoImage(tenantData[0].logo.imgBase64);
+
+        } catch (error) {
+          console.error('Error fetching organization logo:', error);
+          setLogoImage(null);
+        } 
+      }
+    }; 
 
     fetchTenantLogo();
-  }, []);
+  }, [selectedOrg, tenantApi]);
 
   React.useEffect(() => {
-    const handleResize = () => {
+    const handleResize = () => { 
       setIsMobile(window.innerWidth <= 768);
     };
 
@@ -109,7 +127,6 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                   src={`data:image/png;base64,${logoImage}`} 
                   alt="Tenant Logo" 
                   className="logo-image" 
-                  style={{ maxHeight: '32px', maxWidth: '140px' }}
                 />
               ) : (
                 <>
@@ -335,4 +352,4 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   );
 };
 
-export default Header; 
+export default Header;
