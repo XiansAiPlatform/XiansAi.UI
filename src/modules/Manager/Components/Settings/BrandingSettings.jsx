@@ -1,10 +1,10 @@
-import { 
-    Box, 
-    Paper, 
-    Typography, 
-    Button, 
-    Input, 
-    Stack, 
+import {
+    Box,
+    Paper,
+    Typography,
+    Button,
+    Input,
+    Stack,
     CircularProgress,
     Grid,
     Card,
@@ -18,47 +18,84 @@ import {
     DialogContentText,
     DialogActions
 } from "@mui/material";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import './Settings.css';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
+import { useTenantApi } from '../../services/tenant-api';
+import { useTenant } from '../../contexts/TenantContext'; 
 
 const BrandingSettings = () => {
     const { selectedOrg } = useSelectedOrg();
+    const tenantApi = useTenantApi();
     const [logoFile, setLogoFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
-    const [primaryColor, setPrimaryColor] = useState('#0ea5e9'); 
+    const [primaryColor, setPrimaryColor] = useState('#0ea5e9');
     const [secondaryColor, setSecondaryColor] = useState('#dc004e');
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     const [confirmDelete, setConfirmDelete] = useState(false);
-
-    const handleFileChange = (event) => {
+    const [tenantID, setTenantID] = useState(null);
+    const [logoInfo, setLogoInfo] = useState({ width: 0, height: 0 });
+    const {fetchTenant, teanantId } = useTenant();
+    
+    const handleFileChange = async (event) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0];
             setLogoFile(file);
-            
+
             // Create a preview URL
             const fileUrl = URL.createObjectURL(file);
             setPreviewUrl(fileUrl);
+
+            // Get image dimensions
+            const dimensions = await getImageDimensions(file);
+            setLogoInfo(dimensions);
         }
     };
-    
+
     const handleConfirmDelete = () => {
         setConfirmDelete(true);
     };
-    
     const handleDeleteLogo = () => {
-        if (previewUrl) {
+        if (previewUrl && !previewUrl.startsWith('data:')) {
             URL.revokeObjectURL(previewUrl);
         }
         setPreviewUrl(null);
         setLogoFile(null);
+        setLogoInfo({ width: 0, height: 0 });
+        updateTenantLogo(); // Call the API to update the logo
         setConfirmDelete(false);
     };
-    
+
+    // Function to update tenant logo via API
+    const updateTenantLogo = async () => {
+        console.log('Updating tenant logo with ID:', teanantId);
+        try {
+            const updateData = {
+                logo: {
+                    url: null,
+                    imgBase64: null,
+                    width: 0,
+                    height: 0 
+                }
+            };
+            const response = await tenantApi.updateTenant(teanantId, updateData);
+            if (response) {
+                showNotification('Logo removed successfully!');
+                window.location.reload();
+                
+            } else {
+                showNotification('Failed to remove logo.', 'error');
+            }
+        } catch (error) {
+            console.error('Error removing logo:', error);
+            showNotification('Failed to remove logo.', 'error');
+        }
+    }
+
     const handleColorChange = (colorType, color) => {
         if (colorType === 'primary') {
             setPrimaryColor(color);
@@ -80,8 +117,116 @@ const BrandingSettings = () => {
     };
 
     const handleSubmit = async () => {
-       // Update tenant with new branding settings
+        // Update tenant with new branding settings
+        if (!selectedOrg) {
+            console.warn('No organization selected for branding settings');
+            showNotification('Please select an organization first.', 'warning');
+        }
+        else {
+            setIsUploading(true);
+            try {
+                const updateData = {};
+
+                // Handle logo update
+                if (logoFile) {
+                    // Convert the logo to base64
+                    const reader = new FileReader();
+                    reader.readAsDataURL(logoFile);
+
+                    await new Promise((resolve, reject) => {
+                        reader.onload = () => {
+                            try {
+                                // Extract the base64 string without the data URL prefix
+                                const base64String = reader.result.split(',')[1];
+
+                                updateData.logo = {
+                                    imgBase64: base64String,
+                                    width: logoInfo.width,
+                                    height: logoInfo.height
+                                };
+                                resolve();
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+                        reader.onerror = reject;
+                    });
+                } else if (previewUrl === null) {
+                    // If logo was deleted
+                    updateData.logo = null;
+                }
+
+                fetchTenant(selectedOrg); 
+
+                // Call API to update branding settings
+                const respone = await tenantApi.updateTenant(teanantId, updateData);
+                if (respone) {  
+                    showNotification('Branding settings updated successfully!');
+                    window.location.reload();
+                }
+                else {
+                    showNotification('Failed to update branding settings.', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating branding settings:', error);
+                showNotification('Failed to update branding settings.', 'error');
+            } finally {
+                setIsUploading(false); 
+            }
+
+        }
+
+
     };
+
+    const getImageDimensions = (file) => {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const width = img.width;
+                const height = img.height;
+                resolve({ width, height });
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
+    // Load tenant data when component mounts or when selectedOrg changes
+    useEffect(() => {
+        const fetchTenantData = async () => {
+            if (selectedOrg) {
+                try {
+                    const tenantData = await fetchTenant(selectedOrg);
+
+                    if (tenantData && tenantData[0].logo) {
+                        if (tenantData[0].logo.url) {
+                            setPreviewUrl(tenantData[0].logo.url);
+                        } else if (tenantData[0].logo.imgBase64) {
+                            setPreviewUrl(`data:image/png;base64,${tenantData[0].logo.imgBase64}`);
+                        }
+                        if (tenantData[0].logo.imgBase64 !== null) {
+                            setLogoInfo({
+                                width: tenantData[0].logo.width || 0,
+                                height: tenantData[0].logo.height || 0
+                            });
+                         }
+                    }
+
+                    // Load colors if available
+                    if (tenantData?.primaryColor) {
+                        setPrimaryColor(tenantData.primaryColor);
+                    }
+                    if (tenantData?.secondaryColor) {
+                        setSecondaryColor(tenantData.secondaryColor);
+                    }
+                } catch (error) {
+                    console.error('Error fetching tenant data:', error);
+                }
+            }
+        };
+
+        fetchTenantData();
+    }, [selectedOrg, tenantApi]);
 
     return (
         <Paper className="ca-certificates-paper">
@@ -97,24 +242,24 @@ const BrandingSettings = () => {
                             <Typography variant="h6" gutterBottom>
                                 Company Logo
                             </Typography>
-                            
+
                             <Divider sx={{ mb: 2 }} />
-                            
+
                             {previewUrl ? (
                                 <Box sx={{ textAlign: 'center', my: 2 }}>
-                                    <img 
-                                        src={previewUrl} 
-                                        alt="Logo Preview" 
-                                        style={{ 
-                                            maxWidth: '250px', 
+                                    <img
+                                        src={previewUrl}
+                                        alt="Logo Preview"
+                                        style={{
+                                            maxWidth: '250px',
                                             maxHeight: '120px',
                                             padding: '10px',
                                             border: '1px dashed #ccc',
                                             borderRadius: '4px',
                                             background: '#f9f9f9'
-                                        }} 
+                                        }}
                                     />
-                                    
+
                                     <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                         <Button
                                             variant="outlined"
@@ -125,7 +270,7 @@ const BrandingSettings = () => {
                                         >
                                             Remove
                                         </Button>
-                                        
+
                                         <Button
                                             variant="contained"
                                             component="label"
@@ -142,8 +287,8 @@ const BrandingSettings = () => {
                                     </Box>
                                 </Box>
                             ) : (
-                                <Box 
-                                    sx={{ 
+                                <Box
+                                    sx={{
                                         textAlign: 'center',
                                         border: '2px dashed #ccc',
                                         borderRadius: '8px',
@@ -156,7 +301,7 @@ const BrandingSettings = () => {
                                     <Typography variant="body1" color="textSecondary" gutterBottom>
                                         No logo uploaded yet
                                     </Typography>
-                                    
+
                                     <Button
                                         variant="contained"
                                         component="label"
@@ -172,7 +317,7 @@ const BrandingSettings = () => {
                                     </Button>
                                 </Box>
                             )}
-                            
+
                             {logoFile && (
                                 <Box sx={{ mt: 1 }}>
                                     <Typography variant="body2" color="textSecondary">
@@ -194,15 +339,15 @@ const BrandingSettings = () => {
                             <Typography variant="h6" gutterBottom>
                                 Theme Colors
                             </Typography>
-                            
+
                             <Divider sx={{ mb: 2 }} />
-                            
+
                             <Stack spacing={3}>
                                 <Box>
                                     <Typography variant="subtitle1" gutterBottom>
                                         Primary Color
                                     </Typography>
-                                    
+
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                         <Box
                                             sx={{
@@ -214,25 +359,25 @@ const BrandingSettings = () => {
                                                 mr: 2
                                             }}
                                         />
-                                        
+
                                         <Input
                                             type="color"
                                             value={primaryColor}
                                             onChange={(e) => handleColorChange('primary', e.target.value)}
                                             sx={{ width: '80px' }}
                                         />
-                                        
+
                                         <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
                                             {primaryColor.toUpperCase()}
                                         </Typography>
                                     </Box>
                                 </Box>
-                                
+
                                 <Box>
                                     <Typography variant="subtitle1" gutterBottom>
                                         Secondary Color
                                     </Typography>
-                                    
+
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                         <Box
                                             sx={{
@@ -244,27 +389,27 @@ const BrandingSettings = () => {
                                                 mr: 2
                                             }}
                                         />
-                                        
+
                                         <Input
                                             type="color"
                                             value={secondaryColor}
                                             onChange={(e) => handleColorChange('secondary', e.target.value)}
                                             sx={{ width: '80px' }}
                                         />
-                                        
+
                                         <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
                                             {secondaryColor.toUpperCase()}
                                         </Typography>
                                     </Box>
                                 </Box>
-                                
+
                                 <Box sx={{ mt: 2 }}>
                                     <Typography variant="subtitle1">Preview</Typography>
                                     <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
                                         <Button variant="contained" sx={{ bgcolor: primaryColor, '&:hover': { bgcolor: primaryColor } }}>
                                             Primary Button
                                         </Button>
-                                        
+
                                         <Button variant="contained" color="secondary" sx={{ bgcolor: secondaryColor, '&:hover': { bgcolor: secondaryColor } }}>
                                             Secondary Button
                                         </Button>
@@ -274,7 +419,7 @@ const BrandingSettings = () => {
                         </CardContent>
                     </Card>
                 </Grid>
-                
+
                 {/* Save Button & Notifications */}
                 <Grid item xs={12}>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
@@ -291,7 +436,7 @@ const BrandingSettings = () => {
                     </Box>
                 </Grid>
             </Grid>
-            
+
             {/* Confirmation Dialog */}
             <Dialog
                 open={confirmDelete}
@@ -310,11 +455,11 @@ const BrandingSettings = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-            
+
             {/* Notification */}
-            <Snackbar 
-                open={notification.open} 
-                autoHideDuration={6000} 
+            <Snackbar
+                open={notification.open}
+                autoHideDuration={6000}
                 onClose={handleNotificationClose}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             >
