@@ -1,6 +1,5 @@
 import { useTenantApi } from "../services/tenant-api";
-import { useState, createContext, useContext } from "react";
-import { useSelectedOrg } from "../contexts/OrganizationContext"; 
+import { useState, createContext, useContext, useEffect } from "react";
 
 // Create the context
 const TenantContext = createContext();
@@ -15,53 +14,37 @@ export const useTenant = () => {
 };
 
 //provide tenant data provider
-export const TenantProvider = ({ children }) => {
-  const [tenantData, setTenantData] = useState(null);
+export const TenantProvider = ({ children }) => {  const [tenantData, setTenantData] = useState(null);
   const [tenantId, setTenantId] = useState(null);
-  const [tenantLogo, setTenantLogo] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const tenantApi = useTenantApi();
-  const { selectedOrg } = useSelectedOrg();
-
-  const fetchTenant = async (id) => {
-    if (!id) {
-      id = selectedOrg;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await tenantApi.getTenant(id);
-      setTenantData(data);
-      
-      // Process tenant data after it's available
-      if (data && data.length > 0) {
-        console.log("Tenant data fetched:", data);
-        setTenantId(data[0].id);
-        setTenantLogo(data[0].logo?.imgBase64);
-      } else {
-        console.warn("No tenant data returned");
+  const organizationId = localStorage.getItem("selectedOrganization");
+  useEffect(() => {
+    const fetchTenant = async () => {
+      setLoading(true);
+      try {
+        const data = await tenantApi.getTenant(organizationId);
+        if (data) {
+          setTenantData(data);
+          setTenantId(data.id);
+        }
+      } catch (error) {
+        console.error(`Error fetching tenant`, error);
+      } finally {
+        setLoading(false);
       }
-
-      return data;
-    } catch (error) {
-      console.error(`Error fetching tenant ${id}:`, error);
-      setError(error);
-      return null;
-    } finally {
-      setLoading(false);
+    };
+    
+    if (organizationId) {
+      fetchTenant();
     }
-  };
-  // Provide the context value
+  }, [organizationId, tenantApi]);
+
+  
   const contextValue = {
     tenantData,
     tenantId,
-    tenantLogo,
-    loading,
-    error,
-    fetchTenant
+    loading
   };
 
   return (
