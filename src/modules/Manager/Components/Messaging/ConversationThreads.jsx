@@ -265,7 +265,10 @@ const ConversationThreads = ({
                                                             cursor: 'pointer'
                                                         }}
                                                     >
-                                                        {thread.participantId || 'Unknown Participant'}
+                                                        {thread.participantId 
+                                                            ? thread.participantId.substring(0, 12) + (thread.participantId.length > 12 ? '...' : '')
+                                                            : 'Unknown Participant'
+                                                        }
                                                     </Typography>
                                                 </Tooltip>
                                                 {thread.hasUnread && (
@@ -325,23 +328,23 @@ const ConversationThreads = ({
                                                             color="text.secondary"
                                                             sx={{ fontStyle: 'italic' }}
                                                         >
-                                                            Agent:
+                                                            
                                                         </Typography>
                                                         <Tooltip title={thread.workflowType} arrow placement="bottom">
                                                             <Typography 
                                                                 variant="caption" 
                                                                 color="text.secondary" 
                                                                 sx={{ 
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis',
-                                                                    whiteSpace: 'nowrap',
                                                                     fontStyle: 'italic',
                                                                     cursor: 'pointer',
                                                                     flex: 1,
                                                                     minWidth: 0
                                                                 }}
                                                             >
-                                                                {thread.workflowType}
+                                                                {thread.workflowType 
+                                                                    ? thread.workflowType.split(':')[1] || thread.workflowType
+                                                                    : ''
+                                                                }
                                                             </Typography>
                                                         </Tooltip>
                                                     </Box>

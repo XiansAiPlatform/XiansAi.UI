@@ -490,7 +490,7 @@ body {
   font-family: var(--font-family);
   font-weight: 800;
   letter-spacing: -1px;
-  font-size: 1.625rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 2px;
@@ -595,31 +595,4 @@ body {
 .user-menu-item .MuiSvgIcon-root {
   font-size: 1.25rem;
   opacity: 0.8;
-}
-
-.logo-image{
-  max-height: 40px;
-  width: auto;
-  margin-right: 8px;
-}
-
-@media (max-width: 768px) {
-  .logo-image{
-    height: 32px;
-  }
-}
-
-@media (max-width: 480px) {
-  .logo-image{
-    height: 28px;
-  }
-  
-}
-
-.ca-certificates-box {
-  margin-top: 16px;
-  padding: 16px;
-  border-radius: var(--radius-md);
-  background-color: var(--bg-paper);
-  border: 1px solid var(--border-color);
 }

@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Paper, Box, useTheme } from '@mui/material';
-import ChatHeader from './ChatHeader';
+import ChatHeader from '../ChatHeader';
 import MessagesList from './MessagesList';
-import { useLoading } from '../../contexts/LoadingContext';
-import useMessagePolling from './hooks/useMessagePolling';
+import { useLoading } from '../../../contexts/LoadingContext';
+import useMessagePolling from '../hooks/useMessagePolling';
 
 /**
  * Chat conversation component that displays messages for a selected thread
@@ -17,6 +17,7 @@ import useMessagePolling from './hooks/useMessagePolling';
  * @param {Function} [props.onHandover] - Optional callback to call when a thread handover is detected
  * @param {Function} [props.onRefresh] - Optional callback to refresh conversations list
  * @param {Function} [props.onThreadDeleted] - Optional callback when thread is deleted
+ * @param {string} props.agentName - Name of the current agent
  */
 const ChatConversation = ({ 
     selectedThreadId,
@@ -26,7 +27,8 @@ const ChatConversation = ({
     onSendMessage,
     onHandover,
     onRefresh,
-    onThreadDeleted
+    onThreadDeleted,
+    agentName
 }) => {
     const theme = useTheme();
     const [messages, setMessages] = useState([]);
@@ -252,6 +254,7 @@ const ChatConversation = ({
                 onSendMessage={onSendMessage}
                 onThreadDeleted={onThreadDeleted}
                 onRefresh={onRefresh}
+                agentName={agentName}
             />
             
             {/* Messages Container - Scrollable area */}
