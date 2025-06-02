@@ -58,7 +58,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
     }; 
 
     fetchTenantLogo();
-  }, [selectedOrg, tenantApi]);
+  }, [fetchTenant, selectedOrg, tenantApi, tenantData]);
 
   React.useEffect(() => {
     const handleResize = () => { 
@@ -352,4 +352,4 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   );
 };
 
-export default Header; 
+export default Header;
