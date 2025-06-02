@@ -596,3 +596,16 @@ body {
   font-size: 1.25rem;
   opacity: 0.8;
 }
+
+.logo-image{
+  width: auto;
+  height: 40px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  margin-right: 8px;
+}
+@media (max-width: 480px) {
+  .logo-image {
+    height: 32px;
+  }
+}
