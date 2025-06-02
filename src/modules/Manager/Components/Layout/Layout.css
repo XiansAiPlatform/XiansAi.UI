@@ -598,7 +598,7 @@ body {
 }
 
 .logo-image{
-  height: 40px;
+  max-height: 40px;
   width: auto;
   margin-right: 8px;
 }
