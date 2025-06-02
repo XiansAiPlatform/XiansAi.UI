@@ -23,6 +23,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
 import { useNavigate } from 'react-router-dom';
+import { TenantProvider } from './contexts/TenantContext';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -43,6 +44,7 @@ function ManagerRoutes() {
   return (
     <NotificationProvider>
       <OrganizationProvider>
+        <TenantProvider>
         <AuditProvider>
           <ThemeProvider theme={theme}>
             <ToastContainer />
@@ -98,6 +100,7 @@ function ManagerRoutes() {
             </LoadingProvider>
           </ThemeProvider>
         </AuditProvider>
+        </TenantProvider>
       </OrganizationProvider>
     </NotificationProvider>
   );
