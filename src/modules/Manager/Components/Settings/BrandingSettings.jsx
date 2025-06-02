@@ -39,7 +39,6 @@ const BrandingSettings = () => {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [tenantID, setTenantID] = useState(null);
     const [logoInfo, setLogoInfo] = useState({ width: 0, height: 0 });
-    const {fetchTenant, teanantId } = useTenant();
     
     const handleFileChange = async (event) => {
         if (event.target.files && event.target.files[0]) {
@@ -72,7 +71,7 @@ const BrandingSettings = () => {
 
     // Function to update tenant logo via API
     const updateTenantLogo = async () => {
-        console.log('Updating tenant logo with ID:', teanantId);
+        console.log('Updating tenant logo with ID:', tenantID);
         try {
             const updateData = {
                 logo: {
@@ -82,7 +81,7 @@ const BrandingSettings = () => {
                     height: 0 
                 }
             };
-            const response = await tenantApi.updateTenant(teanantId, updateData);
+            const response = await tenantApi.updateTenant(tenantID, updateData);
             if (response) {
                 showNotification('Logo removed successfully!');
                 window.location.reload();
@@ -156,10 +155,8 @@ const BrandingSettings = () => {
                     updateData.logo = null;
                 }
 
-                fetchTenant(selectedOrg); 
-
                 // Call API to update branding settings
-                const respone = await tenantApi.updateTenant(teanantId, updateData);
+                const respone = await tenantApi.updateTenant(tenantID, updateData);
                 if (respone) {  
                     showNotification('Branding settings updated successfully!');
                     window.location.reload();
@@ -196,18 +193,23 @@ const BrandingSettings = () => {
         const fetchTenantData = async () => {
             if (selectedOrg) {
                 try {
-                    const tenantData = await fetchTenant(selectedOrg);
+                    // const tenantData = await fetchTenant(selectedOrg);
+                    const tenantData = await tenantApi.getTenant(selectedOrg);
 
-                    if (tenantData && tenantData[0].logo) {
-                        if (tenantData[0].logo.url) {
-                            setPreviewUrl(tenantData[0].logo.url);
-                        } else if (tenantData[0].logo.imgBase64) {
-                            setPreviewUrl(`data:image/png;base64,${tenantData[0].logo.imgBase64}`);
+                    if(tenantData) {
+                        setTenantID(tenantData.id);
+                    }
+
+                    if (tenantData && tenantData.logo) {
+                        if (tenantData.logo.url) {
+                            setPreviewUrl(tenantData.logo.url);
+                        } else if (tenantData.logo.imgBase64) {
+                            setPreviewUrl(`data:image/png;base64,${tenantData.logo.imgBase64}`);
                         }
-                        if (tenantData[0].logo.imgBase64 !== null) {
+                        if (tenantData.logo.imgBase64 !== null) {
                             setLogoInfo({
-                                width: tenantData[0].logo.width || 0,
-                                height: tenantData[0].logo.height || 0
+                                width: tenantData.logo.width || 0,
+                                height: tenantData.logo.height || 0
                             });
                          }
                     }
