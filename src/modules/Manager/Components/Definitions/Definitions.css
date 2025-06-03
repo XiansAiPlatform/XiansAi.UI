@@ -22,7 +22,9 @@
   text-transform: none !important;
   font-weight: 500 !important;
   box-shadow: none !important;
-  min-width: 120px !important;
+  min-width: 90px !important;
+  font-size: 0.75rem !important;
+  padding: 4px 12px !important;
 }
 
 .visualize-btn:hover,
@@ -68,13 +70,15 @@
 .definition-content-cell {
   border-bottom: none;
   padding-right: var(--spacing-md);
+  padding-top: var(--spacing-xs);
+  padding-bottom: var(--spacing-xs);
 }
 
 .definition-content-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--spacing-sm) 0;
+  padding: var(--spacing-xs) 0;
 }
 
 .definition-title {
@@ -83,6 +87,7 @@
     font-family: var(--font-family) !important;
     font-weight: var(--font-weight-normal) !important;
     font-size: var(--text-md) !important;
+    margin-bottom: 2px !important;
 }
 
 .visualize-btn {
@@ -103,21 +108,23 @@
 
 .start-btn {
   border-radius: var(--radius-md);
-  background-color: var(--primary);
-  color: white;
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border-color);
 }
 
 .start-btn .MuiButton-startIcon {
-  color: white;
+  color: var(--primary);
 }
 
 .start-btn:hover {
-  background-color: var(--primary-dark);
-  box-shadow: var(--button-primary-shadow) !important;
+  background-color: var(--primary-lighter);
+  border-color: var(--primary);
+  box-shadow: none !important;
 }
 
 .start-btn:hover .MuiButton-startIcon {
-  color: white;
+  color: var(--primary);
 }
 
 .definition-collapse-cell {

@@ -4,6 +4,12 @@ export function getConfig() {
   const config = {
     authProvider,
     apiBaseUrl: process.env.REACT_APP_API_URL,
+    modules: {
+      // Enable/disable modules (defaults to true if not specified)
+      public: process.env.REACT_APP_ENABLE_PUBLIC_MODULE !== 'false',
+      manager: process.env.REACT_APP_ENABLE_MANAGER_MODULE !== 'false',
+      agents: process.env.REACT_APP_ENABLE_AGENTS_MODULE !== 'false',
+    }
   };
 
   if (authProvider === 'auth0') {

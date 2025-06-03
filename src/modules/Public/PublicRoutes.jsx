@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Home from './Components/Home/Home';
 import Register from './Components/Register/Register';
 import Login from './auth/Login';
@@ -24,6 +24,7 @@ function PublicRoutes() {
           <Callback />
         </NotificationProvider>
       } />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

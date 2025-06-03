@@ -1,12 +1,19 @@
 import { keyframes } from '@emotion/react';
-import { Box, Table, TableBody, TableContainer, Paper, Typography, Chip, Stack, Button } from '@mui/material';
+import { Box, Table, TableBody, TableContainer, Paper, Typography, Chip, Stack, Button, Menu, MenuItem, IconButton } from '@mui/material';
 import { ReactComponent as AgentSvgIcon } from '../../theme/agent.svg';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShareIcon from '@mui/icons-material/Share';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DefinitionRow from './DefinitionRow';
 import { formatAgentName, formatLastUpdated, isRecentlyUpdated } from './definitionUtils';
 import { tableStyles } from './styles';
 import { useAuth } from '../../auth/AuthContext';
+import { useWorkflowApi } from '../../services/workflow-api';
+import { useLoading } from '../../contexts/LoadingContext';
+import { useSelectedOrg } from '../../contexts/OrganizationContext';
+import { useNotification } from '../../contexts/NotificationContext';
+import { useState } from 'react';
 
 // Define a keyframe animation for the pulsing effect
 const pulse = keyframes`
@@ -33,6 +40,50 @@ const AgentGroup = ({
   onShareClick
 }) => {
   const { user } = useAuth();
+  const api = useWorkflowApi();
+  const { setLoading } = useLoading();
+  const { selectedOrg } = useSelectedOrg();
+  const { showSuccess, showError } = useNotification();
+  const [anchorEl, setAnchorEl] = useState(null);
+  
+  const handleMenuClick = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+  
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const handleActivateAll = async () => {
+    handleMenuClose();
+    setLoading(true);
+    
+    try {
+      const promises = definitions.map(async (definition) => {
+        // Generate unique flow IDs for each workflow
+        const flowId = `${selectedOrg}:${definition.workflowType.trim()}`;
+        
+        return api.startNewWorkflow(
+          definition.workflowType.trim(),
+          definition.agent.trim(),
+          [],
+          flowId,
+          null
+        );
+      });
+      
+      await Promise.all(promises);
+      
+      // Show success notification
+      showSuccess(`Successfully activated ${definitions.length} workflow${definitions.length !== 1 ? 's' : ''}`);
+    } catch (error) {
+      console.error('Failed to activate all workflows:', error);
+      showError(`Failed to activate workflows: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function to determine current user's permission level
   const getUserPermissionLevel = () => {
@@ -262,6 +313,40 @@ const AgentGroup = ({
               >
                 Delete Agent
               </Button>
+              <IconButton
+                size="small"
+                onClick={handleMenuClick}
+                sx={{
+                  borderRadius: '4px',
+                  border: '1px solid var(--border-color)',
+                  padding: '3px',
+                  color: 'var(--text-secondary)',
+                  '&:hover': {
+                    borderColor: 'var(--border-color-hover)',
+                    backgroundColor: 'var(--bg-hover)'
+                  }
+                }}
+              >
+                <MoreVertIcon fontSize="small" />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem onClick={handleActivateAll}>
+                  <PlayArrowIcon fontSize="small" sx={{ mr: 1 }} />
+                  Activate All as Singletons
+                </MenuItem>
+              </Menu>
             </Stack>
           </>
         )}

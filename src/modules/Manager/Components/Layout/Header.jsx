@@ -43,7 +43,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;
     setSelectedOrg(newOrg);
-    navigate('/definitions');
+    navigate('/manager/definitions');
   };
 
   const handleMenu = (event) => {

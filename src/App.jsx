@@ -12,9 +12,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import lazyLoad from './utils/lazyLoad';
 
 // Use lazyLoad utility for code splitting with prefetch
-const PublicRoutes = lazyLoad(() => import('./modules/Public/PublicRoutes'), { prefetch: true });
-const ManagerRoutes = lazyLoad(() => import('./modules/Manager/ManagerRoutes'));
-const AgentsRoutes = lazyLoad(() => import('./modules/Agents/AgentsRoutes'));
+const AppRoutes = lazyLoad(() => import('./routes/AppRoutes'), { prefetch: true });
 
 // Dynamically select the Auth Provider based on configuration
 const AppAuthProvider = ({ children }) => {
@@ -37,9 +35,7 @@ function App() {
       <AppAuthProvider>
         <ErrorBoundary>
           <Suspense fallback={<LoadingSpinner message="Loading application..." />}>
-            <PublicRoutes />
-            <AgentsRoutes />
-            <ManagerRoutes />
+            <AppRoutes />
           </Suspense>
         </ErrorBoundary>
         <ToastContainer />
