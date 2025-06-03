@@ -1,5 +1,5 @@
 export function getConfig() {
-  const authProvider = process.env.REACT_APP_AUTH_PROVIDER || 'auth0'; // Default to auth0
+  const authProvider = process.env.REACT_APP_AUTH_PROVIDER || "keycloak"; // Default to auth0
 
   const config = {
     authProvider,
@@ -15,6 +15,10 @@ export function getConfig() {
     config.entraIdClientId = process.env.REACT_APP_ENTRA_ID_CLIENT_ID;
     config.entraIdAuthority = process.env.REACT_APP_ENTRA_ID_AUTHORITY;
     config.entraIdScopes = process.env.REACT_APP_ENTRA_ID_SCOPES ? process.env.REACT_APP_ENTRA_ID_SCOPES.split(',') : ['User.Read'];
+  } else if (authProvider === 'keycloak') {
+    config.keycloakUrl = process.env.REACT_APP_KEYCLOAK_URL;
+    config.keycloakRealm = process.env.REACT_APP_KEYCLOAK_REALM;
+    config.keycloakClientId = process.env.REACT_APP_KEYCLOAK_CLIENT_ID;
     config.organizationClaim = process.env.REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM || 'https://login-dev.parkly.no/tenants';
     config.knownAuthorities = process.env.REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES ? process.env.REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES.split(',') : [];
   }
