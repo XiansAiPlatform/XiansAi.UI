@@ -16,13 +16,18 @@ import {
     DialogTitle,
     DialogContent,
     DialogContentText,
-    DialogActions
+    DialogActions,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select
 } from "@mui/material";
 import { useState, useEffect } from 'react';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import './Settings.css';
+import { colorThemes } from '../../theme/mui-theme';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { useTenantApi } from '../../services/tenant-api';
 import { useTenant } from '../../contexts/TenantContext'; 
@@ -32,13 +37,17 @@ const BrandingSettings = () => {
     const tenantApi = useTenantApi();
     const [logoFile, setLogoFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
-    const [isUploading, setIsUploading] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);    
     const [primaryColor, setPrimaryColor] = useState('#0ea5e9');
     const [secondaryColor, setSecondaryColor] = useState('#dc004e');
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [logoInfo, setLogoInfo] = useState({ width: 0, height: 0 });
-    const { tenantData, tenantId} = useTenant(); // Get tenant data from context
+    const [selectedTheme, setSelectedTheme] = useState('default');
+    const { tenant, fetchTenant } = useTenant();
+    
+    // Add a state variable to hold the tenantId
+    const [tenantId, setTenantId] = useState(null);
     
     const handleFileChange = async (event) => {
         if (event.target.files && event.target.files[0]) {
@@ -58,6 +67,7 @@ const BrandingSettings = () => {
     const handleConfirmDelete = () => {
         setConfirmDelete(true);
     };
+
     const handleDeleteLogo = () => {
         if (previewUrl && !previewUrl.startsWith('data:')) {
             URL.revokeObjectURL(previewUrl);
@@ -71,7 +81,6 @@ const BrandingSettings = () => {
 
     // Function to update tenant logo via API
     const updateTenantLogo = async () => {
-        console.log('Updating tenant logo with ID:', tenantId);
         try {
             const updateData = {
                 logo: {
@@ -84,6 +93,7 @@ const BrandingSettings = () => {
             const response = await tenantApi.updateTenant(tenantId, updateData);
             if (response) {
                 showNotification('Logo removed successfully!');
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 window.location.reload();
                 
             } else {
@@ -118,15 +128,13 @@ const BrandingSettings = () => {
     const handleSubmit = async () => {
         // Update tenant with new branding settings
         if (!tenantId) {
-            console.warn('No organization selected for branding settings');
+            console.warn('No tenantId available for branding settings');
             showNotification('Please select an organization first.', 'warning');
         }
         else {
             setIsUploading(true);
             try {
                 const updateData = {};
-
-                // Handle logo update
                 if (logoFile) {
                     // Convert the logo to base64
                     const reader = new FileReader();
@@ -154,11 +162,15 @@ const BrandingSettings = () => {
                     // If logo was deleted
                     updateData.logo = null;
                 }
+                
+                // Store the selected theme name
+                updateData.theme = selectedTheme;
 
-                // Call API to update branding settings
-                const respone = await tenantApi.updateTenant(tenantId, updateData);
-                if (respone) {  
+                // Call API to update branding settings using the tenantId
+                const response = await tenantApi.updateTenant(tenantId, updateData);
+                if (response) {  
                     showNotification('Branding settings updated successfully!');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                     window.location.reload();
                 }
                 else {
@@ -170,7 +182,6 @@ const BrandingSettings = () => {
             } finally {
                 setIsUploading(false); 
             }
-
         }
     };
 
@@ -184,42 +195,66 @@ const BrandingSettings = () => {
             };
             img.src = URL.createObjectURL(file);
         });
+    };    // Handle theme selection change
+    const handleThemeChange = (event) => {
+        const themeName = event.target.value;
+        setSelectedTheme(themeName);
+        
+        // Set primary and secondary colors from selected theme
+        if (colorThemes[themeName]) {
+            setPrimaryColor(colorThemes[themeName].primary.main);
+            setSecondaryColor(colorThemes[themeName].secondary.main);
+        }
     };
 
-    // Load tenant data when component mounts or when selectedOrg changes
+    // Load tenant data
     useEffect(() => {
-        const fetchTenantData = async () => {
-            if (tenantData) {
+        const fetchTenant = async () => {
+            if (tenant) {
+                setTenantId(tenant.id);
+                
                 try {
-                    if (tenantData.logo) {
-                        if (tenantData.logo.imgBase64) {
-                            setPreviewUrl(`data:image/png;base64,${tenantData.logo.imgBase64}`)
-                        } else if (tenantData.logo.url) {
-                            setPreviewUrl(tenantData.logo.url);
+                    if (tenant.logo) {
+                        if (tenant.logo.imgBase64) {
+                            setPreviewUrl(`data:image/png;base64,${tenant.logo.imgBase64}`)
+                        } else if (tenant.logo.url) {
+                            setPreviewUrl(tenant.logo.url);
                         }
-                        if (tenantData.logo.imgBase64 !== null) {
+                        if (tenant.logo.imgBase64 !== null) {
                             setLogoInfo({
-                                width: tenantData.logo.width || 0,
-                                height: tenantData.logo.height || 0
+                                width: tenant.logo.width || 0,
+                                height: tenant.logo.height || 0
                             });
-                         }
+                        }
+                    }
+                    
+                    // Load theme name
+                    if (tenant.theme && colorThemes[tenant.theme]) {
+                        setSelectedTheme(tenant.theme);
+                        
+                        // Update color pickers based on the selected theme
+                        if (colorThemes[tenant.theme]) {
+                            setPrimaryColor(colorThemes[tenant.theme].primary.main);
+                            setSecondaryColor(colorThemes[tenant.theme].secondary.main);
+                        }
                     }
 
                     // Load colors if available
-                    if (tenantData?.primaryColor) {
-                        setPrimaryColor(tenantData.primaryColor);
+                    if (tenant?.primaryColor) {
+                        setPrimaryColor(tenant.primaryColor);
                     }
-                    if (tenantData?.secondaryColor) {
-                        setSecondaryColor(tenantData.secondaryColor);
+                    if (tenant?.secondaryColor) {
+                        setSecondaryColor(tenant.secondaryColor);
                     }
                 } catch (error) {
-                    console.error('Error fetching tenant data:', error);
+                    console.error('Error processing tenant data:', error);
                 }
             }
+            
         };
 
-        fetchTenantData();
-    }, [selectedOrg, tenantData, tenantId]);
+        fetchTenant();
+    }, [selectedOrg, tenant, fetchTenant]);
 
     return (
         <Paper className="ca-certificates-paper">
@@ -328,7 +363,7 @@ const BrandingSettings = () => {
                 {/* Theme Color Section */}
                 <Grid item xs={12} md={6}>
                     <Card elevation={2}>
-                        <CardContent>
+                        <CardContent>                            
                             <Typography variant="h6" gutterBottom>
                                 Theme Colors
                             </Typography>
@@ -336,6 +371,29 @@ const BrandingSettings = () => {
                             <Divider sx={{ mb: 2 }} />
 
                             <Stack spacing={3}>
+                                <Box>
+                                    <Typography variant="subtitle1" gutterBottom>
+                                        Theme Selection
+                                    </Typography>
+                                    <FormControl fullWidth sx={{ mb: 2 }}>
+                                        <InputLabel id="theme-select-label">Theme</InputLabel>
+                                        <Select
+                                            labelId="theme-select-label"
+                                            id="theme-select"
+                                            value={selectedTheme}
+                                            label="Theme"
+                                            onChange={handleThemeChange}
+                                        >                                            
+                                            <MenuItem value="default">Default Theme</MenuItem>
+                                            <MenuItem value="nordicFjord">Fjord Theme</MenuItem>
+                                            <MenuItem value="nordicAurora">Aurora Theme</MenuItem>
+                                            <MenuItem value="nordicMinimalist">Minimalist Theme</MenuItem>
+                                            <MenuItem value="europeanClassic">Classic Theme</MenuItem>
+                                            <MenuItem value="australasianCoastal">Coastal Theme</MenuItem>
+                                        </Select>
+                                    </FormControl>
+                                </Box>
+                                
                                 <Box>
                                     <Typography variant="subtitle1" gutterBottom>
                                         Primary Color

@@ -8,54 +8,50 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
-import { useTenant } from '../../contexts/TenantContext'; // Assuming this is the correct path to your TenantContext
+import { useTenant } from '../../contexts/TenantContext';
 
 const Header = ({ pageTitle = "", toggleNav }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
-  const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });  const [logoImage, setLogoImage] = React.useState(null);
-  const { tenantData } = useTenant(); 
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768); 
+   const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });    
+   const [logoImage, setLogoImage] = React.useState(null);
+  const { tenant } = useTenant();
 
-  useEffect(() => {  
+  useEffect(() => {
     // Update user data when auth context changes
     if (user) {
       console.log('Auth user data:', user);
       // Use nickname if name is empty, or extract from email as last resort
       const displayName = user.name || user.nickname || user.email?.split('@')[0] || 'User';
-      setUserData({ 
+      setUserData({
         name: displayName,
         email: user.email || '',
         id: user.id || user.sub || ''
       });
-    } 
+    }
   }, [user]);
 
   useEffect(() => { 
+    // Fetch tenant logo 
     const fetchTenantLogo = async () => { 
-      // Get Logo from the server
-      if (!tenantData) {
-        console.warn('Cannot fetch tenant logo');
-        setLogoImage(null);  
-      }
-      else{ 
-        try {
-          if (tenantData.logo) {
-            setLogoImage(tenantData.logo.imgBase64);
-          } else {
-            setLogoImage(null);
-          }
-        } catch (error) {
-          console.error('Error fetching organization logo:', error);
+      try {
+        if (tenant && tenant.logo) {
+          setLogoImage(tenant.logo.imgBase64);
+          console.log(tenant);
+        } else {
           setLogoImage(null);
-        } 
+        }
+      } catch (error) {
+        console.error('Error fetching tenant logo:', error);
+        setLogoImage(null);
       }
-    }; 
+    };
 
     fetchTenantLogo();
-  }, [selectedOrg, tenantData]);
+  }, [selectedOrg, tenant]);
 
   React.useEffect(() => {
     const handleResize = () => { 
@@ -117,10 +113,10 @@ const Header = ({ pageTitle = "", toggleNav }) => {
           display: 'flex',
           alignItems: 'center',
           gap: 2
-        }}>          
+        }}>            
         <Link to="/" className="logo-link">
             <Typography className="logo-text">
-              {logoImage !== null ? (
+              { logoImage !== null ? (
                 <img 
                   src={`data:image/png;base64,${logoImage}`} 
                   alt="Tenant Logo" 
