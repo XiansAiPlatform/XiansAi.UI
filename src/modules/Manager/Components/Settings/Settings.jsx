@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
+import TenantSettings from './TenantSettings';
 import './Settings.css';
 
 const Settings = () => {
@@ -38,11 +39,13 @@ const Settings = () => {
             aria-label="settings tabs"
           >
             <Tab label="App Server" />
+            <Tab label="Tenants" />
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
           {currentTab === 0 && <CACertificates />}
+          {currentTab === 1 && <TenantSettings />}
         </Box>
       </Box>
     </Container>
