@@ -111,7 +111,7 @@ class KeycloakService {
   async getAccessTokenSilently(options) {
     try {
       if (!this.keycloakInstance || !this.keycloakInstance.token) {
-        throw new Error("No valid Keycloak session");
+        throw new Error("Login required");
       }
 
       // Check if token is about to expire and refresh it
