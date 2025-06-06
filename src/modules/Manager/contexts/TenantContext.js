@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useTenantApi } from "../services/tenant-api";
+import { useTenantsApi } from "../services/tenants-api";
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
@@ -13,7 +13,7 @@ export const TenantProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   
-  const tenantApi = useTenantApi();
+  const tenantApi = useTenantsApi();
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const location = useLocation();
 

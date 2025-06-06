@@ -48,7 +48,7 @@ const Settings = () => {
         <Box role="tabpanel">
           {currentTab === 0 && <CACertificates />}
           {currentTab === 1 && <TenantSettings />}
-          {currentTab === 1 && <BrandingSettings />}
+          {currentTab === 2 && <BrandingSettings />}
 
         </Box>
       </Box>

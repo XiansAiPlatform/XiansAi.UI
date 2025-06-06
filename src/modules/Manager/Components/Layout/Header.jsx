@@ -40,7 +40,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
       try {
         if (tenant && tenant.logo) {
           setLogoImage(tenant.logo.imgBase64);
-          console.log(tenant);
+          console.log("Tenant data:", tenant);
         } else {
           setLogoImage(null);
         }

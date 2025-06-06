@@ -29,12 +29,12 @@ import SaveIcon from '@mui/icons-material/Save';
 import './Settings.css';
 import { colorThemes } from '../../theme/mui-theme';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
-import { useTenantApi } from '../../services/tenant-api';
+import { useTenantsApi } from '../../services/tenants-api';
 import { useTenant } from '../../contexts/TenantContext'; 
 
 const BrandingSettings = () => {
     const { selectedOrg } = useSelectedOrg();
-    const tenantApi = useTenantApi();
+    const tenantApi = useTenantsApi();
     const [logoFile, setLogoFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isUploading, setIsUploading] = useState(false);    
