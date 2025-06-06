@@ -7,17 +7,17 @@ import { useRef, useCallback, useEffect } from 'react';
  * @param {string} options.threadId - ID of the thread to poll messages for
  * @param {Function} options.fetchMessages - Function to fetch thread messages
  * @param {number} options.pollingInterval - Interval in ms between polls (default: 5000)
- * @param {number} options.maxPollingCount - Max number of polls before stopping (default: 24)
+ * @param {number} options.pollingDuration - Duration in ms to poll for (default: 60000 = 60 seconds)
  * @returns {Object} - Object containing polling control functions
  */
 const useMessagePolling = ({
     threadId,
     fetchMessages,
-    pollingInterval = 5000,
-    maxPollingCount = 24 // 2 minutes with 5s interval
+    pollingInterval = 3000,
+    pollingDuration = 60000 // 60 seconds default
 }) => {
     const pollingTimerRef = useRef(null);
-    const pollingCountRef = useRef(0);
+    const pollingEndTimeRef = useRef(null);
     
     // Stop message polling
     const stopPolling = useCallback(() => {
@@ -25,9 +25,10 @@ const useMessagePolling = ({
             clearTimeout(pollingTimerRef.current);
             pollingTimerRef.current = null;
         }
+        pollingEndTimeRef.current = null;
     }, []);
     
-    // Start polling for message updates
+    // Start polling for message updates for a limited duration
     const startPolling = useCallback((id) => {
         // Use the passed threadId parameter or fall back to the one from options
         const threadToUse = id || threadId;
@@ -35,24 +36,23 @@ const useMessagePolling = ({
         // Clear any existing polling
         stopPolling();
         
-        // Reset the polling counter
-        pollingCountRef.current = 0;
+        // Set the end time for polling
+        pollingEndTimeRef.current = Date.now() + pollingDuration;
         
-        console.log('Starting message polling for 2 minutes');
+        console.log(`⏰ Starting polling for ${pollingDuration / 1000} seconds (thread: ${threadToUse})`);
         
         // Define the polling function
         const pollMessages = () => {
-            pollingCountRef.current += 1;
-            
-            // Check if we've reached the max polling count
-            if (pollingCountRef.current > maxPollingCount) {
-                console.log('Message polling completed after 2 minutes');
+            // Check if polling duration has expired
+            if (Date.now() >= pollingEndTimeRef.current) {
+                console.log(`⏹️ Polling completed after ${pollingDuration / 1000} seconds`);
                 stopPolling();
                 return;
             }
             
             // Check if thread ID is still valid
             if (!threadToUse) {
+                console.log("❌ Thread ID is no longer valid, stopping polling");
                 stopPolling();
                 return;
             }
@@ -66,7 +66,20 @@ const useMessagePolling = ({
         
         // Start the first poll after the interval
         pollingTimerRef.current = setTimeout(pollMessages, pollingInterval);
-    }, [threadId, fetchMessages, pollingInterval, maxPollingCount, stopPolling]);
+    }, [threadId, fetchMessages, pollingInterval, pollingDuration, stopPolling]);
+
+    // Start polling immediately when triggered (e.g., after sending a message)
+    const triggerPolling = useCallback((id) => {
+        const threadToUse = id || threadId;
+        
+        if (!threadToUse) {
+            console.log("❌ No threadId provided for triggerPolling");
+            return;
+        }
+        
+        console.log('🚀 Triggering polling after message sent');
+        startPolling(threadToUse);
+    }, [startPolling, threadId]);
     
     // Clean up polling on unmount
     useEffect(() => {
@@ -78,6 +91,7 @@ const useMessagePolling = ({
     return {
         startPolling,
         stopPolling,
+        triggerPolling,
         isPolling: !!pollingTimerRef.current
     };
 };

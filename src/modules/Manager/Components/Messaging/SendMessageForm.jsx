@@ -19,7 +19,8 @@ const SendMessageForm = ({
     initialParticipantId = '', 
     initialWorkflowType = '',
     initialWorkflowId = '',
-    onMessageSent 
+    onMessageSent,
+    sendMessage
 }) => {
     const [workflowType, setWorkflowType] = useState(initialWorkflowType);
     const [workflowId, setWorkflowId] = useState(initialWorkflowId);
@@ -229,28 +230,48 @@ const SendMessageForm = ({
             }
             
             let response;
-            if (metadataOnly) {
-                // Use sendData for metadata-only messages
-                response = await messagingApi.sendData(
-                    threadId,
-                    agentName,
-                    workflowType,
-                    workflowId,
-                    participantId,
-                    null, // no content for metadata-only
-                    parsedMetadata
-                );
+            
+            // Check if we have the unified sendMessage function and this is an existing thread
+            if (sendMessage && threadId) {
+                // Use the unified sendMessage function for existing threads
+                const messageData = {
+                    content: metadataOnly ? null : content,
+                    metadata: parsedMetadata,
+                    isNewThread: false
+                };
+                
+                const result = await sendMessage(messageData);
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to send message');
+                }
+                
+                response = result.response;
             } else {
-                // Use sendMessage for regular messages
-                response = await messagingApi.sendMessage(
-                    threadId,
-                    agentName,
-                    workflowType,
-                    workflowId,
-                    participantId,
-                    content,
-                    parsedMetadata
-                );
+                // Use the original API call approach for new threads or when sendMessage is not available
+                if (metadataOnly) {
+                    // Use sendData for metadata-only messages
+                    response = await messagingApi.sendData(
+                        threadId,
+                        agentName,
+                        workflowType,
+                        workflowId,
+                        participantId,
+                        null, // no content for metadata-only
+                        parsedMetadata
+                    );
+                } else {
+                    // Use sendMessage for regular messages
+                    response = await messagingApi.sendMessage(
+                        threadId,
+                        agentName,
+                        workflowType,
+                        workflowId,
+                        participantId,
+                        content,
+                        parsedMetadata
+                    );
+                }
             }
             
             showSuccess('Message sent successfully!');
@@ -261,7 +282,7 @@ const SendMessageForm = ({
             // Call onMessageSent callback if provided, passing the thread info
             if (onMessageSent) {
                 // Create a thread object with the necessary information
-                const newThread = {
+                const newThread = threadId ? null : {
                     id: response,
                     participantId: participantId,
                     // Include other properties as needed

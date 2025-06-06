@@ -38,9 +38,9 @@ export const useMessagingApi = () => {
         try {
           const payload = {
             threadId,
-            sourceAgent: agent,
-            sourceWorkflowType: workflowType,
-            sourceWorkflowId: workflowId,
+            agent,
+            workflowType,
+            workflowId,
             participantId,
             text: content,
             data: metadata
@@ -62,9 +62,9 @@ export const useMessagingApi = () => {
         try {
           const payload = {
             threadId,
-            sourceAgent: agent,
-            sourceWorkflowType: workflowType,
-            sourceWorkflowId: workflowId,
+            agent,
+            workflowType,
+            workflowId,
             participantId,
             text: content,
             data: metadata

@@ -16,12 +16,12 @@ import { useLoading } from '../../contexts/LoadingContext';
  * @param {Object} props.selectedThread - Details of the selected thread
  * @param {string} props.lastUpdateTime - Time of the last update
  * @param {Function} props.onSendMessage - Callback to open send message form (Configure & Send)
- * @param {Function} props.onQuickSend - Callback for quick send option
+ * @param {Function} props.sendMessage - Unified function to send messages with typing indicator and polling
  * @param {Function} props.onThreadDeleted - Callback when thread is deleted
  * @param {Function} props.onRefresh - Callback to refresh conversations list
  * @param {string} props.agentName - Name of the current agent
  */
-const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onQuickSend, onThreadDeleted, onRefresh, agentName }) => {
+const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage, onThreadDeleted, onRefresh, agentName }) => {
     const theme = useTheme();
     const messagingApi = useMessagingApi();
     const { showSuccess, showError } = useNotification();
@@ -53,6 +53,11 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onQuickSend
             return;
         }
 
+        if (!sendMessage) {
+            showError('Send function not available');
+            return;
+        }
+
         setIsSending(true);
         try {
             // Retrieve persisted metadata from localStorage
@@ -67,22 +72,16 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, onQuickSend
                 }
             }
 
-            await messagingApi.sendMessage(
-                selectedThread.id,
-                agentName,
-                selectedThread.workflowType,
-                selectedThread.workflowId,
-                selectedThread.participantId,
-                quickMessage.trim(),
-                parsedMetadata // use persisted metadata if available
-            );
+            // Use the unified sendMessage function
+            const result = await sendMessage({
+                content: quickMessage.trim(),
+                metadata: parsedMetadata,
+                isNewThread: false
+            });
             
-            showSuccess('Message sent successfully!');
-            setQuickMessage('');
-            
-            // Call onRefresh to update the conversation
-            if (onRefresh) {
-                onRefresh();
+            if (result.success) {
+                showSuccess('Message sent successfully!');
+                setQuickMessage('');
             }
         } catch (error) {
             showError(`Error sending message: ${error.message}`);

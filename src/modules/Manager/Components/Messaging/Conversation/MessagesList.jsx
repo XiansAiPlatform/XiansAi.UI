@@ -16,6 +16,7 @@ import TypingIndicator from './TypingIndicator';
  * @param {Function} props.loadMoreMessages - Function to load more messages
  * @param {Function} props.isMessageRecent - Function to check if a message is recent
  * @param {boolean} props.showTypingAfterHandover - Whether to show typing indicator after handover
+ * @param {boolean} props.isTyping - Whether a message is currently being sent
  */
 const MessagesList = ({
     messages,
@@ -25,7 +26,8 @@ const MessagesList = ({
     error,
     loadMoreMessages,
     isMessageRecent,
-    showTypingAfterHandover = false
+    showTypingAfterHandover = false,
+    isTyping = false
 }) => {
     // State to track when to show typing indicator
     const [showTypingIndicator, setShowTypingIndicator] = useState(false);
@@ -42,6 +44,12 @@ const MessagesList = ({
 
     // Effect to handle typing indicator visibility
     useEffect(() => {
+        // Always show typing indicator if a message is being sent
+        if (isTyping) {
+            setShowTypingIndicator(true);
+            return;
+        }
+        
         // Show typing indicator immediately if handover just occurred
         if (showTypingAfterHandover) {
             setShowTypingIndicator(true);
@@ -112,7 +120,7 @@ const MessagesList = ({
                 typingTimeoutRef.current = null;
             }
         };
-    }, [messages, sortedMessagesForDisplay, isMessageRecent, showTypingAfterHandover]);
+    }, [messages, sortedMessagesForDisplay, isMessageRecent, showTypingAfterHandover, isTyping]);
 
     if (isLoadingMessages && messages.length === 0) {
         return (
