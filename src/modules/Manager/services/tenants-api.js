@@ -1,0 +1,56 @@
+import { useApiClient } from "./api-client";
+import { useMemo } from "react";
+
+export const useTenantsApi = () => {
+  const apiClient = useApiClient();
+
+  return useMemo(() => {
+    return {
+      getAllTenants: async () => {
+        try {
+          return await apiClient.get("/api/client/tenants");
+        } catch (error) {
+          console.error("Error fetching tenants:", error);
+          throw error;
+        }
+      },
+
+      getTenant: async (tenantId) => {
+        if (!tenantId) {
+          console.warn("No tenant ID provided to getTenant");
+          return null;
+        }
+
+        try {
+          return await apiClient.get(
+            `/api/client/tenants/by-tenant-id/${tenantId}`
+          );
+        } catch (error) {
+          console.error(`Error fetching tenant:`, error);
+          return null;
+        }
+      },
+
+      updateTenant: async (tenantId, tenantData) => {
+        try {
+          return await apiClient.put(
+            `/api/client/tenants/${tenantId}`,
+            tenantData
+          );
+        } catch (error) {
+          console.error("Error updating tenant:", error);
+          return null;
+        }
+      },
+
+      deleteTenant: async (tenantId) => {
+        try {
+          return await apiClient.delete(`/api/client/tenants/${tenantId}`);
+        } catch (error) {
+          console.error("Error deleting tenant:", error);
+          return null;
+        }
+      },
+    };
+  }, [apiClient]);
+};
