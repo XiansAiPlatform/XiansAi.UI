@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
+import TenantSettings from './TenantSettings';
 import './Settings.css';
-import BrandingSettings from './BrandingSettings';
 
 const Settings = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -39,13 +39,13 @@ const Settings = () => {
             aria-label="settings tabs"
           >
             <Tab label="App Server" />
-            <Tab label="Branding" />
+            <Tab label="Tenants" />
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
           {currentTab === 0 && <CACertificates />}
-          {currentTab === 1 && <BrandingSettings />}
+          {currentTab === 1 && <TenantSettings />}
         </Box>
       </Box>
     </Container>
