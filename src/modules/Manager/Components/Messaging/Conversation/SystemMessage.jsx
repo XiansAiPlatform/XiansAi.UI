@@ -157,29 +157,35 @@ const SystemMessage = ({ message }) => {
                         Message Metadata
                     </Typography>
 
-                    {message.metadata ? (
-                        <Box 
-                            sx={{ 
-                                backgroundColor: theme.palette.grey[50],
-                                border: '1px solid',
-                                borderColor: theme.palette.grey[200],
-                                borderRadius: 1,
-                                p: 2,
-                                mb: 2
-                            }}
-                        >
-                            <pre 
-                                style={{
-                                    margin: 0,
-                                    fontSize: '0.75rem',
-                                    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-                                    color: theme.palette.text.primary,
-                                    whiteSpace: 'pre-wrap',
-                                    wordBreak: 'break-word'
+                    {message.data ? (
+                        <Box sx={{ mt: 1 }}>
+                            <Typography 
+                                variant="caption" 
+                                sx={{ 
+                                    display: 'block', 
+                                    fontWeight: 'bold',
+                                    mb: 1
                                 }}
                             >
-                                {JSON.stringify(message.metadata, null, 2)}
-                            </pre>
+                                Message Data
+                            </Typography>
+                            <Box 
+                                component="pre" 
+                                sx={{ 
+                                    fontFamily: 'monospace', 
+                                    fontSize: '0.7rem',
+                                    backgroundColor: theme.palette.grey[50],
+                                    p: 1,
+                                    borderRadius: 1,
+                                    maxHeight: 300,
+                                    overflow: 'auto',
+                                    whiteSpace: 'pre-wrap',
+                                    border: '1px solid',
+                                    borderColor: theme.palette.grey[200]
+                                }}
+                            >
+                                {JSON.stringify(message.data, null, 2)}
+                            </Box>
                         </Box>
                     ) : (
                         <Typography 

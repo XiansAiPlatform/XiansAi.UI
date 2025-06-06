@@ -228,15 +228,30 @@ const SendMessageForm = ({
                 }
             }
             
-            const response = await messagingApi.sendMessage(
-                threadId,
-                agentName,
-                workflowType,
-                workflowId,
-                participantId,
-                metadataOnly ? null : content,
-                parsedMetadata
-            );
+            let response;
+            if (metadataOnly) {
+                // Use sendData for metadata-only messages
+                response = await messagingApi.sendData(
+                    threadId,
+                    agentName,
+                    workflowType,
+                    workflowId,
+                    participantId,
+                    null, // no content for metadata-only
+                    parsedMetadata
+                );
+            } else {
+                // Use sendMessage for regular messages
+                response = await messagingApi.sendMessage(
+                    threadId,
+                    agentName,
+                    workflowType,
+                    workflowId,
+                    participantId,
+                    content,
+                    parsedMetadata
+                );
+            }
             
             showSuccess('Message sent successfully!');
             

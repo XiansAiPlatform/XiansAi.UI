@@ -34,23 +34,47 @@ export const useMessagingApi = () => {
         }
       },
 
-      sendMessage: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
+      sendData: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
         try {
           const payload = {
             threadId,
-            agent,
-            workflowType,
-            workflowId,
+            sourceAgent: agent,
+            sourceWorkflowType: workflowType,
+            sourceWorkflowId: workflowId,
             participantId,
-            content,
-            metadata
+            text: content,
+            data: metadata
           };
           
           if (!threadId) {
             delete payload.threadId;
           }
           
-          const response = await apiClient.post('/api/client/messaging/inbound', payload);
+          const response = await apiClient.post('/api/client/messaging/inbound/data', payload);
+          return response.value;
+        } catch (error) {
+          console.error('Error sending message:', error);
+          throw error;
+        }
+      },
+
+      sendMessage: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
+        try {
+          const payload = {
+            threadId,
+            sourceAgent: agent,
+            sourceWorkflowType: workflowType,
+            sourceWorkflowId: workflowId,
+            participantId,
+            text: content,
+            data: metadata
+          };
+          
+          if (!threadId) {
+            delete payload.threadId;
+          }
+          
+          const response = await apiClient.post('/api/client/messaging/inbound/chat', payload);
           return response.value;
         } catch (error) {
           console.error('Error sending message:', error);

@@ -31,11 +31,11 @@ const MessagesList = ({
     const [showTypingIndicator, setShowTypingIndicator] = useState(false);
     // Ref to store the timeout ID so we can clear it if needed
     const typingTimeoutRef = useRef(null);
-    
+
     // Sort messages whenever the messages array changes
     // Messages are fetched newest first, older messages are appended.
     // We want newest at the *top* of the display list
-    const sortedMessagesForDisplay = useMemo(() => 
+    const sortedMessagesForDisplay = useMemo(() =>
         [...messages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
         [messages]
     );
@@ -45,68 +45,55 @@ const MessagesList = ({
         // Show typing indicator immediately if handover just occurred
         if (showTypingAfterHandover) {
             setShowTypingIndicator(true);
-            
+
             // Clear any existing timeout
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
                 typingTimeoutRef.current = null;
             }
-            
+
             // The handover component will control when to hide it
             return;
         }
-        
+
         // If showTypingAfterHandover is false and we were showing it due to handover,
         // hide it now
         if (!showTypingAfterHandover && messages.length > 0) {
             const latestMessage = sortedMessagesForDisplay[0];
-            
+
             // Clear any existing timeout when messages change
             if (typingTimeoutRef.current) {
                 clearTimeout(typingTimeoutRef.current);
                 typingTimeoutRef.current = null;
             }
-            
-            // Check if this is a metadata-only message FIRST (highest priority)
-            // Metadata-only messages can be both Incoming and Outgoing
-            const isMetadataOnlyMessage = (latestMessage.content === null || 
-                                         latestMessage.content === 'null' || 
-                                         latestMessage.content === undefined ||
-                                         latestMessage.content === 'undefined' ||
-                                         latestMessage.content === '') &&
-                                         latestMessage.metadata;
-            
+
+            // Check if latest message is a system message (empty content)
+            const isSystemMessage = (latestMessage.messageType === 'Data');
+
+
             // If it's a metadata-only message (any direction), never show typing indicator
-            if (isMetadataOnlyMessage) {
+            if (isSystemMessage) {
                 setShowTypingIndicator(false);
                 return;
             }
-            
-            // Check if latest message is a system message (empty content)
-            const isSystemMessage = !latestMessage.content || 
-                                  latestMessage.content === null || 
-                                  latestMessage.content === undefined || 
-                                  latestMessage.content === '' || 
-                                  latestMessage.content.toString().trim() === '' ||
-                                  latestMessage.content === 'null' ||
-                                  latestMessage.content === 'undefined';
-            
+
+
             // Don't hide indicator for Handover messages or system messages
-            if (latestMessage.direction === 'Handover' || isSystemMessage) {
+            if (latestMessage.messageType === 'Handoff' || isSystemMessage) {
                 setShowTypingIndicator(true);
                 return;
             }
-            
+
             // If latest message is outgoing, hide the indicator immediately
             if (latestMessage.direction === 'Outgoing') {
                 setShowTypingIndicator(false);
                 return;
             }
-            
+
             // Show indicator if latest message is incoming and recent
             if (latestMessage.direction === 'Incoming' && isMessageRecent(latestMessage)) {
                 setShowTypingIndicator(true);
-                
+
                 // Hide the indicator after 10 seconds
                 typingTimeoutRef.current = setTimeout(() => {
                     setShowTypingIndicator(false);
@@ -117,7 +104,7 @@ const MessagesList = ({
                 setShowTypingIndicator(false);
             }
         }
-        
+
         // Clean up the timeout when component unmounts or messages change
         return () => {
             if (typingTimeoutRef.current) {
@@ -167,15 +154,15 @@ const MessagesList = ({
 
     return (
         <>
-            {/* Messages List - Takes remaining space */} 
+            {/* Messages List - Takes remaining space */}
             <List sx={{ px: 1, width: '100%', py: 0, pt: 2 }}>
                 {/* Show typing indicator if needed */}
                 {showTypingIndicator && <TypingIndicator />}
-                
+
                 {sortedMessagesForDisplay.map((msg, index) => (
-                    <MessageItem 
-                        key={msg.id || index} 
-                        message={msg} 
+                    <MessageItem
+                        key={msg.id || index}
+                        message={msg}
                         isRecent={isMessageRecent(msg)}
                     />
                 ))}
@@ -183,16 +170,16 @@ const MessagesList = ({
 
             {/* Load More Button at the BOTTOM */}
             {hasMoreMessages && (
-                <Box 
-                    sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
                         py: 2,
                         mt: 2
                     }}
                 >
-                    <Button 
-                        size="small" 
+                    <Button
+                        size="small"
                         onClick={loadMoreMessages}
                         disabled={isLoadingMore || isLoadingMessages}
                         startIcon={isLoadingMore ? <CircularProgress size={16} /> : <ExpandMoreIcon />}
