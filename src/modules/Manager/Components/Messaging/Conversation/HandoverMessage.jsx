@@ -5,12 +5,13 @@ import { Box, Typography, useTheme } from '@mui/material';
  * Component for displaying handover messages
  * 
  * @param {Object} props
- * @param {Object} props.message - The handover message object
- * @param {string} props.message.content - Message content to display
+ * @param {Object} props.message - The message object
+ * @param {string} props.message.text - Message text to display
+ * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
  */
-const HandoverMessage = ({ message }) => {
+const HandoverMessage = ({ message, isRecent = false }) => {
     const theme = useTheme();
-    const messageContent = message.content?.replace(/^"|"$/g, '') || '';
+    const messageContent = message.text?.replace(/^"|"$/g, '') || '';
 
     return (
         <Box 

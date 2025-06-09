@@ -32,7 +32,7 @@ const RegularMessage = ({ message, isRecent = false }) => {
     const [expanded, setExpanded] = useState(false);
     const isIncoming = message.direction === 'Incoming';
     const formattedDate = message.createdAt ? format(new Date(message.createdAt), 'MMM d, yyyy h:mm a') : '';
-    const messageContent = message.content?.replace(/^"|"$/g, '') || '';
+    const messageContent = message.text?.replace(/^"|"$/g, '') || '';
     const senderName = isIncoming ? (message.participantId || 'Unknown') : (message.workflowType || 'System');
 
     const handleExpandClick = (e) => {
@@ -277,6 +277,21 @@ const RegularMessage = ({ message, isRecent = false }) => {
                                     </TableRow>
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold', 
+                                            width: '30%',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Message Type
+                                        </TableCell>
+                                        <TableCell sx={{ 
+                                            color: theme.palette.text.primary,
+                                            wordBreak: 'break-all'
+                                        }}>
+                                            {message.messageType}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
                                             fontWeight: 'bold',
                                             color: theme.palette.text.secondary
                                         }}>
@@ -355,7 +370,7 @@ const RegularMessage = ({ message, isRecent = false }) => {
                                             {message.createdBy}
                                         </TableCell>
                                     </TableRow>
-                                    {message.metadata && (
+                                    {message.data && (
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
                                             fontWeight: 'bold',
@@ -367,9 +382,9 @@ const RegularMessage = ({ message, isRecent = false }) => {
                                             color: theme.palette.text.primary,
                                             wordBreak: 'break-all'
                                         }}>
-                                            {typeof message.metadata === 'object' 
-                                                ? JSON.stringify(message.metadata) 
-                                                : message.metadata}
+                                            {typeof message.data === 'object' 
+                                                ? JSON.stringify(message.data) 
+                                                : message.data}
                                         </TableCell>
                                     </TableRow>
                                     )}
