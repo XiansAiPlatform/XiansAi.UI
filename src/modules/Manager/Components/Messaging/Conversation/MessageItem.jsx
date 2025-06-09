@@ -15,42 +15,38 @@ import RegularMessage from './RegularMessage';
  * @param {string} props.message.status - Message status
  * @param {string} props.message.createdAt - Creation timestamp
  * @param {string} props.message.createdBy - User who created the message
- * @param {string} props.message.content - Message content
+ * @param {string} props.message.text - Message text
  * @param {string} props.message.participantChannelId - Channel ID
  * @param {string} props.message.participantId - Participant ID (for incoming messages)
  * @param {string} props.message.workflowType - Workflow type (for outgoing messages)
- * @param {Object} [props.message.metadata] - Optional message metadata
+ * @param {Object} [props.message.data] - Optional message data
  * @param {Array} [props.message.logs] - Optional message logs
  * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
  */
 const MessageItem = ({ message, isRecent = false }) => {
-    console.log('Message content check:', {
-        content: message.content,
-        type: typeof message.content,
-        messageId: message.id
-    });
+    // Debugging information (only output for first message or every 10th message)
+    const shouldLog = message.id === 'first' || (message.id && message.id.endsWith('0'));
+    if (shouldLog) {
+        console.log('Rendering message:', {
+            id: message.id,
+            text: message.text,
+            type: typeof message.text,
+            messageId: message.id
+        });
+    }
 
     // Check if message is a handover type
-    const isHandover = message.direction === 'Handover';
-    
-    // Check if message content is null, undefined, empty, or just whitespace
-    const isContentEmpty = !message.content || 
-                          message.content === null || 
-                          message.content === undefined || 
-                          message.content === '' || 
-                          message.content.toString().trim() === '' ||
-                          message.content === 'null' ||
-                          message.content === 'undefined';
+    const isHandover = message.messageType === 'Handoff';
+    const isData = message.messageType === 'Data';
 
     // Route to appropriate component based on message type
     if (isHandover) {
         return <HandoverMessage message={message} />;
     }
-    
-    if (isContentEmpty) {
+    else if (isData) {
         return <SystemMessage message={message} />;
     }
-    
+
     return <RegularMessage message={message} isRecent={isRecent} />;
 };
 
