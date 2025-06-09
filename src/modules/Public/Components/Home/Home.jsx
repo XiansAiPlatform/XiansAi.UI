@@ -188,7 +188,7 @@ var newBlogPosts = new List<string>();`
                                     }}
                                 >
                                     <ArrowForward style={{ fontSize: '1.1em' }} />
-                                    Go to Account
+                                    Go to Dashboard
                                 </button>
                             ) : (
                                 <>
