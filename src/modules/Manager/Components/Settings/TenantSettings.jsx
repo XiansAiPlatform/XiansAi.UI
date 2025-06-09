@@ -13,8 +13,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTenantsApi } from '../../services/tenants-api';
 
 const TenantSettings = () => {
@@ -22,6 +25,9 @@ const TenantSettings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [switchLoading, setSwitchLoading] = useState({});
+  const [deleteLoading, setDeleteLoading] = useState({});
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [tenantToDelete, setTenantToDelete] = useState(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -180,6 +186,45 @@ const TenantSettings = () => {
     }
   };
 
+  const handleDeleteTenant = async (tenantId) => {
+    if (!tenantId) {
+      console.error('No tenant ID provided for deletion');
+      return;
+    }
+
+    setDeleteLoading(prev => ({ ...prev, [tenantId]: true }));
+
+    try {
+      await tenantsApi.deleteTenant(tenantId);
+      
+      // Update the local state - remove the deleted tenant
+      setTenants(prevTenants => 
+        prevTenants.filter(tenant => 
+          tenant.id !== tenantId && tenant.tenantId !== tenantId
+        )
+      );
+      
+      setDeleteConfirmOpen(false);
+      setTenantToDelete(null);
+      setError(null);
+    } catch (err) {
+      setError('Failed to delete tenant. Please try again.');
+      console.error('Error deleting tenant:', err);
+    } finally {
+      setDeleteLoading(prev => ({ ...prev, [tenantId]: false }));
+    }
+  };
+
+  const handleDeleteClick = (tenant) => {
+    setTenantToDelete(tenant);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteConfirmOpen(false);
+    setTenantToDelete(null);
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
@@ -232,7 +277,8 @@ const TenantSettings = () => {
             {tenants.map((tenant, index) => {
               const tenantId = tenant.id || tenant.tenantId;
               const isEnabled = tenant.enabled ?? tenant.isEnabled ?? true;
-              const isLoading = switchLoading[tenantId] || false;
+              const isToggleLoading = switchLoading[tenantId] || false;
+              const isDeleteLoading = deleteLoading[tenantId] || false;
               
               return (
                 <Paper 
@@ -241,7 +287,7 @@ const TenantSettings = () => {
                   sx={{ p: 2, mb: 1 }}
                 >
                   <Grid container alignItems="center" justifyContent="space-between">
-                    <Grid item xs={8}>
+                    <Grid item xs={6}>
                       <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                         {tenant.name || tenant.tenantName || `Tenant ${index + 1}`}
                       </Typography>
@@ -251,19 +297,19 @@ const TenantSettings = () => {
                         </Typography>
                       )}
                     </Grid>
-                    <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Grid item xs={6} sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1 }}>
                       <FormControlLabel
                         control={
                           <Switch
                             checked={isEnabled}
                             onChange={() => handleToggleEnabled(tenantId, isEnabled)}
-                            disabled={isLoading || !tenantId}
+                            disabled={isToggleLoading || !tenantId}
                             color="primary"
                           />
                         }
                         label={
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            {isLoading && <CircularProgress size={16} />}
+                            {isToggleLoading && <CircularProgress size={16} />}
                             <Typography variant="body2">
                               {isEnabled ? 'Enabled' : 'Disabled'}
                             </Typography>
@@ -271,6 +317,20 @@ const TenantSettings = () => {
                         }
                         labelPlacement="start"
                       />
+                      <Tooltip title="Delete Tenant">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteClick(tenant)}
+                          disabled={isDeleteLoading}
+                          size="small"
+                        >
+                          {isDeleteLoading ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            <DeleteIcon />
+                          )}
+                        </IconButton>
+                      </Tooltip>
                     </Grid>
                   </Grid>
                 </Paper>
@@ -361,6 +421,59 @@ const TenantSettings = () => {
               </Box>
             ) : (
               'Create Tenant'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={deleteConfirmOpen} 
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Delete Tenant</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Are you sure you want to delete this tenant?
+          </Typography>
+          {tenantToDelete && (
+            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+              <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                {tenantToDelete.name || tenantToDelete.tenantName || 'Unknown Tenant'}
+              </Typography>
+              {tenantToDelete.description && (
+                <Typography variant="body2" color="text.secondary">
+                  {tenantToDelete.description}
+                </Typography>
+              )}
+            </Paper>
+          )}
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            This action cannot be undone. All data associated with this tenant will be permanently deleted.
+          </Alert>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleDeleteCancel}
+            disabled={deleteLoading[tenantToDelete?.id || tenantToDelete?.tenantId]}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => handleDeleteTenant(tenantToDelete?.id || tenantToDelete?.tenantId)}
+            variant="contained"
+            color="error"
+            disabled={deleteLoading[tenantToDelete?.id || tenantToDelete?.tenantId]}
+          >
+            {deleteLoading[tenantToDelete?.id || tenantToDelete?.tenantId] ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} />
+                Deleting...
+              </Box>
+            ) : (
+              'Delete Tenant'
             )}
           </Button>
         </DialogActions>
