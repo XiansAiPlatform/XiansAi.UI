@@ -338,7 +338,7 @@ const WorkflowList = () => {
               {isLoading ? 'Loading...' : 'It can take a few seconds to load the workflows'}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              To get started, <Link to="/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
+              To get started, <Link to="/manager/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
@@ -352,14 +352,14 @@ const WorkflowList = () => {
               </Button>
               <Button
                 component={Link}
-                to="/definitions"
+                to="/manager/definitions"
                 variant="outlined"
                 color="primary"
               >
                 Go to Agent Definitions
               </Button>
             </Box>
-          </Paper>
+          </Paper>  
         )}
       </Box>
     </Container>

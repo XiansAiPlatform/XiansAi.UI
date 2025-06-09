@@ -87,7 +87,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const handleAction = async (action, force = false) => {
     try {
       await api.executeWorkflowCancelAction(workflow.workflowId, force);
-      showSuccess('Termination requested. It may take a few minutes to complete.');
+      showSuccess('Termination requested. It may take sometime to complete.');
 
       // Wait a moment before fetching updated data
       setTimeout(() => {

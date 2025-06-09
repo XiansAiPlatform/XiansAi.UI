@@ -15,7 +15,7 @@ import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
 import ConversationThreads from './ConversationThreads';
-import ChatConversation from './ChatConversation';
+import ChatConversation from './Conversation/ChatConversation';
 
 
 /**
@@ -28,12 +28,15 @@ const MessagingPage = () => {
     const [selectedThreadId, setSelectedThreadId] = useState(null);
     const [selectedThreadDetails, setSelectedThreadDetails] = useState(null); // Store full thread object
     const [error, setError] = useState(null); // Keep top-level error state if needed
-    const [refreshCounter, setRefreshCounter] = useState(0); // Add counter for refreshing
+    const [refreshCounter, setRefreshCounter] = useState(0); // Add counter for refreshing conversation
+    const [threadsRefreshCounter, setThreadsRefreshCounter] = useState(0); // Separate counter for threads refresh
     
     // Use a ref to track the last handover refresh time to prevent rapid refreshes
     const lastHandoverRefreshRef = useRef(0);
     // Track processing state to prevent concurrent handover refreshes
     const isProcessingHandoverRef = useRef(false);
+    // Ref for ChatConversation component to trigger polling
+    const chatConversationRef = useRef(null);
 
     // --- Hooks ---
     // Using the existing API hook from services/messaging-api.js
@@ -61,7 +64,7 @@ const MessagingPage = () => {
         setError(null); // Clear errors when selection changes
     }, []);
 
-    // Handler for refreshing threads and messages
+    // Handler for refreshing threads and messages (for manual refresh)
     const handleRefresh = useCallback((newThread) => {
         if (!selectedAgentName) {
             showError('Please select an agent first.');
@@ -69,8 +72,9 @@ const MessagingPage = () => {
         }
         
         console.log("Refreshing threads and messages...");
-        // Increment refresh counter to force children to reload
+        // Increment both refresh counters to force children to reload
         setRefreshCounter(prev => prev + 1);
+        setThreadsRefreshCounter(prev => prev + 1);
         
         // If a new thread was created, select it
         if (newThread) {
@@ -87,6 +91,31 @@ const MessagingPage = () => {
             setSelectedThreadDetails(prev => ({...prev}));
         }
     }, [selectedAgentName, selectedThreadId, showError]);
+
+    // Handler for when a message is sent - now simplified since ChatConversation handles polling
+    const handleMessageSent = useCallback((newThread) => {
+        if (!selectedAgentName) {
+            showError('Please select an agent first.');
+            return;
+        }
+        
+        // If a new thread was created, select it and refresh
+        if (newThread) {
+            setSelectedThreadId(newThread.id);
+            setSelectedThreadDetails({
+                id: newThread.id,
+                participantId: newThread.participantId,
+                // Add other necessary properties
+            });
+            // Increment both refresh counters for new threads
+            setThreadsRefreshCounter(prev => prev + 1);
+            setRefreshCounter(prev => prev + 1);
+        } else {
+            // For existing threads, ChatConversation.sendMessage handles polling and refresh
+            // Just refresh the threads list to update metadata
+            setThreadsRefreshCounter(prev => prev + 1);
+        }
+    }, [selectedAgentName, showError]);
 
     // Handler for thread handover events
     const handleThreadHandover = useCallback(async (threadId) => {
@@ -129,6 +158,7 @@ const MessagingPage = () => {
                 setSelectedThreadDetails(updatedThreadDetails);
                 // Force refresh of components
                 setRefreshCounter(prev => prev + 1);
+                setThreadsRefreshCounter(prev => prev + 1);
                 console.log("Thread details refreshed after handover");
             }
         } catch (err) {
@@ -141,7 +171,7 @@ const MessagingPage = () => {
                 isProcessingHandoverRef.current = false;
             }, 1000);
         }
-    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter, setLoading]);
+    }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter, setThreadsRefreshCounter, setLoading]);
 
     // Handler for opening the send message slider
     const handleSendMessage = useCallback(() => {
@@ -149,6 +179,9 @@ const MessagingPage = () => {
             showError('Please select an agent first.');
             return;
         }
+        
+        // Get the sendMessage function from ChatConversation if available
+        const unifiedSendMessage = chatConversationRef.current?.sendMessage;
         
         // Pass necessary details to SendMessageForm
         openSlider(
@@ -160,11 +193,12 @@ const MessagingPage = () => {
                 initialParticipantId={selectedThreadDetails?.participantId || ''}
                 initialWorkflowType={selectedThreadDetails?.workflowType || ''}
                 initialWorkflowId={selectedThreadDetails?.workflowId || ''}
-                onMessageSent={handleRefresh}
+                onMessageSent={handleMessageSent}
+                sendMessage={unifiedSendMessage}
             />,
             `Send Message` // Simplified title
         );
-    }, [selectedAgentName, selectedThreadId, selectedThreadDetails, openSlider, closeSlider, showError, handleRefresh]);
+    }, [selectedAgentName, selectedThreadId, selectedThreadDetails, openSlider, closeSlider, showError, handleMessageSent]);
 
     // Handler for opening the webhook registration slider
     const handleRegisterWebhook = useCallback(() => {
@@ -213,7 +247,7 @@ const MessagingPage = () => {
                     <Grid item xs={12} md={3}>
                         {/* Threads list */}
                         <ConversationThreads
-                            key={`threads-${refreshCounter}`}
+                            key={`threads-${threadsRefreshCounter}`}
                             selectedAgentName={selectedAgentName}
                             messagingApi={messagingApi}
                             showError={showError}
@@ -232,15 +266,18 @@ const MessagingPage = () => {
                             onSendMessage={handleSendMessage}
                             onHandover={handleThreadHandover}
                             onRefresh={handleRefresh}
+                            agentName={selectedAgentName}
                             onThreadDeleted={(threadId) => {
                                 // Clear the selected thread when it's deleted
                                 if (threadId === selectedThreadId) {
                                     setSelectedThreadId(null);
                                     setSelectedThreadDetails(null);
                                 }
-                                // Refresh the threads list
-                                handleRefresh();
+                                // Refresh both lists
+                                setRefreshCounter(prev => prev + 1);
+                                setThreadsRefreshCounter(prev => prev + 1);
                             }}
+                            ref={chatConversationRef}
                         />
                     </Grid>
                 </Grid>
