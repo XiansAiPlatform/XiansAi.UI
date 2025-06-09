@@ -7,7 +7,13 @@ import {
   Alert, 
   Switch, 
   FormControlLabel,
-  Grid
+  Grid,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
 } from '@mui/material';
 import { useTenantsApi } from '../../services/tenants-api';
 
@@ -16,6 +22,15 @@ const TenantSettings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [switchLoading, setSwitchLoading] = useState({});
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    description: '',
+    tenantId: '',
+    domain: ''
+  });
+  const [createError, setCreateError] = useState(null);
   const tenantsApi = useTenantsApi();
 
   useEffect(() => {
@@ -42,6 +57,8 @@ const TenantSettings = () => {
       return;
     }
 
+    console.log('Toggle attempt - tenantId:', tenantId, 'currentlyEnabled:', currentlyEnabled);
+
     setSwitchLoading(prev => ({ ...prev, [tenantId]: true }));
     
     try {
@@ -50,19 +67,116 @@ const TenantSettings = () => {
         enabled: !currentlyEnabled 
       });
 
-      // Update the local state
+      // Update the local state - check both id and tenantId fields
       setTenants(prevTenants => 
-        prevTenants.map(tenant => 
-          tenant.id === tenantId 
+        prevTenants.map(tenant => {
+          const matchesId = tenant.id === tenantId || tenant.tenantId === tenantId;
+          console.log('Checking tenant:', { 
+            'tenant.id': tenant.id, 
+            'tenant.tenantId': tenant.tenantId, 
+            'targetId': tenantId, 
+            'matches': matchesId 
+          });
+          
+          return matchesId
             ? { ...tenant, enabled: !currentlyEnabled, isEnabled: !currentlyEnabled }
-            : tenant
-        )
+            : tenant;
+        })
       );
     } catch (err) {
       setError(`Failed to ${currentlyEnabled ? 'disable' : 'enable'} tenant. Please try again.`);
       console.error('Error toggling tenant status:', err);
     } finally {
       setSwitchLoading(prev => ({ ...prev, [tenantId]: false }));
+    }
+  };
+
+  const handleCreateDialogOpen = () => {
+    setCreateDialogOpen(true);
+    setCreateError(null);
+    setCreateForm({ name: '', description: '', tenantId: '', domain: '' });
+  };
+
+  const handleCreateDialogClose = () => {
+    setCreateDialogOpen(false);
+    setCreateError(null);
+    setCreateForm({ name: '', description: '', tenantId: '', domain: '' });
+  };
+
+  const handleCreateFormChange = (field) => (event) => {
+    setCreateForm(prev => ({
+      ...prev,
+      [field]: event.target.value
+    }));
+  };
+
+  const handleCreateTenant = async () => {
+    if (!createForm.name.trim()) {
+      setCreateError('Tenant name is required');
+      return;
+    }
+
+    if (!createForm.tenantId.trim()) {
+      setCreateError('Tenant ID is required');
+      return;
+    }
+
+    if (!createForm.domain.trim()) {
+      setCreateError('Domain is required');
+      return;
+    }
+
+    setCreateLoading(true);
+    setCreateError(null);
+
+    try {
+      const newTenantData = {
+        name: createForm.name.trim(),
+        description: createForm.description.trim(),
+        tenantId: createForm.tenantId.trim(),
+        domain: createForm.domain.trim(),
+        enabled: true
+      };
+
+      console.log('Creating tenant with data:', newTenantData);
+      const response = await tenantsApi.createTenant(newTenantData);
+      const newTenant = response.data || response;
+      console.log('Server response for created tenant:', newTenant);
+
+      // Map the server response to match the expected UI format
+      const tenantToAdd = {
+        // Prioritize server response for ID, but ensure both formats are available
+        ...newTenant,
+        id: newTenant.id || newTenant.tenantId || createForm.tenantId.trim(),
+        tenantId: newTenant.tenantId || newTenant.id || createForm.tenantId.trim(),
+        name: newTenant.name || newTenant.tenantName || createForm.name.trim(),
+        tenantName: newTenant.tenantName || newTenant.name || createForm.name.trim(),
+        description: newTenant.description || createForm.description.trim(),
+        domain: newTenant.domain || createForm.domain.trim(),
+        enabled: newTenant.enabled !== undefined ? newTenant.enabled : true,
+        isEnabled: newTenant.isEnabled !== undefined ? newTenant.isEnabled : (newTenant.enabled !== undefined ? newTenant.enabled : true)
+      };
+
+      console.log('Tenant being added to state:', tenantToAdd);
+      console.log('Tenant ID fields check:', { 
+        'id': tenantToAdd.id, 
+        'tenantId': tenantToAdd.tenantId,
+        'formTenantId': createForm.tenantId.trim()
+      });
+
+      // Add the new tenant to the local state
+      setTenants(prevTenants => [...prevTenants, tenantToAdd]);
+      
+      // Close the dialog and reset form
+      handleCreateDialogClose();
+      
+      // Clear any existing errors
+      setError(null);
+    } catch (err) {
+      setCreateError('Failed to create tenant. Please try again.');
+      console.error('Error creating tenant:', err);
+    } finally {
+      setCreateLoading(false);
     }
   };
 
@@ -84,17 +198,25 @@ const TenantSettings = () => {
 
   return (
     <Box>
-      <Typography 
-        variant="h6" 
-        component="h2"
-        sx={{
-          fontWeight: 'var(--font-weight-semibold)',
-          color: 'var(--text-primary)',
-          mb: 3
-        }}
-      >
-        Tenant Management
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Typography 
+          variant="h6" 
+          component="h2"
+          sx={{
+            fontWeight: 'var(--font-weight-semibold)',
+            color: 'var(--text-primary)'
+          }}
+        >
+          Tenant Management
+        </Typography>
+        <Button 
+          variant="contained" 
+          color="primary"
+          onClick={handleCreateDialogOpen}
+        >
+          Create Tenant
+        </Button>
+      </Box>
       
       <Paper sx={{ p: 3 }}>
         <Typography variant="body1" sx={{ mb: 2 }}>
@@ -157,6 +279,92 @@ const TenantSettings = () => {
           </Box>
         )}
       </Paper>
+
+      {/* Create Tenant Dialog */}
+      <Dialog 
+        open={createDialogOpen} 
+        onClose={handleCreateDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Create New Tenant</DialogTitle>
+        <DialogContent>
+          {createError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {createError}
+            </Alert>
+          )}
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Tenant Name"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={createForm.name}
+            onChange={handleCreateFormChange('name')}
+            required
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Tenant ID"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={createForm.tenantId}
+            onChange={handleCreateFormChange('tenantId')}
+            required
+            sx={{ mb: 2 }}
+            helperText="Unique identifier for the tenant"
+          />
+          <TextField
+            margin="dense"
+            label="Domain"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={createForm.domain}
+            onChange={handleCreateFormChange('domain')}
+            required
+            sx={{ mb: 2 }}
+            helperText="Domain associated with this tenant"
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            type="text"
+            fullWidth
+            variant="outlined"
+            multiline
+            rows={3}
+            value={createForm.description}
+            onChange={handleCreateFormChange('description')}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleCreateDialogClose}
+            disabled={createLoading}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleCreateTenant}
+            variant="contained"
+            disabled={createLoading || !createForm.name.trim() || !createForm.tenantId.trim() || !createForm.domain.trim()}
+          >
+            {createLoading ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} />
+                Creating...
+              </Box>
+            ) : (
+              'Create Tenant'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
