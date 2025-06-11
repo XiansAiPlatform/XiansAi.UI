@@ -28,6 +28,7 @@ import { useWorkflowApi } from '../../services/workflow-api';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useAuth } from '../../auth/AuthContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -129,7 +130,7 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
       showSuccess(`Termination requested for ${runningWorkflows.length} workflow(s). It may take a few minutes to complete.`);
       handleMenuClose();
     } catch (error) {
-      showError('An unexpected error occurred while terminating workflows. Error: ' + error.message);
+      await handleApiError(error, 'An unexpected error occurred while terminating workflows', showError);
       console.error('Error terminating workflows:', error);
     } finally {
       setIsTerminating(false);
