@@ -4,6 +4,7 @@ import ChatHeader from './ChatHeader';
 import MessagesList from './MessagesList';
 import { useLoading } from '../../contexts/LoadingContext';
 import useMessagePolling from './hooks/useMessagePolling';
+import { handleApiError } from '../../utils/errorHandler';
 
 /**
  * Chat conversation component that displays messages for a selected thread
@@ -146,7 +147,7 @@ const ChatConversation = ({
             if (!isPolling) {
                 const errorMsg = 'Failed to fetch messages for the selected thread.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 console.error(err);
                 setMessages([]);
                 setHasMoreMessages(false);
@@ -223,8 +224,7 @@ const ChatConversation = ({
         } catch (err) {
             const errorMsg = 'Failed to load more messages.';
             setError(errorMsg); // Show error specific to loading more
-            showError(`${errorMsg}: ${err.message}`);
-            console.error(err);
+            await handleApiError(err, errorMsg, showError);
             // Don't clear existing messages on load more error
         } finally {
             setIsLoadingMore(false);

@@ -10,6 +10,7 @@ import {
 import { useAuditingApi } from '../../services/auditing-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const WorkflowSelector = ({
     selectedAgentName,
@@ -51,7 +52,7 @@ const WorkflowSelector = ({
                 setWorkflowTypes(formattedTypes);
             } catch (err) {
                 setError('Failed to fetch workflow types');
-                showError(`Error fetching workflow types: ${err.message}`);
+                await handleApiError(err, 'Error fetching workflow types', showError);
             } finally {
                 setIsLoadingWorkflowTypes(false);
                 setLoading(false);
@@ -86,7 +87,7 @@ const WorkflowSelector = ({
                 setWorkflows(formattedWorkflows);
             } catch (err) {
                 setError('Failed to fetch workflows');
-                showError(`Error fetching workflows: ${err.message}`);
+                await handleApiError(err, 'Error fetching workflows', showError);
             } finally {
                 setIsLoadingWorkflows(false);
                 setLoading(false);
