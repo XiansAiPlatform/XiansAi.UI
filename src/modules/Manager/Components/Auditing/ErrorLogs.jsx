@@ -29,6 +29,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const CriticalLogs = () => {
     const [criticalLogs, setCriticalLogs] = useState([]);
@@ -104,7 +105,7 @@ const CriticalLogs = () => {
             setCriticalLogs(result);
         } catch (err) {
             setError('Failed to fetch critical logs');
-            showError(`Error fetching critical logs: ${err.message}`);
+            await handleApiError(err, 'Error fetching critical logs', showError);
         } finally {
             setIsLoading(false);
             setLoading(false);

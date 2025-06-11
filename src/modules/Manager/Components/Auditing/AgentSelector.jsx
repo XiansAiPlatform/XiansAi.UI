@@ -9,6 +9,7 @@ import {
     Alert
 } from '@mui/material';
 import { useLoading } from '../../contexts/LoadingContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const AgentSelector = ({
     agentsApi,
@@ -35,7 +36,7 @@ const AgentSelector = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch agents.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 console.error(err);
             } finally {
                 setIsLoadingAgents(false);

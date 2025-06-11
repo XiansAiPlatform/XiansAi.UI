@@ -11,6 +11,7 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useSettingsApi } from '../../services/settings-api';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 import './Settings.css';
 import { getConfig } from '../../../../config';
 
@@ -29,7 +30,7 @@ const AppServerSettings = () => {
       setApiKey(response.certificate);
       showSuccess('API Key generated successfully');
     } catch (error) {
-      showError(`Failed to generate API key: ${error.message}`);
+      await handleApiError(error, 'Failed to generate API key', showError);
     } finally {
       setIsLoading(false);
     }

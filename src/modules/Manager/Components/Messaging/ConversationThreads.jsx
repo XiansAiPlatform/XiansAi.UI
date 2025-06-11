@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import SendMessageForm from './SendMessageForm';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 /**
  * Displays a list of conversation threads for a selected agent
@@ -87,7 +88,7 @@ const ConversationThreads = ({
                 }
             }
         } catch (err) {
-            showError(`Failed to refresh threads: ${err.message}`);
+            await handleApiError(err, 'Failed to refresh threads', showError);
         } finally {
             setLoading(false);
         }
@@ -110,7 +111,7 @@ const ConversationThreads = ({
                 setHasMore(false);
             }
         } catch (err) {
-            showError(`Failed to load more threads: ${err.message}`);
+            await handleApiError(err, 'Failed to load more threads', showError);
         } finally {
             setLoadingMore(false);
         }
@@ -146,7 +147,7 @@ const ConversationThreads = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch conversation threads.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 console.error(err);
                 setThreads([]);
                 setHasMore(false);

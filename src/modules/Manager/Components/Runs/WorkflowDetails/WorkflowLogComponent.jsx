@@ -22,6 +22,7 @@ import {
 } from '@mui/icons-material';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
+import { handleApiError } from '../../../utils/errorHandler';
 import './WorkflowDetails.css';
 
 
@@ -85,7 +86,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
         if (logs.length < limit) setHasMore(false);
       } catch (error) {
         console.error('Failed to fetch logs with new level:', error);
-        showError('Failed to fetch workflow logs');
+        await handleApiError(error, 'Failed to fetch workflow logs', showError);
       } finally {
         setIsLoading(false);
       }
@@ -104,7 +105,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
       if (logs.length < limit) setHasMore(false);
     } catch (error) {
       console.error('Failed to fetch initial logs:', error);
-      showError('Failed to fetch workflow logs');
+      await handleApiError(error, 'Failed to fetch workflow logs', showError);
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +128,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
       if (newLogs.length < limit) setHasMore(false);
     } catch (error) {
       console.error('Failed to refresh logs:', error);
-      showError('Failed to refresh workflow logs');
+      await handleApiError(error, 'Failed to refresh workflow logs', showError);
     } finally {
       setIsRefreshing(false);
     }
@@ -156,7 +157,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
       setSkip(skip + newLogs.length);
     } catch (error) {
       console.error('Failed to load more logs:', error);
-      showError('Failed to load more logs');
+      await handleApiError(error, 'Failed to load more logs', showError);
     } finally {
       setIsLoadingMore(false);
     }
