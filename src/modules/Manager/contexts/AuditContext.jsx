@@ -34,7 +34,7 @@ export const AuditProvider = ({ children }) => {
                     // Ensure we have an access token. 
                     // getAccessTokenSilently from useAuth might return it directly if already fetched,
                     // or fetch it if necessary.
-                    const token = accessToken || await getAccessTokenSilently();
+                    const token = accessToken || (await getAccessTokenSilently());
                     if (token) {
                         console.log('Access token is ready in ErrorNotificationContext');
                         setIsTokenReady(true);

@@ -77,7 +77,7 @@ const SystemMessage = ({ message }) => {
                 </Typography>
             ) : (
                 /* Detailed expanded view */
-                <Paper 
+                (<Paper 
                     elevation={0}
                     sx={{
                         width: '80%',
@@ -143,9 +143,7 @@ const SystemMessage = ({ message }) => {
                             <ExpandLessIcon fontSize="small" />
                         </IconButton>
                     </Box>
-
                     <Divider sx={{ my: 2, borderColor: theme.palette.warning.main + '30' }} />
-                    
                     <Typography 
                         variant="subtitle2" 
                         sx={{ 
@@ -156,7 +154,6 @@ const SystemMessage = ({ message }) => {
                     >
                         Message Metadata
                     </Typography>
-
                     {message.data ? (
                         <Box sx={{ mt: 1 }}>
                             <Typography 
@@ -198,7 +195,6 @@ const SystemMessage = ({ message }) => {
                             No metadata available
                         </Typography>
                     )}
-
                     <Typography 
                         variant="subtitle2" 
                         sx={{ 
@@ -209,7 +205,6 @@ const SystemMessage = ({ message }) => {
                     >
                         Message Details
                     </Typography>
-                    
                     <TableContainer component={Box} sx={{ 
                         backgroundColor: 'transparent',
                         fontSize: '0.75rem'
@@ -285,7 +280,7 @@ const SystemMessage = ({ message }) => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                </Paper>
+                </Paper>)
             )}
         </Box>
     );

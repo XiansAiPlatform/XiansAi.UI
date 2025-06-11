@@ -373,7 +373,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
           {menuItems}
         </Menu>
       </Box>
-
       <Box
         className="overview-grid"
         sx={{
@@ -462,7 +461,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Box>
       </Box>
       <WorkflowLogComponent workflow={workflow} runId={workflow?.runId} onActionComplete={onActionComplete} isMobile={isMobile}/>
-
     </Paper>
   );
 };

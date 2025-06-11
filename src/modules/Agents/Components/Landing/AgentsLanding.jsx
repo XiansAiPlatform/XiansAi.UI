@@ -17,10 +17,14 @@ const AgentsLanding = ({ onSelectAgent, onSelectPrompt }) => {
   return (
     <Box sx={containerStyles(theme)}>
       <AgentsHeader />
-      
       <Grid container spacing={6}>
         {mockAgents.map((agent) => (
-          <Grid item xs={12} md={6} key={agent.id}>
+          <Grid
+            key={agent.id}
+            size={{
+              xs: 12,
+              md: 6
+            }}>
             <AgentCard 
               agent={agent}
               onSelectAgent={onSelectAgent}
