@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, Paper, CircularProgress, Alert } from '@mui/material';
 import { useTenantsApi } from '../../services/tenants-api';
 

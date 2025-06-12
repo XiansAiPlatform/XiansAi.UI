@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { useEffect, useRef, useState, useCallback, useImperativeHandle } from 'react';
 import { Paper, Box, useTheme } from '@mui/material';
 import ChatHeader from '../ChatHeader';
 import MessagesList from './MessagesList';
@@ -19,17 +19,20 @@ import useMessagePolling from '../hooks/useMessagePolling';
  * @param {Function} [props.onThreadDeleted] - Optional callback when thread is deleted
  * @param {string} props.agentName - Name of the current agent
  */
-const ChatConversation = forwardRef(({ 
-    selectedThreadId,
-    messagingApi,
-    showError,
-    selectedThread,
-    onSendMessage,
-    onHandover,
-    onRefresh,
-    onThreadDeleted,
-    agentName
-}, ref) => {
+const ChatConversation = (
+    {
+        ref,
+        selectedThreadId,
+        messagingApi,
+        showError,
+        selectedThread,
+        onSendMessage,
+        onHandover,
+        onRefresh,
+        onThreadDeleted,
+        agentName
+    }
+) => {
     const theme = useTheme();
     const [messages, setMessages] = useState([]);
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -354,6 +357,6 @@ const ChatConversation = forwardRef(({
             </Box>
         </Paper>
     );
-});
+};
 
 export default ChatConversation; 

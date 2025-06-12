@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
 import TenantSettings from './TenantSettings';

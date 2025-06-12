@@ -1,4 +1,3 @@
-import React from 'react';
 import HandoverMessage from './HandoverMessage';
 import SystemMessage from './SystemMessage';
 import RegularMessage from './RegularMessage';

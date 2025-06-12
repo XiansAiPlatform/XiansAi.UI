@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import { createContext, use, useState, useCallback, useEffect, useRef } from 'react';
 import { useAuditingApi } from '../services/auditing-api';
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
@@ -232,7 +232,7 @@ export const AuditProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuditContext.Provider value={{
+        (<AuditContext value={{
             navErrorCount,
             tabErrorCount,
             lastCheckedTime,
@@ -245,12 +245,12 @@ export const AuditProvider = ({ children }) => {
             consecutiveFailures: consecutiveFailuresRef.current
         }}>
             {children}
-        </AuditContext.Provider>
+        </AuditContext>)
     );
 };
 
 export const useAuditContext = () => {
-    const context = useContext(AuditContext);
+    const context = use(AuditContext);
     if (!context) {
         throw new Error('useAuditContext must be used within an AuditProvider');
     }
