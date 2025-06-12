@@ -63,7 +63,7 @@ const NotAuthorized = () => {
           }}
         >
           You don't have permission to access this resource. 
-          Please register for an account to get started with Xians.ai.
+          Please register for an account to get started with Qib.ai.
         </Typography>
 
         <Box
