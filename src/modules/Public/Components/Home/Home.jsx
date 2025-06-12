@@ -157,7 +157,7 @@ var newBlogPosts = new List<string>();`
                 <div className="home-header-content">
                     <div className="home-logo-container">
                         <div className="home-logo">
-                            <span className="home-logo-flow">Xians</span>
+                            <span className="home-logo-flow">Qib</span>
                             <span className="home-logo-ai">.ai</span>
                         </div>
                         <a href="https://99x.io" target="_blank" rel="noopener noreferrer" className="home-logo-sub">
@@ -708,10 +708,10 @@ var newBlogPosts = new List<string>();`
                 <div className="home-footer-content">
                     <div className="home-footer-left">
                         <div className="home-footer-logo">
-                            <span className="home-logo-flow">Xians</span>
+                            <span className="home-logo-flow">Qib</span>
                             <span className="footer-logo-ai">.ai</span>
                         </div>
-                        <span className="home-footer-copyright">© {new Date().getFullYear()} Xians.ai. All rights reserved.</span>
+                        <span className="home-footer-copyright">© {new Date().getFullYear()} Qib.ai. All rights reserved.</span>
                     </div>
                     <div className="home-footer-right">
                         <div className="home-footer-links">
