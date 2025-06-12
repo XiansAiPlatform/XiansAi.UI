@@ -27,24 +27,31 @@ const AgentSelector = ({
             setIsLoadingAgents(true);
             setLoading(true);
             setError(null);
-            setAgentNames([]);
-            setSelectedAgentName('');
-            onAgentSelected(null);
             try {
                 const response = await agentsApi.getAllAgents();
-                setAgentNames(Array.isArray(response) ? response : []);
+                const agents = Array.isArray(response) ? response : [];
+                setAgentNames(agents);
+                
+                // If no agents available, clear selection
+                if (agents.length === 0) {
+                    setSelectedAgentName('');
+                    onAgentSelected(null);
+                }
             } catch (err) {
                 const errorMsg = 'Failed to fetch agents.';
                 setError(errorMsg);
                 await handleApiError(err, errorMsg, showError);
                 console.error(err);
+                setAgentNames([]);
+                setSelectedAgentName('');
+                onAgentSelected(null);
             } finally {
                 setIsLoadingAgents(false);
                 setLoading(false);
             }
         };
         fetchAgents();
-    }, [agentsApi, showError, onAgentSelected, setLoading]);
+    }, [agentsApi, showError, setLoading, onAgentSelected]);
 
     const handleAgentChange = (newValue) => {
         const newAgentName = newValue || '';

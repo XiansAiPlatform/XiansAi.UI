@@ -93,21 +93,29 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
               <Typography 
                 className="definition-title"
               >
-                {definition.workflowType}
+                {definition.workflowType?.split(':')[1] || definition.workflowType}
               </Typography>
               <Typography variant="caption">
-                <span className="definition-stat">
-                  <span className="stat-value">{definition.activityDefinitions?.length || 0}</span> Activities
-                </span>
-                <span className="definition-stat">
-                  <span className="stat-value">{definition.parameterDefinitions?.length || 0}</span> Inputs
-                </span>
+                {definition.activityDefinitions?.length > 0 && (
+                  <span className="definition-stat">
+                    <span className="stat-value">{definition.activityDefinitions.length}</span> Activities
+                  </span>
+                )}
+                {definition.parameterDefinitions?.length > 0 && (
+                  <span className="definition-stat">
+                    <span className="stat-value">{definition.parameterDefinitions.length}</span> Inputs
+                  </span>
+                )}
+                {definition.createdBy && (
+                  <span className="definition-stat">
+                    Created by {definition.createdBy}
+                  </span>
+                )}
                 <span className="definition-stat">
                   {formatCreatedTime(definition.createdAt)}
                 </span>
                 {definition.updatedAt && 
-                  definition.updatedAt !== definition.createdAt && 
-                  new Date(definition.updatedAt) > new Date(definition.createdAt) && (
+                  definition.updatedAt !== definition.createdAt && (
                   <span className="definition-stat">
                     {formatUpdatedTime(definition.updatedAt)}
                   </span>
@@ -137,10 +145,9 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
                   e.stopPropagation();
                   handleActivate();
                 }}
-                className="button-base button-primary start-btn"
+                className="button-base button-outlined-primary start-btn"
                 size="small"
-                variant="contained"
-                color="primary"
+                variant="outlined"
                 startIcon={<PlayArrowIcon />}
               >
                 Activate
@@ -157,6 +164,14 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
           >
             <Collapse in={isOpen} timeout="auto" unmountOnExit>
               <div className="definition-collapse-content">
+                <div className="definition-section">
+                  <Typography variant="h6" className="section-title">
+                    Type
+                  </Typography>
+                  <Box sx={{ padding: '8px 16px' }}>
+                    <Typography variant="body2">{definition.workflowType}</Typography>
+                  </Box>
+                </div>
                 {definition.activityDefinitions?.length > 0 ? (
                   <DefinitionActivities 
                     activities={definition.activityDefinitions} 

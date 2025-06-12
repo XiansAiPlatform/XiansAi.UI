@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Paper, Box, useTheme } from '@mui/material';
-import ChatHeader from './ChatHeader';
+import ChatHeader from '../ChatHeader';
 import MessagesList from './MessagesList';
-import { useLoading } from '../../contexts/LoadingContext';
-import useMessagePolling from './hooks/useMessagePolling';
-import { handleApiError } from '../../utils/errorHandler';
+import { useLoading } from '../../../contexts/LoadingContext';
+import useMessagePolling from '../hooks/useMessagePolling';
+import { handleApiError } from '../../../utils/errorHandler';
 
 /**
  * Chat conversation component that displays messages for a selected thread
@@ -18,8 +18,9 @@ import { handleApiError } from '../../utils/errorHandler';
  * @param {Function} [props.onHandover] - Optional callback to call when a thread handover is detected
  * @param {Function} [props.onRefresh] - Optional callback to refresh conversations list
  * @param {Function} [props.onThreadDeleted] - Optional callback when thread is deleted
+ * @param {string} props.agentName - Name of the current agent
  */
-const ChatConversation = ({ 
+const ChatConversation = forwardRef(({ 
     selectedThreadId,
     messagingApi,
     showError,
@@ -27,8 +28,9 @@ const ChatConversation = ({
     onSendMessage,
     onHandover,
     onRefresh,
-    onThreadDeleted
-}) => {
+    onThreadDeleted,
+    agentName
+}, ref) => {
     const theme = useTheme();
     const [messages, setMessages] = useState([]);
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
@@ -37,6 +39,7 @@ const ChatConversation = ({
     const [hasMoreMessages, setHasMoreMessages] = useState(true);
     const [error, setError] = useState(null);
     const [lastUpdateTime, setLastUpdateTime] = useState(null);
+    const [isTyping, setIsTyping] = useState(false); // Add typing indicator state
     const { setLoading } = useLoading();
     const scrollContainerRef = useRef(null);
     const isInitialLoad = useRef(true);
@@ -138,11 +141,8 @@ const ChatConversation = ({
             // Check for handover messages
             checkForHandover(sorted);
             
-            if (!isPolling && messagePollingRef.current) {
-                isInitialLoad.current = true; // Reset initial load flag
-                // Start polling for new messages
-                messagePollingRef.current.startPolling(threadId);
-            }
+            // Note: We no longer automatically start polling here
+            // Polling will only be triggered when a message is sent
         } catch (err) {
             if (!isPolling) {
                 const errorMsg = 'Failed to fetch messages for the selected thread.';
@@ -162,18 +162,93 @@ const ChatConversation = ({
         }
     }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading]);
     
-    // Initialize the message polling hook
+    // Initialize the message polling hook with 60-second polling duration
     const messagePolling = useMessagePolling({
         threadId: selectedThreadId,
         fetchMessages: fetchThreadMessages,
         pollingInterval: 5000,
-        maxPollingCount: 24
+        pollingDuration: 60000 // Poll for 60 seconds after message sent
     });
 
     // Store the messagePolling in ref to break the circular dependency
     useEffect(() => {
         messagePollingRef.current = messagePolling;
     }, [messagePolling]);
+
+    // Unified message sending function - used by both Quick Send and Configure & Send
+    const sendMessage = useCallback(async (messageData) => {
+        const { content, metadata, isNewThread = false } = messageData;
+        
+        if (!selectedThread && !isNewThread) {
+            showError('No thread selected');
+            return { success: false };
+        }
+
+        console.log("📤 Sending message and starting 60-second polling...");
+        setIsTyping(true);
+        
+        try {
+            let threadId = selectedThreadId;
+            let response;
+            
+            if (isNewThread) {
+                // For new threads, the calling code should handle the API call
+                // This is just a placeholder for the interface
+                response = messageData.response;
+                threadId = response;
+            } else {
+                // For existing threads, send the message
+                if (!selectedThread.participantId || !selectedThread.workflowType || !selectedThread.workflowId) {
+                    throw new Error('Thread is missing required configuration');
+                }
+                
+                response = await messagingApi.sendMessage(
+                    selectedThreadId,
+                    agentName,
+                    selectedThread.workflowType,
+                    selectedThread.workflowId,
+                    selectedThread.participantId,
+                    content,
+                    metadata
+                );
+            }
+            
+            // Start polling for new messages
+            if (messagePollingRef.current && threadId) {
+                messagePollingRef.current.triggerPolling(threadId);
+            }
+            
+            // Refresh messages immediately to show the sent message
+            if (threadId) {
+                await fetchThreadMessages(threadId, 1);
+            }
+            
+            return { 
+                success: true, 
+                response,
+                threadId 
+            };
+            
+        } catch (error) {
+            showError(`Error sending message: ${error.message}`);
+            return { 
+                success: false, 
+                error: error.message 
+            };
+        } finally {
+            setIsTyping(false);
+        }
+    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError, messagePollingRef, fetchThreadMessages]);
+
+    // Expose both triggerPolling and sendMessage to parent component
+    useImperativeHandle(ref, () => ({
+        triggerPolling: () => {
+            if (messagePollingRef.current && selectedThreadId) {
+                messagePollingRef.current.triggerPolling(selectedThreadId);
+            }
+        },
+        sendMessage: sendMessage
+    }), [selectedThreadId, sendMessage]);
 
     // Initial message fetch when thread ID changes
     useEffect(() => {
@@ -252,6 +327,8 @@ const ChatConversation = ({
                 onSendMessage={onSendMessage}
                 onThreadDeleted={onThreadDeleted}
                 onRefresh={onRefresh}
+                agentName={agentName}
+                sendMessage={sendMessage}
             />
             
             {/* Messages Container - Scrollable area */}
@@ -272,10 +349,11 @@ const ChatConversation = ({
                     error={error}
                     loadMoreMessages={loadMoreMessages}
                     isMessageRecent={isMessageRecent}
+                    isTyping={isTyping}
                 />
             </Box>
         </Paper>
     );
-};
+});
 
 export default ChatConversation; 

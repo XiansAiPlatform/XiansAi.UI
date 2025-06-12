@@ -17,10 +17,9 @@ import {
   ContentCopy as CopyIcon,
 
 } from '@mui/icons-material';
-import StatusChip from '../../Common/StatusChip';
+import StatusChip from '../../Components/Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
-import { handleApiError } from '../../../utils/errorHandler';
 import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
 import { useAuth } from '../../../auth/AuthContext';
@@ -52,7 +51,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       }
     } catch (error) {
       console.error('Failed to fetch workflow details:', error);
-      await handleApiError(error, 'Failed to fetch workflow details', showError);
+      showError('Failed to fetch workflow details');
     }
   }, [workflowId, runId, api, showError]);
 
@@ -88,14 +87,14 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const handleAction = async (action, force = false) => {
     try {
       await api.executeWorkflowCancelAction(workflow.workflowId, force);
-      showSuccess('Termination requested. It may take sometime to complete.');
+      showSuccess('Termination requested. It may take a while to complete.');
 
       // Wait a moment before fetching updated data
       setTimeout(() => {
         fetchWorkflow();
       }, 2000);
     } catch (error) {
-      await handleApiError(error, 'An unexpected error occurred. Please check if the workflow is still running', showError);
+      showError('An unexpected error occurred. Please check if the workflow is still running. Error: ' + error.message);
       console.error(`Error executing ${action}:`, error);
     } finally {
       handleClose();
@@ -335,15 +334,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
                 }}
               >
                 <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Workers: </Box> {getDisplayValue(workflow?.numOfWorkers)}
-              </Typography>
-               <Typography
-                sx={{
-                  color: 'text.secondary',
-                  fontSize: 'inherit',
-                  wordBreak: 'break-word'
-                }}
-              >
-                <Box component="span" sx={{ fontWeight: 600, color: 'primary.dark' }}>Queue: </Box> {getDisplayValue(workflow?.taskQueue)}
               </Typography>
               {workflow?.parentId && (
                 <Typography
