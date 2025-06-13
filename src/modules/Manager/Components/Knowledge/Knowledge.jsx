@@ -19,6 +19,7 @@ import KnowledgeItem from './KnowledgeItem';
 import { useKnowledgeApi } from '../../services/knowledge-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const Knowledge = () => {
   const [knowledgeItems, setKnowledgeItems] = useState([]);
@@ -111,7 +112,7 @@ const Knowledge = () => {
         setKnowledgeItems(sortedData);
       } catch (error) {
         console.error('Failed to fetch knowledge:', error);
-        showError('Failed to fetch knowledge items');
+        await handleApiError(error, 'Failed to fetch knowledge items', showError);
       } finally {
         setIsLoading(false);
         setLoading(false);
@@ -129,7 +130,7 @@ const Knowledge = () => {
       return data;
     } catch (error) {
       console.error('Failed to fetch knowledge by ID:', error);
-      showError('Failed to load knowledge details');
+      await handleApiError(error, 'Failed to load knowledge details', showError);
       return null;
     } finally {
       setIsLoadingItem(false);
@@ -153,7 +154,7 @@ const Knowledge = () => {
             showSuccess('Knowledge created successfully');
           } catch (error) {
             console.error('Failed to create knowledge:', error);
-            showError('Failed to create knowledge item');
+            await handleApiError(error, 'Failed to create knowledge item', showError);
           } finally {
             setLoading(false);
           }
@@ -176,7 +177,7 @@ const Knowledge = () => {
       showSuccess('Knowledge updated successfully');
     } catch (error) {
       console.error('Failed to update knowledge:', error);
-      showError('Failed to update knowledge item');
+      await handleApiError(error, 'Failed to update knowledge item', showError);
     } finally {
       setLoading(false);
     }
@@ -200,7 +201,7 @@ const Knowledge = () => {
       if (error.response && error.response.status === 404) {
         errorMessage = 'Knowledge not found or already deleted';
       }
-      showError(errorMessage);
+      await handleApiError(error, errorMessage, showError);
     } finally {
       setLoading(false);
     }
@@ -224,7 +225,7 @@ const Knowledge = () => {
       if (error.response && error.response.status === 404) {
         errorMessage = 'Version not found or already deleted';
       }
-      showError(errorMessage);
+      await handleApiError(error, errorMessage, showError);
     } finally {
       setLoading(false);
     }

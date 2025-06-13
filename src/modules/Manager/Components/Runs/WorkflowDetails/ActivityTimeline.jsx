@@ -9,6 +9,7 @@ import './WorkflowDetails.css';
 import { useLoading } from '../../../contexts/LoadingContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
+import { handleApiError } from '../../../utils/errorHandler';
 
 const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile }) => {
   const [events, setEvents] = useState([]);
@@ -59,8 +60,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
 
       return () => abortController.abort();
     } catch (error) {
-      showError(error.message || 'Failed to connect to event stream');
-      console.error('Failed to connect to event stream:', error);
+      await handleApiError(error, 'Failed to connect to event stream', showError);
     } finally {
       setIsLoading(false);
       setLoading(false);

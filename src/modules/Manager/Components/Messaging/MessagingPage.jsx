@@ -10,6 +10,7 @@ import { useAgentsApi } from '../../services/agents-api';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
 import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
@@ -163,7 +164,7 @@ const MessagingPage = () => {
             }
         } catch (err) {
             console.error("Error refreshing thread after handover:", err);
-            showError(`Failed to refresh thread: ${err.message}`);
+            await handleApiError(err, 'Failed to refresh thread', showError);
         } finally {
             setLoading(false);
             // Reset processing flag after a short delay to ensure stability

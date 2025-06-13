@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Container, CircularProgress, Box, useMediaQuery, useTheme } from '@mui/material';
+import { Container, Box, useMediaQuery, useTheme } from '@mui/material';
 import { useSlider } from '../../../contexts/SliderContext';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { handleApiError } from '../../../utils/errorHandler';
 import { useWorkflowApi } from '../../../services/workflow-api';
+import { ContentLoader } from '../../Common/StandardLoaders';
 import WorkflowOverview from './WorkflowOverview';
 import ActivityTimeline from './ActivityTimeline';
 
@@ -54,11 +55,7 @@ const WorkflowDetails = () => {
   }, []);
 
   if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-        <CircularProgress />
-      </Box>
-    );
+    return <ContentLoader />;
   }
 
   if (error) {
