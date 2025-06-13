@@ -18,6 +18,7 @@ import { useWorkflowApi } from '../../services/workflow-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const RegisterWebhookForm = ({ agentName, onClose }) => {
     const [workflowType, setWorkflowType] = useState('');
@@ -56,7 +57,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow types.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
             } finally {
                 setIsLoadingTypes(false);
             }
@@ -83,7 +84,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow instances.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 setWorkflowInstances([]);
             } finally {
                 setIsLoadingInstances(false);
@@ -107,7 +108,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
                 const hooks = await workflowApi.getWebhooks(workflowId);
                 setRegisteredWebhooks(hooks);
             } catch (error) {
-                showError(`Error fetching webhooks: ${error.message}`);
+                await handleApiError(error, 'Error fetching webhooks', showError);
                 setRegisteredWebhooks([]);
             } finally {
                 setIsLoadingWebhooks(false);
@@ -176,7 +177,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
             setUrl('');
             setEventName('');
         } catch (error) {
-            showError(`Error registering webhook: ${error.message}`);
+            await handleApiError(error, 'Error registering webhook', showError);
         } finally {
             setLoading(false);
         }
@@ -189,7 +190,7 @@ const RegisterWebhookForm = ({ agentName, onClose }) => {
             showSuccess(`Webhook deleted successfully!`);
             setRegisteredWebhooks(prev => prev.filter(hook => hook.id !== webhookId));
         } catch (error) {
-            showError(`Error deleting webhook: ${error.message}`);
+            await handleApiError(error, 'Error deleting webhook', showError);
         } finally {
             setLoading(false);
         }

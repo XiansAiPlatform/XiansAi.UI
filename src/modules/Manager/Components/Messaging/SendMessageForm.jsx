@@ -11,6 +11,7 @@ import { useMessagingApi } from '../../services/messaging-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const SendMessageForm = ({ 
     agentName, 
@@ -87,7 +88,7 @@ const SendMessageForm = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow types.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
             } finally {
                 setIsLoadingTypes(false);
             }
@@ -116,7 +117,7 @@ const SendMessageForm = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow instances.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 setWorkflowInstances([]);
             } finally {
                 setIsLoadingInstances(false);
@@ -295,7 +296,7 @@ const SendMessageForm = ({
                 onClose();
             }
         } catch (error) {
-            showError(`Error sending message: ${error.message}`);
+            await handleApiError(error, 'Error sending message', showError);
         } finally {
             setLoading(false);
         }
