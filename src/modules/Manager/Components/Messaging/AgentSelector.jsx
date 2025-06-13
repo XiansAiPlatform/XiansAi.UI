@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Grid,
     TextField,
@@ -64,7 +64,7 @@ const AgentSelector = ({
     return (
         <>
             <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Autocomplete
                         id="agent-select"
                         options={agentNames}
@@ -106,7 +106,6 @@ const AgentSelector = ({
                     />
                 </Grid>
             </Grid>
-
             {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
                     {error} - Please check the console for details.

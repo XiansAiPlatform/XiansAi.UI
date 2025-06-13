@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import { useMemo, useCallback, useState, useEffect } from 'react';
 import { Typography, IconButton, Box, Paper } from '@mui/material';
 import { Timeline } from '@mui/lab';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -90,7 +90,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
     }
   }, [shouldNotifyCompletion, onWorkflowComplete]);
 
-  const sortedEventsWithIndex = React.useMemo(() => {
+  const sortedEventsWithIndex = useMemo(() => {
     // First sort by start time chronologically (ascending)
     const chronologicalOrder = [...events].sort((a, b) => {
       const timeA = a.StartedTime ? new Date(a.StartedTime).getTime() : 0;

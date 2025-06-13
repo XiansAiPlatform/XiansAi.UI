@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { AuditProvider } from './contexts/AuditContext';
@@ -108,7 +108,7 @@ function ManagerRoutes() {
 function LogoutHandler({ onLogout }) {
   const navigate = useNavigate();
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Immediately redirect to home page for better UX
     navigate('/');
 

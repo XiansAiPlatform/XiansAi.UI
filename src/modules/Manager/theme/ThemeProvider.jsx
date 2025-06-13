@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import { useTenantTheme, useTenantColors } from './mui-theme';
 

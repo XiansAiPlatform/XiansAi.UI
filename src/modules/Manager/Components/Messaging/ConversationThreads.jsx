@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import {
     Box,
     Typography,
@@ -176,7 +176,7 @@ const ConversationThreads = ({
     }
 
     return (
-        <Paper 
+        (<Paper 
             sx={{
                 bgcolor: theme.palette.background.paper,
                 border: '1px solid',
@@ -211,7 +211,6 @@ const ConversationThreads = ({
                     <AddIcon />
                 </IconButton>
             </Box>
-            
             <Box sx={{ flex: '1 1 auto' }}>
                 {error && (
                      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -230,7 +229,7 @@ const ConversationThreads = ({
                 {!error && threads.length > 0 && (
                     <List disablePadding>
                         {threads.map(thread => (
-                            <React.Fragment key={thread.id}>
+                            <Fragment key={thread.id}>
                                 <ListItemButton 
                                     selected={selectedThreadId === thread.id}
                                     onClick={() => onThreadSelect(thread.id, thread)} 
@@ -355,12 +354,11 @@ const ConversationThreads = ({
                                     />
                                 </ListItemButton>
                                 <Divider component="li" />
-                            </React.Fragment>
+                            </Fragment>
                         ))}
                     </List>
                 )}
             </Box>
-            
             {hasMore && (
                 <Box sx={{ p: 1, borderTop: '1px solid', borderColor: theme.palette.divider }}>
                     <Button 
@@ -374,7 +372,7 @@ const ConversationThreads = ({
                     </Button>
                 </Box>
             )}
-        </Paper>
+        </Paper>)
     );
 };
 
