@@ -197,7 +197,7 @@ class KeycloakService {
     this.keycloakInstance.onTokenExpired = () => {
       console.log("Token expired, refreshing...");
       this.keycloakInstance
-        .updateToken(60)
+        .updateToken(90)
         .then((refreshed) => {
           if (refreshed) {
             console.log("Token refreshed");
