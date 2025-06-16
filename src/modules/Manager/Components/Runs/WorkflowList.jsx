@@ -23,8 +23,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const WorkflowList = () => {  
   const [agentGroups, setAgentGroups] = useState([]);
-  const [ownerFilter, setOwnerFilter] = useState('mine');
-  const [timeFilter, setTimeFilter] = useState('30days');
   const [statusFilter, setStatusFilter] = useState('running');
   const [showHint, setShowHint] = useState(false);
   const { user } = useAuth();
@@ -40,27 +38,25 @@ const WorkflowList = () => {
     
     return agentGroups
       .map(group => {
-        const filteredWorkflows = (group.workflows || []).filter(workflow => {
-          return ownerFilter === 'all' || (ownerFilter === 'mine' && workflow.owner === user?.id);
-        });
+        const filteredWorkflows = (group.workflows || []).sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
         
         if (filteredWorkflows.length > 0) {
           return {
             ...group,
-            workflows: filteredWorkflows.sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+            workflows: filteredWorkflows
           };
         }
         return null;
       })
       .filter(Boolean);
-  }, [ownerFilter, user?.id]);
+  }, []);
 
   const loadWorkflows = useCallback(async () => {
     setLoading(true);
     // Hide hint when refreshing
     setShowHint(false);
     try {
-      const data = await api.fetchWorkflowRuns(timeFilter, ownerFilter, statusFilter);
+      const data = await api.fetchWorkflowRuns(statusFilter);
       
       if (data && Array.isArray(data) && data.length > 0) {
         // Validate that each item in the array has the expected structure
@@ -87,11 +83,11 @@ const WorkflowList = () => {
     } finally {
       setLoading(false);
     }
-  }, [filterAgentGroups, setLoading, api, timeFilter, ownerFilter, statusFilter]);
+  }, [filterAgentGroups, setLoading, api, statusFilter]);
 
   useEffect(() => {
     loadWorkflows();
-  }, [loadWorkflows]);
+  }, [loadWorkflows, statusFilter]);
 
   // Show hint when navigated from NewWorkflowForm
   useEffect(() => {
@@ -112,18 +108,6 @@ const WorkflowList = () => {
   const hasWorkflows = useMemo(() => {
     return agentGroups.length > 0;
   }, [agentGroups]);
-
-  const handleOwnerFilterChange = (event, newOwnerFilter) => {
-    if (newOwnerFilter !== null) {
-      setOwnerFilter(newOwnerFilter);
-    }
-  };
-
-  const handleTimeFilterChange = (event, newTimeFilter) => {
-    if (newTimeFilter !== null) {
-      setTimeFilter(newTimeFilter);
-    }
-  };
 
   const handleStatusFilterChange = (event, newStatusFilter) => {
     if (newStatusFilter !== null) {
@@ -252,31 +236,6 @@ const WorkflowList = () => {
           flexWrap: isSmallMobile ? 'wrap' : 'nowrap',
           width: '100%'
         }}>
-          <ToggleButtonGroup
-            value={ownerFilter}
-            exclusive
-            onChange={handleOwnerFilterChange}
-            size="small"
-            className="filter-toggle-group owner-filter"
-            sx={{ flexGrow: isSmallMobile ? 1 : 0, zIndex: 2 }}
-          >
-            <ToggleButton value="mine">Mine</ToggleButton>
-            <ToggleButton value="all">All</ToggleButton>
-          </ToggleButtonGroup>
-
-          <ToggleButtonGroup
-            value={timeFilter}
-            exclusive
-            onChange={handleTimeFilterChange}
-            size="small"
-            className="filter-toggle-group time-filter"
-            sx={{ flexGrow: isSmallMobile ? 1 : 0, zIndex: 2 }}
-          >
-            <ToggleButton value="7days">7 Days</ToggleButton>
-            <ToggleButton value="30days">30 Days</ToggleButton>
-            <ToggleButton value="all">All</ToggleButton>
-          </ToggleButtonGroup>
-
           <ToggleButtonGroup
             value={statusFilter}
             exclusive
