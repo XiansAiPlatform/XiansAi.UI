@@ -261,10 +261,13 @@ const BrandingSettings = () => {
             <Typography variant="h6" gutterBottom>
                 Branding Settings
             </Typography>
-
             <Grid container spacing={3}>
                 {/* Company Logo Section */}
-                <Grid item xs={12} md={6}>
+                <Grid
+                    size={{
+                        xs: 12,
+                        md: 6
+                    }}>
                     <Card elevation={2}>
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
@@ -361,7 +364,11 @@ const BrandingSettings = () => {
                 </Grid>
 
                 {/* Theme Color Section */}
-                <Grid item xs={12} md={6}>
+                <Grid
+                    size={{
+                        xs: 12,
+                        md: 6
+                    }}>
                     <Card elevation={2}>
                         <CardContent>                            
                             <Typography variant="h6" gutterBottom>
@@ -472,7 +479,7 @@ const BrandingSettings = () => {
                 </Grid>
 
                 {/* Save Button & Notifications */}
-                <Grid item xs={12}>
+                <Grid size={12}>
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
                         <Button
                             variant="contained"
@@ -487,7 +494,6 @@ const BrandingSettings = () => {
                     </Box>
                 </Grid>
             </Grid>
-
             {/* Confirmation Dialog */}
             <Dialog
                 open={confirmDelete}
@@ -506,7 +512,6 @@ const BrandingSettings = () => {
                     </Button>
                 </DialogActions>
             </Dialog>
-
             {/* Notification */}
             <Snackbar
                 open={notification.open}

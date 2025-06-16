@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
     Box,
     Typography,
@@ -22,6 +22,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 // Microsoft logging levels
 const LOG_LEVELS = [
@@ -126,7 +127,7 @@ const WorkflowLogs = ({
             }
         } catch (err) {
             setError('Failed to fetch logs');
-            showError(`Error fetching logs: ${err.message}`);
+            await handleApiError(err, 'Error fetching logs', showError);
         } finally {
             setIsLoading(false);
             setLoading(false);

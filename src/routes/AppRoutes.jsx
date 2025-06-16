@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import lazyLoad from '../utils/lazyLoad';
 import ModuleLoader from '../components/ModuleLoader';

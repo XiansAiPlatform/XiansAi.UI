@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, use, useState } from 'react';
 import { LinearProgress } from '@mui/material';
 
 const LoadingContext = createContext();
@@ -7,7 +7,7 @@ export function LoadingProvider({ children }) {
   const [loading, setLoading] = useState(false);
 
   return (
-    <LoadingContext.Provider value={{ loading, setLoading }}>
+    (<LoadingContext value={{ loading, setLoading }}>
       {loading && (
         <LinearProgress
           sx={{
@@ -20,8 +20,8 @@ export function LoadingProvider({ children }) {
         />
       )}
       {children}
-    </LoadingContext.Provider>
+    </LoadingContext>)
   );
 }
 
-export const useLoading = () => useContext(LoadingContext); 
+export const useLoading = () => use(LoadingContext); 

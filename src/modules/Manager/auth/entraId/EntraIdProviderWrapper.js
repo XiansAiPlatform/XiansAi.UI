@@ -1,4 +1,3 @@
-import React from 'react';
 import { AuthProvider as GenericAuthProvider } from '../AuthContext';
 import EntraIdService from './EntraIdService';
 // MsalProvider from @azure/msal-react is needed to provide msal instance to hooks like useMsal

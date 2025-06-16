@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import '../Public.css';
 import { FiCpu, FiLock, FiSettings, FiStar, FiGitBranch } from 'react-icons/fi';
 import { BiLogoGithub} from 'react-icons/bi';

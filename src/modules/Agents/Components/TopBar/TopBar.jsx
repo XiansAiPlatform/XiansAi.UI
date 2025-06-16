@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -223,7 +223,7 @@ const TopBar = ({ handleToggleSidebar, onBackToExplore, selectedAgent, onSelectA
   };
 
   return (
-    <AppBar 
+    (<AppBar 
       position="static" 
       color="transparent" 
       elevation={0}
@@ -342,7 +342,7 @@ const TopBar = ({ handleToggleSidebar, onBackToExplore, selectedAgent, onSelectA
                 }
               }}>
                 {notifications.map((notification, index) => (
-                  <React.Fragment key={notification.id}>
+                  <Fragment key={notification.id}>
                     <ListItem 
                       button 
                       alignItems="flex-start"
@@ -390,7 +390,7 @@ const TopBar = ({ handleToggleSidebar, onBackToExplore, selectedAgent, onSelectA
                       />
                     </ListItem>
                     {index < notifications.length - 1 && <Divider component="li" />}
-                  </React.Fragment>
+                  </Fragment>
                 ))}
               </List>
             )}
@@ -491,7 +491,7 @@ const TopBar = ({ handleToggleSidebar, onBackToExplore, selectedAgent, onSelectA
           </Menu>
         </Box>
       </Toolbar>
-    </AppBar>
+    </AppBar>)
   );
 };
 
