@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
 import { formatDistanceToNow, formatDistance } from 'date-fns';

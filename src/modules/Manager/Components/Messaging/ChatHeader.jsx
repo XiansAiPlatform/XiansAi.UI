@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, Button, useTheme, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, Chip, TextField, CircularProgress } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SendIcon from '@mui/icons-material/Send';
@@ -8,6 +8,7 @@ import { getRelativeTimeString } from './utils/ConversationUtils';
 import { useMessagingApi } from '../../services/messaging-api';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useLoading } from '../../contexts/LoadingContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 /**
  * Component to display the header of a chat thread
@@ -130,7 +131,7 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
             }
         } catch (error) {
             console.error('Failed to delete thread:', error);
-            showError('Failed to delete conversation. Please try again.');
+            await handleApiError(error, 'Failed to delete conversation. Please try again', showError);
         } finally {
             setIsDeleting(false);
             setLoading(false);

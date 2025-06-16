@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -20,6 +20,7 @@ import {
 import StatusChip from '../../Common/StatusChip';
 import { useNotification } from '../../../contexts/NotificationContext';
 import { useWorkflowApi } from '../../../services/workflow-api';
+import { handleApiError } from '../../../utils/errorHandler';
 import useInterval from '../../../utils/useInterval';
 import './WorkflowDetails.css';
 import { useAuth } from '../../../auth/AuthContext';
@@ -51,7 +52,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
       }
     } catch (error) {
       console.error('Failed to fetch workflow details:', error);
-      showError('Failed to fetch workflow details');
+      await handleApiError(error, 'Failed to fetch workflow details', showError);
     }
   }, [workflowId, runId, api, showError]);
 
@@ -94,7 +95,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         fetchWorkflow();
       }, 2000);
     } catch (error) {
-      showError('An unexpected error occurred. Please check if the workflow is still running. Error: ' + error.message);
+      await handleApiError(error, 'An unexpected error occurred. Please check if the workflow is still running', showError);
       console.error(`Error executing ${action}:`, error);
     } finally {
       handleClose();
@@ -382,7 +383,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
           {menuItems}
         </Menu>
       </Box>
-
       <Box
         className="overview-grid"
         sx={{
@@ -471,7 +471,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Box>
       </Box>
       <WorkflowLogComponent workflow={workflow} runId={workflow?.runId} onActionComplete={onActionComplete} isMobile={isMobile}/>
-
     </Paper>
   );
 };
