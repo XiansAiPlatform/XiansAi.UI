@@ -9,6 +9,7 @@ import {
   sortAgentGroupsByDate,
   isUserOwnerOfAllWorkflows
 } from './definitionUtils';
+import { handleApiError } from '../../utils/errorHandler';
 
 /**
  * Custom hook for managing definitions state and operations
@@ -73,7 +74,7 @@ export const useDefinitions = () => {
     } catch (err) {
       setError(err.message);
       console.error('Error loading definitions:', err);
-      showError('Failed to load definitions. Please try again.');
+      await handleApiError(err, 'Failed to load definitions. Please try again', showError);
     } finally {
       setLoading(false);
     }
@@ -137,7 +138,7 @@ export const useDefinitions = () => {
       setSelectedAgentName(null);
     } catch (error) {
       console.error('Failed to delete agent:', error);
-      showError('Failed to delete agent. Please try again.');
+      await handleApiError(error, 'Failed to delete agent. Please try again', showError);
     } finally {
       setLoading(false);
     }

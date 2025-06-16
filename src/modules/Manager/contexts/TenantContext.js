@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useCallback, createContext, use, useState, useEffect } from 'react';
 import { useTenantsApi } from "../services/tenants-api";
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const TenantContext = createContext();
 
-export const useTenant = () => useContext(TenantContext);
+export const useTenant = () => use(TenantContext);
 
 // Tenant data provider
 export const TenantProvider = ({ children }) => {  
@@ -17,7 +17,7 @@ export const TenantProvider = ({ children }) => {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const location = useLocation();
 
-  const fetchTenant = React.useCallback(async (tenantId) => {
+  const fetchTenant = useCallback(async (tenantId) => {
     try {
       // Make sure tenantId is properly provided before making the API call
       if (!tenantId) {
@@ -95,7 +95,7 @@ export const TenantProvider = ({ children }) => {
   }, [isAuthenticated, isAuthLoading, location.pathname, fetchTenant]);
 
   return (
-    <TenantContext.Provider
+    (<TenantContext
       value={{
         tenant,
         isLoading,
@@ -104,6 +104,6 @@ export const TenantProvider = ({ children }) => {
       }}
     >
       {children}
-    </TenantContext.Provider>
+    </TenantContext>)
   );
 };

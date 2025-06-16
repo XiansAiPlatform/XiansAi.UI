@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 import { toast } from 'react-toastify';
 
 const NotificationContext = createContext();
@@ -41,10 +41,10 @@ export function NotificationProvider({ children }) {
   };
 
   return (
-    <NotificationContext.Provider value={{ showError, showSuccess, showDetailedError }}>
+    (<NotificationContext value={{ showError, showSuccess, showDetailedError }}>
       {children}
-    </NotificationContext.Provider>
+    </NotificationContext>)
   );
 }
 
-export const useNotification = () => useContext(NotificationContext); 
+export const useNotification = () => use(NotificationContext); 

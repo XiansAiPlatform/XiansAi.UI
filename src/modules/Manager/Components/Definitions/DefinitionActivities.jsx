@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { 
   Typography, 
   Box, 
@@ -17,7 +17,7 @@ import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import ViewListIcon from '@mui/icons-material/ViewList';
 
 const DefinitionActivities = ({ activities, agentName }) => {
-  const [viewMode, setViewMode] = React.useState('card');
+  const [viewMode, setViewMode] = useState('card');
 
   const formatText = (text) => {
     return text.replace(/([A-Z])/g, ' $1').trim();
@@ -84,7 +84,13 @@ const DefinitionActivities = ({ activities, agentName }) => {
   const renderCardView = () => (
     <Grid container spacing={2}>
       {activities?.map((activity, index) => (
-        <Grid item xs={12} sm={6} md={4} key={index}>
+        <Grid
+          key={index}
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 4
+          }}>
           <Card sx={{ 
             height: '100%',
             backgroundColor: 'var(--background-paper)',

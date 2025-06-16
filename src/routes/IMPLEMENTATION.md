@@ -34,38 +34,6 @@ The `lazyLoad` utility wraps `React.lazy()` with additional features:
 - Consistent error handling
 - Suspense integration
 
-## Backward Compatibility
-
-For a smooth transition to the new route structure, we implemented a `PreservePathRedirect` component that:
-
-1. Intercepts navigation to legacy routes
-2. Extracts the base path and any additional path segments
-3. Redirects to the new route structure while preserving path parameters and query strings
-
-Example:
-```jsx
-// From: /runs/123/details?view=full
-// To:   /manager/runs/123/details?view=full
-```
-
-Implementation:
-```jsx
-const PreservePathRedirect = ({ from, to }) => {
-  const location = useLocation();
-  
-  // Extract the part of the path after the "from" prefix
-  const remainingPath = location.pathname.substring(from.length);
-  
-  // Construct the new path by combining the "to" prefix with the remaining path
-  const newPath = `${to}${remainingPath}`;
-  
-  // Preserve any query parameters
-  const queryParams = location.search ?? '';
-  
-  return <Navigate to={`${newPath}${queryParams}`} replace />;
-};
-```
-
 ## Error Handling
 
 All routes are wrapped with `ErrorBoundary` components to catch and handle route-level errors:

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
     Box,
     Typography,
@@ -10,6 +10,7 @@ import { useAgentsApi } from '../../services/agents-api';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
 import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
@@ -163,7 +164,7 @@ const MessagingPage = () => {
             }
         } catch (err) {
             console.error("Error refreshing thread after handover:", err);
-            showError(`Failed to refresh thread: ${err.message}`);
+            await handleApiError(err, 'Failed to refresh thread', showError);
         } finally {
             setLoading(false);
             // Reset processing flag after a short delay to ensure stability
@@ -223,28 +224,28 @@ const MessagingPage = () => {
             <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
                 Messaging Playground
             </Typography>
-
-            {/* Display top-level error if any */} 
+            {/* Display top-level error if any */}
             {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
-
             {/* Agent selection */}
             <AgentSelector
                 agentsApi={agentsApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
             />
-
             {/* Action buttons */}
             <WorkflowActions
                 selectedAgentName={selectedAgentName}
                 onRegisterWebhook={handleRegisterWebhook}
                 onRefresh={handleRefresh}
             />
-
             {/* Conditionally render Thread/Conversation area */}
             {selectedAgentName ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
-                    <Grid item xs={12} md={3}>
+                    <Grid
+                        size={{
+                            xs: 12,
+                            md: 3
+                        }}>
                         {/* Threads list */}
                         <ConversationThreads
                             key={`threads-${threadsRefreshCounter}`}
@@ -255,7 +256,11 @@ const MessagingPage = () => {
                             onThreadSelect={handleThreadSelected}
                         />
                     </Grid>
-                    <Grid item xs={12} md={9}>
+                    <Grid
+                        size={{
+                            xs: 12,
+                            md: 9
+                        }}>
                         {/* Messages display */}
                         <ChatConversation 
                             key={`conversation-${refreshCounter}-${selectedThreadId}`}
@@ -283,9 +288,8 @@ const MessagingPage = () => {
                 </Grid>
             ) : (
                 // Placeholder when no agent selected
-                <Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    Please select an agent to view messages.
-                </Typography>
+                (<Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Please select an agent to view messages.
+                                    </Typography>)
             )}
         </Box>
     );
