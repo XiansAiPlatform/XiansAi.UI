@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
     Box,
     CircularProgress,
@@ -11,6 +11,7 @@ import { useMessagingApi } from '../../services/messaging-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 const SendMessageForm = ({ 
     agentName, 
@@ -19,7 +20,8 @@ const SendMessageForm = ({
     initialParticipantId = '', 
     initialWorkflowType = '',
     initialWorkflowId = '',
-    onMessageSent 
+    onMessageSent,
+    sendMessage
 }) => {
     const [workflowType, setWorkflowType] = useState(initialWorkflowType);
     const [workflowId, setWorkflowId] = useState(initialWorkflowId);
@@ -27,6 +29,7 @@ const SendMessageForm = ({
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
     const [showMetadata, setShowMetadata] = useState(false);
+    const [metadataOnly, setMetadataOnly] = useState(false);
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
     
@@ -47,6 +50,17 @@ const SendMessageForm = ({
     useEffect(() => {
         if (contentInputRef.current) {
             contentInputRef.current.focus();
+        }
+        
+        // Load persisted metadata from localStorage
+        const savedMetadata = localStorage.getItem('sendMessageForm_metadata');
+        const savedShowMetadata = localStorage.getItem('sendMessageForm_showMetadata');
+        
+        if (savedMetadata) {
+            setMetadata(savedMetadata);
+        }
+        if (savedShowMetadata === 'true') {
+            setShowMetadata(true);
         }
     }, []);
 
@@ -74,7 +88,7 @@ const SendMessageForm = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow types.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
             } finally {
                 setIsLoadingTypes(false);
             }
@@ -103,7 +117,7 @@ const SendMessageForm = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch workflow instances.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 setWorkflowInstances([]);
             } finally {
                 setIsLoadingInstances(false);
@@ -130,6 +144,23 @@ const SendMessageForm = ({
             setIsMetadataValid(false);
         }
     }, [metadata]);
+
+    // Save metadata to localStorage when it changes
+    useEffect(() => {
+        localStorage.setItem('sendMessageForm_metadata', metadata);
+    }, [metadata]);
+
+    // Save showMetadata state to localStorage when it changes
+    useEffect(() => {
+        localStorage.setItem('sendMessageForm_showMetadata', showMetadata.toString());
+    }, [showMetadata]);
+
+    // Clear content when metadataOnly is checked
+    useEffect(() => {
+        if (metadataOnly) {
+            setContent('');
+        }
+    }, [metadataOnly]);
 
     const handleWorkflowTypeChange = (event, newValue) => {
         // Stop event propagation to prevent the slider from closing
@@ -181,7 +212,7 @@ const SendMessageForm = ({
     };
 
     const handleSend = async () => {
-        if (!participantId || !content || !workflowId || !workflowType) {
+        if (!participantId || (!content && !metadataOnly) || !workflowId || !workflowType) {
             showError('Participant ID, workflow type, workflow ID, and content are required');
             return;
         }
@@ -199,22 +230,60 @@ const SendMessageForm = ({
                 }
             }
             
-            const response = await messagingApi.sendMessage(
-                threadId,
-                agentName,
-                workflowType,
-                workflowId,
-                participantId,
-                content,
-                parsedMetadata
-            );
+            let response;
+            
+            // Check if we have the unified sendMessage function and this is an existing thread
+            if (sendMessage && threadId) {
+                // Use the unified sendMessage function for existing threads
+                const messageData = {
+                    content: metadataOnly ? null : content,
+                    metadata: parsedMetadata,
+                    isNewThread: false
+                };
+                
+                const result = await sendMessage(messageData);
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to send message');
+                }
+                
+                response = result.response;
+            } else {
+                // Use the original API call approach for new threads or when sendMessage is not available
+                if (metadataOnly) {
+                    // Use sendData for metadata-only messages
+                    response = await messagingApi.sendData(
+                        threadId,
+                        agentName,
+                        workflowType,
+                        workflowId,
+                        participantId,
+                        null, // no content for metadata-only
+                        parsedMetadata
+                    );
+                } else {
+                    // Use sendMessage for regular messages
+                    response = await messagingApi.sendMessage(
+                        threadId,
+                        agentName,
+                        workflowType,
+                        workflowId,
+                        participantId,
+                        content,
+                        parsedMetadata
+                    );
+                }
+            }
             
             showSuccess('Message sent successfully!');
+            
+            // Clear only the content, keep metadata for next message
+            setContent('');
             
             // Call onMessageSent callback if provided, passing the thread info
             if (onMessageSent) {
                 // Create a thread object with the necessary information
-                const newThread = {
+                const newThread = threadId ? null : {
                     id: response,
                     participantId: participantId,
                     // Include other properties as needed
@@ -222,12 +291,12 @@ const SendMessageForm = ({
                 onMessageSent(newThread);
             }
             
-            // Always close the slider after sending a message
+            // Close the form after sending a message (metadata will be persisted)
             if (onClose) {
                 onClose();
             }
         } catch (error) {
-            showError(`Error sending message: ${error.message}`);
+            await handleApiError(error, 'Error sending message', showError);
         } finally {
             setLoading(false);
         }
@@ -240,13 +309,21 @@ const SendMessageForm = ({
         }
     };
 
+    const handleMetadataKeyDown = (e) => {
+        // Prevent form submission on Enter key in metadata field
+        if (e.key === 'Enter') {
+            e.stopPropagation();
+            // Allow default behavior for Enter in multiline text (new line)
+        }
+    };
+
     // Prevent click events from bubbling up to the slider overlay
     const handleFormClick = (e) => {
         e.stopPropagation();
     };
 
     // Determine if the send button should be disabled
-    const isSendDisabled = loading || !participantId || !content || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
+    const isSendDisabled = loading || !participantId || (!content && !metadataOnly) || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
 
     return (
         <Box sx={{ p: 3 }} onClick={handleFormClick}>
@@ -254,7 +331,7 @@ const SendMessageForm = ({
                 label="Agent Name"
                 value={agentName}
                 fullWidth
-                margin="normal"
+                sx={{ mt: 0, mb: 2 }}
                 readOnly
                 inputProps={{
                   style: { 
@@ -450,14 +527,35 @@ const SendMessageForm = ({
                 margin="normal"
                 multiline
                 rows={4}
-                required
-                helperText="Message content to be sent"
-                disabled={loading}
+                required={!metadataOnly}
+                helperText={metadataOnly ? "Content disabled (Metadata Only mode)" : "Message content to be sent"}
+                disabled={loading || metadataOnly}
                 inputRef={contentInputRef}
                 onKeyDown={handleKeyDown}
                 onClick={(e) => e.stopPropagation()}
             />
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'flex-end' }}>
+            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                        type="checkbox"
+                        checked={metadataOnly}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            setMetadataOnly(e.target.checked);
+                            if (e.target.checked && !showMetadata) {
+                                setShowMetadata(true);
+                            }
+                        }}
+                        style={{ 
+                            marginRight: '8px',
+                            transform: 'scale(1.1)',
+                            cursor: 'pointer'
+                        }}
+                    />
+                    <Typography variant="body2" sx={{ ml: 0.5, fontSize: '0.875rem' }}>
+                        Metadata Only
+                    </Typography>
+                </Box>
                 <Button 
                     onClick={(e) => {
                         e.stopPropagation();
@@ -485,6 +583,7 @@ const SendMessageForm = ({
                         error={!!metadataError}
                         helperText={metadataError || "Additional data associated with the message (optional)"}
                         onClick={(e) => e.stopPropagation()}
+                        onKeyDown={handleMetadataKeyDown}
                     />
                 </Box>
             )}

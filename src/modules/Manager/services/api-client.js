@@ -96,7 +96,7 @@ export const useApiClient = () => {
           // a clean user experience by redirecting them to a safe location
           if (response.status === 403) {
             console.error('Access forbidden (403). Redirecting to home page.');
-            navigate('/unauthorized');
+            navigate('/manager/unauthorized');
             return; // Exit early to prevent further error handling
           }
 
@@ -110,7 +110,7 @@ export const useApiClient = () => {
           } catch (parseError) {
             // If JSON parsing fails, try to get text response
             try {
-              errorMessage = await response.text() || errorMessage;
+              errorMessage = (await response.text()) || errorMessage;
             } catch (textError) {
               console.warn('Could not parse error response:', textError);
             }
@@ -211,7 +211,7 @@ export const useApiClient = () => {
             // a clean user experience by redirecting them to a safe location
             if (response.status === 403) {
               console.error('Access forbidden (403). Redirecting to home page.');
-              navigate('/unauthorized');
+              navigate('/manager/unauthorized');
               return; // Exit early to prevent further error handling
             }
             
@@ -225,7 +225,7 @@ export const useApiClient = () => {
             } catch (parseError) {
               // If JSON parsing fails, try to get text response
               try {
-                errorMessage = await response.text() || errorMessage;
+                errorMessage = (await response.text()) || errorMessage;
               } catch (textError) {
                 console.warn('Could not parse error response:', textError);
               }

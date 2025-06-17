@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, use, useState, useCallback } from 'react';
 
 const SliderContext = createContext();
 
@@ -35,7 +35,7 @@ export const SliderProvider = ({ children }) => {
   }, []);
 
   return (
-    <SliderContext.Provider value={{ 
+    (<SliderContext value={{ 
       isOpen, 
       isVisible,
       openSlider, 
@@ -44,12 +44,12 @@ export const SliderProvider = ({ children }) => {
       sliderTitle 
     }}>
       {children}
-    </SliderContext.Provider>
+    </SliderContext>)
   );
 };
 
 export const useSlider = () => {
-  const context = useContext(SliderContext);
+  const context = use(SliderContext);
   if (!context) {
     throw new Error('useSlider must be used within a SliderProvider');
   }

@@ -1,5 +1,4 @@
-import React from 'react';
-import { AuthProvider as GenericAuthProvider } from '../AuthContext'; // The generic provider
+import { AuthProvider as GenericAuthProvider } from '../AuthContext';
 import Auth0Service from './Auth0Service';
 
 const Auth0ProviderWrapper = ({ children }) => {

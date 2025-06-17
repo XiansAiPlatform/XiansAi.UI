@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import AgentsLayout from './Components/Layout/AgentsLayout';
 import AgentsLanding from './Components/Landing/AgentsLanding';
@@ -39,7 +39,7 @@ const AgentsRoutes = () => {
     
     // If no agent found with that ID, redirect to explore
     if (!loadedAgent) {
-      return <Navigate to="/agents/explore" replace />;
+      return <Navigate to="../explore" replace />;
     }
     
     // If agent was found, show the chat
@@ -53,9 +53,9 @@ const AgentsRoutes = () => {
   
   return (
     <Routes>
-      <Route path="/agents" element={<Navigate to="/agents/explore" replace />} />
+      <Route path="/" element={<Navigate to="explore" replace />} />
       <Route 
-        path="/agents/explore" 
+        path="explore" 
         element={
           <AgentsLanding 
             onSelectAgent={handleSelectAgent} 
@@ -63,8 +63,9 @@ const AgentsRoutes = () => {
           />
         } 
       />
-      <Route path="/agents/chat/:agentId" element={<AgentChatRoute />} />
-      <Route path="/agents/chat" element={<Navigate to="/agents/explore" replace />} />
+      <Route path="chat/:agentId" element={<AgentChatRoute />} />
+      <Route path="chat" element={<Navigate to="/agents/explore" replace />} />
+      <Route path="*" element={<Navigate to="/agents/explore" replace />} />
     </Routes>
   );
 };

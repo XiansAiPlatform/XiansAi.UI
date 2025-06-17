@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { createContext, use, useState, useEffect, useRef } from 'react';
 
 const AuthContext = createContext(null);
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => use(AuthContext);
 
 export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const [user, setUser] = useState(null);
@@ -144,5 +144,5 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
     providerInstance: AuthProviderInstance 
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext value={value}>{children}</AuthContext>;
 }; 

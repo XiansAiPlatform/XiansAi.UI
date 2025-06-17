@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Box,
     Typography,
@@ -18,74 +18,28 @@ import {
 import { format } from 'date-fns';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { formatStatus } from './utils/ConversationUtils';
+import { formatStatus } from '../utils/ConversationUtils';
 
 /**
- * Displays a single message with expandable details
+ * Component for displaying regular incoming/outgoing messages
  * 
  * @param {Object} props
- * @param {Object} props.message - The message object to display
- * @param {string} props.message.id - Message ID
- * @param {string} props.message.threadId - Thread ID
- * @param {string} props.message.tenantId - Tenant ID
- * @param {string} props.message.direction - 'Incoming', 'Outgoing', or 'Handover'
- * @param {string} props.message.status - Message status
- * @param {string} props.message.createdAt - Creation timestamp
- * @param {string} props.message.createdBy - User who created the message
- * @param {string} props.message.content - Message content
- * @param {string} props.message.participantChannelId - Channel ID
- * @param {string} props.message.participantId - Participant ID (for incoming messages)
- * @param {string} props.message.workflowType - Workflow type (for outgoing messages)
- * @param {Object} [props.message.metadata] - Optional message metadata
- * @param {Array} [props.message.logs] - Optional message logs
+ * @param {Object} props.message - The message object
  * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
  */
-const MessageItem = ({ message, isRecent = false }) => {
+const RegularMessage = ({ message, isRecent = false }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
     const isIncoming = message.direction === 'Incoming';
-    const isHandover = message.direction === 'Handover';
     const formattedDate = message.createdAt ? format(new Date(message.createdAt), 'MMM d, yyyy h:mm a') : '';
-    const messageContent = message.content?.replace(/^"|"$/g, '') || '';
+    const messageContent = message.text?.replace(/^"|"$/g, '') || '';
     const senderName = isIncoming ? (message.participantId || 'Unknown') : (message.workflowType || 'System');
-    
+
     const handleExpandClick = (e) => {
         e.stopPropagation();
         setExpanded(!expanded);
     };
-    
-    // If message is a handover message, render it differently
-    if (isHandover) {
-        return (
-            <Box 
-                sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '100%',
-                    my: 2,
-                    mt: 6,
-                    px: 2
-                }}
-            >
-                <Typography 
-                    variant="body1" 
-                    sx={{ 
-                        textAlign: 'center',
-                        fontStyle: 'italic',
-                        color: theme.palette.text.secondary,
-                        fontWeight: 500,
-                        fontSize: '0.8rem',
-                        padding: '6px 12px',
-                    }}
-                >
-                    {messageContent}
-                </Typography>
-            </Box>
-        );
-    }
-    
+
     return (
         <Box 
             sx={{ 
@@ -323,6 +277,21 @@ const MessageItem = ({ message, isRecent = false }) => {
                                     </TableRow>
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold', 
+                                            width: '30%',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Message Type
+                                        </TableCell>
+                                        <TableCell sx={{ 
+                                            color: theme.palette.text.primary,
+                                            wordBreak: 'break-all'
+                                        }}>
+                                            {message.messageType}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
                                             fontWeight: 'bold',
                                             color: theme.palette.text.secondary
                                         }}>
@@ -401,7 +370,7 @@ const MessageItem = ({ message, isRecent = false }) => {
                                             {message.createdBy}
                                         </TableCell>
                                     </TableRow>
-                                    {message.metadata && (
+                                    {message.data && (
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
                                             fontWeight: 'bold',
@@ -413,9 +382,9 @@ const MessageItem = ({ message, isRecent = false }) => {
                                             color: theme.palette.text.primary,
                                             wordBreak: 'break-all'
                                         }}>
-                                            {typeof message.metadata === 'object' 
-                                                ? JSON.stringify(message.metadata) 
-                                                : message.metadata}
+                                            {typeof message.data === 'object' 
+                                                ? JSON.stringify(message.data) 
+                                                : message.data}
                                         </TableCell>
                                     </TableRow>
                                     )}
@@ -498,4 +467,4 @@ const MessageItem = ({ message, isRecent = false }) => {
     );
 };
 
-export default MessageItem; 
+export default RegularMessage; 

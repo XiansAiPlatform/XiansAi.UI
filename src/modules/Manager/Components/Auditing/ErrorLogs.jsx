@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Box,
     Typography,
-    CircularProgress,
     Alert,
     Paper,
     Accordion,
@@ -29,6 +28,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useAuditingApi } from '../../services/auditing-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
+import { ContentLoader } from '../Common/StandardLoaders';
 
 const CriticalLogs = () => {
     const [criticalLogs, setCriticalLogs] = useState([]);
@@ -104,7 +105,7 @@ const CriticalLogs = () => {
             setCriticalLogs(result);
         } catch (err) {
             setError('Failed to fetch critical logs');
-            showError(`Error fetching critical logs: ${err.message}`);
+            await handleApiError(err, 'Error fetching critical logs', showError);
         } finally {
             setIsLoading(false);
             setLoading(false);
@@ -139,11 +140,7 @@ const CriticalLogs = () => {
     };
 
     if (isLoading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-                <CircularProgress />
-            </Box>
-        );
+        return <ContentLoader />;
     }
 
     if (error) {
@@ -368,7 +365,7 @@ const CriticalLogs = () => {
                                                             <span>
                                                                 <IconButton
                                                                     size="small"
-                                                                    onClick={() => navigate(`/runs/${workflowGroup.workflowId}/${workflowGroup.workflowRuns[0].workflowRunId}`)}
+                                                                    onClick={() => navigate(`/manager/runs/${workflowGroup.workflowId}/${workflowGroup.workflowRuns[0].workflowRunId}`)}
                                                                     disabled={workflowGroup.workflowId === 'defaultWorkflowId'}
                                                                 >
                                                                     <LinkIcon fontSize="small" />
@@ -415,7 +412,7 @@ const CriticalLogs = () => {
                                         <span>
                                             <IconButton
                                                 size="small"
-                                                onClick={() => navigate(`/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`)}
+                                                onClick={() => navigate(`/manager/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`)}
                                                 disabled={selectedWorkflowId === 'defaultWorkflowId'}
                                             >
                                                 <LinkIcon fontSize="small" />

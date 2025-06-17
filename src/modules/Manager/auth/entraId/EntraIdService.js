@@ -14,6 +14,7 @@ class EntraIdService {
       cache: {
         cacheLocation: 'localStorage', // This configures where your cache will be stored
         storeAuthStateInCookie: false, // Set to true if you are having issues on IE11 or Edge
+        claimsBasedCachingEnabled: true, // Enable claims-based caching
       },
     };
     this.publicClientApplication = new PublicClientApplication(this.msalConfig);
@@ -40,7 +41,7 @@ class EntraIdService {
       if (this.activeAccount) {
         this.authState.isAuthenticated = true;
         this.authState.user = {
-            id: this.activeAccount.idTokenClaims?.oid, 
+            id: this.activeAccount.idTokenClaims?.oid|| this.activeAccount.idTokenClaims?.sub,
             name: this.activeAccount.name,
             username: this.activeAccount.username, 
             email: this.activeAccount.username, 
@@ -67,7 +68,7 @@ class EntraIdService {
   async login(options) {
     try {
       await this.publicClientApplication.loginRedirect({
-        scopes: getConfig().entraIdScopes || ['User.Read'],
+        scopes: (getConfig().entraIdScopes?.length > 0) ? getConfig().entraIdScopes : ['User.Read'],
         ...(options || {}),
       });
     } catch (error) {
@@ -82,7 +83,6 @@ class EntraIdService {
       await this.publicClientApplication.logoutRedirect({
         account: account,
         postLogoutRedirectUri: (options?.returnTo || window.location.origin), // Use returnTo from options if provided
-        idTokenHint: account.idToken,
         ...(options || {}),
       });
     } catch (error) {
@@ -125,7 +125,7 @@ class EntraIdService {
         this.activeAccount = account;
         this.authState.isAuthenticated = true;
         this.authState.user = {
-            id: account.idTokenClaims?.oid,
+            id: account.idTokenClaims?.oid || account.idTokenClaims?.sub,
             name: account.name,
             username: account.username,
             email: account.username,
@@ -166,7 +166,7 @@ class EntraIdService {
         this.activeAccount = account;
         this.authState.isAuthenticated = true;
         this.authState.user = {
-            id: account.idTokenClaims?.oid,
+            id: account.idTokenClaims?.oid || account.idTokenClaims?.sub,
             name: account.name,
             username: account.username,
             email: account.username,

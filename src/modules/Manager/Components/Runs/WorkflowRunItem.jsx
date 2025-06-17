@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
 import { formatDistanceToNow, formatDistance } from 'date-fns';
@@ -60,7 +59,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
 
   return (
     <Link 
-      to={`/runs/${safeRun.workflowId}/${safeRun.runId}`} 
+      to={`/manager/runs/${safeRun.workflowId}/${safeRun.runId}`} 
       className="workflow-run-item"
       style={{
         padding: isMobile ? '12px' : '16px',

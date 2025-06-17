@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import {
     Box,
     Typography,
@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import SendMessageForm from './SendMessageForm';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
+import { handleApiError } from '../../utils/errorHandler';
 
 /**
  * Displays a list of conversation threads for a selected agent
@@ -87,7 +88,7 @@ const ConversationThreads = ({
                 }
             }
         } catch (err) {
-            showError(`Failed to refresh threads: ${err.message}`);
+            await handleApiError(err, 'Failed to refresh threads', showError);
         } finally {
             setLoading(false);
         }
@@ -110,7 +111,7 @@ const ConversationThreads = ({
                 setHasMore(false);
             }
         } catch (err) {
-            showError(`Failed to load more threads: ${err.message}`);
+            await handleApiError(err, 'Failed to load more threads', showError);
         } finally {
             setLoadingMore(false);
         }
@@ -146,7 +147,7 @@ const ConversationThreads = ({
             } catch (err) {
                 const errorMsg = 'Failed to fetch conversation threads.';
                 setError(errorMsg);
-                showError(`${errorMsg}: ${err.message}`);
+                await handleApiError(err, errorMsg, showError);
                 console.error(err);
                 setThreads([]);
                 setHasMore(false);
@@ -175,7 +176,7 @@ const ConversationThreads = ({
     }
 
     return (
-        <Paper 
+        (<Paper 
             sx={{
                 bgcolor: theme.palette.background.paper,
                 border: '1px solid',
@@ -210,7 +211,6 @@ const ConversationThreads = ({
                     <AddIcon />
                 </IconButton>
             </Box>
-            
             <Box sx={{ flex: '1 1 auto' }}>
                 {error && (
                      <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -229,7 +229,7 @@ const ConversationThreads = ({
                 {!error && threads.length > 0 && (
                     <List disablePadding>
                         {threads.map(thread => (
-                            <React.Fragment key={thread.id}>
+                            <Fragment key={thread.id}>
                                 <ListItemButton 
                                     selected={selectedThreadId === thread.id}
                                     onClick={() => onThreadSelect(thread.id, thread)} 
@@ -265,7 +265,10 @@ const ConversationThreads = ({
                                                             cursor: 'pointer'
                                                         }}
                                                     >
-                                                        {thread.participantId || 'Unknown Participant'}
+                                                        {thread.participantId 
+                                                            ? thread.participantId.substring(0, 12) + (thread.participantId.length > 12 ? '...' : '')
+                                                            : 'Unknown Participant'
+                                                        }
                                                     </Typography>
                                                 </Tooltip>
                                                 {thread.hasUnread && (
@@ -325,23 +328,23 @@ const ConversationThreads = ({
                                                             color="text.secondary"
                                                             sx={{ fontStyle: 'italic' }}
                                                         >
-                                                            Agent:
+                                                            
                                                         </Typography>
                                                         <Tooltip title={thread.workflowType} arrow placement="bottom">
                                                             <Typography 
                                                                 variant="caption" 
                                                                 color="text.secondary" 
                                                                 sx={{ 
-                                                                    overflow: 'hidden',
-                                                                    textOverflow: 'ellipsis',
-                                                                    whiteSpace: 'nowrap',
                                                                     fontStyle: 'italic',
                                                                     cursor: 'pointer',
                                                                     flex: 1,
                                                                     minWidth: 0
                                                                 }}
                                                             >
-                                                                {thread.workflowType}
+                                                                {thread.workflowType 
+                                                                    ? thread.workflowType.split(':')[1] || thread.workflowType
+                                                                    : ''
+                                                                }
                                                             </Typography>
                                                         </Tooltip>
                                                     </Box>
@@ -351,12 +354,11 @@ const ConversationThreads = ({
                                     />
                                 </ListItemButton>
                                 <Divider component="li" />
-                            </React.Fragment>
+                            </Fragment>
                         ))}
                     </List>
                 )}
             </Box>
-            
             {hasMore && (
                 <Box sx={{ p: 1, borderTop: '1px solid', borderColor: theme.palette.divider }}>
                     <Button 
@@ -370,7 +372,7 @@ const ConversationThreads = ({
                     </Button>
                 </Box>
             )}
-        </Paper>
+        </Paper>)
     );
 };
 
