@@ -16,19 +16,9 @@ export const useWorkflowApi = () => {
         }
       },
 
-      fetchWorkflowRuns: async (timeFilter = '7days', ownerFilter = 'all', statusFilter = 'all') => {
+      fetchWorkflowRuns: async (statusFilter = 'all') => {
         try {
-          const { startTime, endTime } = getTimeRangeParams(timeFilter);
           const queryParams = {};
-
-          if (startTime) {
-            queryParams.startTime = startTime;
-            queryParams.endTime = endTime;
-          }
-
-          if (ownerFilter === 'mine') {
-            queryParams.owner = 'current';
-          }
 
           if (statusFilter !== 'all') {
             queryParams.status = statusFilter;

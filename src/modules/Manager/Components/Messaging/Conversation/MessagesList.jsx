@@ -1,8 +1,9 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { Box, Typography, CircularProgress, List, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MessageItem from './MessageItem';
 import TypingIndicator from './TypingIndicator';
+import { ContentLoader } from '../../Common/StandardLoaders';
 
 /**
  * Component to display a list of messages with load more functionality
@@ -123,11 +124,7 @@ const MessagesList = ({
     }, [messages, sortedMessagesForDisplay, isMessageRecent, showTypingAfterHandover, isTyping]);
 
     if (isLoadingMessages && messages.length === 0) {
-        return (
-            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <CircularProgress />
-            </Box>
-        );
+        return <ContentLoader sx={{ flexGrow: 1 }} />;
     }
 
     if (error) {

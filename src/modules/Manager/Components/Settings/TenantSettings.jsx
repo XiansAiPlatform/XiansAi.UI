@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, CircularProgress, Alert } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Alert } from '@mui/material';
 import { useTenantsApi } from '../../services/tenants-api';
+import { ContentLoader } from '../Common/StandardLoaders';
 
 const TenantSettings = () => {
   const [tenants, setTenants] = useState([]);
@@ -27,11 +28,7 @@ const TenantSettings = () => {
   }, [tenantsApi]);
 
   if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-        <CircularProgress />
-      </Box>
-    );
+    return <ContentLoader size="medium" sx={{ height: '200px' }} />;
   }
 
   if (error) {
