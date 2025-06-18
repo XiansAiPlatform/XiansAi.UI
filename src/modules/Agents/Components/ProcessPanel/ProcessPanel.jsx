@@ -1,4 +1,3 @@
-import React from 'react';
 import CollapsedProcessPanel from './CollapsedProcessPanel';
 import FullProcessPanel from './FullProcessPanel';
 

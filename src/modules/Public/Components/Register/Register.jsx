@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { FiPlusCircle } from 'react-icons/fi';
 import { HiUserGroup } from 'react-icons/hi';
@@ -34,12 +34,12 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [verificationDigits, setVerificationDigits] = useState(['', '', '', '', '', '']);
   const digitRefs = [
-    React.useRef(null),
-    React.useRef(null),
-    React.useRef(null),
-    React.useRef(null),
-    React.useRef(null),
-    React.useRef(null)
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null)
   ];
 
   // Add email validation function

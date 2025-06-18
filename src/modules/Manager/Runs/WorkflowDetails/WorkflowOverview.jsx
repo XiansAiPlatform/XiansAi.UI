@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Typography,
   Box,
@@ -87,7 +87,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
   const handleAction = async (action, force = false) => {
     try {
       await api.executeWorkflowCancelAction(workflow.workflowId, force);
-      showSuccess('Termination requested. It may take a few minutes to complete.');
+      showSuccess('Termination requested. It may take a while to complete.');
 
       // Wait a moment before fetching updated data
       setTimeout(() => {
@@ -373,7 +373,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
           {menuItems}
         </Menu>
       </Box>
-
       <Box
         className="overview-grid"
         sx={{
@@ -462,7 +461,6 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
         </Box>
       </Box>
       <WorkflowLogComponent workflow={workflow} runId={workflow?.runId} onActionComplete={onActionComplete} isMobile={isMobile}/>
-
     </Paper>
   );
 };

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Typography, Box, Tooltip, Button } from '@mui/material';
 import { TimelineItem, TimelineSeparator, TimelineConnector, TimelineContent } from '@mui/lab';
 import { useTheme } from '@mui/material/styles';

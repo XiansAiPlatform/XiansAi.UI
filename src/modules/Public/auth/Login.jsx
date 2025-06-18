@@ -1,10 +1,10 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '../../Manager/auth/AuthContext'; // New import
 
 function Login() {
   const { login, isLoading, isAuthenticated, error } = useAuth(); // New hook, login is now the generic login function
 
-  React.useEffect(() => {
+  useEffect(() => {
     // Only attempt to login if not already loading and not authenticated
     if (!isLoading && !isAuthenticated) {
       login(); // Call the generic login function

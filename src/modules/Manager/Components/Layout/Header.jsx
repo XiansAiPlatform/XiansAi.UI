@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import * as React from 'react';
 import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
 import './Layout.css'; // Import the CSS file
 import { useAuth } from '../../auth/AuthContext';
@@ -8,14 +9,17 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
+import { useTenant } from '../../contexts/TenantContext';
 
 const Header = ({ pageTitle = "", toggleNav }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
-  const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768); 
+   const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });    
+   const [logoImage, setLogoImage] = React.useState(null);
+  const { tenant } = useTenant();
 
   useEffect(() => {
     // Update user data when auth context changes
@@ -31,8 +35,27 @@ const Header = ({ pageTitle = "", toggleNav }) => {
     }
   }, [user]);
 
+  useEffect(() => { 
+    // Fetch tenant logo 
+    const fetchTenantLogo = async () => { 
+      try {
+        if (tenant && tenant.logo) {
+          setLogoImage(tenant.logo.imgBase64);
+          console.log("Tenant data:", tenant);
+        } else {
+          setLogoImage(null);
+        }
+      } catch (error) {
+        console.error('Error fetching tenant logo:', error);
+        setLogoImage(null);
+      }
+    };
+
+    fetchTenantLogo();
+  }, [selectedOrg, tenant]);
+
   React.useEffect(() => {
-    const handleResize = () => {
+    const handleResize = () => { 
       setIsMobile(window.innerWidth <= 768);
     };
 
@@ -43,7 +66,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;
     setSelectedOrg(newOrg);
-    navigate('/definitions');
+    navigate('/manager/definitions');
   };
 
   const handleMenu = (event) => {
@@ -67,7 +90,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
       <Box className="header-content">
         {isMobile && (
           <Tooltip title="Toggle menu">
-            <IconButton 
+            <IconButton
               className="menu-button"
               onClick={toggleNav}
               size="medium"
@@ -86,29 +109,39 @@ const Header = ({ pageTitle = "", toggleNav }) => {
             </IconButton>
           </Tooltip>
         )}
-        
-        <Box sx={{ 
-          display: 'flex', 
+
+        <Box sx={{
+          display: 'flex',
           alignItems: 'center',
-          gap: 2 
-        }}>
-          <Link to="/" className="logo-link">
+          gap: 2
+        }}>            
+        <Link to="/" className="logo-link">
             <Typography className="logo-text">
-              <span className="logo-text-primary">Parkly</span>
-              <span className="logo-text-accent">.ai</span>
+              { logoImage !== null ? (
+                <img 
+                  src={`data:image/png;base64,${logoImage}`} 
+                  alt="Tenant Logo" 
+                  className="logo-image"
+                />
+              ) : (
+                <>
+                  <span className="logo-text-primary">Xians</span>
+                  <span className="logo-text-accent">.ai</span>
+                </>
+              )}
             </Typography>
           </Link>
-          
+
           {pageTitle && !isMobile && (
             <>
-              <Box sx={{ 
-                color: 'text.secondary', 
+              <Box sx={{
+                color: 'text.secondary',
                 mx: 2,
                 opacity: 0.4,
                 fontSize: '1.5rem',
                 fontWeight: 200
               }}>/</Box>
-              <Typography variant="h6" sx={{ 
+              <Typography variant="h6" sx={{
                 fontWeight: 500,
                 color: 'text.primary',
                 opacity: 0.85,
@@ -119,15 +152,15 @@ const Header = ({ pageTitle = "", toggleNav }) => {
             </>
           )}
         </Box>
-        
-        <Box className="header-controls" sx={{ 
-          display: 'flex', 
+
+        <Box className="header-controls" sx={{
+          display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '12px' : '20px'
         }}>
           <Tooltip title="Select organization">
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               alignItems: 'center',
               gap: '8px',
               backgroundColor: 'var(--bg-paper)',
@@ -140,7 +173,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                 borderColor: 'var(--border-color)'
               }
             }}>
-              <BusinessIcon sx={{ 
+              <BusinessIcon sx={{
                 color: 'text.secondary',
                 fontSize: '20px',
                 opacity: 0.7
@@ -175,9 +208,9 @@ const Header = ({ pageTitle = "", toggleNav }) => {
             </Box>
           </Tooltip>
 
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: '8px',
             cursor: 'pointer',
             padding: '4px 12px',
@@ -186,8 +219,8 @@ const Header = ({ pageTitle = "", toggleNav }) => {
             '&:hover': {
               backgroundColor: 'var(--bg-hover)',
             }
-          }} 
-          onClick={handleMenu}
+          }}
+            onClick={handleMenu}
           >
             {!isMobile && (
               <Typography
@@ -266,7 +299,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                 {userData.name}
               </Typography>
               {userData.email && (
-                <Typography className="user-info-email" variant="caption" sx={{ 
+                <Typography className="user-info-email" variant="caption" sx={{
                   display: 'block',
                   color: 'text.secondary',
                   mb: 0.5
@@ -275,7 +308,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                 </Typography>
               )}
               {userData.id && (
-                <Typography className="user-info-id" variant="caption" sx={{ 
+                <Typography className="user-info-id" variant="caption" sx={{
                   display: 'block',
                   color: 'text.secondary',
                   fontSize: '0.7rem',
@@ -289,7 +322,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                 </Typography>
               )}
             </Box>
-            <MenuItem 
+            <MenuItem
               className="user-menu-item logout"
               onClick={handleLogout}
               sx={{
@@ -314,4 +347,4 @@ const Header = ({ pageTitle = "", toggleNav }) => {
   );
 };
 
-export default Header; 
+export default Header;

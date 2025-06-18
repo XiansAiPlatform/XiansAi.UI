@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import { Box, Typography, Button } from '@mui/material';
 import { ErrorOutline } from '@mui/icons-material';
 

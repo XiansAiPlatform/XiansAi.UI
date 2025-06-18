@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider, Badge } from '@mui/material';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
@@ -10,41 +9,41 @@ import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import { useAuditContext } from '../../contexts/AuditContext';
 const NAV_ITEMS = [
   {
-    to: '/definitions',
+    to: '/manager/definitions',
     icon: <CodeOutlinedIcon />,
     label: 'Agent Definitions',
-    isSelected: (pathname) => pathname === '/definitions' || pathname.startsWith('/definitions/'),
+    isSelected: (pathname) => pathname === '/manager/definitions' || pathname.startsWith('/manager/definitions/'),
   },
   {
-    to: '/runs',
+    to: '/manager/runs',
     icon: <AirIcon />,
     label: 'Agent Runs',
-    isSelected: (pathname) => pathname === '/runs' || pathname.startsWith('/runs/') || pathname === '/',
+    isSelected: (pathname) => pathname === '/manager/runs' || pathname.startsWith('/manager/runs/') || pathname === '/manager',
   },
 
   {
-    to: '/knowledge',
+    to: '/manager/knowledge',
     icon: <MenuBookOutlinedIcon />,
     label: 'Knowledge Base',
-    isSelected: (pathname) => pathname === '/knowledge' || pathname.startsWith('/knowledge/'),
+    isSelected: (pathname) => pathname === '/manager/knowledge' || pathname.startsWith('/manager/knowledge/'),
   },
   {
-    to: '/messaging',
+    to: '/manager/messaging',
     icon: <ForumOutlinedIcon />,
     label: 'Messaging',
-    isSelected: (pathname) => pathname === '/messaging' || pathname.startsWith('/messaging/'),
+    isSelected: (pathname) => pathname === '/manager/messaging' || pathname.startsWith('/manager/messaging/'),
   },
   {
-    to: '/auditing',
+    to: '/manager/auditing',
     icon: <ChecklistOutlinedIcon />,
     label: 'Auditing',
-    isSelected: (pathname) => pathname === '/auditing' || pathname.startsWith('/auditing/'),
+    isSelected: (pathname) => pathname === '/manager/auditing' || pathname.startsWith('/manager/auditing/'),
   },
   {
-    to: '/settings',
+    to: '/manager/settings',
     icon: <SettingsOutlinedIcon />,
     label: 'Settings',
-    isSelected: (pathname) => pathname === '/settings' || pathname.startsWith('/settings/'),
+    isSelected: (pathname) => pathname === '/manager/settings' || pathname.startsWith('/manager/settings/'),
   }
 ];
 
@@ -96,11 +95,11 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeC
         primary={label}
         sx={{
           '& .MuiTypography-root': {
-            fontSize: 'var(--text-sm)',
-            fontWeight: selected ? 600 : 500,
-            color: selected ? 'var(--text-primary)' : 'var(--text-secondary)',
-            fontFamily: 'var(--font-family)',
-            letterSpacing: '0.2px'
+            fontSize: 'var(--text-sm) !important',
+            fontWeight: selected ? '600 !important' : '500 !important',
+            color: selected ? 'var(--text-primary) !important' : 'var(--text-secondary) !important',
+            fontFamily: 'var(--font-family) !important',
+            letterSpacing: '0.2px !important'
           }
         }}
       />

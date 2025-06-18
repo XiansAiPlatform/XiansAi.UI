@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Paper, Typography, CircularProgress } from '@mui/material';
 import AgentIcon from './AgentIcon';
 

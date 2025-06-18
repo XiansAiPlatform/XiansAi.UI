@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -60,7 +60,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         queueNameToSend
       );
       onSuccess();
-      navigate('/runs', { state: { fromNewWorkflow: true } });
+      navigate('/manager/runs', { state: { fromNewWorkflow: true } });
     } catch (err) {
       setError(err.message);
     } finally {
