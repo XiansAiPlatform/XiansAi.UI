@@ -172,7 +172,7 @@ const LeftNav = ({ isOpen, onClose }) => {
                 textAlign: 'center'
               }}
             >
-              Xians.ai &copy; {new Date().getFullYear()}
+              Parkly AI &copy; {new Date().getFullYear()}
             </Typography>
           </Box>
         </Box>
