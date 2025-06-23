@@ -144,6 +144,7 @@ class EntraIdService {
   async handleRedirectCallback() {
     try {
         console.log("EntraIdService: Handling redirect callback");
+        await this.publicClientApplication.initialize();
         const response = await this.publicClientApplication.handleRedirectPromise();
         if (response) {
             this.activeAccount = this.publicClientApplication.getActiveAccount();
