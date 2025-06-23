@@ -18,15 +18,7 @@ class EntraIdService {
         claimsBasedCachingEnabled: true, // Enable claims-based caching
       },
       system: {
-        allowNativeBroker: false, // Disables native broker for stability
-        loggerOptions: {
-          loggerCallback: (level, message, containsPii) => {
-            if (!containsPii) {
-              console.log(`MSAL [${level}]: ${message}`);
-            }
-          },
-          logLevel: 'Warning'
-        }
+        allowNativeBroker: false // Disables native broker for stability
       }
     };
     this.publicClientApplication = new PublicClientApplication(this.msalConfig);
@@ -46,21 +38,9 @@ class EntraIdService {
       
       // Check for existing accounts - this should pick up accounts cached during callback processing
       const accounts = this.publicClientApplication.getAllAccounts();
-      console.log("EntraIdService: Found", accounts.length, "existing accounts");
-      
-      // Log account details for debugging
-      if (accounts.length > 0) {
-        console.log("EntraIdService: Account details:", accounts.map(acc => ({ 
-          name: acc.name, 
-          username: acc.username,
-          localAccountId: acc.localAccountId 
-        })));
-      }
-      
       if (accounts.length > 0) {
         this.activeAccount = accounts[0];
         this.publicClientApplication.setActiveAccount(this.activeAccount);
-        console.log("EntraIdService: Set active account:", this.activeAccount.name);
       }
 
       if (this.activeAccount) {
@@ -70,7 +50,8 @@ class EntraIdService {
             name: this.activeAccount.name,
             username: this.activeAccount.username, 
             email: this.activeAccount.username, 
-            rawClaims: this.activeAccount.idTokenClaims,
+            // Ensure all desired claims are mapped here
+            rawClaims: this.activeAccount.idTokenClaims, // Keep raw claims if needed
         };
         try {
             const tokenResponse = await this.getAccessTokenSilently();
@@ -79,14 +60,8 @@ class EntraIdService {
             console.warn("Silent token acquisition failed on init:", error);
             this.authState.accessToken = null;
         }
-        console.log("EntraIdService: Init completed with authenticated user:", this.authState.user.name);
       } else {
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
-        console.log("EntraIdService: Init completed with no authenticated user");
-        
-        // Additional debugging - check localStorage directly
-        const msalKeys = Object.keys(localStorage).filter(key => key.includes('msal'));
-        console.log("EntraIdService: MSAL keys in localStorage:", msalKeys);
       }
     } catch (error) {
       console.error("Error initializing EntraIdService:", error);
@@ -186,9 +161,23 @@ class EntraIdService {
   async logout(options) {
     const account = this.publicClientApplication.getActiveAccount() || this.publicClientApplication.getAllAccounts()[0];
     try {
+      console.log("EntraIdService: Starting logout process");
+      
+      // Clear local auth state immediately
+      this.authState = { user: null, isAuthenticated: false, accessToken: null };
+      this.activeAccount = null;
+      this._notifyStateChange();
+      
+      const logoutUrl = options?.returnTo || (window.location.origin + '/login');
+      console.log("EntraIdService: Redirecting after logout to:", logoutUrl);
+      
       await this.publicClientApplication.logoutRedirect({
         account: account,
-        postLogoutRedirectUri: (options?.returnTo || window.location.origin), // Use returnTo from options if provided
+        postLogoutRedirectUri: logoutUrl, // Redirect to /login page
+        onRedirectNavigate: (url) => {
+          console.log("EntraIdService: Logout redirect URL:", url);
+          return true; // Allow navigation
+        },
         ...(options || {}),
       });
     } catch (error) {

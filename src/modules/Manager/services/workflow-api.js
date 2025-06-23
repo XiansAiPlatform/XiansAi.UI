@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useApiClient, getTimeRangeParams } from './api-client';
+import { useApiClient } from './api-client';
 
 
 export const useWorkflowApi = () => {

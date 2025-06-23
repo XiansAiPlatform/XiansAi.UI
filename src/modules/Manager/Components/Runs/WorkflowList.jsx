@@ -18,14 +18,12 @@ import { useLoading } from '../../contexts/LoadingContext';
 import WorkflowAccordion from './WorkflowAccordion';
 import './WorkflowList.css';
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth } from '../../auth/AuthContext';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const WorkflowList = () => {  
   const [agentGroups, setAgentGroups] = useState([]);
   const [statusFilter, setStatusFilter] = useState('running');
   const [showHint, setShowHint] = useState(false);
-  const { user } = useAuth();
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
