@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Box,
   TextField,
@@ -6,13 +6,13 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  CircularProgress
+  MenuItem
 } from '@mui/material';
 import { Editor } from '@monaco-editor/react';
 import { useKnowledgeApi } from '../../services/knowledge-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
+import { ContentLoader } from '../Common/StandardLoaders';
 
 const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, onClose }) => {
   const knowledgeApi = useKnowledgeApi();
@@ -311,9 +311,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
             }
           }}>
             {isLoadingContent ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <CircularProgress size={40} />
-              </Box>
+              <ContentLoader />
             ) : (
               <Editor
                 height="400px"

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box } from '@mui/material';
 import Message from './Message';
 import TypingIndicator from './TypingIndicator';

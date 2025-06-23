@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, use, useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext'; // New import
 import { useNotification } from './NotificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -86,7 +86,7 @@ export function OrganizationProvider({ children }) {
   };
 
   return (
-    <OrganizationContext.Provider
+    (<OrganizationContext
       value={{
         selectedOrg,
         setSelectedOrg: updateSelectedOrg,
@@ -95,12 +95,12 @@ export function OrganizationProvider({ children }) {
       }}
     >
       {children}
-    </OrganizationContext.Provider>
+    </OrganizationContext>)
   );
 }
 
 export function useSelectedOrg() {
-  const context = useContext(OrganizationContext);
+  const context = use(OrganizationContext);
   if (!context) {
     throw new Error('useSelectedOrg must be used within an OrganizationProvider');
   }

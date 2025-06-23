@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
+import * as React from 'react';
 import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
 import './Layout.css'; // Import the CSS file
 import { useAuth } from '../../auth/AuthContext';

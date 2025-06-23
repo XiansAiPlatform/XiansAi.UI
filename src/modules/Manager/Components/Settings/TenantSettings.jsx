@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useTenantsApi } from '../../services/tenants-api';
+import { ContentLoader } from '../Common/StandardLoaders';
 
 const TenantSettings = () => {
   const [tenants, setTenants] = useState([]);
@@ -226,11 +227,7 @@ const TenantSettings = () => {
   };
 
   if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-        <CircularProgress />
-      </Box>
-    );
+    return <ContentLoader size="medium" sx={{ height: '200px' }} />;
   }
 
   if (error) {
