@@ -11,6 +11,7 @@ export const AuditProvider = ({ children }) => {
     const [navErrorCount, setNavErrorCount] = useState(0);
     const [tabErrorCount, setTabErrorCount] = useState(0);
     const [lastCheckedTime, setLastCheckedTime] = useState(new Date());
+    const [isPollingEnabled, setIsPollingEnabled] = useState(false); // Add polling control
     const lastCheckedTimeRef = useRef(new Date());
     const auditingApi = useAuditingApi();
     const { isAuthenticated, isLoading: authLoading, getAccessTokenSilently, accessToken } = useAuth();
@@ -65,11 +66,12 @@ export const AuditProvider = ({ children }) => {
     }, [isAuthenticated, authLoading, getAccessTokenSilently, accessToken]);
 
     const fetchErrorCount = useCallback(async () => {
-        // Skip if not authenticated, loading, token not ready, on home page, circuit open, or call in progress
-        if (!isAuthenticated || authLoading || !isTokenReady || 
+        // Skip if polling is disabled, not authenticated, loading, token not ready, on home page, circuit open, or call in progress
+        if (!isPollingEnabled || !isAuthenticated || authLoading || !isTokenReady || 
             location.pathname === '/' || location.pathname === '/register' ||
             isCircuitOpenRef.current || isApiCallInProgressRef.current) {
             console.log('Skipping fetchErrorCount:', { 
+                isPollingEnabled,
                 isAuthenticated, 
                 authLoading, 
                 isTokenReady, 
@@ -140,14 +142,14 @@ export const AuditProvider = ({ children }) => {
         } finally {
             isApiCallInProgressRef.current = false;
         }
-    }, [auditingApi, isAuthenticated, authLoading, isTokenReady, location.pathname]);
+    }, [auditingApi, isAuthenticated, authLoading, isTokenReady, location.pathname, isPollingEnabled]);
 
     // Assign the function to the ref after it's defined
     fetchErrorCountRef.current = fetchErrorCount;
 
     // Initial fetch
     useEffect(() => {
-        if (isAuthenticated && !authLoading && isTokenReady) {
+        if (isPollingEnabled && isAuthenticated && !authLoading && isTokenReady) {
             // Delay the initial fetch to ensure token is fully processed
             const timer = setTimeout(() => {
                 if (location.pathname !== '/' && location.pathname !== '/register') {
@@ -157,14 +159,14 @@ export const AuditProvider = ({ children }) => {
             
             return () => clearTimeout(timer);
         }
-    }, [fetchErrorCount, isAuthenticated, authLoading, isTokenReady, location.pathname]);
+    }, [fetchErrorCount, isAuthenticated, authLoading, isTokenReady, location.pathname, isPollingEnabled]);
 
     // Setup polling
     useEffect(() => {
         const isAuditingPage = location.pathname.startsWith('/auditing');
         const isHomePage = location.pathname === '/';
         
-        if (isAuthenticated && !authLoading && isTokenReady && !isAuditingPage && !isHomePage) {
+        if (isPollingEnabled && isAuthenticated && !authLoading && isTokenReady && !isAuditingPage && !isHomePage) {
             // Clear any existing interval
             if (pollingIntervalRef.current) {
                 clearInterval(pollingIntervalRef.current);
@@ -187,11 +189,12 @@ export const AuditProvider = ({ children }) => {
                     clearInterval(pollingIntervalRef.current);
                 }
             };
-        } else if ((isAuditingPage || isHomePage) && pollingIntervalRef.current) {
+        } else if ((!isPollingEnabled || isAuditingPage || isHomePage) && pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
+            console.log('Error notification polling stopped');
         }
-    }, [isAuthenticated, authLoading, isTokenReady, location.pathname]);
+    }, [isAuthenticated, authLoading, isTokenReady, location.pathname, isPollingEnabled]);
 
     // Handle nav error count reset when on auditing page
     useEffect(() => {
@@ -231,16 +234,39 @@ export const AuditProvider = ({ children }) => {
         setLastCheckedTime(newTime);
     }, []);
 
+    const togglePolling = useCallback((enabled) => {
+        setIsPollingEnabled(enabled);
+        console.log(`Audit polling ${enabled ? 'enabled' : 'disabled'}`);
+    }, []);
+
+    const stopPolling = useCallback(() => {
+        setIsPollingEnabled(false);
+        if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+        }
+        console.log('Audit polling stopped');
+    }, []);
+
+    const startPolling = useCallback(() => {
+        setIsPollingEnabled(true);
+        console.log('Audit polling enabled');
+    }, []);
+
     return (
         (<AuditContext value={{
             navErrorCount,
             tabErrorCount,
             lastCheckedTime,
+            isPollingEnabled,
             resetNavErrorCount,
             resetTabErrorCount,
             resetAllErrorCounts,
             resetCircuitBreaker,
             updateLastCheckedTime,
+            togglePolling,
+            stopPolling,
+            startPolling,
             isCircuitOpen: isCircuitOpenRef.current,
             consecutiveFailures: consecutiveFailuresRef.current
         }}>
