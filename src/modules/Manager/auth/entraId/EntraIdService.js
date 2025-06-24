@@ -34,7 +34,6 @@ class EntraIdService {
   async init() {
     try {
       await this.publicClientApplication.initialize();
-      console.log("EntraIdService: MSAL initialized successfully");
       
       // Check for existing accounts - this should pick up accounts cached during callback processing
       const accounts = this.publicClientApplication.getAllAccounts();
@@ -76,21 +75,12 @@ class EntraIdService {
         await this.publicClientApplication.initialize();
         
         // Handle the redirect promise and get the response
-        console.log("EntraIdService: Calling handleRedirectPromise...");
         const response = await this.publicClientApplication.handleRedirectPromise();
-        console.log("EntraIdService: handleRedirectPromise response:", response);
         
         if (response) {
-            console.log("EntraIdService: Successfully processed redirect response", response);
             // Set the active account from the response
             this.publicClientApplication.setActiveAccount(response.account);
             this.activeAccount = response.account;
-            
-            // Verify account was set and cached properly
-            const allAccounts = this.publicClientApplication.getAllAccounts();
-            console.log("EntraIdService: After setting active account, total accounts:", allAccounts.length);
-            const activeAccount = this.publicClientApplication.getActiveAccount();
-            console.log("EntraIdService: Active account after setting:", activeAccount?.name);
             
             // Update auth state immediately
             this.authState.isAuthenticated = true;
@@ -103,8 +93,6 @@ class EntraIdService {
             };
             this.authState.accessToken = null; // Will be obtained later if needed
             
-            console.log("EntraIdService: Auth state updated from redirect response:", this.authState);
-            
             // Force MSAL to save the account data by triggering cache operations
             try {
                 // Force cache operations to ensure data persists
@@ -113,7 +101,6 @@ class EntraIdService {
                     account: response.account,
                     forceRefresh: false
                 });
-                console.log("EntraIdService: Successfully verified token cache");
             } catch (tokenError) {
                 console.warn("EntraIdService: Token cache verification failed, but proceeding:", tokenError.message);
             }
@@ -122,14 +109,11 @@ class EntraIdService {
             // If no response, check for existing accounts
             // This can happen if the redirect was already processed
             const accounts = this.publicClientApplication.getAllAccounts();
-            console.log("EntraIdService: No redirect response, checking existing accounts:", accounts.length);
             if (accounts.length > 0) {
-                console.log("EntraIdService: Found existing account, setting as active");
                 this.activeAccount = accounts[0];
                 this.publicClientApplication.setActiveAccount(this.activeAccount);
                 await this._updateStateFromActiveAccount();
             } else {
-                console.log("EntraIdService: No redirect response and no existing accounts");
                 this.authState = { user: null, isAuthenticated: false, accessToken: null };
             }
         }
@@ -137,7 +121,6 @@ class EntraIdService {
         // Notify state change
         this._notifyStateChange();
         
-        console.log("EntraIdService: Callback handling completed, final auth state:", this.authState);
     } catch (error) {
         console.error("Error handling redirect callback in EntraIdService:", error);
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
@@ -161,21 +144,17 @@ class EntraIdService {
   async logout(options) {
     const account = this.publicClientApplication.getActiveAccount() || this.publicClientApplication.getAllAccounts()[0];
     try {
-      console.log("EntraIdService: Starting logout process");
-      
       // Clear local auth state immediately
       this.authState = { user: null, isAuthenticated: false, accessToken: null };
       this.activeAccount = null;
       this._notifyStateChange();
       
       const logoutUrl = options?.returnTo || (window.location.origin + '/login');
-      console.log("EntraIdService: Redirecting after logout to:", logoutUrl);
       
       await this.publicClientApplication.logoutRedirect({
         account: account,
         postLogoutRedirectUri: logoutUrl, // Redirect to /login page
         onRedirectNavigate: (url) => {
-          console.log("EntraIdService: Logout redirect URL:", url);
           return true; // Allow navigation
         },
         ...(options || {}),
@@ -239,7 +218,6 @@ class EntraIdService {
   // Helper to consolidate updating state from active account
   async _updateStateFromActiveAccount() {
     const account = this.publicClientApplication.getActiveAccount();
-    console.log("EntraIdService: _updateStateFromActiveAccount - Active account:", account);
     
     if (account) {
         this.activeAccount = account;
@@ -252,11 +230,9 @@ class EntraIdService {
             rawClaims: account.idTokenClaims,
         };
         this.authState.accessToken = null; // Will be set later when requested
-        console.log("EntraIdService: Updated auth state - authenticated:", this.authState.isAuthenticated, "user:", this.authState.user?.name);
     } else {
         this.activeAccount = null;
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
-        console.log("EntraIdService: No active account found - setting state to unauthenticated");
     }
   }
 }

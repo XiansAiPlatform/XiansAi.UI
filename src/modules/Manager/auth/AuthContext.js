@@ -18,19 +18,12 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
       const initAuth = async () => {
         try {
           setIsLoading(true);
-          console.log("AuthContext: Starting normal authentication initialization...");
           await AuthProviderInstance.init();
           const authState = AuthProviderInstance.getAuthState();
-          console.log("AuthContext: Got auth state from provider:", authState);
           
           setUser(authState.user);
           setIsAuthenticated(authState.isAuthenticated);
           setAccessToken(authState.accessToken);
-          
-          console.log("AuthContext: Normal authentication initialization completed", {
-            isAuthenticated: authState.isAuthenticated,
-            user: authState.user?.name
-          });
         } catch (e) {
           console.error("AuthContext: Error during initAuth:", e);
           setError(e);
@@ -61,39 +54,26 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
         
         const handleRedirectCallback = async () => {
           try {
-            console.log("AuthContext: Starting callback processing...");
-            console.log("AuthContext: URL info - Path:", window.location.pathname, "Search:", window.location.search, "Hash:", window.location.hash);
-            
             // Call the provider's handleRedirectCallback method
             await AuthProviderInstance.handleRedirectCallback();
-            
-            console.log("AuthContext: Callback processing completed, getting auth state...");
             const authState = AuthProviderInstance.getAuthState();
-            console.log("AuthContext: Retrieved auth state:", authState);
             
             // Update React state
             setUser(authState.user);
             setIsAuthenticated(authState.isAuthenticated);
             setAccessToken(authState.accessToken);
             
-            console.log("AuthContext: Callback processing successful", {
-              isAuthenticated: authState.isAuthenticated,
-              user: authState.user?.name
-            });
-            
             // Small delay to ensure state updates propagate before navigation
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // Only clear URL parameters after successful authentication
             if (authState.isAuthenticated && window.history && window.history.replaceState) {
-              console.log("AuthContext: Clearing URL parameters after successful authentication");
               window.history.replaceState({}, document.title, window.location.pathname);
             }
           } catch (e) {
             console.error("AuthContext: Error handling redirect callback:", e);
             setError(e);
           } finally {
-            console.log("AuthContext: Callback processing finished");
             setIsLoading(false);
             setIsProcessingCallback(false);
           }
@@ -103,7 +83,6 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
       }
 
       const unsubscribe = AuthProviderInstance.onAuthStateChanged((authState) => {
-        console.log("AuthContext: onAuthStateChanged triggered with:", authState);
         
         setUser(authState.user);
         setIsAuthenticated(authState.isAuthenticated);
@@ -111,8 +90,6 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
         if (!redirectCallbackHandled.current) {
           setIsLoading(false);
         }
-        
-        console.log("AuthContext: React state updated via onAuthStateChanged");
       });
 
       return () => {

@@ -9,23 +9,9 @@ const Callback = () => {
   const { showError } = useNotification();
   const [hasShownError, setHasShownError] = useState(false);
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Callback component state:", {
-      isAuthenticated,
-      isLoading,
-      isProcessingCallback,
-      error: error?.message,
-      pathname: window.location.pathname,
-      search: window.location.search,
-      hash: window.location.hash
-    });
-  }, [isAuthenticated, isLoading, isProcessingCallback, error]);
-
   useEffect(() => {
     // Don't navigate while still processing
     if (isLoading || isProcessingCallback) {
-      console.log("Callback: Still processing authentication...");
       return;
     }
 
@@ -44,7 +30,6 @@ const Callback = () => {
     // If callback processing is complete but user is not authenticated and no error,
     // it might mean the callback didn't contain valid auth data
     if (!isAuthenticated && !error) {
-      console.log("Callback: Processing complete but not authenticated - redirecting to login");
       setTimeout(() => {
         navigate('/login');
       }, 2000); // Give a brief moment to show the message
@@ -53,7 +38,6 @@ const Callback = () => {
     
     // Only redirect if successfully authenticated
     if (isAuthenticated && !error) {
-      console.log("Callback: Authentication successful, redirecting to /manager/definitions");
       navigate('/manager/definitions');
     }
   }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError]);
