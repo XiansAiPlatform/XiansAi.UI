@@ -24,7 +24,6 @@ const WorkflowList = () => {
   const [agentGroups, setAgentGroups] = useState([]);
   const [statusFilter, setStatusFilter] = useState('running');
   const [showHint, setShowHint] = useState(false);
-
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
