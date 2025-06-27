@@ -7,12 +7,15 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../../../Manager/auth/AuthContext';
 import { ArrowForward } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
     const { isAuthenticated, login } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
     const [activeCodeTab, setActiveCodeTab] = useState('flow');
     const [activeFeatureTab, setActiveFeatureTab] = useState(0);
+    const navigate = useNavigate();
+    
 
     const featureTabs = [
         {
@@ -177,7 +180,7 @@ var newBlogPosts = new List<string>();`
                                 <button
                                     className="home-btn home-btn-primary"
                                     onClick={() => {
-                                        login({ returnTo: window.location.origin });
+                                        navigate('/manager/definitions');
                                     }}
                                     style={{
                                         display: 'flex',
