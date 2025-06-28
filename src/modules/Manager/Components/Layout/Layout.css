@@ -10,7 +10,6 @@
   background-color: var(--bg-main);
   position: relative;
   width: 100%;
-  max-width: 1440px;
   margin: 0 auto;
   overflow-x: hidden;
   box-sizing: border-box;
@@ -116,7 +115,6 @@
 /* Update header content styles */
 .header-content {
   width: 100%;
-  max-width: 1440px;
   padding: 0 24px;
   height: 100%;
   display: grid;
@@ -273,7 +271,6 @@
 /* Header Styles */
 .header-content {
   width: 100%;
-  max-width: 1440px;
   padding: 0 24px;
   height: 100%;
   display: flex;

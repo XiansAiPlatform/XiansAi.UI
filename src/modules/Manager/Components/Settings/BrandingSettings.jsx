@@ -45,9 +45,13 @@ const BrandingSettings = () => {
     const [logoInfo, setLogoInfo] = useState({ width: 0, height: 0 });
     const [selectedTheme, setSelectedTheme] = useState('default');
     const { tenant, fetchTenant } = useTenant();
+    const { userRoles } = useTenant();
     
     // Add a state variable to hold the tenantId
     const [tenantId, setTenantId] = useState(null);
+
+      // Only allow sysAdmin or tenantAdmin
+  const hasAccess = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
     
     const handleFileChange = async (event) => {
         if (event.target.files && event.target.files[0]) {
@@ -255,6 +259,14 @@ const BrandingSettings = () => {
 
         fetchTenant();
     }, [selectedOrg, tenant, fetchTenant]);
+
+    if (!hasAccess) {
+    return (
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        You do not have permission to view this page.
+      </Alert>
+    );
+  }
 
     return (
         <Paper className="ca-certificates-paper">

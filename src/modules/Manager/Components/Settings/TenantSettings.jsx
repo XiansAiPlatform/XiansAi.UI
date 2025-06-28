@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  CircularProgress, 
-  Alert, 
-  Switch, 
+import {
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+  Alert,
+  Switch,
   FormControlLabel,
   Grid,
   Button,
@@ -15,11 +15,18 @@ import {
   DialogActions,
   TextField,
   IconButton,
-  Tooltip
+  Tooltip,
+  Collapse,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import { useTenantsApi } from '../../services/tenants-api';
 import { ContentLoader } from '../Common/StandardLoaders';
+import { useTenant } from '../../contexts/TenantContext';
+import { useRolesApi } from "../../services/roles-api";
 
 const TenantSettings = () => {
   const [tenants, setTenants] = useState([]);
@@ -38,7 +45,15 @@ const TenantSettings = () => {
     domain: ''
   });
   const [createError, setCreateError] = useState(null);
+  const [expandedTenantId, setExpandedTenantId] = useState(null);
+  const [admins, setAdmins] = useState({});
+  const [adminsLoading, setAdminsLoading] = useState({});
   const tenantsApi = useTenantsApi();
+  const { userRoles, isLoading: tenantLoading } = useTenant();
+  const rolesApi = useRolesApi();
+
+  // Only allow sysAdmin or tenantAdmin
+  const hasAccess = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
 
   useEffect(() => {
     const fetchTenants = async () => {
@@ -54,37 +69,17 @@ const TenantSettings = () => {
         setLoading(false);
       }
     };
-
     fetchTenants();
   }, [tenantsApi]);
 
   const handleToggleEnabled = async (tenantId, currentlyEnabled) => {
-    if (!tenantId) {
-      console.error('No tenant ID provided for toggle');
-      return;
-    }
-
-    console.log('Toggle attempt - tenantId:', tenantId, 'currentlyEnabled:', currentlyEnabled);
-
+    if (!tenantId) return;
     setSwitchLoading(prev => ({ ...prev, [tenantId]: true }));
-    
     try {
-      // Update tenant with new enabled status
-      await tenantsApi.updateTenant(tenantId, { 
-        enabled: !currentlyEnabled 
-      });
-
-      // Update the local state - check both id and tenantId fields
-      setTenants(prevTenants => 
+      await tenantsApi.updateTenant(tenantId, { enabled: !currentlyEnabled });
+      setTenants(prevTenants =>
         prevTenants.map(tenant => {
           const matchesId = tenant.id === tenantId || tenant.tenantId === tenantId;
-          console.log('Checking tenant:', { 
-            'tenant.id': tenant.id, 
-            'tenant.tenantId': tenant.tenantId, 
-            'targetId': tenantId, 
-            'matches': matchesId 
-          });
-          
           return matchesId
             ? { ...tenant, enabled: !currentlyEnabled, isEnabled: !currentlyEnabled }
             : tenant;
@@ -111,10 +106,7 @@ const TenantSettings = () => {
   };
 
   const handleCreateFormChange = (field) => (event) => {
-    setCreateForm(prev => ({
-      ...prev,
-      [field]: event.target.value
-    }));
+    setCreateForm(prev => ({ ...prev, [field]: event.target.value }));
   };
 
   const handleCreateTenant = async () => {
@@ -122,20 +114,16 @@ const TenantSettings = () => {
       setCreateError('Tenant name is required');
       return;
     }
-
     if (!createForm.tenantId.trim()) {
       setCreateError('Tenant ID is required');
       return;
     }
-
     if (!createForm.domain.trim()) {
       setCreateError('Domain is required');
       return;
     }
-
     setCreateLoading(true);
     setCreateError(null);
-
     try {
       const newTenantData = {
         name: createForm.name.trim(),
@@ -144,15 +132,9 @@ const TenantSettings = () => {
         domain: createForm.domain.trim(),
         enabled: true
       };
-
-      console.log('Creating tenant with data:', newTenantData);
       const response = await tenantsApi.createTenant(newTenantData);
       const newTenant = response.data || response;
-      console.log('Server response for created tenant:', newTenant);
-
-      // Map the server response to match the expected UI format
       const tenantToAdd = {
-        // Prioritize server response for ID, but ensure both formats are available
         ...newTenant,
         id: newTenant.id || newTenant.tenantId || createForm.tenantId.trim(),
         tenantId: newTenant.tenantId || newTenant.id || createForm.tenantId.trim(),
@@ -163,21 +145,8 @@ const TenantSettings = () => {
         enabled: newTenant.enabled !== undefined ? newTenant.enabled : true,
         isEnabled: newTenant.isEnabled !== undefined ? newTenant.isEnabled : (newTenant.enabled !== undefined ? newTenant.enabled : true)
       };
-
-      console.log('Tenant being added to state:', tenantToAdd);
-      console.log('Tenant ID fields check:', { 
-        'id': tenantToAdd.id, 
-        'tenantId': tenantToAdd.tenantId,
-        'formTenantId': createForm.tenantId.trim()
-      });
-
-      // Add the new tenant to the local state
       setTenants(prevTenants => [...prevTenants, tenantToAdd]);
-      
-      // Close the dialog and reset form
       handleCreateDialogClose();
-      
-      // Clear any existing errors
       setError(null);
     } catch (err) {
       setCreateError('Failed to create tenant. Please try again.');
@@ -188,23 +157,11 @@ const TenantSettings = () => {
   };
 
   const handleDeleteTenant = async (tenantId) => {
-    if (!tenantId) {
-      console.error('No tenant ID provided for deletion');
-      return;
-    }
-
+    if (!tenantId) return;
     setDeleteLoading(prev => ({ ...prev, [tenantId]: true }));
-
     try {
       await tenantsApi.deleteTenant(tenantId);
-      
-      // Update the local state - remove the deleted tenant
-      setTenants(prevTenants => 
-        prevTenants.filter(tenant => 
-          tenant.id !== tenantId && tenant.tenantId !== tenantId
-        )
-      );
-      
+      setTenants(prevTenants => prevTenants.filter(tenant => tenant.id !== tenantId && tenant.tenantId !== tenantId));
       setDeleteConfirmOpen(false);
       setTenantToDelete(null);
       setError(null);
@@ -226,10 +183,34 @@ const TenantSettings = () => {
     setTenantToDelete(null);
   };
 
+  const handleExpand = async (tenantId) => {
+    setExpandedTenantId(expandedTenantId === tenantId ? null : tenantId);
+    if (!admins[tenantId] && expandedTenantId !== tenantId) {
+      setAdminsLoading((prev) => ({ ...prev, [tenantId]: true }));
+      try {
+        const response = await rolesApi.getTenantAdmins(tenantId);
+        setAdmins((prev) => ({ ...prev, [tenantId]: response.data || response }));
+      } catch (err) {
+        setAdmins((prev) => ({ ...prev, [tenantId]: [{ name: 'Failed to load admins' }] }));
+      } finally {
+        setAdminsLoading((prev) => ({ ...prev, [tenantId]: false }));
+      }
+    }
+  };
+
+  if (tenantLoading) {
+    return <ContentLoader size="medium" sx={{ height: '200px' }} />;
+  }
+  if (!hasAccess) {
+    return (
+      <Alert severity="warning" sx={{ mb: 2 }}>
+        You do not have permission to view this page.
+      </Alert>
+    );
+  }
   if (loading) {
     return <ContentLoader size="medium" sx={{ height: '200px' }} />;
   }
-
   if (error) {
     return (
       <Alert severity="error" sx={{ mb: 2 }}>
@@ -241,30 +222,21 @@ const TenantSettings = () => {
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography 
-          variant="h6" 
+        <Typography
+          variant="h6"
           component="h2"
-          sx={{
-            fontWeight: 'var(--font-weight-semibold)',
-            color: 'var(--text-primary)'
-          }}
+          sx={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--text-primary)' }}
         >
           Tenant Management
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary"
-          onClick={handleCreateDialogOpen}
-        >
+        <Button variant="contained" color="primary" onClick={handleCreateDialogOpen}>
           Create Tenant
         </Button>
       </Box>
-      
       <Paper sx={{ p: 3 }}>
         <Typography variant="body1" sx={{ mb: 2 }}>
           Total Tenants: {tenants.length}
         </Typography>
-        
         {tenants.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
             No tenants found.
@@ -276,13 +248,8 @@ const TenantSettings = () => {
               const isEnabled = tenant.enabled ?? tenant.isEnabled ?? true;
               const isToggleLoading = switchLoading[tenantId] || false;
               const isDeleteLoading = deleteLoading[tenantId] || false;
-              
               return (
-                <Paper 
-                  key={tenantId || index} 
-                  variant="outlined" 
-                  sx={{ p: 2, mb: 1 }}
-                >
+                <Paper key={tenantId || index} variant="outlined" sx={{ p: 2, mb: 1 }}>
                   <Grid container alignItems="center" justifyContent="space-between">
                     <Grid item xs={6}>
                       <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
@@ -321,29 +288,50 @@ const TenantSettings = () => {
                           disabled={isDeleteLoading}
                           size="small"
                         >
-                          {isDeleteLoading ? (
-                            <CircularProgress size={20} />
-                          ) : (
-                            <DeleteIcon />
-                          )}
+                          {isDeleteLoading ? <CircularProgress size={20} /> : <DeleteIcon />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={expandedTenantId === tenantId ? 'Collapse' : 'Expand'}>
+                        <IconButton size="small" onClick={() => handleExpand(tenantId)}>
+                          {expandedTenantId === tenantId ? <ExpandLess /> : <ExpandMore />}
                         </IconButton>
                       </Tooltip>
                     </Grid>
                   </Grid>
+                  <Collapse in={expandedTenantId === tenantId} timeout="auto" unmountOnExit>
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                        Admins:
+                      </Typography>
+                      {adminsLoading[tenantId] ? (
+                        <ContentLoader size="small" sx={{ height: '40px' }} />
+                      ) : (
+                        <List dense>
+                          {(admins[tenantId] || []).map((admin, i) => (
+                            <ListItem key={admin.id || i}>
+                              <ListItemText
+                                primary={admin.userId || admin.name || 'Unknown'}
+                                secondary={admin.nickname || null}
+                              />
+                            </ListItem>
+                          ))}
+                          {(admins[tenantId] || []).length === 0 && (
+                            <ListItem>
+                              <ListItemText primary="No admins found." />
+                            </ListItem>
+                          )}
+                        </List>
+                      )}
+                    </Box>
+                  </Collapse>
                 </Paper>
               );
             })}
           </Box>
         )}
       </Paper>
-
       {/* Create Tenant Dialog */}
-      <Dialog 
-        open={createDialogOpen} 
-        onClose={handleCreateDialogClose}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={createDialogOpen} onClose={handleCreateDialogClose} maxWidth="sm" fullWidth>
         <DialogTitle>Create New Tenant</DialogTitle>
         <DialogContent>
           {createError && (
@@ -400,13 +388,10 @@ const TenantSettings = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={handleCreateDialogClose}
-            disabled={createLoading}
-          >
+          <Button onClick={handleCreateDialogClose} disabled={createLoading}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={handleCreateTenant}
             variant="contained"
             disabled={createLoading || !createForm.name.trim() || !createForm.tenantId.trim() || !createForm.domain.trim()}
@@ -422,14 +407,8 @@ const TenantSettings = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
-      <Dialog 
-        open={deleteConfirmOpen} 
-        onClose={handleDeleteCancel}
-        maxWidth="sm"
-        fullWidth
-      >
+      <Dialog open={deleteConfirmOpen} onClose={handleDeleteCancel} maxWidth="sm" fullWidth>
         <DialogTitle>Delete Tenant</DialogTitle>
         <DialogContent>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -452,13 +431,10 @@ const TenantSettings = () => {
           </Alert>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={handleDeleteCancel}
-            disabled={deleteLoading[tenantToDelete?.id || tenantToDelete?.tenantId]}
-          >
+          <Button onClick={handleDeleteCancel} disabled={deleteLoading[tenantToDelete?.id || tenantToDelete?.tenantId]}>
             Cancel
           </Button>
-          <Button 
+          <Button
             onClick={() => handleDeleteTenant(tenantToDelete?.id || tenantToDelete?.tenantId)}
             variant="contained"
             color="error"
@@ -479,4 +455,4 @@ const TenantSettings = () => {
   );
 };
 
-export default TenantSettings; 
+export default TenantSettings;
