@@ -4,6 +4,7 @@ import CACertificates from './AppServerSettings';
 import TenantSettings from './TenantSettings';
 import BrandingSettings from './BrandingSettings';
 import './Settings.css';
+import { useTenant } from '../../contexts/TenantContext'; 
 
 const Settings = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -11,6 +12,9 @@ const Settings = () => {
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
   };
+
+   const { userRoles } = useTenant();
+  const showTenantTab = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
 
   return (
     <Container maxWidth="lg">
@@ -40,15 +44,15 @@ const Settings = () => {
             aria-label="settings tabs"
           >
             <Tab label="App Server" />
-            <Tab label="Tenants" />
-            <Tab label="Branding" />
+            {showTenantTab && <Tab label="Tenant" />}
+            {showTenantTab && <Tab label="Branding" />}
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
           {currentTab === 0 && <CACertificates />}
-          {currentTab === 1 && <TenantSettings />}
-          {currentTab === 2 && <BrandingSettings />}
+          {showTenantTab && currentTab === 1 && <TenantSettings />}
+          {showTenantTab && currentTab === 2 && <BrandingSettings />}
 
         </Box>
       </Box>
