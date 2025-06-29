@@ -44,8 +44,7 @@ The XiansAi UI uses a **multi-stage Docker build** for optimal production images
 | `docker-entrypoint.sh` | Runtime configuration injection script |
 | `public/config.js` | Runtime configuration template |
 | `nginx.conf` | Custom nginx configuration for React SPA |
-| `docker-build.sh` | Automated build script with multi-platform support |
-| `docker-publish.sh` | Automated publishing to Docker Hub |
+| `docker-build-publish.sh` | Unified build and publish script with multi-platform support |
 | `.dockerignore` | Excludes unnecessary files from build context |
 | `.env.runtime.example` | Example runtime environment configuration |
 
@@ -70,10 +69,10 @@ docker run -d \
 
 ```bash
 # Build and push to Docker Hub (change username to yours)
-IMAGE_NAME=yourusername/xiansai-ui \
-TAG=latest \
-PLATFORM=linux/amd64,linux/arm64 \
-./docker-build.sh
+export DOCKERHUB_USERNAME=99xio
+export IMAGE_NAME=xiansai-ui
+export TAG=latest
+./docker-build-publish.sh
 
 # Your image is now available on Docker Hub!
 # Run it with your configuration
@@ -87,11 +86,8 @@ docker run -d \
 ### Option 3: Build for Local Use Only
 
 ```bash
-# Build for single platform (stores locally)
-IMAGE_NAME=xiansai-ui \
-TAG=latest \
-PLATFORM=linux/amd64 \
-./docker-build.sh
+# For local development, build the image directly with Docker
+docker build -f Dockerfile.production -t xiansai-ui:latest .
 
 # Run locally
 docker run -d \
@@ -248,132 +244,114 @@ Choose the right approach for your needs:
 
 | **Goal** | **Command** | **Result** |
 |----------|-------------|------------|
-| **Build + Push to Registry** | `IMAGE_NAME=username/xiansai-ui ./docker-build.sh` | ✅ Image on Docker Hub, ready to use |
-| **Build for Local Use** | `IMAGE_NAME=xiansai-ui PLATFORM=linux/amd64 ./docker-build.sh` | ✅ Local image you can run immediately |
-| **Add Tags to Existing Image** | `docker pull username/xiansai-ui:latest && ./docker-publish.sh` | ✅ Additional tags (v1.0.1, stable, etc.) |
+| **Build + Push to Registry** | `export DOCKERHUB_USERNAME=username && ./docker-build-publish.sh` | ✅ Image on Docker Hub, ready to use |
+| **Build for Local Use** | `docker build -f Dockerfile.production -t xiansai-ui .` | ✅ Local image you can run immediately |
+| **Add Additional Tags** | `export ADDITIONAL_TAGS="v1.0.1,stable" && ./docker-build-publish.sh` | ✅ Multiple tags in single operation |
 | **Use Pre-built Image** | `docker run -p 3000:80 99xio/xiansai-ui:latest` | ✅ Run immediately with runtime config |
 
 **💡 Most Common Use Cases:**
-- **For CI/CD**: Use `docker-build.sh` - it builds and pushes automatically
-- **For local development**: Use pre-built images or build with single platform
-- **For releases**: Use `docker-publish.sh` to add version tags
 
-### docker-build.sh
+- **For CI/CD**: Use `docker-build-publish.sh` - it builds and pushes in one step
+- **For local development**: Use direct `docker build` or pre-built images
+- **For releases**: Use `ADDITIONAL_TAGS` to create version tags in single operation
 
-Automated build script that **builds AND pushes** images to Docker registry:
+### docker-build-publish.sh
+
+Unified build and publish script that handles both building and pushing in a single operation:
 
 ```bash
 # Basic usage - builds and pushes automatically
-IMAGE_NAME=99xio/xiansai-ui \
-TAG=latest \
-PLATFORM=linux/amd64,linux/arm64 \
-./docker-build.sh
-```
-
-**Environment Variables:**
-
-- `IMAGE_NAME`: Docker image name (default: `xiansai/ui`)
-- `TAG`: Image tag (default: `latest`)
-- `DOCKERFILE`: Dockerfile to use (default: `Dockerfile.production`)
-- `PLATFORM`: Target platforms (default: `linux/amd64,linux/arm64`)
-
-**Important Notes:**
-- ✅ **Multi-platform builds are pushed automatically** - Your image will be available on Docker Hub after running this script
-- ⚠️ **Multi-platform images are NOT stored locally** - This is a Docker buildx limitation
-- 🔄 **For multi-platform builds, the script also creates a local copy** for the current platform to support additional tagging
-- 🛠️ **Recent improvements**: Script now handles both multi-platform and single-platform builds intelligently
-
-### docker-publish.sh
-
-Automated publishing script for adding additional tags to existing images:
-
-```bash
-# Add additional tags to an already built image
-export DOCKERHUB_USERNAME=99xio
-export IMAGE_NAME=99xio/xiansai-ui
-export ADDITIONAL_TAGS="v1.0.1"
-./docker-publish.sh
+export DOCKERHUB_USERNAME=yourusername
+./docker-build-publish.sh
 ```
 
 **Environment Variables:**
 
 - `DOCKERHUB_USERNAME`: Your Docker Hub username (required)
-- `IMAGE_NAME`: Local image name (must match what you built)
-- `TAG`: Main tag to publish (default: `latest`)
-- `ADDITIONAL_TAGS`: Comma-separated additional tags
+- `IMAGE_NAME`: Docker image name (default: `xiansai/ui`)
+- `TAG`: Image tag (default: `latest`)
+- `ADDITIONAL_TAGS`: Comma-separated additional tags (optional)
+- `DOCKERFILE`: Dockerfile to use (default: `Dockerfile.production`)
+- `PLATFORM`: Target platforms (default: `linux/amd64,linux/arm64`)
 
-**When to use:**
-- ✅ **Adding additional tags** to an existing image (e.g., `v1.0.1`, `stable`)
-- ✅ **Re-publishing** an existing local image
-- ❌ **NOT needed** if you just want to build and push (use `docker-build.sh` instead)
+**Advanced Usage:**
 
-**Recent improvements:**
-- 🛠️ **Better error handling** with clear explanations when images aren't found locally
-- 🔍 **Automatic detection** of multi-platform build issues
-- 💡 **Helpful suggestions** for resolving common problems
+```bash
+# Build with multiple tags
+export DOCKERHUB_USERNAME=yourusername
+export TAG=v1.2.0
+export ADDITIONAL_TAGS="latest,stable"
+./docker-build-publish.sh
+
+# Custom image name and platform
+export DOCKERHUB_USERNAME=yourusername
+export IMAGE_NAME=custom-ui
+export PLATFORM=linux/amd64
+./docker-build-publish.sh
+```
+
+**Key Features:**
+
+- ✅ **One-step operation**: Builds and pushes in single command
+- ✅ **Multi-platform support**: Builds for AMD64 and ARM64 by default
+- ✅ **Multiple tags**: Support for additional tags in single operation
+- ✅ **Efficient**: No local storage needed for multi-platform builds
+- ✅ **Error handling**: Comprehensive validation and helpful error messages
 
 ## 🐛 Troubleshooting
 
 ### Common Docker Build/Publish Issues
 
-#### 1. "An image does not exist locally with the tag"
+#### 1. Docker Hub Authentication Issues
 
 ```bash
-❌ An image does not exist locally with the tag: 99xio/xiansai-ui
+❌ Error response from daemon: denied: requested access to the resource is denied
 ```
 
-**Cause**: Multi-platform Docker builds (`linux/amd64,linux/arm64`) don't store images locally.
+**Cause**: Not logged into Docker Hub or incorrect credentials.
 
 **Solutions**:
 
-**Option A**: Your image is already published! (Recommended)
 ```bash
-# If docker-build.sh completed successfully, your image is on Docker Hub
-# Just pull and use it:
-docker pull 99xio/xiansai-ui:latest
-docker run -p 3000:80 99xio/xiansai-ui:latest
+# Login to Docker Hub
+docker login
+
+# Or login with username directly
+docker login -u yourusername
+
+# Verify login worked
+docker info | grep Username
 ```
 
-**Option B**: Pull the image first, then publish additional tags
-```bash
-# Pull the image to local registry
-docker pull 99xio/xiansai-ui:latest
-
-# Now you can add additional tags
-export DOCKERHUB_USERNAME=99xio
-export IMAGE_NAME=99xio/xiansai-ui
-export ADDITIONAL_TAGS="v1.0.1,stable"
-./docker-publish.sh
-```
-
-**Option C**: Build for single platform to store locally
-```bash
-# Build for current platform only (stores locally)
-IMAGE_NAME=99xio/xiansai-ui \
-PLATFORM=linux/amd64 \
-./docker-build.sh
-```
-
-#### 2. Environment Variable Mismatch
+#### 2. Missing DOCKERHUB_USERNAME
 
 ```bash
-❌ Local image xiansai/ui:latest not found!
+❌ DOCKERHUB_USERNAME environment variable is required
 ```
 
-**Cause**: `IMAGE_NAME` environment variable doesn't match between build and publish scripts.
+**Cause**: The required `DOCKERHUB_USERNAME` environment variable is not set.
 
-**Solution**: Use the same `IMAGE_NAME` for both scripts:
+**Solution**: Set your Docker Hub username:
 ```bash
-# Build with specific image name
-IMAGE_NAME=99xio/xiansai-ui ./docker-build.sh
-
-# Publish with the SAME image name
-export IMAGE_NAME=99xio/xiansai-ui
-export DOCKERHUB_USERNAME=99xio
-./docker-publish.sh
+export DOCKERHUB_USERNAME=yourusername
+./docker-build-publish.sh
 ```
 
-#### 3. Multi-Platform Build Issues
+#### 3. Permission Denied on Script
+
+```bash
+❌ Permission denied: ./docker-build-publish.sh
+```
+
+**Cause**: Script is not executable.
+
+**Solution**: Make the script executable:
+```bash
+chmod +x docker-build-publish.sh
+./docker-build-publish.sh
+```
+
+#### 4. Multi-Platform Build Issues
 
 **Problem**: Build fails with "buildx not found"
 ```bash
@@ -385,14 +363,16 @@ docker buildx create --use
 **Problem**: Build is slow or fails
 ```bash
 # Solution: Build for single platform for testing
-PLATFORM=linux/amd64 ./docker-build.sh
+export PLATFORM=linux/amd64
+./docker-build-publish.sh
 ```
 
-#### 4. Runtime Configuration Not Working
+#### 5. Runtime Configuration Not Working
 
 **Problem**: Environment variables not being applied at runtime
 
 **Solutions**:
+
 ```bash
 # Check if config.js is being loaded
 docker exec -it xiansai-ui cat /usr/share/nginx/html/config.js
@@ -404,11 +384,12 @@ docker exec -it xiansai-ui env | grep REACT_APP
 docker logs xiansai-ui
 ```
 
-#### 5. Authentication Issues
+#### 6. Authentication Issues
 
 **Problem**: `Auth0 domain undefined` error
 
 **Solution**: Check for trailing spaces in environment files:
+
 ```bash
 # Clean environment file
 sed -i 's/[[:space:]]*$//' .env.runtime
@@ -673,7 +654,7 @@ jobs:
     - name: Build and push
       run: |
         export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-        ./docker-build.sh
+        ./docker-build-publish.sh
 ```
 
 ### GitLab CI Example
@@ -687,7 +668,7 @@ docker-build:
   before_script:
     - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
   script:
-    - ./docker-build.sh
+    - ./docker-build-publish.sh
   only:
     - main
     - tags
@@ -701,10 +682,10 @@ The following configuration has been tested and verified to work:
 
 ```bash
 # Multi-platform build that works
-IMAGE_NAME=99xio/xiansai-ui \
-TAG=v1.0.0 \
-PLATFORM=linux/amd64,linux/arm64 \
-./docker-build.sh
+export DOCKERHUB_USERNAME=99xio
+export TAG=v1.0.0
+export PLATFORM=linux/amd64,linux/arm64
+./docker-build-publish.sh
 ```
 
 ### Published Image
@@ -774,16 +755,17 @@ docker run -p 3000:80 --env-file .env.production xiansai-ui
 
 ```bash
 # Build Multi-platform (automatically pushes to Docker Hub)
-IMAGE_NAME=99xio/xiansai-ui TAG=latest ./docker-build.sh
-# ✅ Your image is now on Docker Hub! No need for docker-publish.sh
-
-# Add additional tags (optional)
 export DOCKERHUB_USERNAME=99xio
-export IMAGE_NAME=99xio/xiansai-ui
-export ADDITIONAL_TAGS="v1.0.1,stable"
-docker pull 99xio/xiansai-ui:latest  # Pull first for multi-platform
-./docker-publish.sh
+export TAG=latest
+./docker-build-publish.sh
+# ✅ Your image is now on Docker Hub in one step!
 
-# Build for local use only (single platform)
-IMAGE_NAME=xiansai-ui PLATFORM=linux/amd64 ./docker-build.sh
+# Build with additional tags
+export DOCKERHUB_USERNAME=99xio
+export TAG=v1.0.1
+export ADDITIONAL_TAGS="latest,stable"
+./docker-build-publish.sh
+
+# Build for local use only
+docker build -f Dockerfile.production -t xiansai-ui:latest .
 ```

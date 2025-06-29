@@ -8,10 +8,10 @@ yarn-error.log*
 build
 
 # Development files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+.env.development
+.env.staging
+.env.production
 
 # IDE files
 .vscode

@@ -120,7 +120,7 @@ See `.env.example` for complete configuration options.
 | `npm test` | Run tests |
 | `npm run analyze` | Analyze bundle size |
 
-**Docker Scripts:** See [docs/DOCKER.md](docs/DOCKER.md) for Docker build and publish scripts.
+**Docker Scripts:** See [docs/DOCKER.md](docs/DOCKER.md) for the unified Docker build and publish script.
 
 ## 📁 Project Structure
 
