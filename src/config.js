@@ -1,28 +1,41 @@
+// Helper function to get environment variable with runtime override
+function getEnvVar(key, defaultValue = undefined) {
+  // Check for runtime configuration first (injected at container startup)
+  if (typeof window !== 'undefined' && window.RUNTIME_CONFIG && window.RUNTIME_CONFIG[key] && window.RUNTIME_CONFIG[key] !== `\${${key}}`) {
+    return window.RUNTIME_CONFIG[key];
+  }
+  
+  // Fall back to build-time environment variables
+  return process.env[key] || defaultValue;
+}
+
 export function getConfig() {
-  const authProvider = process.env.REACT_APP_AUTH_PROVIDER || 'auth0'; // Default to auth0
+  const authProvider = getEnvVar('REACT_APP_AUTH_PROVIDER', 'auth0'); // Default to auth0
 
   const config = {
     authProvider,
-    apiBaseUrl: process.env.REACT_APP_API_URL,
+    apiBaseUrl: getEnvVar('REACT_APP_API_URL'),
     modules: {
       // Enable/disable modules (defaults to true if not specified)
-      public: process.env.REACT_APP_ENABLE_PUBLIC_MODULE !== 'false',
-      manager: process.env.REACT_APP_ENABLE_MANAGER_MODULE !== 'false',
-      agents: process.env.REACT_APP_ENABLE_AGENTS_MODULE !== 'false',
+      public: getEnvVar('REACT_APP_ENABLE_PUBLIC_MODULE') !== 'false',
+      manager: getEnvVar('REACT_APP_ENABLE_MANAGER_MODULE') !== 'false',
+      agents: getEnvVar('REACT_APP_ENABLE_AGENTS_MODULE') !== 'false',
     }
   };
 
   if (authProvider === 'auth0') {
-    config.domain = process.env.REACT_APP_AUTH0_DOMAIN;
-    config.clientId = process.env.REACT_APP_AUTH0_CLIENT_ID;
-    config.audience = process.env.REACT_APP_AUTH0_AUDIENCE;
-    config.organizationClaim = process.env.REACT_APP_AUTH0_ORGANIZATION_CLAIM || 'https://xians.ai/tenants';
+    config.domain = getEnvVar('REACT_APP_AUTH0_DOMAIN');
+    config.clientId = getEnvVar('REACT_APP_AUTH0_CLIENT_ID');
+    config.audience = getEnvVar('REACT_APP_AUTH0_AUDIENCE');
+    config.organizationClaim = getEnvVar('REACT_APP_AUTH0_ORGANIZATION_CLAIM', 'https://xians.ai/tenants');
   } else if (authProvider === 'entraId') {
-    config.entraIdClientId = process.env.REACT_APP_ENTRA_ID_CLIENT_ID;
-    config.entraIdAuthority = process.env.REACT_APP_ENTRA_ID_AUTHORITY;
-    config.entraIdScopes = process.env.REACT_APP_ENTRA_ID_SCOPES ? process.env.REACT_APP_ENTRA_ID_SCOPES.split(',') : ['User.Read'];
-    config.organizationClaim = process.env.REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM || 'https://login-dev.parkly.no/tenants';
-    config.knownAuthorities = process.env.REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES ? process.env.REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES.split(',') : [];
+    config.entraIdClientId = getEnvVar('REACT_APP_ENTRA_ID_CLIENT_ID');
+    config.entraIdAuthority = getEnvVar('REACT_APP_ENTRA_ID_AUTHORITY');
+    const scopes = getEnvVar('REACT_APP_ENTRA_ID_SCOPES');
+    config.entraIdScopes = scopes ? scopes.split(',') : ['User.Read'];
+    config.organizationClaim = getEnvVar('REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM', 'https://login-dev.parkly.no/tenants');
+    const authorities = getEnvVar('REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES');
+    config.knownAuthorities = authorities ? authorities.split(',') : [];
   }
 
   return config;
