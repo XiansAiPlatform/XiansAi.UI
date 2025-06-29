@@ -53,6 +53,11 @@ export function OrganizationProvider({ children }) {
         var orgs = tokenService.getOrganizations(decodedToken); // Changed
         // remove orgs without '.' or '-'
         orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
+        
+        // Add "default" if it doesn't exist
+        if ( !orgs.includes('default') && orgs.length === 0) {
+          orgs.push('default');
+        }
 
         if (orgs.length > 0) {
           setOrganizations(orgs);
