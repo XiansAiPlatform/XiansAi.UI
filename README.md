@@ -49,55 +49,32 @@ npm run build
 
 ## 🐳 Docker Deployment
 
-### Option 1: Use Pre-built Images (Recommended)
+The XiansAi UI supports **runtime configuration** with Docker, allowing you to use the same image across all environments by passing environment variables at runtime.
+
+### Quick Start with Docker
 
 ```bash
-# Copy and configure environment
-cp .env.example .env
-# Edit .env with your settings
-
-# Run with docker-compose
-docker-compose -f docker-compose.production.yml up -d
+# Using pre-built image with runtime configuration
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-client-id \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
 ```
 
-### Option 2: Build and Publish Your Own Images
+### 📖 Complete Docker Documentation
 
-1. **Build the Docker image:**
-   ```bash
-   # Build for multiple platforms
-   ./docker-build.sh
-   
-   # Or with custom settings
-   IMAGE_NAME=myorg/xiansai-ui TAG=v1.0.0 ./docker-build.sh
-   ```
+For comprehensive Docker setup, including:
+- Runtime configuration details
+- Build and publish instructions  
+- Production deployment strategies
+- Troubleshooting and optimization
+- Security features
 
-2. **Publish to Docker Hub:**
-   ```bash
-   # Set your Docker Hub username
-   export DOCKERHUB_USERNAME=yourusername
-   
-   # Publish the image
-   ./docker-publish.sh
-   
-   # Or with additional tags
-   ADDITIONAL_TAGS=v1.0.0,stable ./docker-publish.sh
-   ```
-
-3. **Update your environment:**
-   ```bash
-   # Update .env file
-   DOCKER_UI_IMAGE=yourusername/xiansai-ui:latest
-   ```
-
-### Docker Configuration
-
-The Docker setup includes:
-- **Multi-stage build** for optimized production images
-- **Multi-platform support** (AMD64 and ARM64)
-- **Nginx** for serving static files with optimized configuration
-- **Security features** (non-root user, security headers)
-- **Health checks** for container monitoring
-- **Gzip compression** for better performance
+**See: [docs/DOCKER.md](docs/DOCKER.md)**
 
 ## ⚙️ Environment Configuration
 
@@ -130,7 +107,6 @@ REACT_APP_ENTRA_ID_SCOPES=User.Read,openid,profile
 # Enable/disable modules (set to 'false' to disable)
 REACT_APP_ENABLE_PUBLIC_MODULE=true
 REACT_APP_ENABLE_MANAGER_MODULE=true
-REACT_APP_ENABLE_AGENTS_MODULE=true
 ```
 
 See `.env.example` for complete configuration options.
@@ -143,8 +119,8 @@ See `.env.example` for complete configuration options.
 | `npm run build` | Build for production |
 | `npm test` | Run tests |
 | `npm run analyze` | Analyze bundle size |
-| `./docker-build.sh` | Build Docker image |
-| `./docker-publish.sh` | Publish to Docker Hub |
+
+**Docker Scripts:** See [docs/DOCKER.md](docs/DOCKER.md) for Docker build and publish scripts.
 
 ## 📁 Project Structure
 
@@ -162,40 +138,41 @@ src/
 
 ## 🏭 Production Deployment
 
-### Using Docker Compose (Recommended)
+### Docker Deployment (Recommended)
 
-1. **Prepare environment:**
-   ```bash
-   cp .env.example .env
-   # Configure your .env file
-   ```
-
-2. **Deploy both UI and Server:**
-   ```bash
-   docker-compose -f docker-compose.production.yml up -d
-   ```
-
-3. **Monitor services:**
-   ```bash
-   docker-compose -f docker-compose.production.yml logs -f
-   ```
-
-### Manual Docker Deployment
+The recommended way to deploy XiansAi UI is using Docker with runtime configuration:
 
 ```bash
-# Run the UI container
+# Production deployment with environment variables
 docker run -d \
-  --name xiansai-ui \
+  --name xiansai-ui-prod \
   -p 3000:80 \
+  -e REACT_APP_API_URL=https://api.xiansai.com \
+  -e REACT_APP_AUTH0_DOMAIN=your-prod-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-prod-client-id \
   --restart unless-stopped \
-  xiansai/ui:latest
+  99xio/xiansai-ui:latest
+```
+
+For complete production setup instructions, see [docs/DOCKER.md](docs/DOCKER.md)
+
+### Static Build Deployment
+
+For traditional web server deployment:
+
+```bash
+# Build static files
+npm run build
+
+# Serve the build folder with your web server
+# The build files will be in the 'build/' directory
 ```
 
 ## 🔍 Health Monitoring
 
-The application includes health check endpoints:
-- **UI Health Check:** `http://localhost:3000/health`
-- **Docker Health Check:** Automatic container health monitoring
+The application includes a health check endpoint at `http://localhost:3000/health` for monitoring application status.
+
+For Docker-specific health monitoring, see [docs/DOCKER.md](docs/DOCKER.md).
 
 ## 🛠️ Development
 
@@ -239,43 +216,22 @@ npm test -- --coverage
 - **Caching:** Aggressive caching for static assets
 - **Compression:** Gzip compression enabled
 
-## 🐛 Troubleshooting
 
-### Common Issues
 
-1. **Build fails with memory issues:**
-   ```bash
-   export NODE_OPTIONS="--max-old-space-size=4096"
-   npm run build
-   ```
 
-2. **Docker build fails:**
-   ```bash
-   # Check Docker Buildx
-   docker buildx version
-   
-   # Recreate builder
-   docker buildx rm xiansai-ui-builder
-   ./docker-build.sh
-   ```
 
-3. **Authentication not working:**
-   - Verify environment variables are set correctly
-   - Check Auth0/Entra ID configuration
-   - Ensure API URLs are accessible
 
-### Logs and Debugging
+### Debugging
 
 ```bash
-# Docker container logs
-docker logs xiansai-ui
-
-# Docker compose logs
-docker-compose -f docker-compose.production.yml logs xiansai-ui
-
 # Build with debug info
 DEBUG=true npm run build
+
+# Run tests with verbose output
+npm test -- --verbose
 ```
+
+**Docker Troubleshooting:** For Docker-specific issues, see [docs/DOCKER.md](docs/DOCKER.md)
 
 ## 🤝 Contributing
 
@@ -288,16 +244,3 @@ DEBUG=true npm run build
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🔗 Related Projects
-
-- **XiansAi Server:** Backend API and workflow engine
-- **XiansAi Agents:** AI agent implementations
-
-## 📞 Support
-
-For support and questions:
-- Create an issue in the repository
-- Check the documentation in the `docs/` folder
-- Review the troubleshooting section above
-
