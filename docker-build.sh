@@ -35,6 +35,18 @@ docker buildx build \
     --push \
     .
 
+# Also build and load locally for current platform (needed for docker-publish.sh)
+if [[ "$PLATFORM" == *","* ]]; then
+    echo "🏗️  Building local image for current platform..."
+    CURRENT_PLATFORM=$(docker version --format '{{.Server.Os}}/{{.Server.Arch}}')
+    docker buildx build \
+        --platform "$CURRENT_PLATFORM" \
+        --file "$DOCKERFILE" \
+        --tag "$IMAGE_NAME:$TAG" \
+        --load \
+        .
+fi
+
 echo "✅ Docker image built and pushed successfully!"
 echo "📦 Image: $IMAGE_NAME:$TAG"
 echo ""

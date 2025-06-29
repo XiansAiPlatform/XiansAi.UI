@@ -17,6 +17,24 @@ echo "📦 Publishing XiansAi UI to DockerHub..."
 echo "Username: $DOCKERHUB_USERNAME"
 echo "Image: $IMAGE_NAME:$TAG"
 
+# Check if the local image exists
+if ! docker image inspect "$IMAGE_NAME:$TAG" > /dev/null 2>&1; then
+    echo "❌ Local image $IMAGE_NAME:$TAG not found!"
+    echo ""
+    echo "💡 This usually happens when:"
+    echo "   1. Multi-platform builds don't store images locally"
+    echo "   2. IMAGE_NAME environment variable doesn't match the built image"
+    echo ""
+    echo "🔧 Solutions:"
+    echo "   1. If the image was already pushed during build, you might not need this script"
+    echo "   2. Make sure IMAGE_NAME matches what you used in docker-build.sh"
+    echo "   3. For multi-platform builds, use: docker pull $IMAGE_NAME:$TAG"
+    echo ""
+    echo "Available local images:"
+    docker images --format "table {{.Repository}}:{{.Tag}}\t{{.CreatedAt}}" | head -10
+    exit 1
+fi
+
 # Login to DockerHub (if not already logged in)
 echo "🔐 Logging in to DockerHub..."
 docker login
