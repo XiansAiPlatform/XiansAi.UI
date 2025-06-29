@@ -140,6 +140,25 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
     setSubmitError(null);
     setLoading(true);
     
+    // Validate required fields
+    if (!formData.name?.trim()) {
+      setSubmitError('Name is required');
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.agent?.trim()) {
+      setSubmitError('Agent is required');
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.type) {
+      setSubmitError('Type is required');
+      setLoading(false);
+      return;
+    }
+    
     if (formData.type === 'json') {
       const error = validateJSON(formData.content);
       if (error) {
