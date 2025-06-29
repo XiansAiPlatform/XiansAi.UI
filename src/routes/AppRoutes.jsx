@@ -6,7 +6,6 @@ import { getConfig } from '../config';
 // Lazy load route components for code splitting
 const PublicRoutes = lazyLoad(() => import('../modules/Public/PublicRoutes'), { prefetch: true });
 const ManagerRoutes = lazyLoad(() => import('../modules/Manager/ManagerRoutes'));
-const AgentsRoutes = lazyLoad(() => import('../modules/Agents/AgentsRoutes'));
 
 /**
  * Central routing component that organizes all application routes
@@ -45,19 +44,6 @@ const AppRoutes = () => {
             />
           } />
         </>
-      )}
-      
-      {/* 
-        Agents routes
-      */}
-      {config.modules.agents && (
-        <Route path="/agents/*" element={
-          <ModuleLoader
-            moduleName="agents"
-            moduleComponent={<AgentsRoutes />}
-            loadingMessage="Loading agents module..."
-          />
-        } />
       )}
       
       {/* Fallback route if no other routes match */}

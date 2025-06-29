@@ -1,0 +1,66 @@
+# Production-ready Dockerfile for DockerHub
+# Multi-stage build for XiansAi UI (React Application)
+
+# Build stage
+FROM --platform=$BUILDPLATFORM node:20-alpine AS build
+ARG BUILDPLATFORM
+ARG TARGETARCH
+WORKDIR /app
+
+# Install dependencies for native modules compilation
+RUN apk add --no-cache python3 make g++ && ln -sf python3 /usr/bin/python
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci && npm cache clean --force
+
+# Copy source code and build the application
+COPY . .
+
+# Build the React application for production
+RUN npm run build
+
+# Production stage with nginx
+FROM nginx:1.25-alpine AS final
+WORKDIR /usr/share/nginx/html
+
+# Install curl for health checks and gettext for envsubst
+RUN apk add --no-cache curl gettext
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S xiansai && \
+    adduser -S xiansai -u 1001 -G xiansai
+
+# Copy custom nginx configuration
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy built application from build stage
+COPY --from=build --chown=xiansai:xiansai /app/build .
+
+# Copy entrypoint script for runtime configuration
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Create nginx directories and set permissions
+RUN mkdir -p /var/cache/nginx /var/log/nginx /tmp && \
+    chown -R xiansai:xiansai /var/cache/nginx /var/log/nginx /tmp /usr/share/nginx/html /etc/nginx
+
+# Switch to non-root user
+USER xiansai
+
+# Expose port 80
+EXPOSE 80
+
+# Environment variables with defaults
+ENV NODE_ENV=production
+ENV NGINX_PORT=80
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:80/health || exit 1
+
+# Set entrypoint for runtime configuration
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"] 
