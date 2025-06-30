@@ -1,77 +1,246 @@
-# Getting Started with Create React App
+# XiansAi UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern React-based user interface for the XiansAi workflow automation platform. This application provides both manager and agent interfaces for creating, managing, and monitoring AI-powered workflows.
 
-## Available Scripts
+## 🏗️ Architecture
 
-In the project directory, you can run:
+The XiansAi UI is built with:
+- **React 19** with functional components and hooks
+- **Material-UI (MUI)** for consistent design system
+- **React Router** for client-side routing
+- **Auth0 & Entra ID** for authentication
+- **CRACO** for build customization and optimization
+- **Docker** for containerization and deployment
+
+## 📋 Prerequisites
+
+- **Node.js** 18+ and npm
+- **Docker** and Docker Buildx (for containerization)
+- **Docker Hub account** (for publishing images)
+
+## 🚀 Quick Start
+
+### Development Setup
+
+1. **Clone and install dependencies:**
+   ```bash
+   git clone <repository-url>
+   cd XiansAi.UI
+   npm install
+   ```
+
+2. **Configure environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. **Start development server:**
+   ```bash
+   npm start
+   ```
+   The app will be available at [http://localhost:3000](http://localhost:3000)
+
+### Production Build
 
 ```bash
-npm install
-npm start
-
-# To run with production configuration
 npm run build
 ```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🐳 Docker Deployment
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The XiansAi UI supports **runtime configuration** with Docker, allowing you to use the same image across all environments by passing environment variables at runtime.
 
-### `npm test`
+### Quick Start with Docker
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+# Using pre-built image with runtime configuration
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-client-id \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+```
 
-### `npm run build`
+### 📖 Complete Docker Documentation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+For comprehensive Docker setup, including:
+- Runtime configuration details
+- Build and publish instructions  
+- Production deployment strategies
+- Troubleshooting and optimization
+- Security features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**See: [docs/DOCKER.md](docs/DOCKER.md)**
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## ⚙️ Environment Configuration
 
-### `npm run eject`
+### Required Environment Variables
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+# API Configuration
+REACT_APP_API_URL=http://localhost:5000
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+# Authentication Provider ('auth0' or 'entraId')
+REACT_APP_AUTH_PROVIDER=auth0
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Auth0 Configuration
+```bash
+REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com
+REACT_APP_AUTH0_CLIENT_ID=your-client-id
+REACT_APP_AUTH0_AUDIENCE=https://your-api-audience
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Entra ID Configuration
+```bash
+REACT_APP_ENTRA_ID_CLIENT_ID=your-client-id
+REACT_APP_ENTRA_ID_AUTHORITY=https://login.microsoftonline.com/tenant-id
+REACT_APP_ENTRA_ID_SCOPES=User.Read,openid,profile
+```
 
-## Learn More
+### Module Configuration
+```bash
+# Enable/disable modules (set to 'false' to disable)
+REACT_APP_ENABLE_PUBLIC_MODULE=true
+REACT_APP_ENABLE_MANAGER_MODULE=true
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+See `.env.example` for complete configuration options.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔧 Available Scripts
 
-### Code Splitting
+| Script | Description |
+|--------|-------------|
+| `npm start` | Run development server |
+| `npm run build` | Build for production |
+| `npm test` | Run tests |
+| `npm run analyze` | Analyze bundle size |
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+**Docker Scripts:** See [docs/DOCKER.md](docs/DOCKER.md) for the unified Docker build and publish script.
 
-### Analyzing the Bundle Size
+## 📁 Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```
+src/
+├── components/          # Shared components
+├── modules/
+│   ├── Agents/         # Agent interface module
+│   ├── Manager/        # Management interface module
+│   └── Public/         # Public pages module
+├── routes/             # Routing configuration
+├── utils/              # Utility functions
+└── config.js           # Runtime configuration
+```
 
-### Making a Progressive Web App
+## 🏭 Production Deployment
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### Docker Deployment (Recommended)
 
-### Advanced Configuration
+The recommended way to deploy XiansAi UI is using Docker with runtime configuration:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+# Production deployment with environment variables
+docker run -d \
+  --name xiansai-ui-prod \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=https://api.xiansai.com \
+  -e REACT_APP_AUTH0_DOMAIN=your-prod-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-prod-client-id \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+```
 
-### Deployment
+For complete production setup instructions, see [docs/DOCKER.md](docs/DOCKER.md)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Static Build Deployment
 
-### `npm run build` fails to minify
+For traditional web server deployment:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```bash
+# Build static files
+npm run build
 
+# Serve the build folder with your web server
+# The build files will be in the 'build/' directory
+```
+
+## 🔍 Health Monitoring
+
+The application includes a health check endpoint at `http://localhost:3000/health` for monitoring application status.
+
+For Docker-specific health monitoring, see [docs/DOCKER.md](docs/DOCKER.md).
+
+## 🛠️ Development
+
+### Code Organization
+
+- **Lazy Loading:** Modules are lazy-loaded for better performance
+- **Code Splitting:** Optimized bundle splitting with CRACO
+- **Error Boundaries:** Comprehensive error handling
+- **Authentication:** Pluggable auth providers (Auth0/Entra ID)
+
+### Build Optimization
+
+The build process includes:
+- **Tree shaking** for unused code elimination
+- **Code splitting** by vendor and feature
+- **Compression** with gzip
+- **Bundle analysis** with webpack-bundle-analyzer
+
+### Testing
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage
+npm test -- --coverage
+```
+
+## 🔐 Security Features
+
+- **CSP Headers:** Content Security Policy implementation
+- **XSS Protection:** Cross-site scripting prevention
+- **HTTPS Ready:** SSL/TLS configuration support
+- **Non-root Container:** Docker security best practices
+- **Dependency Scanning:** Regular security updates
+
+## 📊 Performance
+
+- **Lighthouse Score:** Optimized for performance metrics
+- **Bundle Size:** Optimized with code splitting
+- **Caching:** Aggressive caching for static assets
+- **Compression:** Gzip compression enabled
+
+
+
+
+
+
+### Debugging
+
+```bash
+# Build with debug info
+DEBUG=true npm run build
+
+# Run tests with verbose output
+npm test -- --verbose
+```
+
+**Docker Troubleshooting:** For Docker-specific issues, see [docs/DOCKER.md](docs/DOCKER.md)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
