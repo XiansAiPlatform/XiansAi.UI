@@ -47,7 +47,8 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
                                (window.location.search.includes("code=") && window.location.search.includes("state="));
       
       // Check if this might be a logout callback 
-      const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
+      const wasLoggingOut = sessionStorage.getItem('logout_in_progress') === 'true' || 
+                           sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
       const isLogoutCallback = wasLoggingOut || 
                               (window.location.pathname === '/callback' && 
                                (window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
@@ -58,7 +59,9 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
       if (isLogoutCallback) {
         // Handle logout callback - redirect to login page
         console.log("AuthContext: Detected logout callback, redirecting to login");
+        sessionStorage.removeItem('logout_in_progress');
         sessionStorage.removeItem('keycloak_logout_in_progress');
+        
         setIsLoading(false);
         window.location.replace('/login');
         return;
@@ -132,6 +135,9 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
     try {
       setIsLoading(true);
       isLoggingOut.current = true;
+      
+      // Mark logout in progress for all auth providers
+      sessionStorage.setItem('logout_in_progress', 'true');
       
       // Explicitly set auth state to logged out immediately
       setUser(null);
