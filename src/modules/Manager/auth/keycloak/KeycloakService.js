@@ -94,7 +94,7 @@ class KeycloakService {
       console.log("KeycloakService: Starting logout process");
       this.isLoggingOut = true;
       
-      // Store logout flag in sessionStorage to detect logout callbacks
+      // Set a flag to indicate logout is in progress
       sessionStorage.setItem('keycloak_logout_in_progress', 'true');
       
       // Clear local auth state first
@@ -105,18 +105,14 @@ class KeycloakService {
       };
       this._notifyStateChange();
 
-      // Perform logout with proper redirect URI - avoid callback URL
+      // Use Keycloak's built-in logout method instead of createLogoutUrl
       const logoutUrl = options?.returnTo || `${window.location.origin}/login`;
       console.log("KeycloakService: Logout redirect URL:", logoutUrl);
       
-      // Use window.location to directly navigate to logout URL to avoid callback
-      const keycloakLogoutUrl = this.keycloakInstance.createLogoutUrl({
+      // Use the Keycloak instance's logout method which properly handles the logout flow
+      await this.keycloakInstance.logout({
         redirectUri: logoutUrl,
       });
-      console.log("KeycloakService: Keycloak logout URL:", keycloakLogoutUrl);
-      
-      // Directly navigate to logout URL
-      window.location.href = keycloakLogoutUrl;
       
     } catch (error) {
       console.error(
@@ -124,6 +120,8 @@ class KeycloakService {
         error?.message || "Unknown logout error"
       );
       this.isLoggingOut = false;
+      
+      // Clear the logout flag on error
       sessionStorage.removeItem('keycloak_logout_in_progress');
       
       // Even if logout fails, we should clear local state
@@ -186,13 +184,16 @@ class KeycloakService {
       console.log("KeycloakService: Handling redirect callback");
       console.log("KeycloakService: Current URL:", window.location.href);
       
-      // Check if we were in the middle of a logout
+      // Check if this is a logout callback using multiple detection methods
       const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
+      const hasLogoutIndicators = this.isLogoutCallback();
       
-      if (wasLoggingOut) {
-        console.log("KeycloakService: Detected logout callback based on session flag");
-        sessionStorage.removeItem('keycloak_logout_in_progress');
+      if (wasLoggingOut || hasLogoutIndicators) {
+        console.log("KeycloakService: Detected logout callback, clearing auth state");
         this.isLoggingOut = false;
+        
+        // Clear the logout flag
+        sessionStorage.removeItem('keycloak_logout_in_progress');
         
         this.authState = {
           user: null,
@@ -208,20 +209,14 @@ class KeycloakService {
         return false;
       }
       
-      // Check if this might be a logout callback by URL pattern
-      const isLogoutCallback = (window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
-                              !window.location.hash.includes("code=") && !window.location.search.includes("code=");
+      // Check if URL contains error parameters that might indicate a failed callback
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlHash = new URLSearchParams(window.location.hash.substring(1));
       
-      if (isLogoutCallback) {
-        console.log("KeycloakService: Detected logout callback by URL pattern, clearing auth state");
-        this.authState = {
-          user: null,
-          isAuthenticated: false,
-          accessToken: null,
-        };
-        this._notifyStateChange();
-        // Don't try to initialize, just return false
-        return false;
+      const hasError = urlParams.get('error') || urlHash.get('error');
+      if (hasError) {
+        console.error("KeycloakService: Error in callback URL:", hasError);
+        throw new Error(`Authentication failed: ${hasError}`);
       }
       
       // Normal login callback - proceed with initialization
@@ -233,9 +228,10 @@ class KeycloakService {
         error?.message || "Unknown callback error"
       );
       
-      // Clean up logout flag if there was an error
-      sessionStorage.removeItem('keycloak_logout_in_progress');
       this.isLoggingOut = false;
+      
+      // Clear logout flag on error
+      sessionStorage.removeItem('keycloak_logout_in_progress');
       
       this.authState = {
         user: null,
@@ -295,6 +291,67 @@ class KeycloakService {
           this.login();
         });
     };
+  }
+
+  // Generic method to detect if we're in a callback flow
+  isInCallbackFlow() {
+    const hasLoginCallback = (window.location.hash.includes("code=") && window.location.hash.includes("state=")) ||
+                            (window.location.search.includes("code=") && window.location.search.includes("state="));
+    const hasLogoutCallback = (window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
+                             !window.location.hash.includes("code=") && !window.location.search.includes("code=");
+    return hasLoginCallback || hasLogoutCallback;
+  }
+
+  // Generic method to detect if this is a logout callback
+  isLogoutCallback() {
+    const hash = window.location.hash;
+    const search = window.location.search;
+    
+    // Check for explicit logout completion indicators
+    const hasSessionState = hash.includes("session_state=") || search.includes("session_state=");
+    const hasNoCode = !hash.includes("code=") && !search.includes("code=");
+    
+    // Check if we're coming from a logout URL (indicating logout completion)
+    const referrer = document.referrer;
+    const isFromLogoutUrl = referrer.includes('/logout') || referrer.includes('protocol/openid-connect/logout');
+    
+    // Check session storage flag
+    const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
+    
+    // Special case: if we're on the login page and were logging out, this is the final destination
+    // Clear the flag and only treat as logout callback if we haven't processed it yet
+    if (wasLoggingOut && window.location.pathname === '/login') {
+      const alreadyProcessed = sessionStorage.getItem('keycloak_logout_processed') === 'true';
+      if (!alreadyProcessed) {
+        // Mark as processed to prevent infinite loops
+        sessionStorage.setItem('keycloak_logout_processed', 'true');
+        // Clear the logout flag
+        sessionStorage.removeItem('keycloak_logout_in_progress');
+        console.log("KeycloakService: Processing logout completion, clearing flags");
+        return true;
+      } else {
+        // Already processed, don't treat as logout callback anymore
+        sessionStorage.removeItem('keycloak_logout_processed');
+        sessionStorage.removeItem('keycloak_logout_in_progress');
+        return false;
+      }
+    }
+    
+    // Logout callback indicators:
+    // 1. Coming from a logout URL
+    // 2. Has session_state but no authorization code (typical of logout completion)
+    const isLogout = isFromLogoutUrl || (hasSessionState && hasNoCode);
+    
+    if (isLogout) {
+      console.log("KeycloakService: Logout callback detected - isFromLogoutUrl:", isFromLogoutUrl, 
+                  "hasSessionState:", hasSessionState,
+                  "hasNoCode:", hasNoCode);
+      // Clear logout flags when we detect a proper logout callback
+      sessionStorage.removeItem('keycloak_logout_in_progress');
+      sessionStorage.removeItem('keycloak_logout_processed');
+    }
+    
+    return isLogout;
   }
 }
 

@@ -4,21 +4,19 @@ import { useNotification } from '../../Manager/contexts/NotificationContext';
 import { useAuth } from '../../Manager/auth/AuthContext';
 
 const Callback = () => {
-  const { isAuthenticated, error, isLoading, isProcessingCallback } = useAuth();
+  const { isAuthenticated, error, isLoading, isProcessingCallback, providerInstance } = useAuth();
   const navigate = useNavigate();
   const { showError } = useNotification();
   const [hasShownError, setHasShownError] = useState(false);
 
   useEffect(() => {
-    // Check if this is a logout callback
-    const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
-    const isLogoutCallback = wasLoggingOut || 
-                            ((window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
-                             !window.location.hash.includes("code=") && !window.location.search.includes("code="));
+    // Check if this is a logout callback using the auth provider's generic method
+    const isLogoutCallback = providerInstance && 
+                            providerInstance.isLogoutCallback && 
+                            providerInstance.isLogoutCallback();
     
     if (isLogoutCallback) {
       console.log("Callback: Detected logout callback, redirecting to login");
-      sessionStorage.removeItem('keycloak_logout_in_progress');
       navigate('/login');
       return;
     }
@@ -53,7 +51,7 @@ const Callback = () => {
     if (isAuthenticated && !error) {
       navigate('/manager/definitions');
     }
-  }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError]);
+  }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError, providerInstance]);
 
   // Show loading state while processing authentication
   if (isLoading || isProcessingCallback) {

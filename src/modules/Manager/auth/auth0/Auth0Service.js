@@ -76,7 +76,6 @@ class Auth0Service {
       // Clear session storage as well
       sessionStorage.removeItem('auth0_logout_in_progress');
       sessionStorage.removeItem('auth0_logout_returnTo');
-      sessionStorage.removeItem('logout_in_progress');
       
       // Construct Auth0 logout URL manually to ensure proper formatting
       const logoutUrl = new URL(`https://${config.domain}/v2/logout`);
@@ -145,6 +144,19 @@ class Auth0Service {
         this._notifyStateChange();
         throw error; // Re-throw to be caught by AuthProvider
     }
+  }
+
+  // Generic method to detect if we're in a callback flow
+  isInCallbackFlow() {
+    return (window.location.search.includes("code=") && window.location.search.includes("state=")) || 
+           (window.location.hash.includes("code=") && window.location.hash.includes("state="));
+  }
+
+  // Generic method to detect if this is a logout callback
+  isLogoutCallback() {
+    // Auth0 doesn't typically have logout callbacks that need special handling
+    // The logout redirect goes directly to the returnTo URL
+    return false;
   }
 }
 
