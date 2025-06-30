@@ -52,7 +52,7 @@ export function OrganizationProvider({ children }) {
         const tokenService = createTokenService(); // Added
         var orgs = tokenService.getOrganizations(decodedToken); // Changed
         // remove orgs without '.' or '-'
-        orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
+        // orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
         
         // Add "default" if it doesn't exist
         if ( !orgs.includes('default') && orgs.length === 0) {
