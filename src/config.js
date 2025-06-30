@@ -10,7 +10,7 @@ function getEnvVar(key, defaultValue = undefined) {
 }
 
 export function getConfig() {
-  const authProvider = process.env.REACT_APP_AUTH_PROVIDER || "keycloak"; // Default to auth0
+  const authProvider = process.env.REACT_APP_AUTH_PROVIDER;
 
   const config = {
     authProvider,
@@ -40,6 +40,8 @@ export function getConfig() {
     config.keycloakUrl = getEnvVar('REACT_APP_KEYCLOAK_URL');
     config.keycloakRealm = getEnvVar('REACT_APP_KEYCLOAK_REALM');
     config.keycloakClientId = getEnvVar('REACT_APP_KEYCLOAK_CLIENT_ID');
+  } else {
+    throw new Error(`Unsupported auth provider: ${authProvider}`);
   }
 
   return config;

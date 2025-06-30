@@ -23,9 +23,11 @@ const AppAuthProvider = ({ children }) => {
       return <EntraIdProviderWrapper>{children}</EntraIdProviderWrapper>;
     case "keycloak":
       return <KeycloakProviderWrapper>{children}</KeycloakProviderWrapper>;
+    case "auth0":
+      return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
     default:
       // Default to Auth0
-      return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
+      throw new Error(`Unsupported auth provider: ${config.authProvider}`);
   }
 };
 
