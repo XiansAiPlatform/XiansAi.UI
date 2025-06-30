@@ -18,6 +18,7 @@ class KeycloakService {
     };
 
     this.onAuthStateChangedCallback = () => {};
+    this.isLoggingOut = false;
   }
 
   async init() {
@@ -90,20 +91,54 @@ class KeycloakService {
 
   async logout(options) {
     try {
-      await this.keycloakInstance.logout({
-        redirectUri: options?.returnTo || `${window.location.origin}/login`,
-      });
+      console.log("KeycloakService: Starting logout process");
+      this.isLoggingOut = true;
+      
+      // Store logout flag in sessionStorage to detect logout callbacks
+      sessionStorage.setItem('keycloak_logout_in_progress', 'true');
+      
+      // Clear local auth state first
       this.authState = {
         user: null,
         isAuthenticated: false,
         accessToken: null,
       };
       this._notifyStateChange();
+
+      // Perform logout with proper redirect URI - avoid callback URL
+      const logoutUrl = options?.returnTo || `${window.location.origin}/login`;
+      console.log("KeycloakService: Logout redirect URL:", logoutUrl);
+      
+      // Use window.location to directly navigate to logout URL to avoid callback
+      const keycloakLogoutUrl = this.keycloakInstance.createLogoutUrl({
+        redirectUri: logoutUrl,
+      });
+      console.log("KeycloakService: Keycloak logout URL:", keycloakLogoutUrl);
+      
+      // Directly navigate to logout URL
+      window.location.href = keycloakLogoutUrl;
+      
     } catch (error) {
       console.error(
         "Keycloak logout error:",
         error?.message || "Unknown logout error"
       );
+      this.isLoggingOut = false;
+      sessionStorage.removeItem('keycloak_logout_in_progress');
+      
+      // Even if logout fails, we should clear local state
+      this.authState = {
+        user: null,
+        isAuthenticated: false,
+        accessToken: null,
+      };
+      this._notifyStateChange();
+      
+      // If logout fails, redirect manually
+      setTimeout(() => {
+        window.location.href = options?.returnTo || `${window.location.origin}/login`;
+      }, 1000);
+      
       throw error;
     }
   }
@@ -149,13 +184,59 @@ class KeycloakService {
   async handleRedirectCallback() {
     try {
       console.log("KeycloakService: Handling redirect callback");
-      // Keycloak handles the callback automatically in the init method
+      console.log("KeycloakService: Current URL:", window.location.href);
+      
+      // Check if we were in the middle of a logout
+      const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
+      
+      if (wasLoggingOut) {
+        console.log("KeycloakService: Detected logout callback based on session flag");
+        sessionStorage.removeItem('keycloak_logout_in_progress');
+        this.isLoggingOut = false;
+        
+        this.authState = {
+          user: null,
+          isAuthenticated: false,
+          accessToken: null,
+        };
+        this._notifyStateChange();
+        
+        // Redirect to login page instead of trying to initialize
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 100);
+        return false;
+      }
+      
+      // Check if this might be a logout callback by URL pattern
+      const isLogoutCallback = (window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
+                              !window.location.hash.includes("code=") && !window.location.search.includes("code=");
+      
+      if (isLogoutCallback) {
+        console.log("KeycloakService: Detected logout callback by URL pattern, clearing auth state");
+        this.authState = {
+          user: null,
+          isAuthenticated: false,
+          accessToken: null,
+        };
+        this._notifyStateChange();
+        // Don't try to initialize, just return false
+        return false;
+      }
+      
+      // Normal login callback - proceed with initialization
+      console.log("KeycloakService: Processing login callback");
       return await this.init();
     } catch (error) {
       console.error(
         "Error handling redirect callback in KeycloakService:",
         error?.message || "Unknown callback error"
       );
+      
+      // Clean up logout flag if there was an error
+      sessionStorage.removeItem('keycloak_logout_in_progress');
+      this.isLoggingOut = false;
+      
       this.authState = {
         user: null,
         isAuthenticated: false,

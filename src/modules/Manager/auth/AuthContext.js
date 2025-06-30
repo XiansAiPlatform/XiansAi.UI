@@ -12,6 +12,7 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [isProcessingCallback, setIsProcessingCallback] = useState(false);
   const redirectCallbackHandled = useRef(false);
+  const isLoggingOut = useRef(false);
 
   useEffect(() => {
     if (AuthProviderInstance) {
@@ -34,17 +35,34 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
 
       // Detect if we're in a callback URL
       // For Auth0: check for code= and state= parameters
-      // For MSAL/Entra ID: check for callback path or MSAL-specific parameters
+      // For MSAL/Entra ID: check for callback path or MSAL-specific parameters  
+      // For Keycloak: check for code= and state= parameters in hash or search
       const hasAuth0Params = (window.location.search.includes("code=") && window.location.search.includes("state=")) || 
                             (window.location.hash.includes("code=") && window.location.hash.includes("state="));
       const hasEntraIdParams = window.location.pathname === '/callback' || 
                               window.location.search.includes("code=") || 
                               window.location.search.includes("error=") ||
                               window.location.search.includes("admin_consent=");
+      const hasKeycloakParams = (window.location.hash.includes("code=") && window.location.hash.includes("state=")) ||
+                               (window.location.search.includes("code=") && window.location.search.includes("state="));
       
-      const hasAuthParams = hasAuth0Params || hasEntraIdParams;
+      // Check if this might be a logout callback 
+      const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
+      const isLogoutCallback = wasLoggingOut || 
+                              (window.location.pathname === '/callback' && 
+                               (window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
+                               !window.location.hash.includes("code=") && !window.location.search.includes("code="));
       
-      if (!hasAuthParams) {
+      const hasAuthParams = (hasAuth0Params || hasEntraIdParams || hasKeycloakParams) && !isLogoutCallback;
+      
+      if (isLogoutCallback) {
+        // Handle logout callback - redirect to login page
+        console.log("AuthContext: Detected logout callback, redirecting to login");
+        sessionStorage.removeItem('keycloak_logout_in_progress');
+        setIsLoading(false);
+        window.location.replace('/login');
+        return;
+      } else if (!hasAuthParams) {
         // Normal init if not in a callback URL
         initAuth();
       } else if (hasAuthParams && !redirectCallbackHandled.current) {
@@ -113,6 +131,14 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const logout = async (options) => {
     try {
       setIsLoading(true);
+      isLoggingOut.current = true;
+      
+      // Explicitly set auth state to logged out immediately
+      setUser(null);
+      setIsAuthenticated(false);
+      setAccessToken(null);
+      setError(null);
+      
       // Ensure federated logout is requested
       const logoutOptions = {
         ...options,
@@ -122,16 +148,17 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
         },
       };
       await AuthProviderInstance.logout(logoutOptions);
-      // Explicitly set auth state to logged out
-      setUser(null);
-      setIsAuthenticated(false);
-      setAccessToken(null);
-      // Auth state will also be updated by onAuthStateChanged, but this makes it immediate
+      
     } catch (e) {
       console.error("Error during logout:", e);
       setError(e);
+      // Even if logout fails, redirect to login page
+      setTimeout(() => {
+        window.location.replace('/login');
+      }, 1000);
     } finally {
-      setIsLoading(false); // Ensure loading is set to false in all cases
+      setIsLoading(false);
+      isLoggingOut.current = false;
     }
   };
 

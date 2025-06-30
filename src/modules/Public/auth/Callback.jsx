@@ -10,6 +10,19 @@ const Callback = () => {
   const [hasShownError, setHasShownError] = useState(false);
 
   useEffect(() => {
+    // Check if this is a logout callback
+    const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
+    const isLogoutCallback = wasLoggingOut || 
+                            ((window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
+                             !window.location.hash.includes("code=") && !window.location.search.includes("code="));
+    
+    if (isLogoutCallback) {
+      console.log("Callback: Detected logout callback, redirecting to login");
+      sessionStorage.removeItem('keycloak_logout_in_progress');
+      navigate('/login');
+      return;
+    }
+
     // Don't navigate while still processing
     if (isLoading || isProcessingCallback) {
       return;
