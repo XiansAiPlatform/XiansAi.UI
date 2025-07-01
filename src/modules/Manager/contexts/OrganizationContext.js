@@ -48,9 +48,9 @@ export function OrganizationProvider({ children }) {
             return;
         }
 
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        //const decodedToken = JSON.parse(atob(token.split('.')[1]));
         const tokenService = createTokenService(); // Added
-        var orgs = tokenService.getOrganizations(decodedToken); // Changed
+        var orgs = tokenService.getOrganizations(token); // Changed
         // remove orgs without '.' or '-'
         // orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
 
