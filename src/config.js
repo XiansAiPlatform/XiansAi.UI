@@ -32,7 +32,7 @@ export function getConfig() {
     config.entraIdAuthority = getEnvVar('REACT_APP_ENTRA_ID_AUTHORITY');
     const scopes = getEnvVar('REACT_APP_ENTRA_ID_SCOPES');
     config.entraIdScopes = scopes ? scopes.split(',') : ['User.Read'];
-    config.organizationClaim = getEnvVar('REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM', 'https://login-dev.parkly.no/tenants');
+    config.organizationClaim = getEnvVar('REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM');
     const authorities = getEnvVar('REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES');
     config.knownAuthorities = authorities ? authorities.split(',') : [];
   } else if (authProvider === 'keycloak') {
