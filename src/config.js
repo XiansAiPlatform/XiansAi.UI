@@ -10,7 +10,7 @@ function getEnvVar(key, defaultValue = undefined) {
 }
 
 export function getConfig() {
-  const authProvider = process.env.REACT_APP_AUTH_PROVIDER;
+  const authProvider = getEnvVar('REACT_APP_AUTH_PROVIDER');
 
   const config = {
     authProvider,
@@ -19,7 +19,6 @@ export function getConfig() {
       // Enable/disable modules (defaults to true if not specified)
       public: getEnvVar('REACT_APP_ENABLE_PUBLIC_MODULE') !== 'false',
       manager: getEnvVar('REACT_APP_ENABLE_MANAGER_MODULE') !== 'false',
-      agents: getEnvVar('REACT_APP_ENABLE_AGENTS_MODULE') !== 'false',
     }
   };
 
