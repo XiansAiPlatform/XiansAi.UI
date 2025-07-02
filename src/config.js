@@ -10,7 +10,7 @@ function getEnvVar(key, defaultValue = undefined) {
 }
 
 export function getConfig() {
-  const authProvider = getEnvVar('REACT_APP_AUTH_PROVIDER', 'auth0'); // Default to auth0
+  const authProvider = process.env.REACT_APP_AUTH_PROVIDER;
 
   const config = {
     authProvider,
@@ -36,6 +36,12 @@ export function getConfig() {
     config.organizationClaim = getEnvVar('REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM', 'https://login-dev.parkly.no/tenants');
     const authorities = getEnvVar('REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES');
     config.knownAuthorities = authorities ? authorities.split(',') : [];
+  } else if (authProvider === 'keycloak') {
+    config.keycloakUrl = getEnvVar('REACT_APP_KEYCLOAK_URL');
+    config.keycloakRealm = getEnvVar('REACT_APP_KEYCLOAK_REALM');
+    config.keycloakClientId = getEnvVar('REACT_APP_KEYCLOAK_CLIENT_ID');
+  } else {
+    throw new Error(`Unsupported auth provider: ${authProvider}`);
   }
 
   return config;

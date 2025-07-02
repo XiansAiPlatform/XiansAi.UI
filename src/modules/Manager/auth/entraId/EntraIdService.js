@@ -235,6 +235,21 @@ class EntraIdService {
         this.authState = { user: null, isAuthenticated: false, accessToken: null };
     }
   }
+
+  // Generic method to detect if we're in a callback flow
+  isInCallbackFlow() {
+    return window.location.pathname === '/callback' || 
+           window.location.search.includes("code=") || 
+           window.location.search.includes("error=") ||
+           window.location.search.includes("admin_consent=");
+  }
+
+  // Generic method to detect if this is a logout callback
+  isLogoutCallback() {
+    // Entra ID doesn't typically have logout callbacks that need special handling
+    // The logout redirect goes directly to the postLogoutRedirectUri
+    return false;
+  }
 }
 
 export default EntraIdService; 

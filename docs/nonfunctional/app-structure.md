@@ -11,7 +11,7 @@ This document outlines the structure of our React application, providing an over
 - Key responsibilities:
   - Sets up routing using React Router with BrowserRouter, Routes, and Route components
   - Wraps the application with multiple context providers (NotificationProvider, OrganizationProvider, ThemeProvider, LoadingProvider, SliderProvider)
-  - Implements protected routes using Auth0 authentication
+  - Implements protected routes using Keycloak authentication
   - Manages the global layout structure
   - Handles authentication flow including login, logout, and callbacks
 

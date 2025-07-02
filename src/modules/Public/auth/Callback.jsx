@@ -4,12 +4,23 @@ import { useNotification } from '../../Manager/contexts/NotificationContext';
 import { useAuth } from '../../Manager/auth/AuthContext';
 
 const Callback = () => {
-  const { isAuthenticated, error, isLoading, isProcessingCallback } = useAuth();
+  const { isAuthenticated, error, isLoading, isProcessingCallback, providerInstance } = useAuth();
   const navigate = useNavigate();
   const { showError } = useNotification();
   const [hasShownError, setHasShownError] = useState(false);
 
   useEffect(() => {
+    // Check if this is a logout callback using the auth provider's generic method
+    const isLogoutCallback = providerInstance && 
+                            providerInstance.isLogoutCallback && 
+                            providerInstance.isLogoutCallback();
+    
+    if (isLogoutCallback) {
+      console.log("Callback: Detected logout callback, redirecting to login");
+      navigate('/login');
+      return;
+    }
+
     // Don't navigate while still processing
     if (isLoading || isProcessingCallback) {
       return;
@@ -40,7 +51,7 @@ const Callback = () => {
     if (isAuthenticated && !error) {
       navigate('/manager/definitions');
     }
-  }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError]);
+  }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError, providerInstance]);
 
   // Show loading state while processing authentication
   if (isLoading || isProcessingCallback) {
