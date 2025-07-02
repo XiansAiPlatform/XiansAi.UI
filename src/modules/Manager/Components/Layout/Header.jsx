@@ -81,8 +81,10 @@ const Header = ({ pageTitle = "", toggleNav }) => {
     console.log('Logging out');
     // Close the menu
     handleClose();
-    // Perform logout in the background
-    logout();
+    // Perform logout with explicit redirect to login page
+    logout({
+      returnTo: `${window.location.origin}/login`
+    });
   };
 
   return (
