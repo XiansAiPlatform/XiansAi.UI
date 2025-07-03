@@ -16,7 +16,16 @@ const Settings = () => {
 
   const { userRoles } = useTenant();
   const showTenantTab = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
-  const showApiKeyTab = showTenantTab; // Only show API Keys tab for SysAdmin/TenantAdmin
+
+  // Build tabs and panels dynamically so indices always match
+  const tabs = [
+    { label: 'App Server', component: <CACertificates /> },
+    { label: 'API Keys', component: <ApiKeySettings /> },
+  ];
+  if (showTenantTab) {
+    tabs.splice(1, 0, { label: 'Tenant', component: <TenantSettings /> });
+    tabs.splice(2, 0, { label: 'Branding', component: <BrandingSettings /> });
+  }
 
   return (
     <Container maxWidth="lg">
@@ -45,19 +54,14 @@ const Settings = () => {
             onChange={handleTabChange}
             aria-label="settings tabs"
           >
-            <Tab label="App Server" />
-            {showTenantTab && <Tab label="Tenant" />}
-            {showTenantTab && <Tab label="Branding" />}
-            { <Tab label="API Keys" />}
+            {tabs.map((tab, idx) => (
+              <Tab key={tab.label} label={tab.label} />
+            ))}
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
-          {currentTab === 0 && <CACertificates />}
-          {currentTab === 1 && <ApiKeySettings />}
-          {showTenantTab && currentTab === 2 && <TenantSettings />}
-          {showTenantTab && currentTab === 3 && <BrandingSettings />}
-          
+          {tabs[currentTab]?.component}
         </Box>
       </Box>
     </Container>
