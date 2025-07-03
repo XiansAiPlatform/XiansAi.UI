@@ -29,6 +29,7 @@
     "web-vitals": "^5.0.3"
   },
   "overrides": {
+    "@braintree/sanitize-url": "7.0.2",
     "refractor": {
       "prismjs": "^1.30.0"
     }
