@@ -3,6 +3,7 @@ import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
 import TenantSettings from './TenantSettings';
 import BrandingSettings from './BrandingSettings';
+import ApiKeySettings from './ApiKeySettings';
 import './Settings.css';
 import { useTenant } from '../../contexts/TenantContext'; 
 
@@ -13,8 +14,9 @@ const Settings = () => {
     setCurrentTab(newValue);
   };
 
-   const { userRoles } = useTenant();
+  const { userRoles } = useTenant();
   const showTenantTab = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
+  const showApiKeyTab = showTenantTab; // Only show API Keys tab for SysAdmin/TenantAdmin
 
   return (
     <Container maxWidth="lg">
@@ -46,18 +48,20 @@ const Settings = () => {
             <Tab label="App Server" />
             {showTenantTab && <Tab label="Tenant" />}
             {showTenantTab && <Tab label="Branding" />}
+            { <Tab label="API Keys" />}
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
           {currentTab === 0 && <CACertificates />}
-          {showTenantTab && currentTab === 1 && <TenantSettings />}
-          {showTenantTab && currentTab === 2 && <BrandingSettings />}
-
+          {currentTab === 1 && <ApiKeySettings />}
+          {showTenantTab && currentTab === 2 && <TenantSettings />}
+          {showTenantTab && currentTab === 3 && <BrandingSettings />}
+          
         </Box>
       </Box>
     </Container>
   );
 };
 
-export default Settings; 
+export default Settings;
