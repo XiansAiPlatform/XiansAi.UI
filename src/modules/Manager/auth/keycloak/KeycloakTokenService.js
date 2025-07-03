@@ -1,5 +1,7 @@
 class KeycloakTokenService {
-  getOrganizations(decodedToken) {
+  getOrganizations(token) {
+    const decodedToken = JSON.parse(atob(token.split('.')[1]));
+
     try {
       // Check if token exists
       if (!decodedToken) {

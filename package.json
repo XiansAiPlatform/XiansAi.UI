@@ -31,6 +31,10 @@
   "overrides": {
     "workbox-build": {
       "rollup": "^3.29.5"
+    },
+    "@braintree/sanitize-url": "7.0.2",
+    "refractor": {
+      "prismjs": "^1.30.0"
     }
   },
   "scripts": {

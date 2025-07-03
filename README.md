@@ -5,6 +5,7 @@ A modern React-based user interface for the XiansAi workflow automation platform
 ## 🏗️ Architecture
 
 The XiansAi UI is built with:
+
 - **React 19** with functional components and hooks
 - **Material-UI (MUI)** for consistent design system
 - **React Router** for client-side routing
@@ -30,12 +31,14 @@ The XiansAi UI is built with:
    ```
 
 2. **Configure environment:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Start development server:**
+
    ```bash
    npm start
    ```

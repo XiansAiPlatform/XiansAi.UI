@@ -10,7 +10,7 @@ function getEnvVar(key, defaultValue = undefined) {
 }
 
 export function getConfig() {
-  const authProvider = process.env.REACT_APP_AUTH_PROVIDER;
+  const authProvider = getEnvVar('REACT_APP_AUTH_PROVIDER');
 
   const config = {
     authProvider,
@@ -19,7 +19,6 @@ export function getConfig() {
       // Enable/disable modules (defaults to true if not specified)
       public: getEnvVar('REACT_APP_ENABLE_PUBLIC_MODULE') !== 'false',
       manager: getEnvVar('REACT_APP_ENABLE_MANAGER_MODULE') !== 'false',
-      agents: getEnvVar('REACT_APP_ENABLE_AGENTS_MODULE') !== 'false',
     }
   };
 
@@ -33,7 +32,7 @@ export function getConfig() {
     config.entraIdAuthority = getEnvVar('REACT_APP_ENTRA_ID_AUTHORITY');
     const scopes = getEnvVar('REACT_APP_ENTRA_ID_SCOPES');
     config.entraIdScopes = scopes ? scopes.split(',') : ['User.Read'];
-    config.organizationClaim = getEnvVar('REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM', 'https://login-dev.parkly.no/tenants');
+    config.organizationClaim = getEnvVar('REACT_APP_ENTRA_ID_ORGANIZATION_CLAIM');
     const authorities = getEnvVar('REACT_APP_ENTRA_ID_KNOWN_AUTHORITIES');
     config.knownAuthorities = authorities ? authorities.split(',') : [];
   } else if (authProvider === 'keycloak') {
