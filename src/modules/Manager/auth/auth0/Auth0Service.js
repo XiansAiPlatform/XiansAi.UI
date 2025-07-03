@@ -52,9 +52,47 @@ class Auth0Service {
   }
 
   async logout(options) {
-    await this.auth0Client.logout({ logoutParams: { returnTo: options?.returnTo ?? window.location.origin + '/login' } });
-    this.authState = { user: null, isAuthenticated: false, accessToken: null }; // Reset state on logout
-    this._notifyStateChange();
+    console.log("Auth0Service: Starting logout with options:", options);
+    const returnTo = options?.returnTo ?? window.location.origin + '/login';
+    console.log("Auth0Service: Logout returnTo URL:", returnTo);
+    
+    try {
+      const config = getConfig();
+      
+      // Reset state immediately to prevent timing issues
+      this.authState = { user: null, isAuthenticated: false, accessToken: null };
+      this._notifyStateChange();
+      
+      // Clear localStorage items that Auth0 might use for caching
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('@@auth0spajs@@') || key.startsWith('auth0.') || key.includes('auth0'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Clear session storage as well
+      sessionStorage.removeItem('auth0_logout_in_progress');
+      sessionStorage.removeItem('auth0_logout_returnTo');
+      
+      // Construct Auth0 logout URL manually to ensure proper formatting
+      const logoutUrl = new URL(`https://${config.domain}/v2/logout`);
+      logoutUrl.searchParams.set('returnTo', returnTo);
+      logoutUrl.searchParams.set('client_id', config.clientId);
+      logoutUrl.searchParams.set('federated', 'true');
+      
+      console.log("Auth0Service: Redirecting to logout URL:", logoutUrl.toString());
+      
+      // Force immediate redirect using window.location.href instead of Auth0 SDK
+      window.location.href = logoutUrl.toString();
+      
+    } catch (error) {
+      console.error("Auth0Service: Error during logout:", error);
+      // Even if logout fails, redirect to login page
+      window.location.replace(returnTo);
+    }
   }
 
   async getAccessTokenSilently(options) {
@@ -82,6 +120,7 @@ class Auth0Service {
   async handleRedirectCallback() {
     try {
         console.log("Auth0Service: Handling redirect callback");
+        
         await this.auth0Client.handleRedirectCallback();
         const isAuthenticated = await this.auth0Client.isAuthenticated();
         if (isAuthenticated) {
@@ -105,6 +144,19 @@ class Auth0Service {
         this._notifyStateChange();
         throw error; // Re-throw to be caught by AuthProvider
     }
+  }
+
+  // Generic method to detect if we're in a callback flow
+  isInCallbackFlow() {
+    return (window.location.search.includes("code=") && window.location.search.includes("state=")) || 
+           (window.location.hash.includes("code=") && window.location.hash.includes("state="));
+  }
+
+  // Generic method to detect if this is a logout callback
+  isLogoutCallback() {
+    // Auth0 doesn't typically have logout callbacks that need special handling
+    // The logout redirect goes directly to the returnTo URL
+    return false;
   }
 }
 

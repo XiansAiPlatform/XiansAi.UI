@@ -71,7 +71,8 @@ docker run -d \
 # Build and push to Docker Hub (change username to yours)
 export DOCKERHUB_USERNAME=99xio
 export IMAGE_NAME=xiansai-ui
-export TAG=latest
+export TAG=v2.0.0
+export ADDITIONAL_TAGS=latest
 ./docker-build-publish.sh
 
 # Your image is now available on Docker Hub!

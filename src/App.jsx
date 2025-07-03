@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { getConfig } from './config';
 import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrapper';
 import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
+import KeycloakProviderWrapper from './modules/Manager/auth/keycloak/KeycloakProviderWrapper';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import lazyLoad from './utils/lazyLoad';
@@ -17,11 +18,17 @@ const AppRoutes = lazyLoad(() => import('./routes/AppRoutes'), { prefetch: true 
 const AppAuthProvider = ({ children }) => {
   const config = getConfig();
 
-  if (config.authProvider === 'entraId') {
-    return <EntraIdProviderWrapper>{children}</EntraIdProviderWrapper>;
+  switch (config.authProvider) {
+    case "entraId":
+      return <EntraIdProviderWrapper>{children}</EntraIdProviderWrapper>;
+    case "keycloak":
+      return <KeycloakProviderWrapper>{children}</KeycloakProviderWrapper>;
+    case "auth0":
+      return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
+    default:
+      // Default to Auth0
+      throw new Error(`Unsupported auth provider: ${config.authProvider}`);
   }
-  // Default to Auth0
-  return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
 };
 
 function App() {
