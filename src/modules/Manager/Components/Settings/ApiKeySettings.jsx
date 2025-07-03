@@ -41,7 +41,7 @@ const ApiKeySettings = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [keyToRevoke, setKeyToRevoke] = useState(null);
 
-  const hasAccess = true || userRoles.includes("SysAdmin") || userRoles.includes("TenantAdmin");
+  const hasAccess = userRoles.includes("SysAdmin") || userRoles.includes("TenantAdmin");
 
   const fetchApiKeys = async () => {
     setLoading(true);
@@ -181,8 +181,7 @@ const ApiKeySettings = () => {
                   <TableCell>Name</TableCell>
                   <TableCell>Created At</TableCell>
                   <TableCell>Created By</TableCell>
-                  <TableCell>Last Rotated</TableCell>
-                  <TableCell>Revoked</TableCell>
+                  <TableCell>Last Rotated</TableCell>                  
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -192,8 +191,7 @@ const ApiKeySettings = () => {
                     <TableCell>{key.name}</TableCell>
                     <TableCell>{key.createdAt ? new Date(key.createdAt).toLocaleString() : "-"}</TableCell>
                     <TableCell>{key.createdBy || "-"}</TableCell>
-                    <TableCell>{key.lastRotatedAt ? new Date(key.lastRotatedAt).toLocaleString() : "-"}</TableCell>
-                    <TableCell>{key.revokedAt ? new Date(key.revokedAt).toLocaleString() : "-"}</TableCell>
+                    <TableCell>{key.lastRotatedAt ? new Date(key.lastRotatedAt).toLocaleString() : "-"}</TableCell>                    
                     <TableCell align="right">
                       <Tooltip title="Rotate">
                         <span>
@@ -229,18 +227,20 @@ const ApiKeySettings = () => {
       {/* Create API Key Dialog */}
       <Dialog open={createDialogOpen} onClose={handleCreateDialogClose} maxWidth="sm" fullWidth>
         <DialogTitle>Create New API Key</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pl: 3, pr: 3 }}>
           {createError && <Alert severity="error" sx={{ mb: 2 }}>{createError}</Alert>}
           {newKey ? (
             <Alert severity="success" sx={{ mb: 2 }}>
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" flexDirection="column" alignItems="flex-start" gap={1}>
                 <span style={{ fontWeight: 600 }}>API Key:</span>
-                <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{newKey}</span>
-                <Tooltip title="Copy">
-                  <IconButton size="small" onClick={() => handleCopy(newKey)}>
-                    <ContentCopy fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <Box display="flex" gap={1} sx={{ backgroundColor: 'white', padding: 1, borderRadius: 1 }}>
+                  <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{newKey}</span>
+                  <Tooltip title="Copy">
+                    <IconButton size="small" onClick={() => handleCopy(newKey)}>
+                      <ContentCopy fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </Box>
               <Typography variant="caption" color="text.secondary">
                 Please copy and store this key securely. You will not be able to see it again.
@@ -261,7 +261,7 @@ const ApiKeySettings = () => {
             />
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ pl: 3, pr: 3, justifyContent: 'flex-end', alignContent: 'start' }}>
           {newKey ? (
             <Button onClick={handleCreateDialogClose} disabled={createLoading} variant="contained">Close</Button>
           ) : (
@@ -282,17 +282,19 @@ const ApiKeySettings = () => {
       {/* Rotate API Key Dialog */}
       <Dialog open={!!rotateKey} onClose={() => setRotateKey(null)} maxWidth="sm" fullWidth>
         <DialogTitle>API Key Rotated</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pl: 3, pr: 3 }}>
           {rotateKey && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" flexDirection="column" alignItems="flex-start" gap={1}>
                 <span style={{ fontWeight: 600 }}>New API Key:</span>
-                <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{rotateKey.apiKey}</span>
-                <Tooltip title="Copy">
-                  <IconButton size="small" onClick={() => handleCopy(rotateKey.apiKey)}>
-                    <ContentCopy fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                <Box display="flex" gap={1} sx={{ backgroundColor: 'white', padding: 1, borderRadius: 1 }}>
+                  <span style={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>{rotateKey.apiKey}</span>
+                  <Tooltip title="Copy">
+                    <IconButton size="small" onClick={() => handleCopy(rotateKey.apiKey)}>
+                      <ContentCopy fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </Box>
               <Typography variant="caption" color="text.secondary">
                 Please copy and store this key securely. You will not be able to see it again.
@@ -300,7 +302,7 @@ const ApiKeySettings = () => {
             </Alert>
           )}
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ pl: 3, pr: 3, justifyContent: 'flex-end', alignContent:'start'}}>
           <Button onClick={() => setRotateKey(null)} variant="contained">Close</Button>
         </DialogActions>
       </Dialog>
