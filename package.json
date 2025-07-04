@@ -29,12 +29,18 @@
     "web-vitals": "^5.0.3"
   },
   "overrides": {
-    "workbox-build": {
-      "rollup": "^3.29.5"
-    },
     "@braintree/sanitize-url": "7.0.2",
     "refractor": {
       "prismjs": "^1.30.0"
+    },
+    "@rollup/plugin-babel": {
+      "rollup": "^2.0.0"
+    },
+    "@rollup/plugin-node-resolve": {
+      "rollup": "^2.0.0"
+    },
+    "@rollup/plugin-replace": {
+      "rollup": "^2.0.0"
     }
   },
   "scripts": {
