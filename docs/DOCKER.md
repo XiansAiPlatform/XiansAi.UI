@@ -78,10 +78,10 @@ export ADDITIONAL_TAGS=latest
 # Your image is now available on Docker Hub!
 # Run it with your configuration
 docker run -d \
-  --name xiansai-ui \
+  --name xiansai-ui-dev \
   -p 3000:80 \
   --env-file .env.runtime \
-  yourusername/xiansai-ui:latest
+  99xio/xiansai-ui:latest
 ```
 
 ### Option 3: Build for Local Use Only
