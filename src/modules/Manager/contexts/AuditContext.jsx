@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 
 const AuditContext = createContext();
-const POLLING_INTERVAL = 120000; // 2 minutes
+const POLLING_INTERVAL = 7200000; // 2 hours
 const MAX_CONSECUTIVE_FAILURES = 3;
 
 export const AuditProvider = ({ children }) => {
