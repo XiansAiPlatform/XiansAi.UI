@@ -45,7 +45,9 @@
   },
   "scripts": {
     "start": "craco start",
+    "start:env": "node scripts/start-with-env.js",
     "build": "craco build",
+    "build:env": "node scripts/start-with-env.js",
     "test": "craco test",
     "eject": "react-scripts eject",
     "analyze": "ANALYZE=true craco build"
@@ -75,6 +77,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/history": "^4.7.11",
     "compression-webpack-plugin": "^10.0.0",
+    "dotenv-cli": "^8.0.0",
     "terser-webpack-plugin": "^5.3.14",
     "webpack-bundle-analyzer": "^4.10.2"
   }
