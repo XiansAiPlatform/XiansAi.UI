@@ -5,14 +5,14 @@ This document provides comprehensive information about containerizing and deploy
 ## 📋 Table of Contents
 
 1. [Automated Publishing via GitHub Actions](#automated-publishing-via-github-actions)
-2. [Manual Publishing Docker Images to DockerHub](#manual-publishing-docker-images-to-dockerhub)
-3. [Running Published Docker Images](#running-published-docker-images)
-4. [Quick Start](#quick-start)
-5. [Development](#development)
-6. [Runtime Configuration](#runtime-configuration)
-7. [Build Scripts](#build-scripts)
-8. [Troubleshooting](#troubleshooting)
-9. [Production Deployment](#production-deployment)
+2. [Manual Publishing Docker Images to DockerHub](#-manual-publishing-docker-images-to-dockerhub)
+3. [Running Published Docker Images](#-running-published-docker-images)
+4. [Quick Start](#-quick-start)
+5. [Development](#️-development)
+6. [Runtime Configuration](#-runtime-configuration)
+7. [Build Scripts](#-build-scripts)
+8. [Troubleshooting](#-troubleshooting)
+9. [Production Deployment](#-production-deployment)
 
 ---
 
