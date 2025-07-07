@@ -59,7 +59,6 @@ const MessagingPage = () => {
 
     // Callback passed to ConversationThreads
     const handleThreadSelected = useCallback((threadId, threadDetails) => {
-        console.log("Thread selected:", threadId, threadDetails);
         setSelectedThreadId(threadId);
         setSelectedThreadDetails(threadDetails); // Store the full thread object
         setError(null); // Clear errors when selection changes
@@ -72,7 +71,6 @@ const MessagingPage = () => {
             return;
         }
         
-        console.log("Refreshing threads and messages...");
         // Increment both refresh counters to force children to reload
         setRefreshCounter(prev => prev + 1);
         setThreadsRefreshCounter(prev => prev + 1);
@@ -128,21 +126,17 @@ const MessagingPage = () => {
         const now = Date.now();
         const debounceTime = 3000; // 3 seconds
         if (now - lastHandoverRefreshRef.current < debounceTime) {
-            console.log("Handover refresh debounced - too soon after last refresh");
             return;
         }
         
         // Prevent concurrent handover processing
         if (isProcessingHandoverRef.current) {
-            console.log("Handover refresh skipped - already processing a handover");
             return;
         }
         
         isProcessingHandoverRef.current = true;
         lastHandoverRefreshRef.current = now;
         setLoading(true);
-        
-        console.log("Thread handover detected, refreshing thread details for:", threadId);
         
         try {
             // Get updated thread details from API
@@ -160,10 +154,8 @@ const MessagingPage = () => {
                 // Force refresh of components
                 setRefreshCounter(prev => prev + 1);
                 setThreadsRefreshCounter(prev => prev + 1);
-                console.log("Thread details refreshed after handover");
             }
         } catch (err) {
-            console.error("Error refreshing thread after handover:", err);
             await handleApiError(err, 'Failed to refresh thread', showError);
         } finally {
             setLoading(false);

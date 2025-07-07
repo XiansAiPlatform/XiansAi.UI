@@ -39,20 +39,16 @@ const useMessagePolling = ({
         // Set the end time for polling
         pollingEndTimeRef.current = Date.now() + pollingDuration;
         
-        console.log(`⏰ Starting polling for ${pollingDuration / 1000} seconds (thread: ${threadToUse})`);
-        
         // Define the polling function
         const pollMessages = () => {
             // Check if polling duration has expired
             if (Date.now() >= pollingEndTimeRef.current) {
-                console.log(`⏹️ Polling completed after ${pollingDuration / 1000} seconds`);
                 stopPolling();
                 return;
             }
             
             // Check if thread ID is still valid
             if (!threadToUse) {
-                console.log("❌ Thread ID is no longer valid, stopping polling");
                 stopPolling();
                 return;
             }
@@ -73,11 +69,9 @@ const useMessagePolling = ({
         const threadToUse = id || threadId;
         
         if (!threadToUse) {
-            console.log("❌ No threadId provided for triggerPolling");
             return;
         }
         
-        console.log('🚀 Triggering polling after message sent');
         startPolling(threadToUse);
     }, [startPolling, threadId]);
     

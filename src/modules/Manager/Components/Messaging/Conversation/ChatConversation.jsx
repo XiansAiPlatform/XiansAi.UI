@@ -107,7 +107,6 @@ const ChatConversation = (
         if (handoverMessages.length > 0) {
             // We found a new recent handover message
             const latestHandover = handoverMessages[0];
-            console.log('Recent thread handover detected:', latestHandover.content);
             
             // Update the reference to avoid duplicate events
             lastHandoverIdRef.current = latestHandover.id;
@@ -126,9 +125,7 @@ const ChatConversation = (
         setError(null);
         
         try {
-            console.log(`${isPolling ? 'Polling' : 'Loading'} messages for thread: ${threadId}, page: ${page}`);
             const threadMessages = await messagingApi.getThreadMessages(threadId, page, pageSize);
-            console.log(`Loaded ${threadMessages.length} messages${isPolling ? ' from polling' : ''}`);
             
             // Sort messages on fetch (newest first)
             const sorted = threadMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -144,8 +141,17 @@ const ChatConversation = (
             // Check for handover messages
             checkForHandover(sorted);
             
-            // Note: We no longer automatically start polling here
-            // Polling will only be triggered when a message is sent
+            // For initial load (not polling), check if we should start polling for new threads
+            if (!isPolling && page === 1 && sorted.length > 0) {
+                const hasRecentUserMessage = sorted.some(msg => 
+                    msg.direction === 'Incoming' && isMessageRecent(msg)
+                );
+                
+                if (hasRecentUserMessage && messagePollingRef.current) {
+                    messagePollingRef.current.triggerPolling(threadId);
+                }
+            }
+            
         } catch (err) {
             if (!isPolling) {
                 const errorMsg = 'Failed to fetch messages for the selected thread.';
@@ -163,7 +169,7 @@ const ChatConversation = (
                 setLoading(false);
             }
         }
-    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading]);
+    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading, isMessageRecent]);
     
     // Initialize the message polling hook with 60-second polling duration
     const messagePolling = useMessagePolling({
@@ -187,7 +193,6 @@ const ChatConversation = (
             return { success: false };
         }
 
-        console.log("📤 Sending message and starting 60-second polling...");
         setIsTyping(true);
         
         try {
@@ -268,23 +273,21 @@ const ChatConversation = (
             isInitialLoad.current = true; // Reset on thread change
             return;
         }
+        
         fetchThreadMessages(selectedThreadId, 1);
     }, [selectedThreadId, fetchThreadMessages]);
 
     // Function to load more messages
     const loadMoreMessages = useCallback(async () => {
         if (!selectedThreadId || !hasMoreMessages || isLoadingMore || isLoadingMessages) {
-            console.log("Cannot load more messages:", { selectedThreadId, hasMoreMessages, isLoadingMore, isLoadingMessages });
             return;
         }
 
-        console.log("Loading more messages, page:", messagesPage + 1);
         setIsLoadingMore(true);
         setError(null);
         try {
             const nextPage = messagesPage + 1;
             const olderMessages = await messagingApi.getThreadMessages(selectedThreadId, nextPage, pageSize);
-            console.log(`Loaded ${olderMessages.length} older messages`);
             
             if (olderMessages.length > 0) {
                 // Sort new messages before appending
