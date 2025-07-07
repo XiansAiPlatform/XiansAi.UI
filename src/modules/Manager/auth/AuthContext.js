@@ -12,6 +12,7 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [isProcessingCallback, setIsProcessingCallback] = useState(false);
   const redirectCallbackHandled = useRef(false);
+  const isLoggingOut = useRef(false);
 
   useEffect(() => {
     if (AuthProviderInstance) {
@@ -32,22 +33,20 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
         }
       };
 
-      // Detect if we're in a callback URL
-      // For Auth0: check for code= and state= parameters
-      // For MSAL/Entra ID: check for callback path or MSAL-specific parameters
-      const hasAuth0Params = (window.location.search.includes("code=") && window.location.search.includes("state=")) || 
-                            (window.location.hash.includes("code=") && window.location.hash.includes("state="));
-      const hasEntraIdParams = window.location.pathname === '/callback' || 
-                              window.location.search.includes("code=") || 
-                              window.location.search.includes("error=") ||
-                              window.location.search.includes("admin_consent=");
+      // Use the provider's generic methods to detect callback flow
+      const isInCallbackFlow = AuthProviderInstance.isInCallbackFlow && AuthProviderInstance.isInCallbackFlow();
+      const isLogoutCallback = AuthProviderInstance.isLogoutCallback && AuthProviderInstance.isLogoutCallback();
       
-      const hasAuthParams = hasAuth0Params || hasEntraIdParams;
-      
-      if (!hasAuthParams) {
+      if (isLogoutCallback) {
+        // Handle logout callback - redirect to login page
+        console.log("AuthContext: Detected logout callback, redirecting to login");
+        setIsLoading(false);
+        window.location.replace('/login');
+        return;
+      } else if (!isInCallbackFlow) {
         // Normal init if not in a callback URL
         initAuth();
-      } else if (hasAuthParams && !redirectCallbackHandled.current) {
+      } else if (isInCallbackFlow && !redirectCallbackHandled.current) {
         // We're in a callback URL and haven't handled it yet
         redirectCallbackHandled.current = true;
         setIsProcessingCallback(true);
@@ -113,25 +112,26 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const logout = async (options) => {
     try {
       setIsLoading(true);
-      // Ensure federated logout is requested
-      const logoutOptions = {
-        ...options,
-        logoutParams: {
-          ...(options?.logoutParams),
-          federated: true,
-        },
-      };
-      await AuthProviderInstance.logout(logoutOptions);
-      // Explicitly set auth state to logged out
+      isLoggingOut.current = true;
+      
+      // Explicitly set auth state to logged out immediately
       setUser(null);
       setIsAuthenticated(false);
       setAccessToken(null);
-      // Auth state will also be updated by onAuthStateChanged, but this makes it immediate
+      setError(null);
+      
+      await AuthProviderInstance.logout(options);
+      
     } catch (e) {
       console.error("Error during logout:", e);
       setError(e);
+      // Even if logout fails, redirect to login page
+      setTimeout(() => {
+        window.location.replace('/login');
+      }, 1000);
     } finally {
-      setIsLoading(false); // Ensure loading is set to false in all cases
+      setIsLoading(false);
+      isLoggingOut.current = false;
     }
   };
 

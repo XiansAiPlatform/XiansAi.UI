@@ -1,6 +1,7 @@
 import { getConfig } from '../../../config';
 import Auth0TokenService from './auth0/Auth0TokenService';
 import EntraIdTokenService from './entraId/EntraIdTokenService';
+import KeycloakTokenService from './keycloak/KeycloakTokenService';
 
 let tokenServiceInstance = null;
 
@@ -17,6 +18,9 @@ export function createTokenService() {
       break;
     case 'entraId':
       tokenServiceInstance = new EntraIdTokenService();
+      break;
+    case 'keycloak':
+      tokenServiceInstance = new KeycloakTokenService();
       break;
     default:
       throw new Error(`Unsupported auth provider: ${authProvider}`);

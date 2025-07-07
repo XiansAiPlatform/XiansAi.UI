@@ -2,6 +2,7 @@ import { useCallback, createContext, use, useState, useEffect } from 'react';
 import { useTenantsApi } from "../services/tenants-api";
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
+import { useRolesApi } from "../services/roles-api.js";
 
 const TenantContext = createContext();
 
@@ -12,9 +13,11 @@ export const TenantProvider = ({ children }) => {
   const [tenant, setTenant] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const [userRoles, setUserRoles] = useState([]);
+
   const tenantApi = useTenantsApi();
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const rolesApi = useRolesApi();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const location = useLocation();
 
   const fetchTenant = useCallback(async (tenantId) => {
@@ -40,6 +43,18 @@ export const TenantProvider = ({ children }) => {
     }
   }, [tenantApi]);
 
+  // Fetch user roles for the current tenant
+  const fetchUserRoles = useCallback(async () => {
+    try {
+      const roles = await rolesApi.getCurrentUserRole();
+      setUserRoles(roles || []);
+      return roles || [];
+    } catch (err) {
+      console.error('Error fetching user roles:', err);
+      setUserRoles([]);
+      return [];
+    }
+  }, [rolesApi]);
 
   useEffect(() => {
     const loadTenantData = async () => {
@@ -78,6 +93,11 @@ export const TenantProvider = ({ children }) => {
         } else {
           console.warn('Tenant data fetch returned null or undefined');
         }
+
+        // Fetch roles after tenant and user are available
+        if (user && tenantId) {
+          await fetchUserRoles();
+        }
       } catch (err) {
         console.error('Error loading tenant data:', err);
         setError(err);
@@ -92,7 +112,7 @@ export const TenantProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated, isAuthLoading, location.pathname, fetchTenant]);
+  }, [isAuthenticated, isAuthLoading, location.pathname, fetchTenant, fetchUserRoles, user]);
 
   return (
     (<TenantContext
@@ -100,7 +120,8 @@ export const TenantProvider = ({ children }) => {
         tenant,
         isLoading,
         error,
-        fetchTenant
+        fetchTenant,
+        userRoles,
       }}
     >
       {children}

@@ -31,6 +31,15 @@ export const useTenantsApi = () => {
         }
       },
 
+      createTenant: async (tenantData) => {
+        try {
+          return await apiClient.post("/api/client/tenants", tenantData);
+        } catch (error) {
+          console.error("Error creating tenant:", error);
+          throw error;
+        }
+      },
+
       updateTenant: async (tenantId, tenantData) => {
         try {
           return await apiClient.put(
