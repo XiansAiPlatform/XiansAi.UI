@@ -2,6 +2,198 @@
 
 This document provides comprehensive information about containerizing and deploying the XiansAi UI using Docker.
 
+## 📋 Table of Contents
+
+1. [Automated Publishing via GitHub Actions](#automated-publishing-via-github-actions)
+2. [Manual Publishing Docker Images to DockerHub](#-manual-publishing-docker-images-to-dockerhub)
+3. [Running Published Docker Images](#-running-published-docker-images)
+4. [Quick Start](#-quick-start)
+5. [Development](#️-development)
+6. [Runtime Configuration](#-runtime-configuration)
+7. [Build Scripts](#-build-scripts)
+8. [Troubleshooting](#-troubleshooting)
+9. [Production Deployment](#-production-deployment)
+
+---
+
+## Automated Publishing via GitHub Actions
+
+### Overview
+
+The repository includes GitHub Actions automation that automatically builds and publishes Docker images to DockerHub when you create version tags. This is the **recommended approach** for consistent, automated deployments.
+
+### 🚀 Quick Start
+
+```bash
+# Push your changes to the main branch
+git add .
+git commit -m "feat: add new feature"
+git push origin main
+
+# Define the version
+export VERSION=1.0.0 # or 1.0.0-beta for pre-release
+
+# Create and push a version tag
+git tag -a v$VERSION -m "Release v$VERSION"
+git push origin v$VERSION
+```
+
+### 🏷️ What Gets Published
+
+The automation publishes to: `99xio/xiansai-ui`
+
+**Tags created for stable releases (e.g., `v2.0.0`):**
+
+- `v2.0.0` - Exact version tag
+- `2.0.0` - Semantic version
+- `2.0` - Major.minor version
+- `2` - Major version
+- `latest` - Points to the most recent stable release
+
+**Tags created for pre-releases (e.g., `v2.0.0-beta`):**
+
+- `v2.0.0-beta` - Exact version tag
+- `2.0.0-beta` - Semantic version
+- `2.0` - Major.minor version
+- `2` - Major version
+- **No `latest` tag** - Pre-releases don't get tagged as latest
+
+### 🌐 Multi-Platform Support
+
+Images are automatically built for:
+
+- `linux/amd64` (Intel/AMD 64-bit)
+- `linux/arm64` (ARM 64-bit, Apple Silicon)
+
+### 🔍 Monitoring Builds
+
+1. Go to the repository's **Actions** tab on GitHub
+2. Look for "Build and Publish XiansAi UI to DockerHub" workflows
+3. Check DockerHub for newly published images at `99xio/xiansai-ui`
+
+### 🗂️ Delete Existing Tag (if needed)
+
+```bash
+# Delete local tag
+git tag -d v1.0.0
+
+# Delete remote tag
+git push origin :refs/tags/v1.0.0
+```
+
+### 📋 Best Practices
+
+1. **Always test locally** before creating tags
+2. **Use semantic versioning** (e.g., v1.0.0, v1.1.0, v2.0.0)
+3. **Use pre-release tags** for beta versions (e.g., v1.0.0-beta)
+4. **Keep main branch in sync** with your releases
+
+---
+
+## 📦 Manual Publishing Docker Images to DockerHub
+
+> **Note:** Manual publishing is available but **automated publishing via GitHub Actions is recommended** for consistency and reliability.
+
+### Prerequisites
+
+- Docker installed with buildx support
+- DockerHub account and credentials
+- Access to the repository
+
+### Step-by-Step Instructions
+
+1. **Set up environment variables:**
+
+   ```bash
+   export DOCKERHUB_USERNAME=99xio
+   export IMAGE_NAME=xiansai-ui
+   export TAG=v2.0.0
+   export ADDITIONAL_TAGS=latest
+   ```
+
+2. **Run the build and publish script:**
+
+   ```bash
+   ./docker-build-publish.sh
+   ```
+
+### What the Script Does
+
+The `docker-build-publish.sh` script performs the following actions:
+
+- **Validates environment variables** - Ensures required variables are set
+- **Logs into DockerHub** - Interactive login prompt
+- **Creates buildx builder** - Sets up multi-platform building capability
+- **Builds multi-platform images** - Creates images for linux/amd64 and linux/arm64
+- **Pushes to DockerHub** - Uploads all specified tags
+
+### Environment Variables Explained
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `DOCKERHUB_USERNAME` | Your DockerHub username | `99xio` | Yes |
+| `IMAGE_NAME` | Docker image name | `xiansai-ui` | No (defaults to `xiansai-ui`) |
+| `TAG` | Primary version tag | `v2.0.0` | No (defaults to `latest`) |
+| `ADDITIONAL_TAGS` | Comma-separated additional tags | `latest,stable` | No |
+| `DOCKERFILE` | Dockerfile to use | `Dockerfile.production` | No (defaults to `Dockerfile.production`) |
+| `PLATFORM` | Target platforms | `linux/amd64,linux/arm64` | No (defaults to both) |
+
+---
+
+## 🏃 Running Published Docker Images
+
+### Basic Usage
+
+Run the XiansAi UI using the published Docker image:
+
+```bash
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-client-id \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+```
+
+### Command Parameters Explained
+
+| Parameter | Description |
+|-----------|-------------|
+| `-d` | Run container in detached mode (background) |
+| `--name xiansai-ui` | Assign a name to the container |
+| `-e` | Set environment variables for runtime configuration |
+| `-p 3000:80` | Map host port 3000 to container port 80 |
+| `--restart unless-stopped` | Restart policy for container |
+
+### Health Check
+
+The container includes a health check endpoint:
+
+```bash
+# Check container health
+docker ps
+
+# Manual health check
+curl http://localhost:3000/health
+```
+
+### Logs and Monitoring
+
+```bash
+# View container logs
+docker logs xiansai-ui
+
+# Follow logs in real-time
+docker logs -f xiansai-ui
+
+# Container stats
+docker stats xiansai-ui
+```
+
+---
+
 ## 🚨 Quick Fix Reference
 
 If you encounter build issues, here are the most common fixes:
@@ -78,10 +270,10 @@ export ADDITIONAL_TAGS=latest
 # Your image is now available on Docker Hub!
 # Run it with your configuration
 docker run -d \
-  --name xiansai-ui \
+  --name xiansai-ui-dev \
   -p 3000:80 \
   --env-file .env.runtime \
-  yourusername/xiansai-ui:latest
+  99xio/xiansai-ui:latest
 ```
 
 ### Option 3: Build for Local Use Only

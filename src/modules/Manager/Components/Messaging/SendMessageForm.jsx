@@ -32,6 +32,7 @@ const SendMessageForm = ({
     const [metadataOnly, setMetadataOnly] = useState(false);
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
+    const [toSingletonInstance, setToSingletonInstance] = useState(true);
     
     // Workflow type and instance data
     const [allWorkflowTypes, setAllWorkflowTypes] = useState([]);
@@ -162,6 +163,13 @@ const SendMessageForm = ({
         }
     }, [metadataOnly]);
 
+    // Clear workflow instance when toSingletonInstance is checked
+    useEffect(() => {
+        if (toSingletonInstance) {
+            setWorkflowId('');
+        }
+    }, [toSingletonInstance]);
+
     const handleWorkflowTypeChange = (event, newValue) => {
         // Stop event propagation to prevent the slider from closing
         if (event) {
@@ -212,8 +220,8 @@ const SendMessageForm = ({
     };
 
     const handleSend = async () => {
-        if (!participantId || (!content && !metadataOnly) || !workflowId || !workflowType) {
-            showError('Participant ID, workflow type, workflow ID, and content are required');
+        if (!participantId || (!content && !metadataOnly) || !workflowType || (!toSingletonInstance && !workflowId)) {
+            showError('Participant ID, workflow type' + (toSingletonInstance ? '' : ', workflow ID') + ', and content are required');
             return;
         }
         
@@ -231,6 +239,9 @@ const SendMessageForm = ({
             }
             
             let response;
+            
+            // Get the workflow ID to send (null if singleton instance)
+            const workflowIdToSend = toSingletonInstance ? null : workflowId;
             
             // Check if we have the unified sendMessage function and this is an existing thread
             if (sendMessage && threadId) {
@@ -256,7 +267,7 @@ const SendMessageForm = ({
                         threadId,
                         agentName,
                         workflowType,
-                        workflowId,
+                        workflowIdToSend,
                         participantId,
                         null, // no content for metadata-only
                         parsedMetadata
@@ -267,7 +278,7 @@ const SendMessageForm = ({
                         threadId,
                         agentName,
                         workflowType,
-                        workflowId,
+                        workflowIdToSend,
                         participantId,
                         content,
                         parsedMetadata
@@ -323,7 +334,7 @@ const SendMessageForm = ({
     };
 
     // Determine if the send button should be disabled
-    const isSendDisabled = loading || !participantId || (!content && !metadataOnly) || !workflowType || !workflowId || (showMetadata && metadata && !isMetadataValid);
+    const isSendDisabled = loading || !participantId || (!content && !metadataOnly) || !workflowType || (!toSingletonInstance && !workflowId) || (showMetadata && metadata && !isMetadataValid);
 
     return (
         <Box sx={{ p: 3 }} onClick={handleFormClick}>
@@ -418,95 +429,118 @@ const SendMessageForm = ({
                 }}
             />
             
-            <Autocomplete
-                id="workflow-id-select"
-                options={Array.isArray(workflowInstances) ? workflowInstances : []}
-                value={selectedWorkflowObject}
-                onChange={handleWorkflowIdChange}
-                getOptionLabel={(option) => option?.workflowId || ''}
-                filterOptions={filterWorkflowIds}
-                disablePortal
-                renderOption={(props, option) => (
-                    <li {...props} style={{ padding: '8px 16px' }}>
-                        <Box sx={{ 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            width: '100%',
-                            borderLeft: '4px solid',
-                            borderColor: 'primary.main',
-                            pl: 1,
-                            py: 0.5
-                        }}>
-                            <Typography variant="subtitle1" fontWeight="bold">
-                                {option.workflowId || 'Unnamed Agent'}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {option.agent || 'Unknown Type'} • {option.workflowType || 'N/A'}
-                            </Typography>
-                            <Box sx={{ 
-                                display: 'flex', 
-                                justifyContent: 'space-between', 
-                                mt: 0.5,
-                                alignItems: 'center'
-                            }}>
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <Box component="span" sx={{ 
-                                        width: 8, 
-                                        height: 8, 
-                                        borderRadius: '50%', 
-                                        bgcolor: 'success.main',
-                                        display: 'inline-block',
-                                        mr: 0.5
-                                    }}/>
-                                    Started: {option.startTime ? new Date(option.startTime).toLocaleString() : 'Unknown'}
-                                </Typography>
-                                <Typography variant="caption" sx={{ 
-                                    color: 'grey.700',
-                                    bgcolor: 'grey.100',
-                                    px: 1,
-                                    py: 0.5,
-                                    borderRadius: 1,
-                                    fontFamily: 'monospace'
-                                }}>
-                                    {option.runId?.substring(0, 8) || 'N/A'}
-                                </Typography>
-                            </Box>
-                        </Box>
-                    </li>
-                )}
-                renderInput={(params) => (
-                    <TextField 
-                        {...params} 
-                        label="Running Workflow Instance" 
-                        variant="outlined"
-                        margin="normal"
-                        required
-                        placeholder="Search by ID or start time..."
-                        InputProps={{
-                            ...params.InputProps,
-                            endAdornment: (
-                                <>
-                                    {isLoadingInstances && <CircularProgress size={20} />}
-                                    {params.InputProps.endAdornment}
-                                </>
-                            ),
-                            onClick: (e) => e.stopPropagation()
+            <Box sx={{ mt: 1, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                        type="checkbox"
+                        checked={toSingletonInstance}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            setToSingletonInstance(e.target.checked);
+                        }}
+                        style={{ 
+                            marginRight: '8px',
+                            transform: 'scale(1.1)',
+                            cursor: 'pointer'
                         }}
                     />
-                )}
-                componentsProps={{
-                    popper: {
-                        onClick: (e) => e.stopPropagation()
-                    }
-                }}
-                disabled={!workflowType || isLoadingInstances}
-                fullWidth
-                ListboxProps={{
-                    style: {
-                        maxHeight: '350px'
-                    }
-                }}
-            />
+                    <Typography variant="body2" sx={{ ml: 0.5, fontSize: '0.875rem' }}>
+                        To Singleton Instance
+                    </Typography>
+                </Box>
+            </Box>
+            
+            {!toSingletonInstance && (
+                <Autocomplete
+                    id="workflow-id-select"
+                    options={Array.isArray(workflowInstances) ? workflowInstances : []}
+                    value={selectedWorkflowObject}
+                    onChange={handleWorkflowIdChange}
+                    getOptionLabel={(option) => option?.workflowId || ''}
+                    filterOptions={filterWorkflowIds}
+                    disablePortal
+                    renderOption={(props, option) => (
+                        <li {...props} style={{ padding: '8px 16px' }}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                width: '100%',
+                                borderLeft: '4px solid',
+                                borderColor: 'primary.main',
+                                pl: 1,
+                                py: 0.5
+                            }}>
+                                <Typography variant="subtitle1" fontWeight="bold">
+                                    {option.workflowId || 'Unnamed Agent'}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                    {option.agent || 'Unknown Type'} • {option.workflowType || 'N/A'}
+                                </Typography>
+                                <Box sx={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    mt: 0.5,
+                                    alignItems: 'center'
+                                }}>
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Box component="span" sx={{ 
+                                            width: 8, 
+                                            height: 8, 
+                                            borderRadius: '50%', 
+                                            bgcolor: 'success.main',
+                                            display: 'inline-block',
+                                            mr: 0.5
+                                        }}/>
+                                        Started: {option.startTime ? new Date(option.startTime).toLocaleString() : 'Unknown'}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ 
+                                        color: 'grey.700',
+                                        bgcolor: 'grey.100',
+                                        px: 1,
+                                        py: 0.5,
+                                        borderRadius: 1,
+                                        fontFamily: 'monospace'
+                                    }}>
+                                        {option.runId?.substring(0, 8) || 'N/A'}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </li>
+                    )}
+                    renderInput={(params) => (
+                        <TextField 
+                            {...params} 
+                            label="Running Workflow Instance" 
+                            variant="outlined"
+                            margin="normal"
+                            required
+                            placeholder="Search by ID or start time..."
+                            InputProps={{
+                                ...params.InputProps,
+                                endAdornment: (
+                                    <>
+                                        {isLoadingInstances && <CircularProgress size={20} />}
+                                        {params.InputProps.endAdornment}
+                                    </>
+                                ),
+                                onClick: (e) => e.stopPropagation()
+                            }}
+                        />
+                    )}
+                    componentsProps={{
+                        popper: {
+                            onClick: (e) => e.stopPropagation()
+                        }
+                    }}
+                    disabled={!workflowType || isLoadingInstances}
+                    fullWidth
+                    ListboxProps={{
+                        style: {
+                            maxHeight: '350px'
+                        }
+                    }}
+                />
+            )}
             
             <TextField
                 label="Participant ID"

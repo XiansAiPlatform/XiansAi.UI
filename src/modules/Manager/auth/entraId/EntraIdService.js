@@ -150,10 +150,11 @@ class EntraIdService {
       this._notifyStateChange();
       
       const logoutUrl = options?.returnTo || (window.location.origin + '/login');
-      
+
       await this.publicClientApplication.logoutRedirect({
         account: account,
         postLogoutRedirectUri: logoutUrl, // Redirect to /login page
+        idTokenHint: account?.idToken,
         onRedirectNavigate: (url) => {
           return true; // Allow navigation
         },

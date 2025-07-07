@@ -3,6 +3,7 @@ import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
 import TenantSettings from './TenantSettings';
 import BrandingSettings from './BrandingSettings';
+import ApiKeySettings from './ApiKeySettings';
 import './Settings.css';
 import { useTenant } from '../../contexts/TenantContext'; 
 
@@ -13,8 +14,18 @@ const Settings = () => {
     setCurrentTab(newValue);
   };
 
-   const { userRoles } = useTenant();
+  const { userRoles } = useTenant();
   const showTenantTab = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
+
+  // Build tabs and panels dynamically so indices always match
+  const tabs = [
+    { label: 'App Server', component: <CACertificates /> },
+    { label: 'API Keys', component: <ApiKeySettings /> },
+  ];
+  if (showTenantTab) {
+    tabs.splice(1, 0, { label: 'Tenant', component: <TenantSettings /> });
+    tabs.splice(2, 0, { label: 'Branding', component: <BrandingSettings /> });
+  }
 
   return (
     <Container maxWidth="lg">
@@ -43,21 +54,18 @@ const Settings = () => {
             onChange={handleTabChange}
             aria-label="settings tabs"
           >
-            <Tab label="App Server" />
-            {showTenantTab && <Tab label="Tenant" />}
-            {showTenantTab && <Tab label="Branding" />}
+            {tabs.map((tab, idx) => (
+              <Tab key={tab.label} label={tab.label} />
+            ))}
           </Tabs>
         </Box>
 
         <Box role="tabpanel">
-          {currentTab === 0 && <CACertificates />}
-          {showTenantTab && currentTab === 1 && <TenantSettings />}
-          {showTenantTab && currentTab === 2 && <BrandingSettings />}
-
+          {tabs[currentTab]?.component}
         </Box>
       </Box>
     </Container>
   );
 };
 
-export default Settings; 
+export default Settings;
