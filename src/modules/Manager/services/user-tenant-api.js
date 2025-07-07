@@ -4,10 +4,10 @@ import { getConfig } from '../../../config';
 export const useUserTenantApi = () => {
   return useMemo(() => {
     return {
-      getCurrentUserTenant: async (token, userId) => {
+      getCurrentUserTenant: async (token) => {
         try {
           const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants/${userId}`;
+          const url = `${apiBaseUrl}/api/user-tenants/current`;
           const response = await fetch(url, {
             headers: {
               'Content-Type': 'application/json',

@@ -49,8 +49,7 @@ export function OrganizationProvider({ children }) {
             return;
         }
 
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        var orgs = await userTenantApi.getCurrentUserTenant(token, decodedToken.sub);
+        var orgs = await userTenantApi.getCurrentUserTenant(token);
         // remove orgs without '.' or '-'
         // orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
 
