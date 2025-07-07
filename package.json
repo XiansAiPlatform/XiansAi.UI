@@ -33,6 +33,8 @@
     "refractor": {
       "prismjs": "^1.30.0"
     },
+    "nth-check": "^2.1.1",
+    "postcss": "8.4.31",
     "@rollup/plugin-babel": {
       "rollup": "^2.0.0"
     },
