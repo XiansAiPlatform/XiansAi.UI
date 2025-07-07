@@ -25,16 +25,19 @@ Built with React 19, Material-UI, React Router, Auth0/Entra ID authentication, C
    ```
 
 2. **Configure environment:**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
    ```
 
 3. **Start development server:**
+
    ```bash
    npm start                        # Default environment
-   npm run start:env development    # Specific environment
-   npm run start:env staging
+   npm run start:env development    # loads .env.development
+   npm run start:env staging        # loads .env.staging
+   npm run start:env project-a     # loads .env.project-a
    ```
 
 ### Production Build
