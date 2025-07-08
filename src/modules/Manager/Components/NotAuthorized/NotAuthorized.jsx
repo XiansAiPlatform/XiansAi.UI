@@ -19,7 +19,7 @@ const NotAuthorized = () => {
         setLoading(true);
         const token = await getAccessTokenSilently();
         const invitationData = await userApi.getCurrentInvitation(token);
-        if (invitationData && invitationData.token) {
+        if (invitationData?.token) {
           setInvitation(invitationData);
         }
       } catch (err) {
@@ -106,7 +106,11 @@ const NotAuthorized = () => {
             backgroundClip: 'text',
           }}
         >
-          Access Not Authorized
+          {invitation?.token
+            ? "Pending Invitation Acceptance"
+            : "Access Not Authorized"
+          }
+          
         </Typography>
 
         <Typography
@@ -118,8 +122,10 @@ const NotAuthorized = () => {
             maxWidth: '500px',
           }}
         >
-          You don't have permission to access this resource. Please contact
-          System Admin for account approval to get started with Xians.ai.
+          {invitation?.token
+            ? "You have been invited to join an organization. Please accept the invitation to get started with Xians.ai."
+            : "You don't have permission to access this resource. Please contact System Admin for account approval to get started with Xians.ai."
+          }
         </Typography>
 
         <Box
