@@ -7,7 +7,7 @@ export const useUserApi = () => {
       getCurrentInvitation: async (token) => {
         try {
           const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/users/invitation`;
+          const url = `${apiBaseUrl}/api/users/currentUserInvitation`;
           const response = await fetch(url, {
             headers: {
               'Content-Type': 'application/json',
@@ -24,13 +24,14 @@ export const useUserApi = () => {
       postAcceptInvitation: async (token, invitationId) => {
         try {
           const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/users/accept-invitation/${invitationId}`;
+          const url = `${apiBaseUrl}/api/users/accept-invitation`;
           const response = await fetch(url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`,
             },
+            body: JSON.stringify({ token: invitationId }),
           });
           if (!response.ok) {
             throw new Error('Failed to accept invitation');
