@@ -1,17 +1,74 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Container } from '@mui/material';
-import { LockOutlined, PersonAdd, Home } from '@mui/icons-material';
+import { Box, Typography, Button, Container, CircularProgress } from '@mui/material';
+import { LockOutlined, Home } from '@mui/icons-material';
+import { useAuth } from '../../../Manager/auth/AuthContext';
+import { useUserApi } from '../../services/user-api';
 
 const NotAuthorized = () => {
   const navigate = useNavigate();
+  const userApi = useUserApi();
+  const [invitation, setInvitation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [accepting, setAccepting] = useState(false);
+  const { getAccessTokenSilently } = useAuth();
 
-  const handleRegisterClick = () => {
-    navigate('/register');
+  useEffect(() => {
+    const fetchInvitation = async () => {
+      try {
+        setLoading(true);
+        const token = await getAccessTokenSilently();
+        const invitationData = await userApi.getCurrentInvitation(token);
+        if (invitationData?.token) {
+          setInvitation(invitationData);
+        }
+      } catch (err) {
+        // Optionally handle error
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInvitation();
+  }, [getAccessTokenSilently, userApi]);
+
+  const handleAcceptInvitation = async () => {
+    if (!invitation?.token) return;
+    try {
+      setAccepting(true);
+      const token = await getAccessTokenSilently();
+      await userApi.postAcceptInvitation(token, invitation.token);
+      navigate('/');
+    } catch (err) {
+      // Optionally show error
+    } finally {
+      setAccepting(false);
+    }
   };
 
   const handleHomeClick = () => {
     navigate('/');
   };
+
+  if (loading) {
+    return (
+      <Container maxWidth='md'>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '60vh',
+            textAlign: 'center',
+            py: 4,
+          }}
+        >
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>Checking for invitation...</Typography>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container maxWidth="md">
@@ -49,7 +106,11 @@ const NotAuthorized = () => {
             backgroundClip: 'text',
           }}
         >
-          Access Not Authorized
+          {invitation?.token
+            ? "Pending Invitation Acceptance"
+            : "Access Not Authorized"
+          }
+          
         </Typography>
 
         <Typography
@@ -61,8 +122,10 @@ const NotAuthorized = () => {
             maxWidth: '500px',
           }}
         >
-          You don't have permission to access this resource. 
-          Please register for an account to get started with Xians.ai.
+          {invitation?.token
+            ? "You have been invited to join an organization. Please accept the invitation to get started with Xians.ai."
+            : "You don't have permission to access this resource. Please contact System Admin for account approval to get started with Xians.ai."
+          }
         </Typography>
 
         <Box
@@ -73,11 +136,11 @@ const NotAuthorized = () => {
             justifyContent: 'center',
           }}
         >
+          {invitation?.token && (
           <Button
             variant="contained"
             size="large"
-            startIcon={<PersonAdd />}
-            onClick={handleRegisterClick}
+            onClick={handleAcceptInvitation}
             sx={{
               minWidth: 160,
               py: 1.5,
@@ -91,8 +154,9 @@ const NotAuthorized = () => {
               transition: 'all 0.3s ease',
             }}
           >
-            Register Now
+            {accepting ? 'Accepting...' : 'Accept Invitation'}
           </Button>
+          )}
 
           <Button
             variant="outlined"
