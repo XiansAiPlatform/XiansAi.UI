@@ -91,7 +91,7 @@ export function OrganizationProvider({ children }) {
     };
 
     initializeOrg();
-  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user, isProcessingCallback]); // Added isAuthLoading and user
+  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user, isProcessingCallback, userTenantApi]); // Added isAuthLoading and user
 
   const updateSelectedOrg = (newOrg) => {
     setSelectedOrg(newOrg);
