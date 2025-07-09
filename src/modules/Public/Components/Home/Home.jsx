@@ -6,12 +6,16 @@ import { RiRobot2Fill, RiFlowChart, RiRocketLine, RiExchangeLine, RiOpenSourceFi
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useAuth } from '../../../Manager/auth/AuthContext';
+import { ArrowForward } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
     const { isAuthenticated, login } = useAuth();
     const [activeTab, setActiveTab] = useState(0);
     const [activeCodeTab, setActiveCodeTab] = useState('flow');
     const [activeFeatureTab, setActiveFeatureTab] = useState(0);
+    const navigate = useNavigate();
+    
 
     const featureTabs = [
         {
@@ -172,21 +176,40 @@ var newBlogPosts = new List<string>();`
                             </a>
                         </nav>
                         <div className="home-auth-buttons">
-                            <>
-                                    <button 
-                                        className="home-btn home-btn-secondary" 
+                            {isAuthenticated ? (
+                                <button
+                                    className="home-btn home-btn-primary"
+                                    onClick={() => {
+                                        navigate('/manager/definitions');
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    <ArrowForward style={{ fontSize: '1.1em' }} />
+                                    Go to Dashboard
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        className="home-btn home-btn-secondary"
                                         onClick={() => login({ returnTo: window.location.origin })}
                                     >
                                         Login
                                     </button>
-                                    <button 
-                                        className="home-btn home-btn-primary" 
+                                    <button
+                                        className="home-btn home-btn-primary"
                                         onClick={() => login({ returnTo: window.location.origin })}
                                     >
                                         <BiLogoGithub />
                                         Sign up
                                     </button>
-                            </>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

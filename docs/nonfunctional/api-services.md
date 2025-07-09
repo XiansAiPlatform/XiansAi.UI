@@ -409,3 +409,4 @@ Reference the following files for implementation examples:
 - [Auth0 React SDK](https://auth0.com/docs/libraries/auth0-react)
 - [REST API Best Practices](https://restfulapi.net/)
 - [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Keycloak with Docker](https://www.keycloak.org/getting-started/getting-started-docker)

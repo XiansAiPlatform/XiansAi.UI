@@ -1,7 +1,8 @@
 import { getConfig } from '../../../../config';
 
 class Auth0TokenService {
-  getOrganizations(decodedToken) {
+  getOrganizations(token) {
+    const decodedToken = JSON.parse(atob(token.split('.')[1]));
     const orgInfoPath = getConfig().organizationClaim;
     let orgInfo = decodedToken[orgInfoPath];
     return Array.isArray(orgInfo) ? orgInfo : (orgInfo ? [orgInfo] : []);

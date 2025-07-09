@@ -10,7 +10,9 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
+  const [isProcessingCallback, setIsProcessingCallback] = useState(false);
   const redirectCallbackHandled = useRef(false);
+  const isLoggingOut = useRef(false);
 
   useEffect(() => {
     if (AuthProviderInstance) {
@@ -19,44 +21,60 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
           setIsLoading(true);
           await AuthProviderInstance.init();
           const authState = AuthProviderInstance.getAuthState();
+          
           setUser(authState.user);
           setIsAuthenticated(authState.isAuthenticated);
           setAccessToken(authState.accessToken);
         } catch (e) {
-          console.error("Error during initAuth:", e);
+          console.error("AuthContext: Error during initAuth:", e);
           setError(e);
         } finally {
           setIsLoading(false);
         }
       };
 
-      // Only call this if we're not in the callback URL or if we're in the callback URL 
-      // and haven't handled the callback yet (to avoid infinite loop)
-      const hasAuthParams = (window.location.search.includes("code=") && window.location.search.includes("state=")) || (window.location.hash.includes("code=") && window.location.hash.includes("state="));
-      if (!hasAuthParams) {
+      // Use the provider's generic methods to detect callback flow
+      const isInCallbackFlow = AuthProviderInstance.isInCallbackFlow && AuthProviderInstance.isInCallbackFlow();
+      const isLogoutCallback = AuthProviderInstance.isLogoutCallback && AuthProviderInstance.isLogoutCallback();
+      
+      if (isLogoutCallback) {
+        // Handle logout callback - redirect to login page
+        console.log("AuthContext: Detected logout callback, redirecting to login");
+        setIsLoading(false);
+        window.location.replace('/login');
+        return;
+      } else if (!isInCallbackFlow) {
         // Normal init if not in a callback URL
         initAuth();
-      } else if (hasAuthParams && !redirectCallbackHandled.current) {
+      } else if (isInCallbackFlow && !redirectCallbackHandled.current) {
         // We're in a callback URL and haven't handled it yet
         redirectCallbackHandled.current = true;
+        setIsProcessingCallback(true);
         
         const handleRedirectCallback = async () => {
           try {
-            console.log("Handling Auth redirect callback...");
+            // Call the provider's handleRedirectCallback method
             await AuthProviderInstance.handleRedirectCallback();
             const authState = AuthProviderInstance.getAuthState();
+            
+            // Update React state
             setUser(authState.user);
             setIsAuthenticated(authState.isAuthenticated);
             setAccessToken(authState.accessToken);
-            // Clear URL parameters after successful handling
-            if (window.history && window.history.replaceState) {
+            
+            // Small delay to ensure state updates propagate before navigation
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Only clear URL parameters after successful authentication
+            if (authState.isAuthenticated && window.history && window.history.replaceState) {
               window.history.replaceState({}, document.title, window.location.pathname);
             }
           } catch (e) {
-            console.error("Error handling redirect callback:", e);
+            console.error("AuthContext: Error handling redirect callback:", e);
             setError(e);
           } finally {
             setIsLoading(false);
+            setIsProcessingCallback(false);
           }
         };
         
@@ -64,10 +82,13 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
       }
 
       const unsubscribe = AuthProviderInstance.onAuthStateChanged((authState) => {
+        
         setUser(authState.user);
         setIsAuthenticated(authState.isAuthenticated);
         setAccessToken(authState.accessToken);
-        setIsLoading(false);
+        if (!redirectCallbackHandled.current) {
+          setIsLoading(false);
+        }
       });
 
       return () => {
@@ -91,25 +112,26 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
   const logout = async (options) => {
     try {
       setIsLoading(true);
-      // Ensure federated logout is requested
-      const logoutOptions = {
-        ...options,
-        logoutParams: {
-          ...(options?.logoutParams),
-          federated: true,
-        },
-      };
-      await AuthProviderInstance.logout(logoutOptions);
-      // Explicitly set auth state to logged out
+      isLoggingOut.current = true;
+      
+      // Explicitly set auth state to logged out immediately
       setUser(null);
       setIsAuthenticated(false);
       setAccessToken(null);
-      // Auth state will also be updated by onAuthStateChanged, but this makes it immediate
+      setError(null);
+      
+      await AuthProviderInstance.logout(options);
+      
     } catch (e) {
       console.error("Error during logout:", e);
       setError(e);
+      // Even if logout fails, redirect to login page
+      setTimeout(() => {
+        window.location.replace('/login');
+      }, 1000);
     } finally {
-      setIsLoading(false); // Ensure loading is set to false in all cases
+      setIsLoading(false);
+      isLoggingOut.current = false;
     }
   };
 
@@ -136,6 +158,7 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
     isLoading,
     error,
     accessToken,
+    isProcessingCallback,
     login,
     logout,
     getAccessTokenSilently,

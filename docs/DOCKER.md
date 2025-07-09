@@ -1,0 +1,964 @@
+# Docker Deployment Guide
+
+This document provides comprehensive information about containerizing and deploying the XiansAi UI using Docker.
+
+## 📋 Table of Contents
+
+1. [Automated Publishing via GitHub Actions](#automated-publishing-via-github-actions)
+2. [Manual Publishing Docker Images to DockerHub](#-manual-publishing-docker-images-to-dockerhub)
+3. [Running Published Docker Images](#-running-published-docker-images)
+4. [Quick Start](#-quick-start)
+5. [Development](#️-development)
+6. [Runtime Configuration](#-runtime-configuration)
+7. [Build Scripts](#-build-scripts)
+8. [Troubleshooting](#-troubleshooting)
+9. [Production Deployment](#-production-deployment)
+
+---
+
+## Automated Publishing via GitHub Actions
+
+### Overview
+
+The repository includes GitHub Actions automation that automatically builds and publishes Docker images to DockerHub when you create version tags. This is the **recommended approach** for consistent, automated deployments.
+
+### 🚀 Quick Start
+
+```bash
+# Push your changes to the main branch
+git add .
+git commit -m "feat: add new feature"
+git push origin main
+
+# Define the version
+export VERSION=1.0.0 # or 1.0.0-beta for pre-release
+
+# Create and push a version tag
+git tag -a v$VERSION -m "Release v$VERSION"
+git push origin v$VERSION
+```
+
+### 🏷️ What Gets Published
+
+The automation publishes to: `99xio/xiansai-ui`
+
+**Tags created for stable releases (e.g., `v2.0.0`):**
+
+- `v2.0.0` - Exact version tag
+- `2.0.0` - Semantic version
+- `2.0` - Major.minor version
+- `2` - Major version
+- `latest` - Points to the most recent stable release
+
+**Tags created for pre-releases (e.g., `v2.0.0-beta`):**
+
+- `v2.0.0-beta` - Exact version tag
+- `2.0.0-beta` - Semantic version
+- `2.0` - Major.minor version
+- `2` - Major version
+- **No `latest` tag** - Pre-releases don't get tagged as latest
+
+### 🌐 Multi-Platform Support
+
+Images are automatically built for:
+
+- `linux/amd64` (Intel/AMD 64-bit)
+- `linux/arm64` (ARM 64-bit, Apple Silicon)
+
+### 🔍 Monitoring Builds
+
+1. Go to the repository's **Actions** tab on GitHub
+2. Look for "Build and Publish XiansAi UI to DockerHub" workflows
+3. Check DockerHub for newly published images at `99xio/xiansai-ui`
+
+### 🗂️ Delete Existing Tag (if needed)
+
+```bash
+# Delete local tag
+git tag -d v1.0.0
+
+# Delete remote tag
+git push origin :refs/tags/v1.0.0
+```
+
+### 📋 Best Practices
+
+1. **Always test locally** before creating tags
+2. **Use semantic versioning** (e.g., v1.0.0, v1.1.0, v2.0.0)
+3. **Use pre-release tags** for beta versions (e.g., v1.0.0-beta)
+4. **Keep main branch in sync** with your releases
+
+---
+
+## 📦 Manual Publishing Docker Images to DockerHub
+
+> **Note:** Manual publishing is available but **automated publishing via GitHub Actions is recommended** for consistency and reliability.
+
+### Prerequisites
+
+- Docker installed with buildx support
+- DockerHub account and credentials
+- Access to the repository
+
+### Step-by-Step Instructions
+
+1. **Set up environment variables:**
+
+   ```bash
+   export DOCKERHUB_USERNAME=99xio
+   export IMAGE_NAME=xiansai-ui
+   export TAG=v2.0.0
+   export ADDITIONAL_TAGS=latest
+   ```
+
+2. **Run the build and publish script:**
+
+   ```bash
+   ./docker-build-publish.sh
+   ```
+
+### What the Script Does
+
+The `docker-build-publish.sh` script performs the following actions:
+
+- **Validates environment variables** - Ensures required variables are set
+- **Logs into DockerHub** - Interactive login prompt
+- **Creates buildx builder** - Sets up multi-platform building capability
+- **Builds multi-platform images** - Creates images for linux/amd64 and linux/arm64
+- **Pushes to DockerHub** - Uploads all specified tags
+
+### Environment Variables Explained
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `DOCKERHUB_USERNAME` | Your DockerHub username | `99xio` | Yes |
+| `IMAGE_NAME` | Docker image name | `xiansai-ui` | No (defaults to `xiansai-ui`) |
+| `TAG` | Primary version tag | `v2.0.0` | No (defaults to `latest`) |
+| `ADDITIONAL_TAGS` | Comma-separated additional tags | `latest,stable` | No |
+| `DOCKERFILE` | Dockerfile to use | `Dockerfile.production` | No (defaults to `Dockerfile.production`) |
+| `PLATFORM` | Target platforms | `linux/amd64,linux/arm64` | No (defaults to both) |
+
+---
+
+## 🏃 Running Published Docker Images
+
+### Basic Usage
+
+Run the XiansAi UI using the published Docker image:
+
+```bash
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-client-id \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+```
+
+### Command Parameters Explained
+
+| Parameter | Description |
+|-----------|-------------|
+| `-d` | Run container in detached mode (background) |
+| `--name xiansai-ui` | Assign a name to the container |
+| `-e` | Set environment variables for runtime configuration |
+| `-p 3000:80` | Map host port 3000 to container port 80 |
+| `--restart unless-stopped` | Restart policy for container |
+
+### Health Check
+
+The container includes a health check endpoint:
+
+```bash
+# Check container health
+docker ps
+
+# Manual health check
+curl http://localhost:3000/health
+```
+
+### Logs and Monitoring
+
+```bash
+# View container logs
+docker logs xiansai-ui
+
+# Follow logs in real-time
+docker logs -f xiansai-ui
+
+# Container stats
+docker stats xiansai-ui
+```
+
+---
+
+## 🚨 Quick Fix Reference
+
+If you encounter build issues, here are the most common fixes:
+
+1. **Node.js 20+ Required**: Update Dockerfile to use `node:20-alpine`
+2. **Package Lock Sync**: Run `npm install` to fix lock file issues
+3. **Nginx Config**: Remove `must-revalidate` from gzip_proxied
+4. **Permissions**: Use `/tmp/nginx.pid` for non-root nginx
+
+## 🏗️ Docker Architecture
+
+### Multi-Stage Build Strategy
+
+The XiansAi UI uses a **multi-stage Docker build** for optimal production images:
+
+1. **Build Stage** (`node:20-alpine`):
+   - Installs dependencies and builds the React application
+   - Includes build tools and development dependencies
+   - Outputs optimized static files
+
+2. **Production Stage** (`nginx:1.25-alpine`):
+   - Serves static files using nginx
+   - Minimal footprint with only runtime requirements
+   - Includes security hardening and performance optimizations
+
+### Image Features
+
+- ✅ **Multi-platform support** (AMD64 and ARM64)
+- ✅ **Security hardening** (non-root user, minimal attack surface)
+- ✅ **Performance optimization** (gzip compression, caching)
+- ✅ **Health monitoring** (built-in health checks)
+- ✅ **Production-ready** (nginx configuration, security headers)
+
+## 📁 Docker Files Overview
+
+| File | Purpose |
+|------|---------|
+| `Dockerfile` | Development containerization with hot reloading |
+| `Dockerfile.production` | Production-optimized build with runtime configuration support |
+| `docker-entrypoint.sh` | Runtime configuration injection script |
+| `public/config.js` | Runtime configuration template |
+| `nginx.conf` | Custom nginx configuration for React SPA |
+| `docker-build-publish.sh` | Unified build and publish script with multi-platform support |
+| `.dockerignore` | Excludes unnecessary files from build context |
+| `.env.runtime.example` | Example runtime environment configuration |
+
+## 🚀 Quick Start
+
+### Option 1: Use Pre-built Images with Runtime Configuration (Recommended)
+
+```bash
+# Pull and run with your environment variables
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-client-id \
+  -e REACT_APP_AUTH0_AUDIENCE=https://your-api-audience \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+```
+
+### Option 2: Build and Push Your Own Image
+
+```bash
+# Build and push to Docker Hub (change username to yours)
+export DOCKERHUB_USERNAME=99xio
+export IMAGE_NAME=xiansai-ui
+export TAG=v2.0.0
+export ADDITIONAL_TAGS=latest
+./docker-build-publish.sh
+
+# Your image is now available on Docker Hub!
+# Run it with your configuration
+docker run -d \
+  --name xiansai-ui-dev \
+  -p 3000:80 \
+  --env-file .env.runtime \
+  99xio/xiansai-ui:latest
+```
+
+### Option 3: Build for Local Use Only
+
+```bash
+# For local development, build the image directly with Docker
+docker build -f Dockerfile.production -t xiansai-ui:latest .
+
+# Run locally
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  --env-file .env.runtime \
+  xiansai-ui:latest
+```
+
+## 🛠️ Development
+
+For development work, use the runtime configuration approach with development environment variables.
+
+### Local Development (Recommended)
+
+For the fastest development experience:
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+### Docker Development with Runtime Configuration
+
+Use the production image with development environment variables:
+
+```bash
+# Build production image
+docker build -f Dockerfile.production -t xiansai-ui .
+
+# Run with development configuration
+docker run -d \
+  --name xiansai-ui-dev \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=xiansai-dev.eu.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-dev-client-id \
+  -e REACT_APP_AUTH0_AUDIENCE=https://dev-api.xiansai.com \
+  xiansai-ui
+```
+
+### Development Environment Variables
+
+Example development configuration:
+
+```bash
+REACT_APP_AUTH_PROVIDER=auth0
+REACT_APP_API_URL=http://localhost:5000
+REACT_APP_AUTH0_DOMAIN=xiansai-dev.eu.auth0.com
+REACT_APP_AUTH0_CLIENT_ID=your-dev-client-id
+REACT_APP_AUTH0_AUDIENCE=https://dev-api.xiansai.com
+```
+
+## 🔄 Runtime Configuration
+
+The XiansAi UI supports **runtime configuration** - you can change environment variables when running containers **without rebuilding the image**. This solves the React build-time limitation!
+
+### ✨ How It Works
+
+Pass environment variables at container runtime:
+
+```bash
+# Build the image once (no environment variables needed at build time)
+docker build -f Dockerfile.production -t xiansai-ui .
+
+# Run with development configuration - NO REBUILD NEEDED!
+docker run -d \
+  --name xiansai-ui-dev \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e REACT_APP_AUTH0_DOMAIN=xiansai-dev.eu.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-dev-client-id \
+  -e REACT_APP_AUTH0_AUDIENCE=https://dev-api.xiansai.com \
+  xiansai-ui
+
+# Run with production configuration - SAME IMAGE!
+docker run -d \
+  --name xiansai-ui-prod \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=https://api.xiansai.com \
+  -e REACT_APP_AUTH0_DOMAIN=xiansai-prod.eu.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-prod-client-id \
+  -e REACT_APP_AUTH0_AUDIENCE=https://api.xiansai.com \
+  xiansai-ui
+```
+
+### Environment File Support
+
+```bash
+# Create your runtime environment file
+cat > .env.runtime << EOF
+REACT_APP_AUTH_PROVIDER=auth0
+REACT_APP_API_URL=http://localhost:5000
+REACT_APP_AUTH0_DOMAIN=xiansai-prod.eu.auth0.com
+REACT_APP_AUTH0_CLIENT_ID=your-client-id
+REACT_APP_AUTH0_AUDIENCE=https://xians.ai/api
+EOF
+
+# Run with environment file
+docker run -d \
+  --name xiansai-ui \
+  -p 3000:80 \
+  --env-file .env.development \
+  xiansai-ui
+```
+
+### 🎯 Key Benefits
+
+✅ **No Rebuild Required**: Change config without rebuilding the image  
+✅ **One Image, Multiple Environments**: Use same image for dev/staging/prod  
+✅ **True Runtime Variables**: Variables are injected when container starts  
+✅ **Environment File Support**: Use `.env` files with Docker  
+✅ **CI/CD Friendly**: Build once, deploy everywhere  
+
+### 🔧 How Runtime Configuration Works
+
+1. **Build Time**: A template `config.js` is created with placeholders like `${REACT_APP_API_URL}`
+2. **Container Startup**: The `docker-entrypoint.sh` script runs and:
+   - Reads environment variables from the container
+   - Replaces placeholders in `config.js` with actual values
+   - Makes the updated config available to the React app
+3. **Runtime**: The React app reads from `window.RUNTIME_CONFIG` with fallback to build-time variables
+
+**Example:**
+
+```javascript
+// Template at build time (public/config.js)
+window.RUNTIME_CONFIG = {
+  REACT_APP_API_URL: '${REACT_APP_API_URL}'
+}
+
+// After container startup with -e REACT_APP_API_URL=http://localhost:5000
+window.RUNTIME_CONFIG = {
+  REACT_APP_API_URL: 'http://localhost:5000'
+}
+
+// React app (src/config.js) reads the runtime value
+function getEnvVar(key) {
+  if (window.RUNTIME_CONFIG && window.RUNTIME_CONFIG[key]) {
+    return window.RUNTIME_CONFIG[key]; // Runtime value
+  }
+  return process.env[key]; // Build-time fallback
+}
+```
+
+## 🔧 Build Scripts
+
+### Workflow Overview
+
+Choose the right approach for your needs:
+
+| **Goal** | **Command** | **Result** |
+|----------|-------------|------------|
+| **Build + Push to Registry** | `export DOCKERHUB_USERNAME=username && ./docker-build-publish.sh` | ✅ Image on Docker Hub, ready to use |
+| **Build for Local Use** | `docker build -f Dockerfile.production -t xiansai-ui .` | ✅ Local image you can run immediately |
+| **Add Additional Tags** | `export ADDITIONAL_TAGS="v1.0.1,stable" && ./docker-build-publish.sh` | ✅ Multiple tags in single operation |
+| **Use Pre-built Image** | `docker run -p 3000:80 99xio/xiansai-ui:latest` | ✅ Run immediately with runtime config |
+
+**💡 Most Common Use Cases:**
+
+- **For CI/CD**: Use `docker-build-publish.sh` - it builds and pushes in one step
+- **For local development**: Use direct `docker build` or pre-built images
+- **For releases**: Use `ADDITIONAL_TAGS` to create version tags in single operation
+
+### docker-build-publish.sh
+
+Unified build and publish script that handles both building and pushing in a single operation:
+
+```bash
+# Basic usage - builds and pushes automatically
+export DOCKERHUB_USERNAME=yourusername
+./docker-build-publish.sh
+```
+
+**Environment Variables:**
+
+- `DOCKERHUB_USERNAME`: Your Docker Hub username (required)
+- `IMAGE_NAME`: Docker image name (default: `xiansai/ui`)
+- `TAG`: Image tag (default: `latest`)
+- `ADDITIONAL_TAGS`: Comma-separated additional tags (optional)
+- `DOCKERFILE`: Dockerfile to use (default: `Dockerfile.production`)
+- `PLATFORM`: Target platforms (default: `linux/amd64,linux/arm64`)
+
+**Advanced Usage:**
+
+```bash
+# Build with multiple tags
+export DOCKERHUB_USERNAME=yourusername
+export TAG=v1.2.0
+export ADDITIONAL_TAGS="latest,stable"
+./docker-build-publish.sh
+
+# Custom image name and platform
+export DOCKERHUB_USERNAME=yourusername
+export IMAGE_NAME=custom-ui
+export PLATFORM=linux/amd64
+./docker-build-publish.sh
+```
+
+**Key Features:**
+
+- ✅ **One-step operation**: Builds and pushes in single command
+- ✅ **Multi-platform support**: Builds for AMD64 and ARM64 by default
+- ✅ **Multiple tags**: Support for additional tags in single operation
+- ✅ **Efficient**: No local storage needed for multi-platform builds
+- ✅ **Error handling**: Comprehensive validation and helpful error messages
+
+## 🐛 Troubleshooting
+
+### Common Docker Build/Publish Issues
+
+#### 1. Docker Hub Authentication Issues
+
+```bash
+❌ Error response from daemon: denied: requested access to the resource is denied
+```
+
+**Cause**: Not logged into Docker Hub or incorrect credentials.
+
+**Solutions**:
+
+```bash
+# Login to Docker Hub
+docker login
+
+# Or login with username directly
+docker login -u yourusername
+
+# Verify login worked
+docker info | grep Username
+```
+
+#### 2. Missing DOCKERHUB_USERNAME
+
+```bash
+❌ DOCKERHUB_USERNAME environment variable is required
+```
+
+**Cause**: The required `DOCKERHUB_USERNAME` environment variable is not set.
+
+**Solution**: Set your Docker Hub username:
+```bash
+export DOCKERHUB_USERNAME=yourusername
+./docker-build-publish.sh
+```
+
+#### 3. Permission Denied on Script
+
+```bash
+❌ Permission denied: ./docker-build-publish.sh
+```
+
+**Cause**: Script is not executable.
+
+**Solution**: Make the script executable:
+```bash
+chmod +x docker-build-publish.sh
+./docker-build-publish.sh
+```
+
+#### 4. Multi-Platform Build Issues
+
+**Problem**: Build fails with "buildx not found"
+```bash
+# Solution: Install Docker Desktop or enable buildx
+docker buildx install
+docker buildx create --use
+```
+
+**Problem**: Build is slow or fails
+```bash
+# Solution: Build for single platform for testing
+export PLATFORM=linux/amd64
+./docker-build-publish.sh
+```
+
+#### 5. Runtime Configuration Not Working
+
+**Problem**: Environment variables not being applied at runtime
+
+**Solutions**:
+
+```bash
+# Check if config.js is being loaded
+docker exec -it xiansai-ui cat /usr/share/nginx/html/config.js
+
+# Check if environment variables are set
+docker exec -it xiansai-ui env | grep REACT_APP
+
+# Check entrypoint script logs
+docker logs xiansai-ui
+```
+
+#### 6. Authentication Issues
+
+**Problem**: `Auth0 domain undefined` error
+
+**Solution**: Check for trailing spaces in environment files:
+
+```bash
+# Clean environment file
+sed -i 's/[[:space:]]*$//' .env.runtime
+
+# Or recreate without trailing spaces
+cat > .env.runtime << 'EOF'
+REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com
+REACT_APP_AUTH0_CLIENT_ID=your-client-id
+EOF
+```
+
+### Debugging Commands
+
+```bash
+# Check if image exists locally
+docker images | grep xiansai-ui
+
+# Check running containers
+docker ps -a | grep xiansai-ui
+
+# View container logs
+docker logs xiansai-ui
+
+# Get inside container for debugging
+docker exec -it xiansai-ui sh
+
+# Test health endpoint
+curl http://localhost:3000/health
+```
+
+## 🏭 Production Deployment
+
+### Docker with Runtime Configuration
+
+Deploy the UI with production environment variables:
+
+```bash
+# Pull and run the latest production image
+docker run -d \
+  --name xiansai-ui-prod \
+  -p 3000:80 \
+  -e REACT_APP_API_URL=https://api.xiansai.com \
+  -e REACT_APP_AUTH0_DOMAIN=xiansai-prod.eu.auth0.com \
+  -e REACT_APP_AUTH0_CLIENT_ID=your-prod-client-id \
+  -e REACT_APP_AUTH0_AUDIENCE=https://api.xiansai.com \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+
+# Or use an environment file
+docker run -d \
+  --name xiansai-ui-prod \
+  -p 3000:80 \
+  --env-file .env.production \
+  --restart unless-stopped \
+  99xio/xiansai-ui:latest
+```
+
+### Kubernetes Deployment
+
+For Kubernetes deployment, here's a sample configuration:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xiansai-ui
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: xiansai-ui
+  template:
+    metadata:
+      labels:
+        app: xiansai-ui
+    spec:
+      containers:
+      - name: xiansai-ui
+        image: xiansai/ui:latest
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: xiansai-ui-service
+spec:
+  selector:
+    app: xiansai-ui
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+The Docker image supports runtime configuration through environment variables:
+
+```bash
+# Core configuration
+NODE_ENV=production
+NGINX_PORT=80
+
+# Application configuration (build-time)
+REACT_APP_API_URL=https://api.xiansai.com
+REACT_APP_AUTH_PROVIDER=auth0
+```
+
+### Build Arguments
+
+For custom builds, you can use build arguments:
+
+```bash
+docker build \
+  --build-arg BUILDPLATFORM=linux/amd64 \
+  --build-arg TARGETARCH=amd64 \
+  -f Dockerfile.production \
+  -t xiansai-ui:custom .
+```
+
+## 🔍 Monitoring and Health Checks
+
+### Built-in Health Check
+
+The Docker image includes a health check endpoint:
+
+```bash
+# Manual health check
+curl http://localhost:3000/health
+
+# Docker health status
+docker ps --format "table {{.Names}}\t{{.Status}}"
+```
+
+### Monitoring Integration
+
+The nginx configuration includes structured logging for monitoring tools:
+
+```nginx
+# Access log format includes:
+- Remote IP
+- Request details
+- Response status
+- Response time
+- User agent
+- Forwarded headers
+```
+
+## 🔐 Security Features
+
+### Container Security
+
+- **Non-root user**: Runs as user `xiansai` (UID 1001)
+- **Minimal base image**: Uses Alpine Linux for smaller attack surface
+- **Read-only filesystem**: Static files served from read-only location
+- **No shell access**: Production image doesn't include shell utilities
+
+### Web Security Headers
+
+The nginx configuration includes security headers:
+
+```nginx
+X-Frame-Options: SAMEORIGIN
+X-XSS-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer-when-downgrade
+Content-Security-Policy: default-src 'self' http: https: data: blob: 'unsafe-inline'
+```
+
+### Network Security
+
+```bash
+# Run with custom network
+docker network create xiansai-network
+docker run -d \
+  --name xiansai-ui \
+  --network xiansai-network \
+  -p 3000:80 \
+  xiansai/ui:latest
+```
+
+## 📊 Performance Optimization
+
+### Build Optimizations
+
+- **Multi-stage build**: Reduces final image size by ~70%
+- **Layer caching**: Optimized layer order for better caching
+- **Dependency optimization**: Separate dependency and source layers
+
+### Runtime Optimizations
+
+- **Gzip compression**: Automatic compression for text assets
+- **Static asset caching**: Long-term caching for versioned assets
+- **HTTP/2 ready**: nginx configured for HTTP/2 support
+
+### Image Size Comparison
+
+| Image Type | Size | Notes |
+|------------|------|-------|
+| Development | ~800MB | Includes Node.js, build tools |
+| Production | ~25MB | nginx + static files only |
+| Multi-arch | ~50MB | Combined AMD64 + ARM64 |
+
+### Debug Mode
+
+For debugging, you can run the container interactively:
+
+```bash
+# Override entrypoint for debugging
+docker run -it --entrypoint /bin/sh xiansai/ui:latest
+
+# Run with debug nginx configuration
+docker run -d \
+  --name xiansai-ui-debug \
+  -p 3000:80 \
+  -e NGINX_DEBUG=1 \
+  xiansai/ui:latest
+```
+
+## 🔄 CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+name: Build and Push Docker Image
+
+on:
+  push:
+    tags: ['v*']
+    branches: ['main']
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    
+    - name: Build and push
+      run: |
+        export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+        ./docker-build-publish.sh
+```
+
+### GitLab CI Example
+
+```yaml
+docker-build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
+  script:
+    - ./docker-build-publish.sh
+  only:
+    - main
+    - tags
+```
+
+## ✅ Verified Working Example
+
+The following configuration has been tested and verified to work:
+
+### Successful Build Example
+
+```bash
+# Multi-platform build that works
+export DOCKERHUB_USERNAME=99xio
+export TAG=v1.0.0
+export PLATFORM=linux/amd64,linux/arm64
+./docker-build-publish.sh
+```
+
+### Published Image
+
+- **Registry**: Docker Hub
+- **Image**: `99xio/xiansai-ui:v1.0.0`
+- **Platforms**: `linux/amd64`, `linux/arm64`
+- **Status**: ✅ Working and tested
+- **Health Check**: ✅ `/health` endpoint responding
+
+### Test Commands
+
+```bash
+# Test the published image
+docker run -d --name test-ui -p 3000:80 99xio/xiansai-ui:v1.0.0
+
+# Verify health check
+curl http://localhost:3000/health
+# Expected: "healthy"
+
+# Verify React app
+curl -s http://localhost:3000/ | grep -o '<title>[^<]*'
+# Expected: "<title>Xians.ai"
+
+# Cleanup
+docker stop test-ui && docker rm test-ui
+```
+
+## 📚 Additional Resources
+
+- [Docker Best Practices](https://docs.docker.com/develop/dev-best-practices/)
+- [Multi-stage Builds](https://docs.docker.com/develop/dev-best-practices/#use-multi-stage-builds)
+- [Docker Security](https://docs.docker.com/engine/security/)
+- [nginx Configuration](https://nginx.org/en/docs/)
+
+## 📋 Quick Reference
+
+### Development Commands
+
+```bash
+# Local Development (Recommended)
+npm install && npm start
+
+# Docker with Runtime Configuration
+docker build -f Dockerfile.production -t xiansai-ui .
+docker run -p 3000:80 -e REACT_APP_API_URL=http://localhost:5000 xiansai-ui
+
+# With Environment File
+docker run -p 3000:80 --env-file .env.runtime xiansai-ui
+```
+
+### Production Commands  
+
+```bash
+# Pre-built Image with Runtime Config
+docker run -d -p 3000:80 \
+  -e REACT_APP_API_URL=https://api.xiansai.com \
+  -e REACT_APP_AUTH0_DOMAIN=your-domain.auth0.com \
+  99xio/xiansai-ui:latest
+
+# Build and Run Locally
+docker build -f Dockerfile.production -t xiansai-ui .
+docker run -p 3000:80 --env-file .env.production xiansai-ui
+```
+
+### Build and Publish
+
+```bash
+# Build Multi-platform (automatically pushes to Docker Hub)
+export DOCKERHUB_USERNAME=99xio
+export TAG=latest
+./docker-build-publish.sh
+# ✅ Your image is now on Docker Hub in one step!
+
+# Build with additional tags
+export DOCKERHUB_USERNAME=99xio
+export TAG=v1.0.1
+export ADDITIONAL_TAGS="latest,stable"
+./docker-build-publish.sh
+
+# Build for local use only
+docker build -f Dockerfile.production -t xiansai-ui:latest .
+```

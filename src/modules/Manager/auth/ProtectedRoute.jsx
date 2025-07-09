@@ -4,12 +4,16 @@ import { useSelectedOrg } from '../contexts/OrganizationContext';
 import { useAuth } from './AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isLoading, login, error } = useAuth();
+  const { isAuthenticated, isLoading, login, error, isProcessingCallback } = useAuth();
   const { showError } = useNotification();
   const { isOrgLoading, selectedOrg } = useSelectedOrg();
 
   useEffect(() => {
     const initiateAuth = async () => {
+      if (isProcessingCallback) {
+        return;
+      }
+      
       if (!isLoading && !isAuthenticated && !error) {
         try {
           if (!navigator.onLine) {
@@ -25,9 +29,9 @@ const ProtectedRoute = ({ children }) => {
     };
 
     initiateAuth();
-  }, [isAuthenticated, isLoading, login, showError, error]);
+  }, [isAuthenticated, isLoading, login, showError, error, isProcessingCallback]);
 
-  if (isLoading || isOrgLoading) {
+  if (isLoading || isProcessingCallback || isOrgLoading) {
     return <div>Loading...</div>;
   }
 

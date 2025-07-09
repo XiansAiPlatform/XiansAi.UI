@@ -11,19 +11,26 @@ export function OrganizationProvider({ children }) {
   const [selectedOrg, setSelectedOrg] = useState('');
   const [organizations, setOrganizations] = useState([]);
   const [isOrgLoading, setIsOrgLoading] = useState(true);
-  const { getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading, user } = useAuth(); // New hook, added isAuthLoading and user
+  const { getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading, user, isProcessingCallback } = useAuth();
   const { showError } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
   
   useEffect(() => {
     const initializeOrg = async () => {
-      const publicPaths = ['/', '/login', '/register', '/callback']; // Added /callback
+      const publicPaths = ['/', '/login', '/register', '/callback'];
       // Wait for auth loading to complete before checking isAuthenticated
       if (isAuthLoading) {
         setIsOrgLoading(true); // Keep org loading true while auth is loading
         return;
       }
+      
+      // Don't initialize org if we're processing a callback
+      if (isProcessingCallback) {
+        setIsOrgLoading(true);
+        return;
+      }
+      
       if (!isAuthenticated || publicPaths.includes(location.pathname)) {
         setIsOrgLoading(false);
         return;
@@ -41,11 +48,18 @@ export function OrganizationProvider({ children }) {
             return;
         }
 
-        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        //const decodedToken = JSON.parse(atob(token.split('.')[1]));
         const tokenService = createTokenService(); // Added
-        var orgs = tokenService.getOrganizations(decodedToken); // Changed
+        var orgs = tokenService.getOrganizations(token); // Changed
         // remove orgs without '.' or '-'
-        orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
+        // orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
+
+        console.log('orgs', orgs);
+        
+        // Add "default" if it doesn't exist
+        if ( !orgs.includes('default') && orgs.length === 0) {
+          orgs.push('default');
+        }
 
         if (orgs.length > 0) {
           setOrganizations(orgs);
@@ -78,7 +92,7 @@ export function OrganizationProvider({ children }) {
     };
 
     initializeOrg();
-  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user]); // Added isAuthLoading and user
+  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user, isProcessingCallback]); // Added isAuthLoading and user
 
   const updateSelectedOrg = (newOrg) => {
     setSelectedOrg(newOrg);
