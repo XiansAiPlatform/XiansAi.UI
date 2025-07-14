@@ -11,3 +11,5 @@ export { useRegistrationApi } from './registration-api';
 export { useKnowledgeApi } from './knowledge-api';
 export { usePermissionsApi } from './permissions-api'; 
 export { useRolesApi } from './roles-api.js';
+export { useUserTenantApi } from './user-tenant-api';
+export { useUserApi } from './user-api';

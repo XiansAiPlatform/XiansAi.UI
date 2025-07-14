@@ -2,7 +2,7 @@ import { createContext, use, useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext'; // New import
 import { useNotification } from './NotificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { createTokenService } from '../auth/createTokenService';
+import {useUserTenantApi} from '../services/user-tenant-api';
 
 const OrganizationContext = createContext();
 const STORAGE_KEY = 'selectedOrganization';
@@ -15,6 +15,7 @@ export function OrganizationProvider({ children }) {
   const { showError } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
+  const userTenantApi = useUserTenantApi();
   
   useEffect(() => {
     const initializeOrg = async () => {
@@ -48,9 +49,7 @@ export function OrganizationProvider({ children }) {
             return;
         }
 
-        //const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const tokenService = createTokenService(); // Added
-        var orgs = tokenService.getOrganizations(token); // Changed
+        var orgs = await userTenantApi.getCurrentUserTenant(token);
         // remove orgs without '.' or '-'
         // orgs = orgs.filter(org => org.includes('.') || org.includes('-'));
 
@@ -92,7 +91,7 @@ export function OrganizationProvider({ children }) {
     };
 
     initializeOrg();
-  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user, isProcessingCallback]); // Added isAuthLoading and user
+  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user, isProcessingCallback, userTenantApi]); // Added isAuthLoading and user
 
   const updateSelectedOrg = (newOrg) => {
     setSelectedOrg(newOrg);
