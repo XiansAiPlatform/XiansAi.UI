@@ -45,7 +45,7 @@ class EntraIdService {
       if (this.activeAccount) {
         this.authState.isAuthenticated = true;
         this.authState.user = {
-            id: this.activeAccount.idTokenClaims?.oid|| this.activeAccount.idTokenClaims?.sub,
+            id: this.activeAccount.idTokenClaims?.sub|| this.activeAccount.idTokenClaims?.oid,
             name: this.activeAccount.name,
             username: this.activeAccount.username, 
             email: this.activeAccount.username, 
@@ -85,7 +85,7 @@ class EntraIdService {
             // Update auth state immediately
             this.authState.isAuthenticated = true;
             this.authState.user = {
-                id: response.account.idTokenClaims?.oid || response.account.idTokenClaims?.sub,
+                id: response.account.idTokenClaims?.sub || response.account.idTokenClaims?.oid,
                 name: response.account.name,
                 username: response.account.username,
                 email: response.account.username,
@@ -200,7 +200,7 @@ class EntraIdService {
         this.activeAccount = account;
         this.authState.isAuthenticated = true;
         this.authState.user = {
-            id: account.idTokenClaims?.oid || account.idTokenClaims?.sub,
+            id: account.idTokenClaims?.sub || account.idTokenClaims?.oid,
             name: account.name,
             username: account.username,
             email: account.username,
@@ -224,7 +224,7 @@ class EntraIdService {
         this.activeAccount = account;
         this.authState.isAuthenticated = true;
         this.authState.user = {
-            id: account.idTokenClaims?.oid || account.idTokenClaims?.sub,
+            id: account.idTokenClaims?.sub || account.idTokenClaims?.oid,
             name: account.name,
             username: account.username,
             email: account.username,
