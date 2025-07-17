@@ -26,9 +26,9 @@ jobs:
           WEBSITE_NODE_DEFAULT_VERSION: "20"
           REACT_APP_AUTH_PROVIDER: ${{ secrets.QIB_REACT_APP_AUTH_PROVIDER }}
           REACT_APP_API_URL: ${{ secrets.QIB_REACT_APP_API_URL }}
-          REACT_APP_AUTH0_DOMAIN: ${{ secrets.QIB_REACT_APP_AUTH0_DOMAIN }}
-          REACT_APP_AUTH0_AUDIENCE: ${{ secrets.QIB_REACT_APP_AUTH0_AUDIENCE }}
-          REACT_APP_AUTH0_CLIENT_ID: ${{ secrets.QIB_REACT_APP_AUTH0_CLIENT_ID }}
+          REACT_APP_ENTRA_ID_CLIENT_ID: ${{ secrets.QIB_REACT_APP_ENTRA_ID_CLIENT_ID }}
+          REACT_APP_ENTRA_ID_AUTHORITY: ${{ secrets.QIB_REACT_APP_ENTRA_ID_AUTHORITY }}
+          REACT_APP_ENTRA_ID_SCOPES: ${{ secrets.QIB_REACT_APP_ENTRA_ID_SCOPES }}
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_LIVELY_CLIFF_02CCE6000 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
