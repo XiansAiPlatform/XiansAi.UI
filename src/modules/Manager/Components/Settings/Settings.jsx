@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
-import TenantSettings from './TenantSettings';
 import BrandingSettings from './BrandingSettings';
 import ApiKeySettings from './ApiKeySettings';
 import './Settings.css';
 import { useTenant } from '../../contexts/TenantContext'; 
+import ApproveUserRequests from "./ApproveUserRequests";
+import InviteUser from "./InviteUser";
+import TenantUserManagement from "./TenantUserManagement";
 
 const Settings = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -23,8 +25,13 @@ const Settings = () => {
     { label: 'API Keys', component: <ApiKeySettings /> },
   ];
   if (showTenantTab) {
-    tabs.splice(1, 0, { label: 'Tenant', component: <TenantSettings /> });
-    tabs.splice(2, 0, { label: 'Branding', component: <BrandingSettings /> });
+    tabs.splice(1, 0, { label: "Users", component: <TenantUserManagement /> });
+    tabs.splice(2, 0, {
+      label: "Approve Requests",
+      component: <ApproveUserRequests />,
+    });
+    tabs.splice(3, 0, { label: "User invitations", component: <InviteUser /> });
+    tabs.splice(4, 0, { label: "Branding", component: <BrandingSettings /> });
   }
 
   return (
