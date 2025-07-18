@@ -14,6 +14,7 @@ import {
   Chip,
   IconButton,
   Switch,
+  Grid,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -26,8 +27,10 @@ export default function UserForm({
 }) {
   const isEdit = Boolean(initialData && initialData.userId);
   const [form, setForm] = useState({
+    id: "",
     name: "",
     email: "",
+    userId: "",
     isSysAdmin: false,
     active: true,
   });
@@ -39,10 +42,12 @@ export default function UserForm({
 
   useEffect(() => {
     if (initialData) {
-    console.log("Initial data:", initialData);
+      console.log("Initial data:", initialData);
       setForm({
+        id: initialData.id || "",
         name: initialData.name || "",
         email: initialData.email || "",
+        userId: initialData.userId || "",
         isSysAdmin: !!initialData.isSysAdmin,
         active: initialData.isLockedOut === false,
       });
@@ -52,24 +57,37 @@ export default function UserForm({
     }
   }, [initialData]);
 
+  // Auto-add tenant role when both tenant and roles are selected
+  useEffect(() => {
+    if (newTenant && newRoles.length > 0) {
+      // Check if this tenant already exists
+      if (tenantRoles.some((tr) => tr.tenant === newTenant)) {
+        console.log("Tenant already exists, not adding duplicate:", newTenant);
+        return;
+      }
+      
+      const newTenantRole = { tenant: newTenant, roles: newRoles, isApproved: true };
+      console.log("Auto-adding tenant role:", newTenantRole);
+      
+      setTenantRoles((prev) => {
+        const updated = [...prev, newTenantRole];
+        console.log("Updated tenantRoles:", updated);
+        return updated;
+      });
+      
+      // Clear the form after adding
+      setNewTenant("");
+      setNewRoles([]);
+      console.log("Cleared new tenant/roles form");
+    }
+  }, [newTenant, newRoles, tenantRoles]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-  };
-
-  const handleAddTenantRole = () => {
-    if (!newTenant || newRoles.length === 0) return;
-    // Prevent duplicate tenant
-    if (tenantRoles.some((tr) => tr.tenant === newTenant)) return;
-    setTenantRoles((prev) => [
-      ...prev,
-      { tenant: newTenant, roles: newRoles, isApproved: true },
-    ]);
-    setNewTenant("");
-    setNewRoles([]);
   };
 
   const handleRemoveTenantRole = (tenant) => {
@@ -85,12 +103,16 @@ export default function UserForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    
+    console.log("Form submission - tenantRoles being submitted:", tenantRoles);
+    
     if (!form.name.trim() || !form.email.trim()) {
       setError("Name and Email are required.");
       return;
     }
     try {
-      await onSave({ ...form, userId: initialData?.userId, tenantRoles });
+      const formDataToSend = { ...form, tenantRoles };
+      await onSave(formDataToSend);
     } catch (e) {
       setError(e.message || "Failed to save user");
     }
@@ -106,25 +128,52 @@ export default function UserForm({
           {error}
         </Alert>
       )}
+      {isEdit && (
+        <TextField
+          label="ID"
+          value={initialData?.id || 'N/A'}
+          fullWidth
+          margin="normal"
+          disabled
+          helperText="This field is read-only"
+        />
+      )}
+      <Grid container spacing={2} mb={2}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Name"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            disabled={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            fullWidth
+            required
+            margin="normal"
+            disabled={loading}
+          />
+        </Grid>
+      </Grid>
       <TextField
-        label="Name"
-        name="name"
-        value={form.name}
+        label="User ID"
+        name="userId"
+        value={form.userId}
         onChange={handleChange}
         fullWidth
         required
         margin="normal"
         disabled={loading}
-      />
-      <TextField
-        label="Email"
-        name="email"
-        value={form.email}
-        onChange={handleChange}
-        fullWidth
-        required
-        margin="normal"
-        disabled={loading}
+        helperText={isEdit ? "Unique identifier for the user" : "Will be auto-generated if left empty"}
       />
       <FormControlLabel
         control={
@@ -225,16 +274,26 @@ export default function UserForm({
               onChange={(e) => setNewTenant(e.target.value)}
               disabled={loading}
             >
-              {tenantOptions
-                .filter(
+              {(() => {
+                const availableTenants = tenantOptions.filter(
                   (t) =>
                     t.value && !tenantRoles.some((tr) => tr.tenant === t.value)
-                )
-                .map((tenant) => (
+                );
+                
+                if (availableTenants.length === 0) {
+                  return (
+                    <MenuItem disabled>
+                      No tenants available
+                    </MenuItem>
+                  );
+                }
+                
+                return availableTenants.map((tenant) => (
                   <MenuItem key={tenant.value} value={tenant.value}>
                     {tenant.label}
                   </MenuItem>
-                ))}
+                ));
+              })()}
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 180 }}>
@@ -251,7 +310,7 @@ export default function UserForm({
                   ))}
                 </Box>
               )}
-              disabled={loading}
+              disabled={loading || !newTenant}
             >
               {allRoles.map((role) => (
                 <MenuItem key={role} value={role}>
@@ -260,15 +319,12 @@ export default function UserForm({
               ))}
             </Select>
           </FormControl>
-          <Button
-            onClick={handleAddTenantRole}
-            disabled={loading || !newTenant || newRoles.length === 0}
-            variant="outlined"
-            size="small"
-          >
-            Add
-          </Button>
         </Box>
+        {tenantOptions.filter(t => t.value && !tenantRoles.some(tr => tr.tenant === t.value)).length > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            Select a tenant and roles above - they will be added automatically to the list.
+          </Typography>
+        )}
       </Box>
       <Box mt={2} display="flex" gap={2}>
         <Button

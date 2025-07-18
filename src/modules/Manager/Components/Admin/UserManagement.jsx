@@ -3,11 +3,8 @@ import {
   Box,
   Typography,
   Button,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
+  Card,
+  CardContent,
   IconButton,
   Snackbar,
   Alert,
@@ -18,6 +15,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Stack,
 } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import EditIcon from "@mui/icons-material/Edit";
@@ -237,79 +235,103 @@ export default function UserManagement() {
         <LoadingSpinner />
       ) : (
         <>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>System Admin</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Tenant Roles</TableCell>
-                <TableCell>Created</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.userId}>
-                  <TableCell>{user.name}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={user.isSysAdmin ? "Yes" : "No"}
-                      color={user.isSysAdmin ? "primary" : "default"}
-                      size="small"
-                      onClick={() => {}}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {user.isLockedOut ? (
-                      <Chip
-                        label="Locked"
-                        color="error"
-                        size="small"
-                        icon={<LockIcon />}
-                        onClick={() => {}}
-                      />
-                    ) : (
-                      <Chip
-                        label="Active"
-                        color="success"
-                        size="small"
-                        icon={<LockOpenIcon />}
-                        onClick={() => {}}
-                      />
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Box display="flex" flexWrap="wrap">
-                      {getTenantRolesDisplay(user.tenantRoles)}
+          <Stack spacing={2}>
+            {users.map((user) => (
+                <Card 
+                  elevation={0} 
+                  sx={{ 
+                    width: '100%', 
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    '&:hover': {
+                      backgroundColor: 'action.hover'
+                    }
+                  }} 
+                  key={user.userId}
+                >
+                  <CardContent sx={{ px: 3, py: 2, '&:last-child': { pb: 2 } }}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center">
+                      {/* Left side - Main user info */}
+                      <Box sx={{ flex: 1 }}>
+                        <Box display="flex" alignItems="center" gap={2} mb={1}>
+                          <Typography variant="h6" component="div">
+                            {user.name}
+                          </Typography>
+                          <Box display="flex" gap={0.5}>
+                            <Chip
+                              label={user.isSysAdmin ? "System Admin" : "User"}
+                              color={user.isSysAdmin ? "primary" : "default"}
+                              size="small"
+                            />
+                            {user.isLockedOut ? (
+                              <Chip
+                                label="Locked"
+                                color="error"
+                                size="small"
+                                icon={<LockIcon />}
+                              />
+                            ) : (
+                              <Chip
+                                label="Active"
+                                color="success"
+                                size="small"
+                                icon={<LockOpenIcon />}
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                        
+                        <Box display="flex" alignItems="center" gap={3} mb={1}>
+                          <Typography variant="body2" color="text.secondary">
+                            {user.email}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            ID: {user.id || 'N/A'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            User ID: {user.userId}
+                          </Typography>
+                        </Box>
+
+                        <Box display="flex" alignItems="center" gap={3}>
+                          <Box display="flex" flexWrap="wrap" gap={0.5}>
+                            {getTenantRolesDisplay(user.tenantRoles)}
+                          </Box>
+                          <Typography variant="caption" color="text.secondary">
+                            Created: {formatDate(user.createdAt)}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Updated: {formatDate(user.updatedAt)}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Right side - Actions */}
+                      <Box display="flex" gap={1}>
+                        <Tooltip title="Edit User">
+                          <IconButton
+                            color="primary"
+                            onClick={() => handleEditUser(user)}
+                            size="small"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete User">
+                          <IconButton
+                            onClick={() => handleDelete(user.userId)}
+                            color="error"
+                            size="small"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </Box>
-                  </TableCell>
-                  <TableCell>{formatDate(user.createdAt)}</TableCell>
-                  <TableCell>
-                    <Tooltip title="Edit Tenant">
-                      <IconButton
-                        color="primary"
-                        sx={{ mr: 1 }}
-                        onClick={() => handleEditUser(user)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete User">
-                      <IconButton
-                        onClick={() => handleDelete(user.userId)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </CardContent>
+                </Card>
+            ))}
+          </Stack>
           <Box
             display="flex"
             alignItems="center"

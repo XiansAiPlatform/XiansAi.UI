@@ -50,7 +50,7 @@ const NAV_ITEMS = [
   {
     to: '/manager/admin',
     icon: <AdminPanelSettingsIcon />,
-    label: 'Admin Dashboard',
+    label: 'Admin',
     isSelected: (pathname) => pathname === '/manager/admin' || pathname.startsWith('/manager/admin/'),
   },
 ];

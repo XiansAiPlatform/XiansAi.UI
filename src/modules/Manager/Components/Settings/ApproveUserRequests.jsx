@@ -39,7 +39,7 @@ export default function ApproveUserRequests() {
       console.error("Error fetching requests:", e);
     }
     setLoading(false);
-  }, [userTenantsApi]);
+  }, [userTenantsApi, tenant.tenantId, getAccessTokenSilently]);
 
   useEffect(() => {
     fetchRequests();

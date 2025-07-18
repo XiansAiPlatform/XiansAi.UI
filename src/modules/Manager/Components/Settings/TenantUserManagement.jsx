@@ -73,7 +73,7 @@ export default function TenantUserManagement() {
       console.error("Error fetching users:", e);
     }
     setLoading(false);
-  }, [userApi, userTenantApi, getAccessTokenSilently, page, pageSize, filters, tenant]);
+  }, [userTenantApi, getAccessTokenSilently, page, pageSize, filters, tenant]);
 
   useEffect(() => {
     fetchUsers();
@@ -118,7 +118,7 @@ export default function TenantUserManagement() {
   const getTenantRolesDisplay = (tenantRoles) => {
     if (!tenantRoles || tenantRoles.length === 0) return "No tenants";
     return tenantRoles
-      .filter((x) => x.tenant == tenant.tenantId)
+      .filter((x) => x.tenant === tenant.tenantId)
       .map((tr) => (
         <Chip
           key={tr.tenant}
