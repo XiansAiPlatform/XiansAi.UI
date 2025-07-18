@@ -39,7 +39,7 @@ export default function UserFormSettings({
         name: initialData.name || "",
         email: initialData.email || "",
         isSysAdmin: !!initialData.isSysAdmin,
-        active: initialData.isLockedOut == false,
+        active: initialData.isLockedOut === false,
       });
       // Find roles for the current tenant only
       const tenantRole = (initialData.tenantRoles || []).find(

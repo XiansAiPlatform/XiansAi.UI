@@ -145,7 +145,7 @@ export default function TenantManagement() {
         enabled: true,
       };
       const response = await tenantsApi.createTenant(newTenantData);
-      const newTenant = response.data || response;
+      const newTenant = response.tenant;
       const tenantToAdd = {
         ...newTenant,
         id: newTenant.id || newTenant.tenantId || createForm.tenantId.trim(),

@@ -74,7 +74,7 @@ export default function InviteUser() {
     if (!window.confirm("Delete this invitation?")) return;
     try {
       const token = await getAccessTokenSilently();
-      await userApi.deleteInvitation(token, inviteToken, tenant.name);
+      await userApi.deleteInvitation(token, inviteToken, tenant.tenantId);
       setSuccess("Invitation deleted successfully");
       await fetchInvitations();
     } catch (e) {

@@ -22,7 +22,6 @@ const Settings = () => {
   // Build tabs and panels dynamically so indices always match
   const tabs = [
     { label: 'App Server', component: <CACertificates /> },
-    { label: 'API Keys', component: <ApiKeySettings /> },
   ];
   if (showTenantTab) {
     tabs.splice(1, 0, { label: "Users", component: <TenantUserManagement /> });
@@ -32,6 +31,7 @@ const Settings = () => {
     });
     tabs.splice(3, 0, { label: "User invitations", component: <InviteUser /> });
     tabs.splice(4, 0, { label: "Branding", component: <BrandingSettings /> });
+    tabs.splice(5, 0, { label: "API Keys", component: <ApiKeySettings /> });
   }
 
   return (

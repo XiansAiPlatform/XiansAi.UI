@@ -44,7 +44,7 @@ export default function UserForm({
         name: initialData.name || "",
         email: initialData.email || "",
         isSysAdmin: !!initialData.isSysAdmin,
-        active: initialData.isLockedOut == false,
+        active: initialData.isLockedOut === false,
       });
       setTenantRoles(initialData.tenantRoles || []);
     } else {
