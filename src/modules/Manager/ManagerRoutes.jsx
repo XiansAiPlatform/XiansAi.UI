@@ -23,6 +23,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
 import { useNavigate } from 'react-router-dom';
+import AdminDashboardRoute from './Components/Admin/AdminDashboardRoute';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -90,6 +91,11 @@ function ManagerRoutes() {
                       <Route path="auditing" element={
                         <ProtectedRoute>
                           <AuditingPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="admin" element={
+                        <ProtectedRoute>
+                          <AdminDashboardRoute />
                         </ProtectedRoute>
                       } />
                     </Route>
