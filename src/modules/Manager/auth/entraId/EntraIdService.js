@@ -1,4 +1,4 @@
-import { PublicClientApplication } from '@azure/msal-browser';
+import { PublicClientApplication, InteractionRequiredAuthError } from '@azure/msal-browser';
 import { getConfig } from '../../../../config'; // Assuming config is two levels up
 
 class EntraIdService {
@@ -181,8 +181,31 @@ class EntraIdService {
       this.authState.accessToken = response.accessToken;
       return response.accessToken;
     } catch (error) {
-      console.error("Silent token acquisition failed:", error);
-      throw error;
+      console.warn("Silent token acquisition failed:", error);
+
+      // Check if an interactive flow is required
+      const isInteractionRequired =
+        error instanceof InteractionRequiredAuthError ||
+        error.errorCode === "authority_mismatch" ||
+        error.errorCode === "consent_required" ||
+        error.errorCode === "login_required";
+
+      if (isInteractionRequired) {
+        try {
+          console.warn(`Interactive login required (${error.errorCode || error.name}). Redirecting...`);
+          // acquireTokenRedirect will navigate away, so this promise will not resolve in this context.
+          await this.publicClientApplication.acquireTokenRedirect(tokenRequest);
+          // The code below this line will not execute after a successful redirect.
+        } catch (redirectError) {
+          // This catch block is for errors during the redirect initiation itself.
+          console.error("Interactive token acquisition failed during redirect initiation:", redirectError);
+          throw redirectError; // Re-throw the error for further handling
+        }
+      } else {
+        // For other non-recoverable errors, re-throw them.
+        console.error("Non-recoverable token acquisition error:", error);
+        throw error;
+      }
     }
   }
 
