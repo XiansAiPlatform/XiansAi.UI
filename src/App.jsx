@@ -7,6 +7,7 @@ import { getConfig } from './config';
 import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrapper';
 import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
 import KeycloakProviderWrapper from './modules/Manager/auth/keycloak/KeycloakProviderWrapper';
+import GlobalAccountConflictProvider from './modules/Manager/Components/Common/GlobalAccountConflictProvider';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import lazyLoad from './utils/lazyLoad';
@@ -35,11 +36,13 @@ function App() {
   return (
     <BrowserRouter>
       <AppAuthProvider>
-        <ErrorBoundary>
-          <Suspense fallback={<LoadingSpinner message="Loading application..." />}>
-            <AppRoutes />
-          </Suspense>
-        </ErrorBoundary>
+        <GlobalAccountConflictProvider>
+          <ErrorBoundary>
+            <Suspense fallback={<LoadingSpinner message="Loading application..." />}>
+              <AppRoutes />
+            </Suspense>
+          </ErrorBoundary>
+        </GlobalAccountConflictProvider>
         <ToastContainer />
       </AppAuthProvider>
     </BrowserRouter>
