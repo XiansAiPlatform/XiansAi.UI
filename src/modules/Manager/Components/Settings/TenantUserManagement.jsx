@@ -67,21 +67,35 @@ export default function TenantUserManagement() {
 
   const fetchUsers = useCallback(async () => {
     console.log("Fetching users for tenant:", tenant);
-    if (!tenant?.tenantId) return;
+    if (!tenant?.tenantId) {
+      console.log("No tenant ID available, skipping user fetch");
+      return;
+    }
+    
     setLoading(true);
     setError("");
     try {
+      console.log("Getting access token...");
       const token = await getAccessTokenSilently();
+      
+      console.log("Calling getTenantUsers API with:", {
+        page,
+        pageSize,
+        filters: { ...filters, tenant: tenant.tenantId },
+      });
+      
       const data = await userTenantApi.getTenantUsers(token, {
         page,
         pageSize,
         filters: { ...filters, tenant: tenant.tenantId },
       });
-      setUsers(data.users);
+      
+      console.log("Received user data:", data);
+      setUsers(data.users || []);
       setTotalUsers(data?.totalCount || 0);
     } catch (e) {
-      setError("Failed to fetch users");
       console.error("Error fetching users:", e);
+      setError("Failed to fetch users: " + (e.message || "Unknown error"));
     }
     setLoading(false);
   }, [
@@ -235,8 +249,18 @@ export default function TenantUserManagement() {
     setAddLoading(false);
   };
 
-  if (tenantLoading || !tenant?.tenantId) {
+  if (tenantLoading) {
     return <LoadingSpinner />;
+  }
+
+  if (!tenant?.tenantId) {
+    return (
+      <Box>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Tenant information is not available. Please ensure you have proper access to this tenant.
+        </Alert>
+      </Box>
+    );
   }
 
   return (

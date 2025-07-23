@@ -14,13 +14,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useUserApi } from "../../services/user-api";
 import { useTenant } from "../../contexts/TenantContext";
 import { useAuth } from "../../auth/AuthContext";
+import LoadingSpinner from "../../../../components/LoadingSpinner";
 
 export default function InviteUser() {
   const [email, setEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const { tenant } = useTenant();
+  const { tenant, isLoading: tenantLoading } = useTenant();
   const { getAccessTokenSilently } = useAuth();
   const userApi = useUserApi();
   const [invitations, setInvitations] = useState([]);
@@ -28,7 +29,7 @@ export default function InviteUser() {
   const [invError, setInvError] = useState("");
 
   const fetchInvitations = async () => {
-    if (!tenant?.name) return;
+    if (!tenant?.tenantId) return;
     setInvLoading(true);
     setInvError("");
     try {
@@ -44,14 +45,22 @@ export default function InviteUser() {
   };
 
   React.useEffect(() => {
-    fetchInvitations();
+    // Only fetch when tenant is loaded and has tenantId
+    if (!tenantLoading && tenant?.tenantId) {
+      fetchInvitations();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tenant?.tenantId]);
+  }, [tenant?.tenantId, tenantLoading]);
 
   const handleInvite = async (e) => {
     e.preventDefault();
     if (!email.trim()) {
       setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!tenant?.tenantId) {
+      setError("Tenant information not available");
       return;
     }
 
@@ -72,6 +81,12 @@ export default function InviteUser() {
 
   const handleDeleteInvitation = async (inviteToken) => {
     if (!window.confirm("Delete this invitation?")) return;
+    
+    if (!tenant?.tenantId) {
+      setError("Tenant information not available");
+      return;
+    }
+
     try {
       const token = await getAccessTokenSilently();
       await userApi.deleteInvitation(token, inviteToken, tenant.tenantId);
@@ -86,6 +101,32 @@ export default function InviteUser() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  // Show loading while tenant data is being loaded
+  if (tenantLoading) {
+    return (
+      <Box>
+        <Typography variant="h6" mb={3}>
+          Invite New User
+        </Typography>
+        <LoadingSpinner />
+      </Box>
+    );
+  }
+
+  // Show error if tenant data is not available
+  if (!tenant?.tenantId) {
+    return (
+      <Box>
+        <Typography variant="h6" mb={3}>
+          Invite New User
+        </Typography>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Tenant information is not available. Please ensure you have proper access to this tenant.
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>

@@ -28,9 +28,9 @@ const AppServerSettings = () => {
       const response = await api.generateApiKey();
       console.log(response);
       setApiKey(response.certificate);
-      showSuccess('API Key generated successfully');
+      showSuccess('Agent API Key generated successfully');
     } catch (error) {
-      await handleApiError(error, 'Failed to generate API key', showError);
+      await handleApiError(error, 'Failed to generate Agent API key', showError);
     } finally {
       setIsLoading(false);
     }
@@ -48,13 +48,13 @@ const AppServerSettings = () => {
   return (
     <Paper className="ca-certificates-paper">
       <Typography variant="h6" gutterBottom>
-        App Server Configurations
+        Agent Settings
       </Typography>
 
       <Box className="server-url-container">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <TextField
-            label="App Server URL"
+            label="Server URL"
             value={apiBaseUrl}
             fullWidth
             InputProps={{ 
@@ -77,7 +77,7 @@ const AppServerSettings = () => {
       <Box className="form-container">
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 2 }}>
           <TextField
-            label="API Key"
+            label="Agent API Key"
             value={apiKey}
             fullWidth
             multiline
@@ -85,10 +85,10 @@ const AppServerSettings = () => {
             InputProps={{ readOnly: true }}
             className="input-field"
           />
-          <Tooltip title="Copy API Key">
+          <Tooltip title="Copy Agent API Key">
             <span>
               <IconButton 
-                onClick={() => handleCopy(apiKey, 'API Key')}
+                onClick={() => handleCopy(apiKey, 'Agent API Key')}
                 size="small"
                 sx={{ mt: 1 }}
                 disabled={!apiKey}
@@ -106,7 +106,7 @@ const AppServerSettings = () => {
           size="small"
           sx={{ alignSelf: 'flex-start' }}
         >
-          {isLoading ? 'Generating...' : 'Generate New API Key'}
+          {isLoading ? 'Generating...' : 'Generate New Agent API Key'}
         </Button>
       </Box>
     </Paper>

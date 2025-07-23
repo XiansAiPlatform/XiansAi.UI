@@ -23,11 +23,16 @@ export default function ApproveUserRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const { tenant } = useTenant();
+  const { tenant, isLoading: tenantLoading } = useTenant();
   const userTenantsApi = useUserTenantApi();
   const { getAccessTokenSilently } = useAuth();
 
   const fetchRequests = useCallback(async () => {
+    // Don't fetch if tenant is not loaded yet
+    if (!tenant?.tenantId) {
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
@@ -39,13 +44,21 @@ export default function ApproveUserRequests() {
       console.error("Error fetching requests:", e);
     }
     setLoading(false);
-  }, [userTenantsApi, tenant.tenantId, getAccessTokenSilently]);
+  }, [userTenantsApi, tenant?.tenantId, getAccessTokenSilently]);
 
   useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+    // Only fetch when tenant is loaded and has tenantId
+    if (!tenantLoading && tenant?.tenantId) {
+      fetchRequests();
+    }
+  }, [fetchRequests, tenantLoading, tenant?.tenantId]);
 
   const handleApprove = async (userId) => {
+    if (!tenant?.tenantId) {
+      setError("Tenant information not available");
+      return;
+    }
+
     try {
       const token = await getAccessTokenSilently();
       await userTenantsApi.approveUserTenantRequest(userId, tenant.tenantId, token);
@@ -58,6 +71,11 @@ export default function ApproveUserRequests() {
   };
 
   const handleDeny = async (userId) => {
+    if (!tenant?.tenantId) {
+      setError("Tenant information not available");
+      return;
+    }
+
     try {
       const token = await getAccessTokenSilently();
       await userTenantsApi.denyUserTenantRequest(userId, tenant.tenantId, token);
@@ -68,6 +86,32 @@ export default function ApproveUserRequests() {
       console.error("Error denying request:", e);
     }
   };
+
+  // Show loading while tenant data is being loaded
+  if (tenantLoading) {
+    return (
+      <Box>
+        <Typography variant="h6" mb={2}>
+          Approve User Requests
+        </Typography>
+        <LoadingSpinner />
+      </Box>
+    );
+  }
+
+  // Show error if tenant data is not available
+  if (!tenant?.tenantId) {
+    return (
+      <Box>
+        <Typography variant="h6" mb={2}>
+          Approve User Requests
+        </Typography>
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Tenant information is not available. Please ensure you have proper access to this tenant.
+        </Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>

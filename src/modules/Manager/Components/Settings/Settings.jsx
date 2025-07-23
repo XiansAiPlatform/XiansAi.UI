@@ -26,7 +26,7 @@ const Settings = () => {
 
   // Build main tabs
   const tabs = [
-    { label: 'App Server', component: <CACertificates /> },
+    { label: 'Agent Settings', component: <CACertificates /> },
   ];
   
   if (showTenantTab) {
