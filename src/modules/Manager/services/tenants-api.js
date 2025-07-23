@@ -24,15 +24,10 @@ export const useTenantsApi = () => {
         }
       },
 
-      getTenant: async (tenantId) => {
-        if (!tenantId) {
-          console.warn("No tenant ID provided to getTenant");
-          return null;
-        }
-
+      getTenant: async () => {
         try {
           return await apiClient.get(
-            `/api/client/tenants/by-tenant-id/${tenantId}`
+            `/api/client/tenants/currentTenantInfo`
           );
         } catch (error) {
           console.error(`Error fetching tenant:`, error);

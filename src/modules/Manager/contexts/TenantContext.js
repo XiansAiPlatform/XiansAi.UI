@@ -28,7 +28,7 @@ export const TenantProvider = ({ children }) => {
         return null;
       }
 
-      const data = await tenantApi.getTenant(tenantId);
+      const data = await tenantApi.getTenant();
       
       if (data) {
         return data;
