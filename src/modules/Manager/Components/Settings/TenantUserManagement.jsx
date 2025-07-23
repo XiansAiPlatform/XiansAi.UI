@@ -18,12 +18,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Divider,
 } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useUserApi } from "../../services/user-api";
 import { useUserTenantApi } from "../../services/user-tenant-api";
 import LoadingSpinner from "../../../../components/LoadingSpinner";
@@ -50,6 +52,8 @@ export default function TenantUserManagement() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [addEmail, setAddEmail] = useState("");
+  const [addLoading, setAddLoading] = useState(false);
   const userApi = useUserApi();
   const userTenantApi = useUserTenantApi();
   const { openSlider, closeSlider } = useSlider();
@@ -73,7 +77,15 @@ export default function TenantUserManagement() {
       console.error("Error fetching users:", e);
     }
     setLoading(false);
-  }, [userTenantApi, getAccessTokenSilently, page, pageSize, filters, tenant]);
+  }, [
+    userApi,
+    userTenantApi,
+    getAccessTokenSilently,
+    page,
+    pageSize,
+    filters,
+    tenant,
+  ]);
 
   useEffect(() => {
     fetchUsers();
@@ -158,35 +170,102 @@ export default function TenantUserManagement() {
     );
   };
 
+  // Add user by email handler
+  const handleAddUserByEmail = async () => {
+    if (!addEmail) {
+      setError("Please enter an email address.");
+      return;
+    }
+    setAddLoading(true);
+    setError("");
+    try {
+      const token = await getAccessTokenSilently();
+      await userTenantApi.addUserToTenantByEmail(
+        token,
+        addEmail,
+        tenant.tenantId
+      );
+      setSuccess("User added to tenant successfully");
+      setAddEmail("");
+      fetchUsers();
+    } catch (e) {
+      console.log("Error adding user by email:", e);
+      if (e?.statusCode === 404) {
+        setError("User with this email does not exist.");
+        } else if (e?.statusCode === 409) {
+        setError("User already exists in this tenant.");
+      } else {
+        setError("Failed to add user to tenant.");
+      }
+      console.error("Error adding user by email:", e);
+    }
+    setAddLoading(false);
+  };
+
   if (tenantLoading || !tenant?.tenantId) {
     return <LoadingSpinner />;
   }
 
   return (
     <Box>
-      <Box display="flex" gap={2} mb={2} alignItems="center">
-        <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel>Type</InputLabel>
-          <Select
-            value={pendingFilters.type}
-            label="User Type"
-            onChange={handleFilterChange("type")}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
+        {/* Left: Filters */}
+        <Box display="flex" gap={2} alignItems="center">
+          <FormControl size="small" sx={{ minWidth: 120 }}>
+            <InputLabel>Type</InputLabel>
+            <Select
+              value={pendingFilters.type}
+              label="User Type"
+              onChange={handleFilterChange("type")}
+            >
+              <MenuItem value="ALL">All</MenuItem>
+              <MenuItem value="ADMIN">Admin</MenuItem>
+              <MenuItem value="NON_ADMIN">Non-Admin</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField
+            size="small"
+            label="Name or Email"
+            value={pendingFilters.search}
+            onChange={handleFilterChange("search")}
+          />
+          <Button
+            variant="outlined"
+            onClick={handleApplyFilters}
+            sx={{ ml: 2 }}
           >
-            <MenuItem value="ALL">All</MenuItem>
-            <MenuItem value="ADMIN">Admin</MenuItem>
-            <MenuItem value="NON_ADMIN">Non-Admin</MenuItem>
-          </Select>
-        </FormControl>
-        <TextField
-          size="small"
-          label="Name or Email"
-          value={pendingFilters.search}
-          onChange={handleFilterChange("search")}
-        />
-        <Button variant="outlined" onClick={handleApplyFilters} sx={{ ml: 2 }}>
-          Apply Filters
-        </Button>
+            Apply Filters
+          </Button>
+        </Box>
+
+        {/* Right: Add User by Email */}
+        <Box display="flex" gap={2} alignItems="center">
+          <TextField
+            size="small"
+            label="Add User by Email"
+            value={addEmail}
+            onChange={(e) => setAddEmail(e.target.value)}
+            disabled={addLoading}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<PersonAddIcon />}
+            onClick={handleAddUserByEmail}
+            disabled={addLoading}
+          >
+            {addLoading ? "Adding..." : "Add User"}
+          </Button>
+        </Box>
       </Box>
+
+      {/* Divider for separation */}
+      <Divider sx={{ my: 2 }} />
 
       <Box
         display="flex"
