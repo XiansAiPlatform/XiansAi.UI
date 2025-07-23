@@ -168,7 +168,34 @@ export const useUserTenantApi = () => {
           console.log('Failed to delete user tenant:', error);
           throw error;
         }
-      }
+      },
+      addUserToTenantByEmail: async (token, email, tenantId) => {
+        try {
+        const { apiBaseUrl } = getConfig();
+        const response = await fetch(
+          `${apiBaseUrl}/api/user-tenants/AddUserToCurrentTenant`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "X-Tenant-Id": tenantId,
+            },
+            body: JSON.stringify({ email }),
+          }
+        );
+        const json = await response.json();
+        console.log("Add user to tenant response:", json);
+        if (!json.isSuccess) {
+          throw json;
+        }
+
+        return json;
+        } catch (error) {
+          console.log("Failed to delete user tenant:", error);
+          throw error;
+        }
+      },
     };
   }, []);
 };
