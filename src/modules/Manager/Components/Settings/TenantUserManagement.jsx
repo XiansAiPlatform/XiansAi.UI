@@ -19,6 +19,11 @@ import {
   Select,
   MenuItem,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
 } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import EditIcon from "@mui/icons-material/Edit";
@@ -52,12 +57,14 @@ export default function TenantUserManagement() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const userApi = useUserApi();
   const userTenantApi = useUserTenantApi();
   const { openSlider, closeSlider } = useSlider();
   const [formLoading, setFormLoading] = useState(false);
+
   const fetchUsers = useCallback(async () => {
     console.log("Fetching users for tenant:", tenant);
     if (!tenant?.tenantId) return;
@@ -78,7 +85,6 @@ export default function TenantUserManagement() {
     }
     setLoading(false);
   }, [
-    userApi,
     userTenantApi,
     getAccessTokenSilently,
     page,
@@ -170,33 +176,60 @@ export default function TenantUserManagement() {
     );
   };
 
+  // Open add user dialog
+  const handleOpenAddUserDialog = () => {
+    setAddUserDialogOpen(true);
+    setAddEmail("");
+    setError("");
+  };
+
+  // Close add user dialog
+  const handleCloseAddUserDialog = () => {
+    setAddUserDialogOpen(false);
+    setAddEmail("");
+    setError("");
+  };
+
   // Add user by email handler
   const handleAddUserByEmail = async () => {
-    if (!addEmail) {
-      setError("Please enter an email address.");
+    if (!addEmail.trim()) {
+      setError("Please enter a valid email address.");
       return;
     }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(addEmail.trim())) {
+      setError("Please enter a valid email format.");
+      return;
+    }
+
     setAddLoading(true);
     setError("");
     try {
       const token = await getAccessTokenSilently();
       await userTenantApi.addUserToTenantByEmail(
         token,
-        addEmail,
+        addEmail.trim(),
         tenant.tenantId
       );
-      setSuccess("User added to tenant successfully");
+      setSuccess("✅ User successfully added to tenant!");
       setAddEmail("");
+      setAddUserDialogOpen(false);
       fetchUsers();
     } catch (e) {
       console.log("Error adding user by email:", e);
+      let errorMessage = "❌ Failed to add user to tenant.";
+      
       if (e?.statusCode === 404) {
-        setError("User with this email does not exist.");
-        } else if (e?.statusCode === 409) {
-        setError("User already exists in this tenant.");
-      } else {
-        setError("Failed to add user to tenant.");
+        errorMessage = "❌ User with this email address does not exist in the system. Please make sure the user has registered first.";
+      } else if (e?.statusCode === 409) {
+        errorMessage = "⚠️ User is already a member of this tenant.";
+      } else if (e?.errorMessage) {
+        errorMessage = `❌ ${e.errorMessage}`;
       }
+      
+      setError(errorMessage);
       console.error("Error adding user by email:", e);
     }
     setAddLoading(false);
@@ -243,25 +276,15 @@ export default function TenantUserManagement() {
           </Button>
         </Box>
 
-        {/* Right: Add User by Email */}
-        <Box display="flex" gap={2} alignItems="center">
-          <TextField
-            size="small"
-            label="Add User by Email"
-            value={addEmail}
-            onChange={(e) => setAddEmail(e.target.value)}
-            disabled={addLoading}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<PersonAddIcon />}
-            onClick={handleAddUserByEmail}
-            disabled={addLoading}
-          >
-            {addLoading ? "Adding..." : "Add User"}
-          </Button>
-        </Box>
+        {/* Right: Add User Button */}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<PersonAddIcon />}
+          onClick={handleOpenAddUserDialog}
+        >
+          Add User by Email
+        </Button>
       </Box>
 
       {/* Divider for separation */}
@@ -376,19 +399,103 @@ export default function TenantUserManagement() {
         </>
       )}
 
+      {/* Add User Dialog */}
+      <Dialog 
+        open={addUserDialogOpen} 
+        onClose={handleCloseAddUserDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={1}>
+            <PersonAddIcon color="primary" />
+            Add User by Email
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Add an existing user to this tenant by entering their email address. 
+              The user must already be registered in the system.
+            </Typography>
+            <TextField
+              autoFocus
+              fullWidth
+              label="Email Address"
+              type="email"
+              value={addEmail}
+              onChange={(e) => setAddEmail(e.target.value)}
+              disabled={addLoading}
+              placeholder="user@example.com"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter' && !addLoading) {
+                  handleAddUserByEmail();
+                }
+              }}
+            />
+            {error && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {error}
+              </Alert>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleCloseAddUserDialog} 
+            disabled={addLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleAddUserByEmail}
+            disabled={addLoading || !addEmail.trim()}
+            startIcon={addLoading ? null : <PersonAddIcon />}
+          >
+            {addLoading ? "Adding..." : "Add User"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Enhanced Success/Error Snackbars */}
       <Snackbar
         open={!!error}
-        autoHideDuration={4000}
+        autoHideDuration={6000}
         onClose={() => setError("")}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity="error">{error}</Alert>
+        <Alert 
+          severity="error" 
+          variant="filled"
+          sx={{ 
+            fontSize: '1rem',
+            fontWeight: 'medium',
+            minWidth: '400px'
+          }}
+          onClose={() => setError("")}
+        >
+          {error}
+        </Alert>
       </Snackbar>
       <Snackbar
         open={!!success}
-        autoHideDuration={2000}
+        autoHideDuration={4000}
         onClose={() => setSuccess("")}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity="success">{success}</Alert>
+        <Alert 
+          severity="success" 
+          variant="filled"
+          sx={{ 
+            fontSize: '1rem',
+            fontWeight: 'medium',
+            minWidth: '400px'
+          }}
+          onClose={() => setSuccess("")}
+        >
+          {success}
+        </Alert>
       </Snackbar>
     </Box>
   );
