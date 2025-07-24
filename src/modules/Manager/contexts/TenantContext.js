@@ -1,5 +1,6 @@
 import { useCallback, createContext, use, useState, useEffect } from 'react';
 import { useTenantsApi } from "../services/tenants-api";
+import { useUserTenantApi } from "../services/user-tenant-api";
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useRolesApi } from "../services/roles-api.js";
@@ -16,32 +17,65 @@ export const TenantProvider = ({ children }) => {
   const [userRoles, setUserRoles] = useState([]);
 
   const tenantApi = useTenantsApi();
+  const userTenantApi = useUserTenantApi();
   const rolesApi = useRolesApi();
-  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user, getAccessTokenSilently } = useAuth();
   const location = useLocation();
 
-  const fetchTenant = useCallback(async (tenantId) => {
+  const fetchCurrentTenant = useCallback(async () => {
     try {
-      // Make sure tenantId is properly provided before making the API call
-      if (!tenantId) {
-        console.warn('No tenant ID provided to fetchTenant');
+      const token = await getAccessTokenSilently();
+      if (!token) {
+        console.warn('No access token available for tenant fetch');
         return null;
       }
 
-      const data = await tenantApi.getTenant(tenantId);
-      
-      if (data) {
-        return data;
-      } else {
-        console.warn(`No data returned for tenant ${tenantId}`);
-        return null;
+      // First try to get current tenant info from the API
+      try {
+        const tenantData = await tenantApi.getTenant();
+        if (tenantData) {
+          return tenantData;
+        }
+      } catch (error) {
+        console.warn('Failed to get tenant from currentTenantInfo API:', error);
       }
+
+      // Fallback: Get user's tenant information and create a basic tenant object
+      try {
+        const userTenants = await userTenantApi.getCurrentUserTenant(token);
+        if (userTenants && userTenants.length > 0) {
+          // Use the first available tenant or the selected one from localStorage
+          const selectedOrg = localStorage.getItem('selectedOrganization');
+          const tenantId = selectedOrg && userTenants.includes(selectedOrg) ? selectedOrg : userTenants[0];
+          
+          // Create a basic tenant object
+          return {
+            tenantId: tenantId,
+            id: tenantId,
+            name: tenantId === 'default' ? 'Default Tenant' : tenantId,
+            domain: tenantId
+          };
+        }
+      } catch (error) {
+        console.warn('Failed to get user tenants:', error);
+      }
+
+      // Final fallback: create a default tenant if nothing else works
+      const fallbackTenantId = localStorage.getItem('selectedOrganization') || 'default';
+      console.warn(`Creating fallback tenant with ID: ${fallbackTenantId}`);
+      return {
+        tenantId: fallbackTenantId,
+        id: fallbackTenantId,
+        name: fallbackTenantId === 'default' ? 'Default Tenant' : fallbackTenantId,
+        domain: fallbackTenantId
+      };
+      
     } catch (error) {
-      console.error(`Error fetching tenant with ${tenantId}:`, error);
+      console.error('Error fetching tenant:', error);
       setError(error);
       return null;
     }
-  }, [tenantApi]);
+  }, [tenantApi, userTenantApi, getAccessTokenSilently]);
 
   // Fetch user roles for the current tenant
   const fetchUserRoles = useCallback(async () => {
@@ -80,22 +114,17 @@ export const TenantProvider = ({ children }) => {
 
         setIsLoading(true);
         
-        // Get the tenant ID 
-        let tenantId = null;
-        
-        // Fallback to localStorage if not in user profile
-        tenantId = localStorage.getItem('selectedOrganization');
-              
-        const tenantData = await fetchTenant(tenantId);
+        const tenantData = await fetchCurrentTenant();
         
         if (tenantData) {
           setTenant(tenantData);
+          console.log('Loaded tenant data:', tenantData);
         } else {
-          console.warn('Tenant data fetch returned null or undefined');
+          console.warn('Failed to load tenant data');
         }
 
-        // Fetch roles after tenant and user are available
-        if (user && tenantId) {
+        // Fetch roles after tenant is available
+        if (user) {
           await fetchUserRoles();
         }
       } catch (err) {
@@ -112,7 +141,7 @@ export const TenantProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated, isAuthLoading, location.pathname, fetchTenant, fetchUserRoles, user]);
+  }, [isAuthenticated, isAuthLoading, location.pathname, fetchCurrentTenant, fetchUserRoles, user]);
 
   return (
     (<TenantContext
@@ -120,7 +149,7 @@ export const TenantProvider = ({ children }) => {
         tenant,
         isLoading,
         error,
-        fetchTenant,
+        fetchTenant: fetchCurrentTenant,
         userRoles,
       }}
     >

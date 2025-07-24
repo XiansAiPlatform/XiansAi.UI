@@ -7,6 +7,8 @@ import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import { useAuditContext } from '../../contexts/AuditContext';
+import { useTenant } from '../../contexts/TenantContext';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 const NAV_ITEMS = [
   {
     to: '/manager/definitions',
@@ -44,7 +46,13 @@ const NAV_ITEMS = [
     icon: <SettingsOutlinedIcon />,
     label: 'Settings',
     isSelected: (pathname) => pathname === '/manager/settings' || pathname.startsWith('/manager/settings/'),
-  }
+  },
+  {
+    to: '/manager/admin',
+    icon: <AdminPanelSettingsIcon />,
+    label: 'Admin',
+    isSelected: (pathname) => pathname === '/manager/admin' || pathname.startsWith('/manager/admin/'),
+  },
 ];
 
 // Reusable NavItem component
@@ -111,6 +119,15 @@ const LeftNav = ({ isOpen, onClose }) => {
   const { pathname } = useLocation();
   const isMobile = window.innerWidth <= 768;
   const { navErrorCount, resetNavErrorCount } = useAuditContext();
+  const { userRoles } = useTenant();
+
+  // Filter navigation items based on user permissions
+  const filteredNavItems = NAV_ITEMS.filter(item => {
+    if (item.to === '/manager/admin') {
+      return userRoles.includes('SysAdmin');
+    }
+    return true;
+  });
 
   const handleNavItemClick = (to) => {
     if (to === '/auditing' && navErrorCount > 0) {
@@ -148,7 +165,7 @@ const LeftNav = ({ isOpen, onClose }) => {
               NAVIGATION
             </Typography>
             <List>
-              {NAV_ITEMS.map((item) => (
+              {filteredNavItems.map((item) => (
                 <NavItem
                   key={item.to}
                   {...item}

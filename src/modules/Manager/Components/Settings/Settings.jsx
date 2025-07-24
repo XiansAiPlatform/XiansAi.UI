@@ -1,31 +1,75 @@
 import { useState } from 'react';
 import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
-import TenantSettings from './TenantSettings';
 import BrandingSettings from './BrandingSettings';
 import ApiKeySettings from './ApiKeySettings';
 import './Settings.css';
 import { useTenant } from '../../contexts/TenantContext'; 
+import ApproveUserRequests from "./ApproveUserRequests";
+import InviteUser from "./InviteUser";
+import TenantUserManagement from "./TenantUserManagement";
 
 const Settings = () => {
   const [currentTab, setCurrentTab] = useState(0);
+  const [currentUserSubTab, setCurrentUserSubTab] = useState(0);
 
   const handleTabChange = (event, newValue) => {
     setCurrentTab(newValue);
   };
 
+  const handleUserSubTabChange = (event, newValue) => {
+    setCurrentUserSubTab(newValue);
+  };
+
   const { userRoles } = useTenant();
   const showTenantTab = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
 
-  // Build tabs and panels dynamically so indices always match
+  // Build main tabs
   const tabs = [
-    { label: 'App Server', component: <CACertificates /> },
-    { label: 'API Keys', component: <ApiKeySettings /> },
+    { label: 'Agent Settings', component: <CACertificates /> },
   ];
+  
   if (showTenantTab) {
-    tabs.splice(1, 0, { label: 'Tenant', component: <TenantSettings /> });
-    tabs.splice(2, 0, { label: 'Branding', component: <BrandingSettings /> });
+    tabs.push({ label: "Users", component: null }); // Will be handled by sub-tabs
+    tabs.push({ label: "Branding", component: <BrandingSettings /> });
+    tabs.push({ label: "API Keys", component: <ApiKeySettings /> });
   }
+
+  // Sub-tabs for Users section
+  const userSubTabs = [
+    { label: "User Management", component: <TenantUserManagement /> },
+    { label: "Invite Users", component: <InviteUser /> },
+    { label: "Approve Requests", component: <ApproveUserRequests /> }
+
+  ];
+
+  // Check if current tab is the Users tab
+  const isUsersTab = showTenantTab && currentTab === 1;
+
+  const renderTabContent = () => {
+    if (isUsersTab) {
+      return (
+        <Box>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+            <Tabs 
+              value={currentUserSubTab} 
+              onChange={handleUserSubTabChange}
+              aria-label="user management sub-tabs"
+            >
+              {userSubTabs.map((tab, idx) => (
+                <Tab key={tab.label} label={tab.label} />
+              ))}
+            </Tabs>
+          </Box>
+          <Box role="tabpanel">
+            {userSubTabs[currentUserSubTab]?.component}
+          </Box>
+        </Box>
+      );
+    } else {
+      return tabs[currentTab]?.component;
+    }
+  };
 
   return (
     <Container maxWidth="lg">
@@ -61,7 +105,7 @@ const Settings = () => {
         </Box>
 
         <Box role="tabpanel">
-          {tabs[currentTab]?.component}
+          {renderTabContent()}
         </Box>
       </Box>
     </Container>

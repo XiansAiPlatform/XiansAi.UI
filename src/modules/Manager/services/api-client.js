@@ -82,9 +82,7 @@ export const useApiClient = () => {
         // First, ensure we have valid auth headers
         const headers = await createAuthHeaders();
         const url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
-        
-        console.log(`Making ${options.method || 'GET'} request to: ${url}`);
-        
+                
         const response = await fetch(url, {
           headers,
           ...options,
