@@ -44,13 +44,13 @@ const NAV_ITEMS = [
   {
     to: '/manager/settings',
     icon: <SettingsOutlinedIcon />,
-    label: 'Settings',
+    label: 'Tenant Settings',
     isSelected: (pathname) => pathname === '/manager/settings' || pathname.startsWith('/manager/settings/'),
   },
   {
     to: '/manager/admin',
     icon: <AdminPanelSettingsIcon />,
-    label: 'Admin',
+    label: 'System Admin',
     isSelected: (pathname) => pathname === '/manager/admin' || pathname.startsWith('/manager/admin/'),
   },
 ];

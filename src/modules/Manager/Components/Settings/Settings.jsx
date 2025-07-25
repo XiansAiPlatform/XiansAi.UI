@@ -84,7 +84,7 @@ const Settings = () => {
             mb: 4
           }}
         >
-          Settings
+          Tenant Settings
         </Typography>
         <Alert severity="info" className="info-alert">
           These settings are required for your app server to run.
