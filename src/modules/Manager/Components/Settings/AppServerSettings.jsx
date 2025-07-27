@@ -14,6 +14,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import './Settings.css';
 import { getConfig } from '../../../../config';
+import ConfirmationDialog from '../Common/ConfirmationDialog';
 
 const AppServerSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +22,7 @@ const AppServerSettings = () => {
   const { apiBaseUrl } = getConfig();
   const [apiKey, setApiKey] = useState('');
   const { showError, showSuccess } = useNotification();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   const generateApiKey = async () => {
     setIsLoading(true);
@@ -43,6 +45,19 @@ const AppServerSettings = () => {
     } catch (error) {
       showError('Failed to copy to clipboard');
     }
+  };
+
+  const handleGenerateClick = () => {
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmGenerate = async () => {
+    setConfirmDialogOpen(false);
+    await generateApiKey();
+  };
+
+  const handleCancelGenerate = () => {
+    setConfirmDialogOpen(false);
   };
 
   return (
@@ -100,7 +115,7 @@ const AppServerSettings = () => {
         </Box>
         <Button
           variant="contained"
-          onClick={generateApiKey}
+          onClick={handleGenerateClick}
           disabled={isLoading}
           className="submit-button"
           size="small"
@@ -108,6 +123,18 @@ const AppServerSettings = () => {
         >
           {isLoading ? 'Generating...' : 'Generate New Agent API Key'}
         </Button>
+        <ConfirmationDialog
+          open={confirmDialogOpen}
+          title="Generate New Agent API Key?"
+          message={
+            'Generating a new Agent API Key will invalidate all previously generated keys. Are you sure you want to continue?'
+          }
+          confirmLabel="Generate"
+          cancelLabel="Cancel"
+          severity="warning"
+          onConfirm={handleConfirmGenerate}
+          onCancel={handleCancelGenerate}
+        />
       </Box>
     </Paper>
   );
