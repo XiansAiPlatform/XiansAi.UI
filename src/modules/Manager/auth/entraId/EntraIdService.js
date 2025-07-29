@@ -41,6 +41,7 @@ class EntraIdService {
       'INTERACTION_REQUIRED', // Our enhanced error code
       'AADB2C90077', // User does not have an existing session and request prompt parameter has a value of 'None'
       'AADB2C90118', // User interaction required
+      'authority_mismatch', // Authority mismatch error - requires account selection
     ];
     
     return error && (

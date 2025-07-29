@@ -33,7 +33,8 @@ function Login() {
     error.type === 'INTERACTION_REQUIRED' || 
     error.code === 'INTERACTION_REQUIRED' ||
     error.message?.includes('AADB2C90077') ||
-    error.message?.includes('account conflict')
+    error.message?.includes('account conflict') ||
+    error.message?.includes('authority_mismatch')
   );
 
   // Check for URL parameters indicating specific scenarios
