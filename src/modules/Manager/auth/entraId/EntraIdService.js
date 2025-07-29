@@ -56,12 +56,27 @@ class EntraIdService {
   }
 
   // Helper method to handle multiple account scenarios
-  async _handleAccountConflict() {
+  async _handleAccountConflict(error = null) {
     console.warn("EntraIdService: Multiple accounts detected or account selection required");
+    
+    // Check if this is specifically an authority mismatch error
+    const isAuthorityMismatch = error && (
+      error.message?.includes('authority_mismatch') ||
+      error.errorCode?.includes('authority_mismatch') ||
+      error.errorDesc?.includes('authority_mismatch')
+    );
+    
+    if (isAuthorityMismatch) {
+      console.warn("EntraIdService: Authority mismatch detected, forcing logout and clear");
+      // For authority mismatch, we must clear all accounts and force logout
+      // Don't try to login again as that will just hit the same error
+      return this.forceLogoutAndClear(window.location.origin + '/login?error=authority_mismatch');
+    }
     
     // Clear any existing cached state to avoid conflicts
     await this._clearAuthState();
     
+    // For other interaction required errors, try account selection
     // Option 1: Force logout to clear all sessions
     // Uncomment this if you prefer to always logout on conflicts
     // return this.logout({ returnTo: window.location.origin + '/login?error=account_conflict' });
@@ -246,7 +261,7 @@ class EntraIdService {
       // Handle specific login errors
       if (this._isInteractionRequiredError(error)) {
         console.warn("EntraIdService: Interaction required during login, attempting account conflict resolution");
-        return this._handleAccountConflict();
+        return this._handleAccountConflict(error);
       }
       
       throw error;
