@@ -33,7 +33,8 @@ function Login() {
     error.type === 'INTERACTION_REQUIRED' || 
     error.code === 'INTERACTION_REQUIRED' ||
     error.message?.includes('AADB2C90077') ||
-    error.message?.includes('account conflict')
+    error.message?.includes('account conflict') ||
+    error.message?.includes('authority_mismatch')
   );
 
   // Check for URL parameters indicating specific scenarios
@@ -101,6 +102,19 @@ function Login() {
         {clearedParam && (
           <Alert severity="success" sx={{ mb: 3 }}>
             All cached accounts have been cleared. You can now sign in with a fresh session.
+          </Alert>
+        )}
+
+        {/* Show authority mismatch error message */}
+        {errorParam === 'authority_mismatch' && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Account Authority Mismatch
+            </Typography>
+            <Typography variant="body2">
+              The cached account belongs to a different organization or tenant than this application is configured for. 
+              All cached accounts have been cleared. Please sign in with an account that belongs to the correct organization.
+            </Typography>
           </Alert>
         )}
 

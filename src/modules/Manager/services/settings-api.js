@@ -6,9 +6,9 @@ export const useSettingsApi = () => {
 
   return useMemo(() => {
     return {
-      generateApiKey: async () => {
+      generateApiKey: async (revoke_previous = false) => {
         try {
-          return await apiClient.post('/api/client/settings/appserver/base64cert');
+          return await apiClient.post('/api/client/settings/appserver/base64cert?revoke_previous=' + revoke_previous);
         } catch (error) {
           console.error('Failed to generate API key:', error);
           throw error;

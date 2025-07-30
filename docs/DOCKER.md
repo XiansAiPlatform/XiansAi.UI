@@ -280,14 +280,14 @@ docker run -d \
 
 ```bash
 # For local development, build the image directly with Docker
-docker build -f Dockerfile.production -t xiansai-ui:latest .
+docker build -f Dockerfile.production -t xiansai-ui:local .
 
 # Run locally
 docker run -d \
   --name xiansai-ui \
   -p 3000:80 \
   --env-file .env.runtime \
-  xiansai-ui:latest
+  xiansai-ui:local
 ```
 
 ## 🛠️ Development

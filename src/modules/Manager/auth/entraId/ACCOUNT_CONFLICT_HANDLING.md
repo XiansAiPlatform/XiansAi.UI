@@ -241,6 +241,7 @@ const conflictHandler = useAccountConflictHandler({
 
 - `AADB2C90077`: User does not have an existing session and request prompt parameter has a value of 'None'
 - `AADB2C90118`: User interaction required
+- `authority_mismatch`: Authority provided in login request does not match the environment of the provided account
 - `interaction_required`: Generic interaction required
 - `consent_required`: User consent required
 - `login_required`: User login required
