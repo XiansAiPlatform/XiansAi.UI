@@ -109,14 +109,6 @@ const BrandingSettings = () => {
         }
     }
 
-    const handleColorChange = (colorType, color) => {
-        if (colorType === 'primary') {
-            setPrimaryColor(color);
-        } else if (colorType === 'secondary') {
-            setSecondaryColor(color);
-        }
-    };
-
     const handleNotificationClose = () => {
         setNotification({ ...notification, open: false });
     };
@@ -430,13 +422,6 @@ const BrandingSettings = () => {
                                             }}
                                         />
 
-                                        <Input
-                                            type="color"
-                                            value={primaryColor}
-                                            onChange={(e) => handleColorChange('primary', e.target.value)}
-                                            sx={{ width: '80px' }}
-                                        />
-
                                         <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
                                             {primaryColor.toUpperCase()}
                                         </Typography>
@@ -458,13 +443,6 @@ const BrandingSettings = () => {
                                                 border: '1px solid #ddd',
                                                 mr: 2
                                             }}
-                                        />
-
-                                        <Input
-                                            type="color"
-                                            value={secondaryColor}
-                                            onChange={(e) => handleColorChange('secondary', e.target.value)}
-                                            sx={{ width: '80px' }}
                                         />
 
                                         <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
