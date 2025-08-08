@@ -6,7 +6,12 @@ import {
     TextField,
     Autocomplete,
     Typography,
-    Alert} from '@mui/material';
+    Alert,
+    RadioGroup,
+    Radio,
+    FormControlLabel,
+    FormLabel
+} from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
@@ -29,7 +34,7 @@ const SendMessageForm = ({
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
     const [showMetadata, setShowMetadata] = useState(false);
-    const [metadataOnly, setMetadataOnly] = useState(false);
+    const [messageType, setMessageType] = useState('Chat');
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
     const [toSingletonInstance, setToSingletonInstance] = useState(true);
@@ -156,12 +161,12 @@ const SendMessageForm = ({
         localStorage.setItem('sendMessageForm_showMetadata', showMetadata.toString());
     }, [showMetadata]);
 
-    // Clear content when metadataOnly is checked
+    // When switching to Data type, show metadata section by default
     useEffect(() => {
-        if (metadataOnly) {
-            setContent('');
+        if (messageType === 'Data' && !showMetadata) {
+            setShowMetadata(true);
         }
-    }, [metadataOnly]);
+    }, [messageType, showMetadata]);
 
     // Clear workflow instance when toSingletonInstance is checked
     useEffect(() => {
@@ -220,8 +225,9 @@ const SendMessageForm = ({
     };
 
     const handleSend = async () => {
-        if (!participantId || (!content && !metadataOnly) || !workflowType || (!toSingletonInstance && !workflowId)) {
-            showError('Participant ID, workflow type' + (toSingletonInstance ? '' : ', workflow ID') + ', and content are required');
+        if (!participantId || !workflowType || (!toSingletonInstance && !workflowId)) {
+            const base = 'Participant ID, workflow type' + (toSingletonInstance ? '' : ', workflow ID');
+            showError(base + ' are required');
             return;
         }
         
@@ -244,36 +250,31 @@ const SendMessageForm = ({
             const workflowIdToSend = toSingletonInstance ? null : workflowId;
             
             // Check if we have the unified sendMessage function and this is an existing thread
-            if (sendMessage && threadId) {
-                // Use the unified sendMessage function for existing threads
+            if (sendMessage && threadId && messageType === 'Chat') {
+                // Use the unified sendMessage function for existing threads (Chat only)
                 const messageData = {
-                    content: metadataOnly ? null : content,
+                    content: content,
                     metadata: parsedMetadata,
                     isNewThread: false
                 };
-                
                 const result = await sendMessage(messageData);
-                
                 if (!result.success) {
                     throw new Error(result.error || 'Failed to send message');
                 }
-                
                 response = result.response;
             } else {
-                // Use the original API call approach for new threads or when sendMessage is not available
-                if (metadataOnly) {
-                    // Use sendData for metadata-only messages
+                // Use direct API calls (for new threads, when unified sender isn't available, or for Data type)
+                if (messageType === 'Data') {
                     response = await messagingApi.sendData(
                         threadId,
                         agentName,
                         workflowType,
                         workflowIdToSend,
                         participantId,
-                        null, // no content for metadata-only
+                        content,
                         parsedMetadata
                     );
                 } else {
-                    // Use sendMessage for regular messages
                     response = await messagingApi.sendMessage(
                         threadId,
                         agentName,
@@ -334,7 +335,13 @@ const SendMessageForm = ({
     };
 
     // Determine if the send button should be disabled
-    const isSendDisabled = loading || !participantId || (!content && !metadataOnly) || !workflowType || (!toSingletonInstance && !workflowId) || (showMetadata && metadata && !isMetadataValid);
+    const isSendDisabled = (
+        loading ||
+        !participantId ||
+        !workflowType ||
+        (!toSingletonInstance && !workflowId) ||
+        (showMetadata && metadata && !isMetadataValid)
+    );
 
     return (
         <Box sx={{ p: 3 }} onClick={handleFormClick}>
@@ -553,42 +560,23 @@ const SendMessageForm = ({
                 disabled={loading}
                 onClick={(e) => e.stopPropagation()}
             />
-            <TextField
-                label="Content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                fullWidth
-                margin="normal"
-                multiline
-                rows={4}
-                required={!metadataOnly}
-                helperText={metadataOnly ? "Content disabled (Metadata Only mode)" : "Message content to be sent"}
-                disabled={loading || metadataOnly}
-                inputRef={contentInputRef}
-                onKeyDown={handleKeyDown}
-                onClick={(e) => e.stopPropagation()}
-            />
-            <Box sx={{ mt: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            
+            <Box sx={{ mt: 1, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <input
-                        type="checkbox"
-                        checked={metadataOnly}
+                    <FormLabel id="message-type-label" sx={{ mr: 2 }}>Message Type</FormLabel>
+                    <RadioGroup
+                        row
+                        aria-labelledby="message-type-label"
+                        name="message-type"
+                        value={messageType}
                         onChange={(e) => {
                             e.stopPropagation();
-                            setMetadataOnly(e.target.checked);
-                            if (e.target.checked && !showMetadata) {
-                                setShowMetadata(true);
-                            }
+                            setMessageType(e.target.value);
                         }}
-                        style={{ 
-                            marginRight: '8px',
-                            transform: 'scale(1.1)',
-                            cursor: 'pointer'
-                        }}
-                    />
-                    <Typography variant="body2" sx={{ ml: 0.5, fontSize: '0.875rem' }}>
-                        Metadata Only
-                    </Typography>
+                    >
+                        <FormControlLabel value="Chat" control={<Radio />} label="Chat" />
+                        <FormControlLabel value="Data" control={<Radio />} label="Data" />
+                    </RadioGroup>
                 </Box>
                 <Button 
                     onClick={(e) => {
@@ -599,13 +587,28 @@ const SendMessageForm = ({
                     size="small"
                     sx={{ textTransform: 'none' }}
                 >
-                    {showMetadata ? 'Hide Metadata' : 'Add Metadata'}
+                    {showMetadata ? 'Hide Data' : 'Add Data'}
                 </Button>
             </Box>
+            
+            <TextField
+                label="Text"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                fullWidth
+                margin="normal"
+                multiline
+                rows={2}
+                helperText="Message text to be sent"
+                disabled={loading}
+                inputRef={contentInputRef}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+            />
             {showMetadata && (
                 <Box sx={{ width: '100%' }}>
                     <TextField
-                        label="Metadata (JSON)"
+                        label="Data (JSON)"
                         value={metadata}
                         onChange={handleMetadataChange}
                         fullWidth
