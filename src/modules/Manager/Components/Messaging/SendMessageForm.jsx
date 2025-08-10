@@ -18,6 +18,70 @@ import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
 
+/**
+ * Validates and parses JSON metadata string
+ * @param {string} metadataString - JSON string to validate
+ * @returns {Object} Result with parsed data or error
+ */
+const validateMetadata = (metadataString) => {
+    if (!metadataString.trim()) {
+        return { isValid: true, data: null, error: '' };
+    }
+    
+    try {
+        const parsed = JSON.parse(metadataString);
+        return { isValid: true, data: parsed, error: '' };
+    } catch (error) {
+        return { isValid: false, data: null, error: 'Invalid JSON format' };
+    }
+};
+
+/**
+ * Validates required fields for sending a message
+ * @param {Object} formData - Form data to validate
+ * @returns {Object} Validation result
+ */
+const validateRequiredFields = ({ participantId, workflowType, workflowId, toSingletonInstance }) => {
+    const missing = [];
+    
+    if (!participantId) missing.push('Participant ID');
+    if (!workflowType) missing.push('Workflow Type');
+    if (!toSingletonInstance && !workflowId) missing.push('Workflow ID');
+    
+    return {
+        isValid: missing.length === 0,
+        error: missing.length > 0 ? `${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} required` : ''
+    };
+};
+
+/**
+ * Prepares message data for sending
+ * @param {Object} formData - Form data
+ * @returns {Object} Prepared message data
+ */
+const prepareMessageData = ({ 
+    agentName, 
+    workflowType, 
+    workflowId, 
+    participantId, 
+    content, 
+    metadata, 
+    messageType, 
+    threadId, 
+    toSingletonInstance 
+}) => {
+    return {
+        agent: agentName,
+        workflowType,
+        workflowId: toSingletonInstance ? null : workflowId,
+        participantId,
+        content,
+        metadata,
+        type: messageType.toLowerCase(),
+        threadId
+    };
+};
+
 const SendMessageForm = ({ 
     agentName, 
     threadId, 
@@ -135,20 +199,9 @@ const SendMessageForm = ({
 
     // Validate metadata when it changes
     useEffect(() => {
-        if (!metadata) {
-            setMetadataError('');
-            setIsMetadataValid(true);
-            return;
-        }
-        
-        try {
-            JSON.parse(metadata);
-            setMetadataError('');
-            setIsMetadataValid(true);
-        } catch (error) {
-            setMetadataError('Invalid JSON format');
-            setIsMetadataValid(false);
-        }
+        const validation = validateMetadata(metadata);
+        setMetadataError(validation.error);
+        setIsMetadataValid(validation.isValid);
     }, [metadata]);
 
     // Save metadata to localStorage when it changes
@@ -224,86 +277,64 @@ const SendMessageForm = ({
         });
     };
 
+    /**
+     * Handles sending a message with simplified logic
+     */
     const handleSend = async () => {
-        if (!participantId || !workflowType || (!toSingletonInstance && !workflowId)) {
-            const base = 'Participant ID, workflow type' + (toSingletonInstance ? '' : ', workflow ID');
-            showError(base + ' are required');
+        // Validate required fields
+        const fieldValidation = validateRequiredFields({ 
+            participantId, 
+            workflowType, 
+            workflowId, 
+            toSingletonInstance 
+        });
+        
+        if (!fieldValidation.isValid) {
+            showError(fieldValidation.error);
+            return;
+        }
+        
+        // Validate metadata if provided
+        const metadataValidation = validateMetadata(metadata);
+        if (!metadataValidation.isValid) {
+            showError(metadataValidation.error);
             return;
         }
         
         setLoading(true);
         try {
-            let parsedMetadata = null;
-            if (metadata) {
-                try {
-                    parsedMetadata = JSON.parse(metadata);
-                } catch (error) {
-                    showError('Invalid JSON format for metadata');
-                    setLoading(false);
-                    return;
-                }
-            }
-            
             let response;
             
-            // Get the workflow ID to send (null if singleton instance)
-            const workflowIdToSend = toSingletonInstance ? null : workflowId;
+            // Always use the simplified API to ensure current form state is used
+            // The sendMessage function from ChatConversation uses cached thread data
+            // which doesn't reflect manual changes to workflow type in the form
+            const messageData = prepareMessageData({
+                agentName,
+                workflowType,
+                workflowId,
+                participantId,
+                content,
+                metadata: metadataValidation.data,
+                messageType,
+                threadId,
+                toSingletonInstance
+            });
             
-            // Check if we have the unified sendMessage function and this is an existing thread
-            if (sendMessage && threadId && messageType === 'Chat') {
-                // Use the unified sendMessage function for existing threads (Chat only)
-                const messageData = {
-                    content: content,
-                    metadata: parsedMetadata,
-                    isNewThread: false
-                };
-                const result = await sendMessage(messageData);
-                if (!result.success) {
-                    throw new Error(result.error || 'Failed to send message');
-                }
-                response = result.response;
-            } else {
-                // Use direct API calls (for new threads, when unified sender isn't available, or for Data type)
-                if (messageType === 'Data') {
-                    response = await messagingApi.sendData(
-                        threadId,
-                        agentName,
-                        workflowType,
-                        workflowIdToSend,
-                        participantId,
-                        content,
-                        parsedMetadata
-                    );
-                } else {
-                    response = await messagingApi.sendMessage(
-                        threadId,
-                        agentName,
-                        workflowType,
-                        workflowIdToSend,
-                        participantId,
-                        content,
-                        parsedMetadata
-                    );
-                }
-            }
+            response = await messagingApi.sendMessage(messageData);
             
             showSuccess('Message sent successfully!');
+            setContent(''); // Clear only the content, keep metadata for next message
             
-            // Clear only the content, keep metadata for next message
-            setContent('');
-            
-            // Call onMessageSent callback if provided, passing the thread info
+            // Notify parent component about the sent message
             if (onMessageSent) {
-                // Create a thread object with the necessary information
                 const newThread = threadId ? null : {
                     id: response,
-                    participantId: participantId,
-                    // Include other properties as needed
+                    participantId,
                 };
                 onMessageSent(newThread);
             }
             
-            // Close the form after sending a message (metadata will be persisted)
+            // Close the form
             if (onClose) {
                 onClose();
             }

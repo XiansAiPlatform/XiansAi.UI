@@ -210,15 +210,16 @@ const ChatConversation = (
                     throw new Error('Thread is missing required configuration');
                 }
                 
-                response = await messagingApi.sendMessage(
-                    selectedThreadId,
-                    agentName,
-                    selectedThread.workflowType,
-                    selectedThread.workflowId,
-                    selectedThread.participantId,
+                response = await messagingApi.sendMessage({
+                    threadId: selectedThreadId,
+                    agent: agentName,
+                    workflowType: selectedThread.workflowType,
+                    workflowId: selectedThread.workflowId,
+                    participantId: selectedThread.participantId,
                     content,
-                    metadata
-                );
+                    metadata,
+                    type: 'chat'
+                });
             }
             
             // Start polling for new messages

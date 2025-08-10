@@ -34,10 +34,31 @@ export const useMessagingApi = () => {
         }
       },
 
-      sendData: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
+      /**
+       * Sends a message to an agent workflow.
+       * @param {Object} options - Message options
+       * @param {string} options.agent - Agent name
+       * @param {string} options.workflowType - Type of workflow  
+       * @param {string|null} options.workflowId - Specific workflow instance ID (null for singleton)
+       * @param {string} options.participantId - ID of the message sender
+       * @param {string} options.content - Message text content
+       * @param {Object|null} options.metadata - Additional message data
+       * @param {'chat'|'data'} options.type - Message type (defaults to 'chat')
+       * @param {string|null} options.threadId - Existing thread ID (null for new thread)
+       * @returns {Promise<string>} Thread ID
+       */
+      sendMessage: async ({ 
+        agent, 
+        workflowType, 
+        workflowId, 
+        participantId, 
+        content, 
+        metadata = null, 
+        type = 'chat',
+        threadId = null 
+      }) => {
         try {
           const payload = {
-            threadId,
             agent,
             workflowType,
             workflowId,
@@ -46,35 +67,17 @@ export const useMessagingApi = () => {
             data: metadata
           };
           
-          if (!threadId) {
-            delete payload.threadId;
+          // Only include threadId if it exists
+          if (threadId) {
+            payload.threadId = threadId;
           }
           
-          const response = await apiClient.post('/api/client/messaging/inbound/data', payload);
-          return response.value;
-        } catch (error) {
-          console.error('Error sending message:', error);
-          throw error;
-        }
-      },
-
-      sendMessage: async (threadId, agent, workflowType, workflowId, participantId, content, metadata = null) => {
-        try {
-          const payload = {
-            threadId,
-            agent,
-            workflowType,
-            workflowId,
-            participantId,
-            text: content,
-            data: metadata
-          };
+          // Choose endpoint based on message type
+          const endpoint = type === 'data' 
+            ? '/api/client/messaging/inbound/data'
+            : '/api/client/messaging/inbound/chat';
           
-          if (!threadId) {
-            delete payload.threadId;
-          }
-          
-          const response = await apiClient.post('/api/client/messaging/inbound/chat', payload);
+          const response = await apiClient.post(endpoint, payload);
           return response.value;
         } catch (error) {
           console.error('Error sending message:', error);

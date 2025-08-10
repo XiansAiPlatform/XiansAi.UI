@@ -202,7 +202,7 @@ const WorkflowOverview = ({ workflowId, runId, onActionComplete, isMobile }) => 
               fontSize: isMobile ? '1.25rem' : '1.5rem'
             }}
           >
-            {getDisplayValue(workflow?.workflowType)?.replace(/([A-Z])/g, ' $1').trim()}
+            {getDisplayValue(workflow?.workflowType).trim()}
           </Typography>
 
           <Button
