@@ -16,13 +16,16 @@ import {
 import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PersonIcon from '@mui/icons-material/Person';
+import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { useLoading } from '../../contexts/LoadingContext';
+import { useNotification } from '../../contexts/NotificationContext';
 import AgentSelector from './AgentSelector';
 import PaginationControls from './PaginationControls';
 import WorkflowRunCard from './WorkflowRunCard';
 import './WorkflowList.css';
 import { Link, useLocation } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ConfirmationDialog from '../Common/ConfirmationDialog';
 
 const WorkflowList = () => {  
   // New pagination state
@@ -40,6 +43,12 @@ const WorkflowList = () => {
 
   const { setLoading, isLoading } = useLoading();
   const api = useWorkflowApi();
+  const { showError, showSuccess } = useNotification();
+
+  // Bulk terminate state
+  const [confirmTerminateOpen, setConfirmTerminateOpen] = useState(false);
+  const [isTerminatingAll, setIsTerminatingAll] = useState(false);
+  const [terminateProgress, setTerminateProgress] = useState({ total: 0, completed: 0 });
 
   // New paginated workflow loading
   const loadPaginatedWorkflows = async (pageToken = null, reset = false) => {
@@ -137,6 +146,78 @@ const WorkflowList = () => {
     setCurrentPage(1);
   };
 
+  const openConfirmTerminate = () => setConfirmTerminateOpen(true);
+  const closeConfirmTerminate = () => setConfirmTerminateOpen(false);
+
+  const handleTerminateAll = async () => {
+    try {
+      setConfirmTerminateOpen(false);
+      setIsTerminatingAll(true);
+
+      // Gather all running workflow IDs across pages (respecting selected agent)
+      let page = 1;
+      const pageSizeForBulk = 100;
+      let allIds = [];
+      // Force status to running for bulk termination regardless of current filter
+      // but if user selected a specific agent, respect it
+      // Loop through pages until no next page
+      // Use nextPageToken if provided, otherwise increment page
+      while (true) {
+        const response = await api.fetchPaginatedWorkflowRuns({
+          status: 'running',
+          agent: selectedAgent,
+          pageSize: pageSizeForBulk,
+          pageToken: page > 1 ? String(page) : null,
+        });
+        const workflowsPage = response?.workflows || [];
+        const ids = workflowsPage.map(w => w.workflowId).filter(Boolean);
+        allIds.push(...ids);
+
+        if (response?.hasNextPage) {
+          if (response?.nextPageToken) {
+            const next = parseInt(response.nextPageToken, 10);
+            page = Number.isNaN(next) ? page + 1 : next;
+          } else {
+            page += 1;
+          }
+        } else {
+          break;
+        }
+      }
+
+      // Deduplicate IDs
+      allIds = Array.from(new Set(allIds));
+
+      if (allIds.length === 0) {
+        showSuccess('No running workflows to terminate.');
+        return;
+      }
+
+      setTerminateProgress({ total: allIds.length, completed: 0 });
+
+      // Execute cancellations sequentially to avoid server overload
+      for (let i = 0; i < allIds.length; i += 1) {
+        const id = allIds[i];
+        try {
+          await api.executeWorkflowCancelAction(id, true);
+        } catch (err) {
+          console.error('Failed to terminate workflow', id, err);
+        }
+        setTerminateProgress(prev => ({ ...prev, completed: i + 1 }));
+      }
+
+      showSuccess(`Termination requests sent for ${allIds.length} workflow${allIds.length === 1 ? '' : 's'}.`);
+      // Refresh list (stay on current page)
+      await loadPaginatedWorkflows(currentPage > 1 ? String(currentPage) : null, false);
+    } catch (error) {
+      console.error('Bulk terminate failed', error);
+      showError('Failed to terminate workflows. Please try again.');
+    } finally {
+      setIsTerminatingAll(false);
+      setTerminateProgress({ total: 0, completed: 0 });
+    }
+  };
+
   return (
     <Container className="workflow-list-container" disableGutters={isMobile} maxWidth={isMobile ? false : "lg"}>
       <Box sx={{ 
@@ -160,35 +241,73 @@ const WorkflowList = () => {
           Agent Runs
         </Typography>
         
-        {isMobile ? (
-          <IconButton
-            onClick={() => loadPaginatedWorkflows(null, true)}
-            disabled={isLoading}
-            className={isLoading ? 'loading' : ''}
-            size="medium"
-            sx={{
-              backgroundColor: 'var(--bg-paper)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
-              color: 'var(--text-secondary)',
-              '&:hover': {
-                backgroundColor: 'var(--bg-hover)',
-              }
-            }}
-          >
-            <RefreshIcon className={isLoading ? 'spin-icon' : ''} />
-          </IconButton>
-        ) : (
-          <Button
-            onClick={() => loadPaginatedWorkflows(null, true)}
-            disabled={isLoading}
-            className={`button-refresh ${isLoading ? 'loading' : ''}`}
-            startIcon={<RefreshIcon />}
-            size="small"
-          >
-            <span>Refresh</span>
-          </Button>
-        )}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          {isMobile ? (
+            <>
+              <IconButton
+                onClick={() => loadPaginatedWorkflows(null, true)}
+                disabled={isLoading}
+                className={isLoading ? 'loading' : ''}
+                size="medium"
+                sx={{
+                  backgroundColor: 'var(--bg-paper)',
+                  border: '1px solid var(--border-color)',
+                  boxShadow: 'var(--shadow-sm)',
+                  color: 'var(--text-secondary)',
+                  '&:hover': {
+                    backgroundColor: 'var(--bg-hover)',
+                  }
+                }}
+              >
+                <RefreshIcon className={isLoading ? 'spin-icon' : ''} />
+              </IconButton>
+
+              {statusFilter === 'running' && (
+                <IconButton
+                  onClick={openConfirmTerminate}
+                  disabled={isLoading || isTerminatingAll}
+                  size="medium"
+                  sx={{
+                    backgroundColor: 'var(--bg-paper)',
+                    border: '1px solid var(--border-color)',
+                    boxShadow: 'var(--shadow-sm)',
+                    color: 'error.main',
+                    '&:hover': {
+                      backgroundColor: 'var(--bg-hover)',
+                    }
+                  }}
+                >
+                  <StopCircleIcon />
+                </IconButton>
+              )}
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={() => loadPaginatedWorkflows(null, true)}
+                disabled={isLoading}
+                className={`button-refresh ${isLoading ? 'loading' : ''}`}
+                startIcon={<RefreshIcon />}
+                size="small"
+              >
+                <span>Refresh</span>
+              </Button>
+
+              {statusFilter === 'running' && (
+                <Button
+                  onClick={openConfirmTerminate}
+                  disabled={isLoading || isTerminatingAll}
+                  color="error"
+                  variant="outlined"
+                  startIcon={<StopCircleIcon />}
+                  size="small"
+                >
+                  Terminate all running
+                </Button>
+              )}
+            </>
+          )}
+        </Box>
       </Box>
 
       {/* Hint message for newly activated workflow */}
@@ -369,6 +488,23 @@ const WorkflowList = () => {
               </Typography>
             </Box>
 
+            {isTerminatingAll && (
+              <Box sx={{
+                px: isMobile ? 2 : 3,
+                py: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                color: 'error.main',
+                borderBottom: '1px dashed var(--border-color)'
+              }}>
+                <StopCircleIcon fontSize="small" />
+                <Typography variant="body2">
+                  Terminating {terminateProgress.completed}/{terminateProgress.total} running workflow{terminateProgress.total === 1 ? '' : 's'}...
+                </Typography>
+              </Box>
+            )}
+
             {/* Workflows List */}
             <Box sx={{ 
               minHeight: 200, // Ensure consistent height during loading
@@ -467,6 +603,20 @@ const WorkflowList = () => {
           </Paper>  
         )}
       </Box>
+
+      {/* Confirm bulk terminate */}
+      <ConfirmationDialog
+        open={confirmTerminateOpen}
+        title={selectedAgent ? `Terminate all running for "${selectedAgent}"?` : 'Terminate all running workflows?'}
+        message={selectedAgent
+          ? 'This will send terminate requests for all currently running workflows for the selected agent. This action cannot be undone.'
+          : 'This will send terminate requests for all currently running workflows you have access to. This action cannot be undone.'}
+        confirmLabel="Terminate all"
+        cancelLabel="Cancel"
+        severity="error"
+        onConfirm={handleTerminateAll}
+        onCancel={closeConfirmTerminate}
+      />
     </Container>
   );
 };
