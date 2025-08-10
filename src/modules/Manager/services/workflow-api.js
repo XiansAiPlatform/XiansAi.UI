@@ -31,6 +31,40 @@ export const useWorkflowApi = () => {
         }
       },
 
+      fetchPaginatedWorkflowRuns: async (options = {}) => {
+        try {
+          const { 
+            status = 'all', 
+            agent = null, 
+            pageSize = 20, 
+            pageToken = null 
+          } = options;
+
+          const queryParams = {};
+
+          if (status !== 'all') {
+            queryParams.status = status;
+          }
+
+          if (agent) {
+            queryParams.agent = agent;
+          }
+
+          if (pageSize) {
+            queryParams.pageSize = pageSize;
+          }
+
+          if (pageToken) {
+            queryParams.pageToken = pageToken;
+          }
+
+          return await apiClient.get('/api/client/workflows', queryParams);
+        } catch (error) {
+          console.error('Failed to fetch paginated workflows:', error);
+          throw error;
+        }
+      },
+
       fetchActivityEvents: async (workflowId) => {
         try {
           if (!workflowId) {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Container, 
   Typography, 
@@ -10,20 +10,30 @@ import {
   useMediaQuery,
   IconButton,
   Alert,
-  Collapse
+  Collapse,
+  Divider
 } from '@mui/material';
 import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import PersonIcon from '@mui/icons-material/Person';
 import { useLoading } from '../../contexts/LoadingContext';
-import WorkflowAccordion from './WorkflowAccordion';
+import AgentSelector from './AgentSelector';
+import PaginationControls from './PaginationControls';
+import WorkflowRunCard from './WorkflowRunCard';
 import './WorkflowList.css';
 import { Link, useLocation } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const WorkflowList = () => {  
-  const [agentGroups, setAgentGroups] = useState([]);
+  // New pagination state
+  const [workflows, setWorkflows] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState(null);
   const [statusFilter, setStatusFilter] = useState('running');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  
   const location = useLocation();
   const isMobile = useMediaQuery('(max-width:768px)');
   const isSmallMobile = useMediaQuery('(max-width:480px)');
@@ -31,61 +41,55 @@ const WorkflowList = () => {
   const { setLoading, isLoading } = useLoading();
   const api = useWorkflowApi();
 
-  const filterAgentGroups = useCallback((agentGroups) => {
-    if (!agentGroups || !Array.isArray(agentGroups)) return [];
-    
-    return agentGroups
-      .map(group => {
-        const filteredWorkflows = (group.workflows || []).sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
-        
-        if (filteredWorkflows.length > 0) {
-          return {
-            ...group,
-            workflows: filteredWorkflows
-          };
-        }
-        return null;
-      })
-      .filter(Boolean);
-  }, []);
-
-  const loadWorkflows = useCallback(async () => {
+  // New paginated workflow loading
+  const loadPaginatedWorkflows = async (pageToken = null, reset = false) => {
     setLoading(true);
+    if (reset) {
+      setWorkflows([]);
+      setCurrentPage(1);
+      setHasNextPage(false);
+    }
+    
     // Hide hint when refreshing
     setShowHint(false);
+    
     try {
-      const data = await api.fetchWorkflowRuns(statusFilter);
+      const options = {
+        status: statusFilter,
+        agent: selectedAgent,
+        pageSize: pageSize,
+        pageToken: pageToken
+      };
+
+      const response = await api.fetchPaginatedWorkflowRuns(options);
       
-      if (data && Array.isArray(data) && data.length > 0) {
-        // Validate that each item in the array has the expected structure
-        const validData = data.filter(item => 
-          item && 
-          typeof item === 'object' && 
-          item.agent && 
-          Array.isArray(item.workflows)
+      if (response && response.workflows) {
+        // Sort workflows by start time (newest first)
+        const sortedWorkflows = response.workflows.sort((a, b) => 
+          new Date(b.startTime) - new Date(a.startTime)
         );
         
-        if (validData.length > 0) {
-          const filteredGroups = filterAgentGroups(validData);
-          setAgentGroups(filteredGroups);
-        } else {
-          console.warn('No valid agent groups found in server response');
-          setAgentGroups([]);
-        }
+        setWorkflows(sortedWorkflows);
+        setHasNextPage(response.hasNextPage);
       } else {
-        setAgentGroups([]);
+        setWorkflows([]);
+        setHasNextPage(false);
       }
     } catch (error) {
-      console.error('Error loading workflows:', error);
-      setAgentGroups([]);
+      console.error('Error loading paginated workflows:', error);
+      setWorkflows([]);
+      setHasNextPage(false);
     } finally {
       setLoading(false);
     }
-  }, [filterAgentGroups, setLoading, api, statusFilter]);
+  };
 
   useEffect(() => {
-    loadWorkflows();
-  }, [loadWorkflows, statusFilter]);
+    // Reset to page 1 and reload when filters change
+    setCurrentPage(1);
+    loadPaginatedWorkflows(null, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, selectedAgent, pageSize]);
 
   // Show hint when navigated from NewWorkflowForm
   useEffect(() => {
@@ -104,13 +108,33 @@ const WorkflowList = () => {
   }, [location.state]);
 
   const hasWorkflows = useMemo(() => {
-    return agentGroups.length > 0;
-  }, [agentGroups]);
+    return workflows.length > 0;
+  }, [workflows]);
 
   const handleStatusFilterChange = (event, newStatusFilter) => {
     if (newStatusFilter !== null) {
       setStatusFilter(newStatusFilter);
+      setCurrentPage(1);
     }
+  };
+
+  const handleAgentChange = (agent) => {
+    setSelectedAgent(agent);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    // Update current page first
+    setCurrentPage(newPage);
+    
+    // Load the new page data
+    const pageToken = newPage > 1 ? newPage.toString() : null;
+    loadPaginatedWorkflows(pageToken, false); // Don't reset the current page state
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1);
   };
 
   return (
@@ -138,7 +162,7 @@ const WorkflowList = () => {
         
         {isMobile ? (
           <IconButton
-            onClick={loadWorkflows}
+            onClick={() => loadPaginatedWorkflows(null, true)}
             disabled={isLoading}
             className={isLoading ? 'loading' : ''}
             size="medium"
@@ -156,7 +180,7 @@ const WorkflowList = () => {
           </IconButton>
         ) : (
           <Button
-            onClick={loadWorkflows}
+            onClick={() => loadPaginatedWorkflows(null, true)}
             disabled={isLoading}
             className={`button-refresh ${isLoading ? 'loading' : ''}`}
             startIcon={<RefreshIcon />}
@@ -186,12 +210,12 @@ const WorkflowList = () => {
           >
             <Typography variant="body2" sx={{ fontWeight: 500 }}>
               Workflow activated successfully!{' '}
-              <Button
-                onClick={loadWorkflows}
-                disabled={isLoading}
-                size="small"
-                variant="text"
-                sx={{
+                              <Button
+                  onClick={() => loadPaginatedWorkflows(null, true)}
+                  disabled={isLoading}
+                  size="small"
+                  variant="text"
+                  sx={{
                   minWidth: 'auto',
                   p: 0,
                   textTransform: 'none',
@@ -220,7 +244,7 @@ const WorkflowList = () => {
           alignItems: 'flex-start',
           mb: 3,
           flexDirection: 'column',
-          gap: 1.5,
+          gap: 2,
           px: isMobile ? 2 : 0,
           width: '100%',
           overflowX: 'auto',
@@ -228,12 +252,61 @@ const WorkflowList = () => {
           zIndex: 10
         }}
       >
+        {/* Agent Selector */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          gap: 2,
+          width: '100%',
+          p: 2,
+          backgroundColor: 'var(--bg-surface)',
+          borderRadius: 2,
+          border: '1px solid var(--border-color)',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            borderColor: 'var(--border-hover)',
+            boxShadow: 'var(--shadow-sm)',
+          }
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1,
+            color: 'var(--text-secondary)'
+          }}>
+            <PersonIcon sx={{ fontSize: 18 }} />
+            <Typography 
+              variant="body2" 
+              color="text.secondary" 
+              sx={{ 
+                minWidth: 'max-content',
+                fontWeight: 500,
+                fontSize: isMobile ? '0.8rem' : '0.875rem'
+              }}
+            >
+              {isMobile ? 'Agent' : 'Filter by Agent'}
+            </Typography>
+          </Box>
+          <AgentSelector
+            selectedAgent={selectedAgent}
+            onAgentChange={handleAgentChange}
+            disabled={isLoading}
+            size="small"
+            showAllOption={true}
+          />
+        </Box>
+
+        {/* Status Filter */}
         <Box sx={{ 
           display: 'flex', 
           gap: 1,
           flexWrap: isSmallMobile ? 'wrap' : 'nowrap',
-          width: '100%'
+          width: '100%',
+          alignItems: 'center'
         }}>
+          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 'max-content', mr: 1 }}>
+            Status:
+          </Typography>
           <ToggleButtonGroup
             value={statusFilter}
             exclusive
@@ -269,16 +342,87 @@ const WorkflowList = () => {
 
       <Box sx={{ px: isMobile ? 2 : 0, position: 'relative', zIndex: 1 }}>
         {hasWorkflows ? (
-          agentGroups.map((agentGroup) => {
-            return (
-              <WorkflowAccordion
-                key={agentGroup.agent?.id || agentGroup.agent?.name}
-                agentInfo={agentGroup.agent}
-                runs={agentGroup.workflows}
-                isMobile={isMobile}
-              />
-            );
-          })
+          <Paper 
+            elevation={0}
+            sx={{ 
+              borderRadius: 3,
+              bgcolor: 'background.paper',
+              border: '1px solid var(--border-color)',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Results Header */}
+            <Box sx={{ 
+              px: isMobile ? 2 : 3, 
+              py: 1.5,
+              backgroundColor: 'var(--bg-muted)',
+              borderBottom: '1px solid var(--border-color)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                {selectedAgent ? `Showing runs for "${selectedAgent}"` : 'Showing all workflow runs'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {workflows.length} {workflows.length === 1 ? 'run' : 'runs'} on page {currentPage}
+              </Typography>
+            </Box>
+
+            {/* Workflows List */}
+            <Box sx={{ 
+              minHeight: 200, // Ensure consistent height during loading
+              position: 'relative'
+            }}>
+              {isLoading ? (
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  minHeight: 200,
+                  color: 'text.secondary'
+                }}>
+                  <Typography variant="body2">Loading workflow runs...</Typography>
+                </Box>
+              ) : (
+                workflows.map((workflow, index) => {
+                  try {
+                    return (
+                      <WorkflowRunCard
+                        key={`${workflow.workflowId}-${workflow.runId}-${index}`}
+                        workflow={workflow}
+                        isFirst={index === 0}
+                        isLast={index === workflows.length - 1}
+                        showAgent={!selectedAgent}
+                        isMobile={isMobile}
+                      />
+                    );
+                  } catch (error) {
+                    console.error('Error rendering WorkflowRunCard:', error);
+                    return (
+                      <div key={`error-${index}`} style={{ padding: '20px', textAlign: 'center' }}>
+                        Error loading workflow card. Please refresh the page.
+                      </div>
+                    );
+                  }
+                })
+              )}
+            </Box>
+            
+            {/* Pagination Controls */}
+            <Divider />
+            <PaginationControls
+              currentPage={currentPage}
+              pageSize={pageSize}
+              hasNextPage={hasNextPage}
+              hasPreviousPage={currentPage > 1}
+              totalCount={null}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              loading={isLoading}
+              itemName="workflow runs"
+            />
+          </Paper>
         ) : (
           <Paper 
             elevation={0}
@@ -288,18 +432,22 @@ const WorkflowList = () => {
               py: isMobile ? 4 : 8, 
               px: isMobile ? 2 : 4,
               borderRadius: 3,
-              bgcolor: 'background.paper' 
+              bgcolor: 'background.paper',
+              border: '1px solid var(--border-color)'
             }}
           >
             <Typography variant="h6" gutterBottom>
-              {isLoading ? 'Loading...' : 'It can take a few seconds to load the workflows'}
+              {isLoading ? 'Loading workflow runs...' : selectedAgent ? `No workflow runs found for "${selectedAgent}"` : 'No workflow runs found'}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              To get started, <Link to="/manager/definitions">navigate to Flow Definitions</Link> to create and start new workflows.
+              {selectedAgent ? 
+                'Try changing the status filter, selecting a different agent, or check if workflows have been started for this agent.' :
+                <>To get started, <Link to="/manager/definitions" style={{ color: 'var(--primary-color)' }}>navigate to Flow Definitions</Link> to create and activate new workflow definitions.</>
+              }
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
-                onClick={loadWorkflows}
+                onClick={() => loadPaginatedWorkflows(null, true)}
                 variant="contained"
                 color="primary"
                 disabled={isLoading}
