@@ -30,7 +30,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
       setUserData({
         name: displayName,
         email: user.email || '',
-        id: user.id || user.sub || ''
+        id: user.preferred_username || user.sub || user.id || ''
       });
     }
   }, [user]);
