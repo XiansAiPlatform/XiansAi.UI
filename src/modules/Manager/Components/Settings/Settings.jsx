@@ -8,6 +8,7 @@ import { useTenant } from '../../contexts/TenantContext';
 import ApproveUserRequests from "./ApproveUserRequests";
 import InviteUser from "./InviteUser";
 import TenantUserManagement from "./TenantUserManagement";
+import TenantAuthSettings from './TenantAuthSettings';
 
 const Settings = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -33,6 +34,7 @@ const Settings = () => {
     tabs.push({ label: "Users", component: null }); // Will be handled by sub-tabs
     tabs.push({ label: "Branding", component: <BrandingSettings /> });
     tabs.push({ label: "API Keys", component: <ApiKeySettings /> });
+    tabs.push({ label: "Auth Config", component: <TenantAuthSettings /> });
   }
 
   // Sub-tabs for Users section
