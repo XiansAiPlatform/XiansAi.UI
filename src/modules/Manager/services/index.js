@@ -13,3 +13,4 @@ export { usePermissionsApi } from './permissions-api';
 export { useRolesApi } from './roles-api.js';
 export { useUserTenantApi } from './user-tenant-api';
 export { useUserApi } from './user-api';
+export { useOidcConfigApi } from './oidc-config-api';
