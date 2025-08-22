@@ -8,16 +8,22 @@ import { useRef, useCallback, useEffect } from 'react';
  * @param {Function} options.fetchMessages - Function to fetch thread messages
  * @param {number} options.pollingInterval - Interval in ms between polls (default: 5000)
  * @param {number} options.pollingDuration - Duration in ms to poll for (default: 60000 = 60 seconds)
+ * @param {number[]} [options.scheduleDelays] - Optional list of delays (ms) for each poll attempt. If provided, overrides interval/duration behavior.
+ * @param {Function} [options.onStarted] - Optional callback invoked when polling begins.
  * @returns {Object} - Object containing polling control functions
  */
 const useMessagePolling = ({
     threadId,
     fetchMessages,
     pollingInterval = 3000,
-    pollingDuration = 60000 // 60 seconds default
+    pollingDuration = 60000, // 60 seconds default
+    scheduleDelays,
+    onStarted
 }) => {
     const pollingTimerRef = useRef(null);
     const pollingEndTimeRef = useRef(null);
+    const attemptIndexRef = useRef(0);
+    const delaysRef = useRef(null);
     
     // Stop message polling
     const stopPolling = useCallback(() => {
@@ -26,6 +32,8 @@ const useMessagePolling = ({
             pollingTimerRef.current = null;
         }
         pollingEndTimeRef.current = null;
+        attemptIndexRef.current = 0;
+        delaysRef.current = null;
     }, []);
     
     // Start polling for message updates for a limited duration
@@ -35,7 +43,43 @@ const useMessagePolling = ({
         
         // Clear any existing polling
         stopPolling();
+        if (onStarted) {
+            try { onStarted(); } catch (_) {}
+        }
         
+        // If an explicit delay schedule is provided, use that (overrides duration/interval)
+        if (Array.isArray(scheduleDelays) && scheduleDelays.length > 0) {
+            delaysRef.current = [...scheduleDelays];
+            attemptIndexRef.current = 0;
+            
+            const pollWithSchedule = () => {
+                // Check if thread ID is still valid
+                if (!threadToUse) {
+                    stopPolling();
+                    return;
+                }
+                
+                // Execute poll
+                fetchMessages(threadToUse, 1, true);
+                
+                // Determine next attempt
+                attemptIndexRef.current += 1;
+                if (!delaysRef.current || attemptIndexRef.current >= delaysRef.current.length) {
+                    stopPolling();
+                    return;
+                }
+                
+                const nextDelay = delaysRef.current[attemptIndexRef.current];
+                pollingTimerRef.current = setTimeout(pollWithSchedule, nextDelay);
+            };
+            
+            // Kick off first attempt after the first delay
+            const initialDelay = delaysRef.current[0];
+            pollingTimerRef.current = setTimeout(pollWithSchedule, initialDelay);
+            return;
+        }
+
+        // Default behavior: fixed interval for a total duration
         // Set the end time for polling
         pollingEndTimeRef.current = Date.now() + pollingDuration;
         
@@ -62,7 +106,7 @@ const useMessagePolling = ({
         
         // Start the first poll after the interval
         pollingTimerRef.current = setTimeout(pollMessages, pollingInterval);
-    }, [threadId, fetchMessages, pollingInterval, pollingDuration, stopPolling]);
+    }, [threadId, fetchMessages, pollingInterval, pollingDuration, stopPolling, scheduleDelays, onStarted]);
 
     // Start polling immediately when triggered (e.g., after sending a message)
     const triggerPolling = useCallback((id) => {

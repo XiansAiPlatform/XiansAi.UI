@@ -47,6 +47,7 @@ const ChatConversation = (
     const scrollContainerRef = useRef(null);
     const isInitialLoad = useRef(true);
     const messagePollingRef = useRef(null);
+    const pollingStartTimeRef = useRef(null);
     const lastHandoverIdRef = useRef(null); // Track last handover message to avoid duplicate events
     
     const pageSize = 15;
@@ -140,6 +141,18 @@ const ChatConversation = (
 
             // Check for handover messages
             checkForHandover(sorted);
+
+            // If polling, stop when a new Incoming message is detected since polling started
+            if (isPolling && pollingStartTimeRef.current && messagePollingRef.current) {
+                const startTs = pollingStartTimeRef.current;
+                const hasNewIncoming = sorted.some(msg => {
+                    if (msg.direction !== 'Incoming' || !msg.createdAt) return false;
+                    return new Date(msg.createdAt).getTime() > startTs;
+                });
+                if (hasNewIncoming) {
+                    messagePollingRef.current.stopPolling();
+                }
+            }
             
             // For initial load (not polling), check if we should start polling for new threads
             if (!isPolling && page === 1 && sorted.length > 0) {
@@ -171,12 +184,13 @@ const ChatConversation = (
         }
     }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading, isMessageRecent]);
     
-    // Initialize the message polling hook with 60-second polling duration
+    // Initialize the message polling hook with exponential backoff schedule
     const messagePolling = useMessagePolling({
         threadId: selectedThreadId,
         fetchMessages: fetchThreadMessages,
-        pollingInterval: 5000,
-        pollingDuration: 60000 // Poll for 60 seconds after message sent
+        // 6 attempts with exponential backoff starting at 2s
+        scheduleDelays: [2000, 4000, 8000, 16000, 32000, 64000],
+        onStarted: () => { pollingStartTimeRef.current = Date.now(); }
     });
 
     // Store the messagePolling in ref to break the circular dependency
@@ -265,6 +279,7 @@ const ChatConversation = (
         if (messagePollingRef.current) {
             messagePollingRef.current.stopPolling();
         }
+        pollingStartTimeRef.current = null;
         
         if (!selectedThreadId) {
             setMessages([]);
