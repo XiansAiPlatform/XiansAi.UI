@@ -598,11 +598,15 @@ body {
   width: auto;
   height: 40px;
   border-radius: var(--radius-md);
-  object-fit: cover;
+  object-fit: contain;
   margin-right: 8px;
+  display: block;
+  /* Ensure SVG logos display properly */
+  max-width: 150px;
 }
 @media (max-width: 480px) {
   .logo-image {
     height: 32px;
+    max-width: 120px;
   }
 }
