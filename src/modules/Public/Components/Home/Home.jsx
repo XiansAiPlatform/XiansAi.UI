@@ -265,19 +265,6 @@ var newBlogPosts = new List<string>();`
                         The open-source platform for creating, deploying, and managing sophisticated AI agent workflows with enterprise-grade reliability.
                     </p>
 
-                    
-                    {/* Add contributor avatars */}
-                    <div className="contributors-section">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                            <img 
-                                key={num}
-                                src={`https://randomuser.me/api/portraits/men/${num + 20}.jpg`} 
-                                alt={`Contributor ${num}`} 
-                                className="contributor-avatar"
-                                title={`Contributor ${num}`}
-                            />
-                        ))}
-                    </div>
                     <div style={{ marginTop: '2rem' }}>
                         <code>
                             {'>'} dotnet add package XiansAi.Lib
