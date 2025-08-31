@@ -87,17 +87,22 @@ const AgentGroup = ({
 
   // Function to determine current user's permission level
   const getUserPermissionLevel = () => {
-    if (!user?.id || !agent?.permissions || agentName === 'Ungrouped') {
+    if (!user?.id || !agent || agentName === 'Ungrouped') {
       return null;
     }
 
-    if (agent.permissions.ownerAccess?.includes(user.id)) {
+    // Support both new structure (agent.ownerAccess) and legacy structure (agent.permissions.ownerAccess)
+    const ownerAccess = agent.ownerAccess || agent.permissions?.ownerAccess;
+    const writeAccess = agent.writeAccess || agent.permissions?.writeAccess;
+    const readAccess = agent.readAccess || agent.permissions?.readAccess;
+
+    if (ownerAccess?.includes(user.id)) {
       return { level: 'Owner', color: 'primary' };
     }
-    if (agent.permissions.writeAccess?.includes(user.id)) {
+    if (writeAccess?.includes(user.id)) {
       return { level: 'Can Write', color: 'secondary' };
     }
-    if (agent.permissions.readAccess?.includes(user.id)) {
+    if (readAccess?.includes(user.id)) {
       return { level: 'Can Read', color: 'default' };
     }
     

@@ -140,8 +140,10 @@ export const sortDefinitionsByDate = (definitions) => {
  * @returns {boolean} True if user owns all workflows for the agent
  */
 export const isUserOwnerOfAllWorkflows = (agent, user) => {
-  if (!user?.id || !agent?.permissions) return false;
+  if (!user?.id || !agent) return false;
   
   // Check if user is in the owner access list for the agent
-  return agent.permissions.ownerAccess?.includes(user.id) || false;
+  // Support both new structure (agent.ownerAccess) and legacy structure (agent.permissions.ownerAccess)
+  const ownerAccess = agent.ownerAccess || agent.permissions?.ownerAccess;
+  return ownerAccess?.includes(user.id) || false;
 }; 

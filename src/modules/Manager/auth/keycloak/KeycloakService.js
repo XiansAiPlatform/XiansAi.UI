@@ -248,7 +248,7 @@ class KeycloakService {
       const userInfo = this.keycloakInstance.idTokenParsed || {};
 
       return {
-        id: userInfo.sub || "",
+        id: userInfo.preferred_username || userInfo.sub || "",
         name: userInfo.name || userInfo.preferred_username || "",
         email: userInfo.email || "",
         picture: userInfo.picture || "",
