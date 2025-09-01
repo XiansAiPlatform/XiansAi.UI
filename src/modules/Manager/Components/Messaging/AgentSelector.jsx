@@ -14,13 +14,21 @@ import { handleApiError } from '../../utils/errorHandler';
 const AgentSelector = ({
     agentsApi,
     showError,
-    onAgentSelected
+    onAgentSelected,
+    selectedAgent = null // Receive selected agent from parent
 }) => {
     const [agentNames, setAgentNames] = useState([]);
     const [isLoadingAgents, setIsLoadingAgents] = useState(true);
-    const [selectedAgentName, setSelectedAgentName] = useState('');
+    const [selectedAgentName, setSelectedAgentName] = useState(selectedAgent || '');
     const [error, setError] = useState(null);
     const { setLoading } = useLoading();
+
+    // Sync local state when selectedAgent prop changes
+    useEffect(() => {
+        if (selectedAgent !== null && selectedAgent !== selectedAgentName) {
+            setSelectedAgentName(selectedAgent || '');
+        }
+    }, [selectedAgent, selectedAgentName]);
 
     useEffect(() => {
         const fetchAgents = async () => {
@@ -71,20 +79,23 @@ const AgentSelector = ({
                         value={selectedAgentName}
                         onChange={(event, newValue) => handleAgentChange(newValue)}
                         getOptionLabel={(option) => option || ''}
-                        renderOption={(props, option) => (
-                            <li {...props}>
-                                <Box sx={{ 
-                                    display: 'flex', 
-                                    flexDirection: 'column',
-                                    width: '100%',
-                                    py: 0.5
-                                }}>
-                                    <Typography variant="body1" fontWeight="medium">
-                                        {option}
-                                    </Typography>
-                                </Box>
-                            </li>
-                        )}
+                        renderOption={(props, option) => {
+                            const { key, ...otherProps } = props;
+                            return (
+                                <li key={key} {...otherProps}>
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column',
+                                        width: '100%',
+                                        py: 0.5
+                                    }}>
+                                        <Typography variant="body1" fontWeight="medium">
+                                            {option}
+                                        </Typography>
+                                    </Box>
+                                </li>
+                            );
+                        }}
                         renderInput={(params) => (
                             <TextField 
                                 {...params} 

@@ -351,6 +351,7 @@ const ConversationThreads = ({
                                                 )}
                                             </Box>
                                         }
+                                        secondaryTypographyProps={{ component: 'div' }}
                                     />
                                 </ListItemButton>
                                 <Divider component="li" />

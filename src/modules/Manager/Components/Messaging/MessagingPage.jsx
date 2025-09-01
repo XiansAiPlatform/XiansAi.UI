@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -23,11 +23,37 @@ import ChatConversation from './Conversation/ChatConversation';
  * Parent component that coordinates messaging components and manages shared state
  */
 const MessagingPage = () => {
+    // Storage keys for persisting state during token refresh
+    const STORAGE_KEYS = {
+        SELECTED_AGENT: 'messaging_selected_agent',
+        SELECTED_THREAD_ID: 'messaging_selected_thread_id',
+        SELECTED_THREAD_DETAILS: 'messaging_selected_thread_details'
+    };
+
     // --- State --- 
-    // Keep selected agent name and other state
-    const [selectedAgentName, setSelectedAgentName] = useState(null);
-    const [selectedThreadId, setSelectedThreadId] = useState(null);
-    const [selectedThreadDetails, setSelectedThreadDetails] = useState(null); // Store full thread object
+    // Keep selected agent name and other state - initialize from sessionStorage
+    const [selectedAgentName, setSelectedAgentName] = useState(() => {
+        try {
+            return sessionStorage.getItem(STORAGE_KEYS.SELECTED_AGENT);
+        } catch {
+            return null;
+        }
+    });
+    const [selectedThreadId, setSelectedThreadId] = useState(() => {
+        try {
+            return sessionStorage.getItem(STORAGE_KEYS.SELECTED_THREAD_ID);
+        } catch {
+            return null;
+        }
+    });
+    const [selectedThreadDetails, setSelectedThreadDetails] = useState(() => {
+        try {
+            const stored = sessionStorage.getItem(STORAGE_KEYS.SELECTED_THREAD_DETAILS);
+            return stored ? JSON.parse(stored) : null;
+        } catch {
+            return null;
+        }
+    }); // Store full thread object
     const [error, setError] = useState(null); // Keep top-level error state if needed
     const [refreshCounter, setRefreshCounter] = useState(0); // Add counter for refreshing conversation
     const [threadsRefreshCounter, setThreadsRefreshCounter] = useState(0); // Separate counter for threads refresh
@@ -47,6 +73,56 @@ const MessagingPage = () => {
     const { setLoading } = useLoading();
     const { showError } = useNotification();
 
+    // Persist selected agent to sessionStorage
+    useEffect(() => {
+        try {
+            if (selectedAgentName) {
+                sessionStorage.setItem(STORAGE_KEYS.SELECTED_AGENT, selectedAgentName);
+            } else {
+                sessionStorage.removeItem(STORAGE_KEYS.SELECTED_AGENT);
+            }
+        } catch (error) {
+            console.warn('Failed to persist selected agent to sessionStorage:', error);
+        }
+    }, [selectedAgentName, STORAGE_KEYS.SELECTED_AGENT]);
+
+    // Persist selected thread ID to sessionStorage
+    useEffect(() => {
+        try {
+            if (selectedThreadId) {
+                sessionStorage.setItem(STORAGE_KEYS.SELECTED_THREAD_ID, selectedThreadId);
+            } else {
+                sessionStorage.removeItem(STORAGE_KEYS.SELECTED_THREAD_ID);
+            }
+        } catch (error) {
+            console.warn('Failed to persist selected thread ID to sessionStorage:', error);
+        }
+    }, [selectedThreadId, STORAGE_KEYS.SELECTED_THREAD_ID]);
+
+    // Persist selected thread details to sessionStorage
+    useEffect(() => {
+        try {
+            if (selectedThreadDetails) {
+                sessionStorage.setItem(STORAGE_KEYS.SELECTED_THREAD_DETAILS, JSON.stringify(selectedThreadDetails));
+            } else {
+                sessionStorage.removeItem(STORAGE_KEYS.SELECTED_THREAD_DETAILS);
+            }
+        } catch (error) {
+            console.warn('Failed to persist selected thread details to sessionStorage:', error);
+        }
+    }, [selectedThreadDetails, STORAGE_KEYS.SELECTED_THREAD_DETAILS]);
+
+    // Utility function to clear persisted selections (can be called when needed)
+    const clearPersistedSelections = useCallback(() => {
+        try {
+            sessionStorage.removeItem(STORAGE_KEYS.SELECTED_AGENT);
+            sessionStorage.removeItem(STORAGE_KEYS.SELECTED_THREAD_ID);
+            sessionStorage.removeItem(STORAGE_KEYS.SELECTED_THREAD_DETAILS);
+        } catch (error) {
+            console.warn('Failed to clear persisted selections:', error);
+        }
+    }, [STORAGE_KEYS.SELECTED_AGENT, STORAGE_KEYS.SELECTED_THREAD_ID, STORAGE_KEYS.SELECTED_THREAD_DETAILS]);
+
     // --- Callbacks --- 
 
     // Callback passed to WorkflowSelector
@@ -55,7 +131,12 @@ const MessagingPage = () => {
         setSelectedThreadId(null); // Reset thread selection when agent changes
         setSelectedThreadDetails(null);
         setError(null); // Clear errors when selection changes
-    }, []);
+        
+        // If agent is being cleared, also clear persisted selections
+        if (!agentName) {
+            clearPersistedSelections();
+        }
+    }, [clearPersistedSelections]);
 
     // Callback passed to ConversationThreads
     const handleThreadSelected = useCallback((threadId, threadDetails) => {
@@ -223,6 +304,7 @@ const MessagingPage = () => {
                 agentsApi={agentsApi}
                 showError={showError}
                 onAgentSelected={handleAgentSelected}
+                selectedAgent={selectedAgentName}
             />
             {/* Action buttons */}
             <WorkflowActions
