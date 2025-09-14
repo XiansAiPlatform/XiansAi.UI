@@ -53,9 +53,67 @@ const BrandingSettings = () => {
       // Only allow sysAdmin or tenantAdmin
   const hasAccess = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
     
+    // Helper function to detect image type from base64 data
+    const detectImageType = (base64String) => {
+        if (!base64String) return 'png'; // Default fallback
+        
+        // Try to decode the first few bytes to detect the image type
+        try {
+            const decoded = atob(base64String.substring(0, 200)); // Decode first part for better detection
+            
+            // Check for SVG signature (more comprehensive)
+            if (decoded.includes('<svg') || decoded.includes('<?xml') || 
+                decoded.toLowerCase().includes('svg') || decoded.includes('<SVG')) {
+                return 'svg+xml';
+            }
+            // Check for PNG signature
+            if (decoded.startsWith('\x89PNG') || decoded.indexOf('PNG') !== -1) {
+                return 'png';
+            }
+            // Check for JPEG signature
+            if (decoded.startsWith('\xFF\xD8\xFF') || decoded.indexOf('JFIF') !== -1) {
+                return 'jpeg';
+            }
+            // Check for GIF signature
+            if (decoded.startsWith('GIF8') || decoded.startsWith('GIF9')) {
+                return 'gif';
+            }
+            // Check for WebP signature
+            if (decoded.indexOf('WEBP') !== -1) {
+                return 'webp';
+            }
+        } catch (e) {
+            console.warn('Error decoding base64 for image type detection:', e);
+        }
+        
+        // Fallback: check base64 string for SVG patterns
+        try {
+            // Common base64 patterns for SVG start tags
+            const svgPatterns = [
+                'PHN2Zw', // '<svg'
+                'PD94bWw', // '<?xml'
+                'PHN2ZyB', // '<svg '
+                'PD94bWwg', // '<?xml '
+                'PCFET0NUWVBF' // '<!DOCTYPE'
+            ];
+            
+            const upperBase64 = base64String.substring(0, 200).toUpperCase();
+            for (const pattern of svgPatterns) {
+                if (upperBase64.includes(pattern.toUpperCase())) {
+                    return 'svg+xml';
+                }
+            }
+        } catch (e) {
+            console.warn('Error in SVG pattern detection:', e);
+        }
+        
+        return 'png'; // Default fallback
+    };
+    
     const handleFileChange = async (event) => {
         if (event.target.files && event.target.files[0]) {
             const file = event.target.files[0];
+            console.log('Selected file:', file.name, 'Type:', file.type, 'Size:', file.size);
             setLogoFile(file);
 
             // Create a preview URL
@@ -64,6 +122,7 @@ const BrandingSettings = () => {
 
             // Get image dimensions
             const dimensions = await getImageDimensions(file);
+            console.log('Image dimensions:', dimensions);
             setLogoInfo(dimensions);
         }
     };
@@ -183,13 +242,64 @@ const BrandingSettings = () => {
 
     const getImageDimensions = (file) => {
         return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                const width = img.width;
-                const height = img.height;
-                resolve({ width, height });
-            };
-            img.src = URL.createObjectURL(file);
+            // Handle SVG files differently
+            if (file.type === 'image/svg+xml') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const svgContent = e.target.result;
+                        const parser = new DOMParser();
+                        const svgDoc = parser.parseFromString(svgContent, 'image/svg+xml');
+                        const svgElement = svgDoc.querySelector('svg');
+                        
+                        if (svgElement) {
+                            // Try to get dimensions from SVG attributes
+                            let width = svgElement.getAttribute('width');
+                            let height = svgElement.getAttribute('height');
+                            
+                            // If no explicit width/height, try viewBox
+                            if (!width || !height) {
+                                const viewBox = svgElement.getAttribute('viewBox');
+                                if (viewBox) {
+                                    const values = viewBox.split(' ');
+                                    if (values.length === 4) {
+                                        width = width || values[2];
+                                        height = height || values[3];
+                                    }
+                                }
+                            }
+                            
+                            // Parse numeric values (remove units like 'px')
+                            const numericWidth = parseFloat(width) || 100;
+                            const numericHeight = parseFloat(height) || 100;
+                            
+                            console.log('SVG dimensions from attributes:', { width: numericWidth, height: numericHeight });
+                            resolve({ width: numericWidth, height: numericHeight });
+                        } else {
+                            // Fallback for SVG
+                            resolve({ width: 100, height: 100 });
+                        }
+                    } catch (error) {
+                        console.warn('Error parsing SVG dimensions:', error);
+                        resolve({ width: 100, height: 100 });
+                    }
+                };
+                reader.readAsText(file);
+            } else {
+                // Handle raster images (PNG, JPEG, etc.)
+                const img = new Image();
+                img.onload = () => {
+                    const width = img.width;
+                    const height = img.height;
+                    console.log('Raster image dimensions:', { width, height });
+                    resolve({ width, height });
+                };
+                img.onerror = () => {
+                    console.warn('Error loading image for dimensions');
+                    resolve({ width: 0, height: 0 });
+                };
+                img.src = URL.createObjectURL(file);
+            }
         });
     };    // Handle theme selection change
     const handleThemeChange = (event) => {
@@ -212,7 +322,9 @@ const BrandingSettings = () => {
                 try {
                     if (tenant.logo) {
                         if (tenant.logo.imgBase64) {
-                            setPreviewUrl(`data:image/png;base64,${tenant.logo.imgBase64}`)
+                            const detectedType = detectImageType(tenant.logo.imgBase64);
+                            console.log('Setting preview with detected type:', detectedType);
+                            setPreviewUrl(`data:image/${detectedType};base64,${tenant.logo.imgBase64}`);
                         } else if (tenant.logo.url) {
                             setPreviewUrl(tenant.logo.url);
                         }
@@ -291,7 +403,10 @@ const BrandingSettings = () => {
                                             padding: '10px',
                                             border: '1px dashed #ccc',
                                             borderRadius: '4px',
-                                            background: '#f9f9f9'
+                                            background: '#f9f9f9',
+                                            objectFit: 'contain',
+                                            display: 'block',
+                                            margin: '0 auto'
                                         }}
                                     />
 
@@ -311,13 +426,15 @@ const BrandingSettings = () => {
                                             component="label"
                                             startIcon={<CloudUploadIcon />}
                                         >
-                                            Change Logo
-                                            <Input
-                                                type="file"
-                                                sx={{ display: 'none' }}
-                                                inputProps={{ accept: 'image/*' }}
-                                                onChange={handleFileChange}
-                                            />
+                                            Change Logo                                        <Input
+                                            type="file"
+                                            sx={{ display: 'none' }}
+                                            inputProps={{ 
+                                                accept: 'image/*,.svg',
+                                                title: 'Supported formats: PNG, JPEG, GIF, SVG, WebP'
+                                            }}
+                                            onChange={handleFileChange}
+                                        />
                                         </Button>
                                     </Box>
                                 </Box>
@@ -336,6 +453,9 @@ const BrandingSettings = () => {
                                     <Typography variant="body1" color="textSecondary" gutterBottom>
                                         No logo uploaded yet
                                     </Typography>
+                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2, fontSize: '0.75rem' }}>
+                                        Supported formats: PNG, JPEG, GIF, SVG, WebP
+                                    </Typography>
 
                                     <Button
                                         variant="contained"
@@ -346,7 +466,10 @@ const BrandingSettings = () => {
                                         <Input
                                             type="file"
                                             sx={{ display: 'none' }}
-                                            inputProps={{ accept: 'image/*' }}
+                                            inputProps={{ 
+                                                accept: 'image/*,.svg',
+                                                title: 'Supported formats: PNG, JPEG, GIF, SVG, WebP'
+                                            }}
                                             onChange={handleFileChange}
                                         />
                                     </Button>
@@ -359,8 +482,16 @@ const BrandingSettings = () => {
                                         Selected file: {logoFile.name}
                                     </Typography>
                                     <Typography variant="body2" color="textSecondary">
+                                        Type: {logoFile.type || 'Unknown'}
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary">
                                         Size: {(logoFile.size / 1024).toFixed(2)} KB
                                     </Typography>
+                                    {logoInfo.width > 0 && logoInfo.height > 0 && (
+                                        <Typography variant="body2" color="textSecondary">
+                                            Dimensions: {logoInfo.width} × {logoInfo.height} pixels
+                                        </Typography>
+                                    )}
                                 </Box>
                             )}
                         </CardContent>

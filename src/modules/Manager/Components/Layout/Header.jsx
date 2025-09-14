@@ -40,9 +40,13 @@ const Header = ({ pageTitle = "", toggleNav }) => {
     const fetchTenantLogo = async () => { 
       try {
         if (tenant && tenant.logo) {
-          setLogoImage(tenant.logo.imgBase64);
-          console.log("Tenant data:", tenant);
+          console.log("Tenant logo data:", tenant.logo);
+          const logoBase64 = tenant.logo.imgBase64;
+          const detectedType = detectImageType(logoBase64);
+          console.log("Detected image type:", detectedType);
+          setLogoImage(logoBase64);
         } else {
+          console.log("No tenant logo available");
           setLogoImage(null);
         }
       } catch (error) {
@@ -53,6 +57,63 @@ const Header = ({ pageTitle = "", toggleNav }) => {
 
     fetchTenantLogo();
   }, [selectedOrg, tenant]);
+
+  // Helper function to detect image type from base64 data
+  const detectImageType = (base64String) => {
+    if (!base64String) return 'png'; // Default fallback
+    
+    // Try to decode the first few bytes to detect the image type
+    try {
+      const decoded = atob(base64String.substring(0, 200)); // Decode first part for better detection
+      
+      // Check for SVG signature (more comprehensive)
+      if (decoded.includes('<svg') || decoded.includes('<?xml') || 
+          decoded.toLowerCase().includes('svg') || decoded.includes('<SVG')) {
+        return 'svg+xml';
+      }
+      // Check for PNG signature
+      if (decoded.startsWith('\x89PNG') || decoded.indexOf('PNG') !== -1) {
+        return 'png';
+      }
+      // Check for JPEG signature
+      if (decoded.startsWith('\xFF\xD8\xFF') || decoded.indexOf('JFIF') !== -1) {
+        return 'jpeg';
+      }
+      // Check for GIF signature
+      if (decoded.startsWith('GIF8') || decoded.startsWith('GIF9')) {
+        return 'gif';
+      }
+      // Check for WebP signature
+      if (decoded.indexOf('WEBP') !== -1) {
+        return 'webp';
+      }
+    } catch (e) {
+      console.warn('Error decoding base64 for image type detection:', e);
+    }
+    
+    // Fallback: check base64 string for SVG patterns
+    try {
+      // Common base64 patterns for SVG start tags
+      const svgPatterns = [
+        'PHN2Zw', // '<svg'
+        'PD94bWw', // '<?xml'
+        'PHN2ZyB', // '<svg '
+        'PD94bWwg', // '<?xml '
+        'PCFET0NUWVBF' // '<!DOCTYPE'
+      ];
+      
+      const upperBase64 = base64String.substring(0, 200).toUpperCase();
+      for (const pattern of svgPatterns) {
+        if (upperBase64.includes(pattern.toUpperCase())) {
+          return 'svg+xml';
+        }
+      }
+    } catch (e) {
+      console.warn('Error in SVG pattern detection:', e);
+    }
+    
+    return 'png'; // Default fallback
+  };
 
   React.useEffect(() => {
     const handleResize = () => { 
@@ -121,7 +182,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
             <Typography className="logo-text">
               { logoImage !== null ? (
                 <img 
-                  src={`data:image/png;base64,${logoImage}`} 
+                  src={`data:image/${detectImageType(logoImage)};base64,${logoImage}`} 
                   alt="Tenant Logo" 
                   className="logo-image"
                 />
