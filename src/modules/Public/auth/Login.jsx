@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Manager/auth/AuthContext';
 import AccountConflictHandler from '../../Manager/Components/Common/AccountConflictHandler';
 import useAccountConflictHandler from '../../Manager/Components/Common/useAccountConflictHandler';
@@ -16,6 +17,7 @@ import { Login as LoginIcon, Refresh as RefreshIcon } from '@mui/icons-material'
 function Login() {
   const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
   const [attemptedLogin, setAttemptedLogin] = useState(false);
+  const navigate = useNavigate();
   
   // Use the account conflict handler
   const { hasConflict, dialogProps } = useAccountConflictHandler({
@@ -44,12 +46,18 @@ function Login() {
   const clearedParam = urlParams.get('cleared');
 
   useEffect(() => {
+    // Redirect authenticated users to the main application
+    if (isAuthenticated && !isLoading) {
+      navigate('/manager/definitions');
+      return;
+    }
+
     // Only attempt to login if not already loading, not authenticated, and no conflicts
     if (!isLoading && !isAuthenticated && !attemptedLogin && !hasConflict) {
       setAttemptedLogin(true);
       login(); // Call the generic login function
     }
-  }, [login, isLoading, isAuthenticated, attemptedLogin, hasConflict]);
+  }, [login, isLoading, isAuthenticated, attemptedLogin, hasConflict, navigate]);
 
   const handleRetryLogin = () => {
     clearError();
@@ -79,7 +87,7 @@ function Login() {
       <Container maxWidth="sm" sx={{ mt: 8 }}>
         <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
           <Typography variant="h6" color="success.main">
-            Already authenticated. Redirecting...
+            Already authenticated. Redirecting... OR click <Link to="/manager/definitions">here</Link>
           </Typography>
         </Paper>
       </Container>
