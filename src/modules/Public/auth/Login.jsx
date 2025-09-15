@@ -13,6 +13,7 @@ import {
   Container
 } from '@mui/material';
 import { Login as LoginIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 
 function Login() {
   const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
