@@ -14,7 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useUserApi } from "../../services/user-api";
 import { useTenant } from "../../contexts/TenantContext";
 import { useAuth } from "../../auth/AuthContext";
-import LoadingSpinner from "../../../../components/LoadingSpinner";
+import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 
 export default function InviteUser() {
   const [email, setEmail] = useState("");
@@ -109,7 +109,7 @@ export default function InviteUser() {
         <Typography variant="h6" mb={3}>
           Invite New User
         </Typography>
-        <LoadingSpinner />
+        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
       </Box>
     );
   }

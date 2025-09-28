@@ -50,7 +50,7 @@ const Footer = styled(Box)(({ theme }) => ({
 export default function NewHome() {
 
     const navigate = useNavigate();
-    const { isAuthenticated, login, isLoading } = useAuth();
+    const { isAuthenticated, login, logout, isLoading } = useAuth();
 
     // Show loading animation while authentication is being initialized
     if (isLoading) {
@@ -135,22 +135,38 @@ export default function NewHome() {
 
                     <div className="home-auth-buttons">
                         {isAuthenticated ? (
-                            <button
-                                className="home-btn home-btn-primary"
-                                onClick={() => {
-                                    navigate('/manager/definitions');
-                                }}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
-                                    transition: 'all 0.3s ease'
-                                }}
-                            >
-                                <ArrowForward style={{ fontSize: '1.1em' }} />
-                                Go to Dashboard
-                            </button>
+                            <>
+                                <button
+                                    className="home-btn home-btn-primary"
+                                    onClick={() => {
+                                        navigate('/manager/definitions');
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    <ArrowForward style={{ fontSize: '1.1em' }} />
+                                    Go to Dashboard
+                                </button>
+                                <button
+                                    className="home-btn home-btn-secondary"
+                                    onClick={() => {
+                                        navigate('/manager/logout');
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.5rem',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    Logout
+                                </button>
+                            </>
                         ) : (
                             <>
                                 <button

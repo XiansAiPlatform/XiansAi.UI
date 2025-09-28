@@ -8,7 +8,7 @@ import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrap
 import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
 import KeycloakProviderWrapper from './modules/Manager/auth/keycloak/KeycloakProviderWrapper';
 import GlobalAccountConflictProvider from './modules/Manager/Components/Common/GlobalAccountConflictProvider';
-import LoadingSpinner from './components/LoadingSpinner';
+import EnhancedLoadingSpinner from './components/EnhancedLoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import lazyLoad from './utils/lazyLoad';
 
@@ -38,7 +38,7 @@ function App() {
       <AppAuthProvider>
         <GlobalAccountConflictProvider>
           <ErrorBoundary>
-            <Suspense fallback={<LoadingSpinner message="Loading application..." />}>
+            <Suspense fallback={<EnhancedLoadingSpinner message="Loading application..." />}>
               <AppRoutes />
             </Suspense>
           </ErrorBoundary>

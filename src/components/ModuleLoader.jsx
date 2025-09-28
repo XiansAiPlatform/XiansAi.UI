@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { getConfig } from '../config';
-import LoadingSpinner from './LoadingSpinner';
+import EnhancedLoadingSpinner from './EnhancedLoadingSpinner';
 import ErrorBoundary from './ErrorBoundary';
 
 /**
@@ -23,7 +23,7 @@ const ModuleLoader = ({
   
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingSpinner message={loadingMessage} />}>
+      <Suspense fallback={<EnhancedLoadingSpinner message={loadingMessage} />}>
         {moduleComponent}
       </Suspense>
     </ErrorBoundary>

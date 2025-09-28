@@ -19,7 +19,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTenantsApi } from "../../services/tenants-api";
-import LoadingSpinner from "../../../../components/LoadingSpinner";
+import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import TenantInfoForm from "./TenantInfoForm";
 import TenantAdminManager from "./TenantAdminManager";
 import { useSlider } from "../../contexts/SliderContext";
@@ -220,7 +220,7 @@ export default function TenantManagement() {
       </Box>
       <Box>
         {loading ? (
-          <LoadingSpinner />
+          <EnhancedLoadingSpinner showRefreshOption={false} height="400px" />
         ) : (
           filteredTenants.map((tenant) => {
             const tenantId = tenant.id || tenant.tenantId;

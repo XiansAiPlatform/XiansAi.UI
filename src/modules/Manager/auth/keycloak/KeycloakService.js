@@ -295,17 +295,22 @@ class KeycloakService {
 
   // Generic method to detect if we're in a callback flow
   isInCallbackFlow() {
+    // Only return true for LOGIN callbacks, not logout callbacks
+    // Logout callbacks should be handled separately by isLogoutCallback()
     const hasLoginCallback = (window.location.hash.includes("code=") && window.location.hash.includes("state=")) ||
                             (window.location.search.includes("code=") && window.location.search.includes("state="));
-    const hasLogoutCallback = (window.location.hash.includes("session_state=") || window.location.search.includes("session_state=")) &&
-                             !window.location.hash.includes("code=") && !window.location.search.includes("code=");
-    return hasLoginCallback || hasLogoutCallback;
+    return hasLoginCallback;
   }
 
   // Generic method to detect if this is a logout callback
   isLogoutCallback() {
     const hash = window.location.hash;
     const search = window.location.search;
+    const currentUrl = window.location.href;
+    
+    // Check for Keycloak-specific logout callback parameters
+    const hasLogoutParams = currentUrl.includes('post_logout_redirect_u') || 
+                           currentUrl.includes('client_id=') && !currentUrl.includes('code=');
     
     // Check for explicit logout completion indicators
     const hasSessionState = hash.includes("session_state=") || search.includes("session_state=");
@@ -340,12 +345,14 @@ class KeycloakService {
     // Logout callback indicators:
     // 1. Coming from a logout URL
     // 2. Has session_state but no authorization code (typical of logout completion)
-    const isLogout = isFromLogoutUrl || (hasSessionState && hasNoCode);
+    // 3. Has logout-specific parameters like post_logout_redirect_u
+    const isLogout = isFromLogoutUrl || (hasSessionState && hasNoCode) || hasLogoutParams;
     
     if (isLogout) {
       console.log("KeycloakService: Logout callback detected - isFromLogoutUrl:", isFromLogoutUrl, 
                   "hasSessionState:", hasSessionState,
-                  "hasNoCode:", hasNoCode);
+                  "hasNoCode:", hasNoCode,
+                  "hasLogoutParams:", hasLogoutParams);
       // Clear logout flags when we detect a proper logout callback
       sessionStorage.removeItem('keycloak_logout_in_progress');
       sessionStorage.removeItem('keycloak_logout_processed');

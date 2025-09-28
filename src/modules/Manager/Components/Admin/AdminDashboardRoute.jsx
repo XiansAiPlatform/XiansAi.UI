@@ -2,13 +2,13 @@ import React from "react";
 import { useTenant } from "../../contexts/TenantContext";
 import AdminDashboard from "./AdminDashboard";
 import NotAuthorized from "../NotAuthorized/NotAuthorized";
-import LoadingSpinner from "../../../../components/LoadingSpinner";
+import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 
 export default function AdminDashboardRoute() {
   const { userRoles, isLoading } = useTenant();
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <EnhancedLoadingSpinner />;
   }
 
   // Check if user has sysadmin role

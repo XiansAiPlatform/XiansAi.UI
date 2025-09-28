@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useUserApi } from "../../services/user-api";
-import LoadingSpinner from "../../../../components/LoadingSpinner";
+import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useAuth } from "../../auth/AuthContext";
 import { useTenantsApi } from "../../services/tenants-api";
 import { useSlider } from "../../contexts/SliderContext";
@@ -232,7 +232,7 @@ export default function UserManagement() {
       </Box>
 
       {loading ? (
-        <LoadingSpinner />
+        <EnhancedLoadingSpinner showRefreshOption={false} height="400px" />
       ) : (
         <>
           <Stack spacing={2}>

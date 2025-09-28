@@ -14,7 +14,7 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useUserTenantApi } from "../../services/user-tenant-api";
-import LoadingSpinner from "../../../../components/LoadingSpinner";
+import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useTenant } from "../../contexts/TenantContext";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -94,7 +94,7 @@ export default function ApproveUserRequests() {
         <Typography variant="h6" mb={2}>
           Approve User Requests
         </Typography>
-        <LoadingSpinner />
+        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
       </Box>
     );
   }
@@ -120,7 +120,7 @@ export default function ApproveUserRequests() {
       </Typography>
 
       {loading ? (
-        <LoadingSpinner />
+        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
       ) : (
         <>
           {requests.length === 0 ? (

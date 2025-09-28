@@ -33,7 +33,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import { useUserApi } from "../../services/user-api";
 import { useUserTenantApi } from "../../services/user-tenant-api";
-import LoadingSpinner from "../../../../components/LoadingSpinner";
+import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useAuth } from "../../auth/AuthContext";
 import { useTenant } from "../../contexts/TenantContext";
 import { useSlider } from "../../contexts/SliderContext";
@@ -250,7 +250,7 @@ export default function TenantUserManagement() {
   };
 
   if (tenantLoading) {
-    return <LoadingSpinner />;
+    return <EnhancedLoadingSpinner showRefreshOption={false} height="400px" />;
   }
 
   if (!tenant?.tenantId) {
@@ -324,7 +324,7 @@ export default function TenantUserManagement() {
       </Box>
 
       {loading ? (
-        <LoadingSpinner />
+        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
       ) : (
         <>
           <Table>

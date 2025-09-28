@@ -39,9 +39,20 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
       
       if (isLogoutCallback) {
         // Handle logout callback - redirect to login page
-        console.log("AuthContext: Detected logout callback, redirecting to login");
+        console.log("AuthContext: Detected logout callback, current URL:", window.location.href);
+        console.log("AuthContext: Redirecting to login page");
         setIsLoading(false);
-        window.location.replace('/login');
+        
+        // Clean up URL parameters before redirecting
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+        
+        // Use a small delay to ensure URL cleanup happens before redirect
+        setTimeout(() => {
+          console.log("AuthContext: Executing redirect to /login");
+          window.location.replace('/login');
+        }, 100);
         return;
       } else if (!isInCallbackFlow) {
         // Normal init if not in a callback URL

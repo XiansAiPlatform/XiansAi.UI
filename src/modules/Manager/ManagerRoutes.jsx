@@ -24,6 +24,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
 import { useNavigate } from 'react-router-dom';
 import AdminDashboardRoute from './Components/Admin/AdminDashboardRoute';
+import EnhancedLoadingSpinner from '../../components/EnhancedLoadingSpinner';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -34,11 +35,11 @@ function ManagerRoutes() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <EnhancedLoadingSpinner message="Loading..." />;
   }
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin });
+    logout({ returnTo: window.location.origin + '/manager/login' });
   };
   return (
     <NotificationProvider>
