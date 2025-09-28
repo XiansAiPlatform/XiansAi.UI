@@ -93,12 +93,12 @@ const FeatureSection = styled(Box)(({ theme }) => ({
 
 const FeatureGrid = styled(Box)(({ theme }) => ({
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(3, 1fr)',
     gap: theme.spacing(3),
     maxWidth: '1200px',
     margin: '0 auto',
     [theme.breakpoints.down('md')]: {
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: theme.spacing(2.5),
     },
     [theme.breakpoints.down('sm')]: {
@@ -111,10 +111,15 @@ const FeatureCard = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(4),
     background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)',
     border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '16px',
+    borderRadius: '8px',
     backdropFilter: 'blur(10px)',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     cursor: 'pointer',
+    aspectRatio: '1 / 1',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    height: 'auto',
     '&:hover': {
         transform: 'translateY(-4px)',
         borderColor: 'rgba(14, 165, 233, 0.2)',
@@ -126,11 +131,13 @@ const FeatureCard = styled(Paper)(({ theme }) => ({
     },
     [theme.breakpoints.down('md')]: {
         padding: theme.spacing(3),
-        borderRadius: '12px',
+        borderRadius: '8px',
+        aspectRatio: '1 / 1',
     },
     [theme.breakpoints.down('sm')]: {
         padding: theme.spacing(2.5),
-        borderRadius: '12px',
+        borderRadius: '8px',
+        aspectRatio: 'auto',
         '&:hover': {
             transform: 'translateY(-2px)',
         },
@@ -138,12 +145,15 @@ const FeatureCard = styled(Paper)(({ theme }) => ({
 }));
 
 const FeatureIcon = styled(Box)(({ theme }) => ({
-    fontSize: '2.5rem',
+    fontSize: '4.5rem',
     color: '#64748b',
-    marginBottom: theme.spacing(3),
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(4),
     transition: 'all 0.3s ease',
     display: 'flex',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '120px',
 }));
 
 // Nordic badge/chip styling
@@ -368,6 +378,7 @@ export default function NewHome() {
                                     letterSpacing: '-0.01em',
                                     color: '#ffffff',
                                     mb: 2
+                                    
                                 }}
                             >
                                 SDK First
