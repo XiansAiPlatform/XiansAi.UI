@@ -73,7 +73,7 @@ export const useApiClient = () => {
       return {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-Tenant-Id': selectedOrg || 'default',
+        'X-Tenant-Id': selectedOrg,
       };
     };
 

@@ -103,7 +103,7 @@ const TenantAuthSettings = () => {
       }
 
       // Inject tenantId as requested
-      parsed.tenantId = selectedOrg || 'default';
+      parsed.tenantId = selectedOrg;
 
       if (existingConfig) {
         await api.updateTenantConfig(parsed);

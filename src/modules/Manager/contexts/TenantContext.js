@@ -52,7 +52,7 @@ export const TenantProvider = ({ children }) => {
           return {
             tenantId: tenantId,
             id: tenantId,
-            name: tenantId === 'default' ? 'Default Tenant' : tenantId,
+            name: tenantId,
             domain: tenantId
           };
         }
@@ -61,12 +61,12 @@ export const TenantProvider = ({ children }) => {
       }
 
       // Final fallback: create a default tenant if nothing else works
-      const fallbackTenantId = localStorage.getItem('selectedOrganization') || 'default';
+      const fallbackTenantId = localStorage.getItem('selectedOrganization');
       console.warn(`Creating fallback tenant with ID: ${fallbackTenantId}`);
       return {
         tenantId: fallbackTenantId,
         id: fallbackTenantId,
-        name: fallbackTenantId === 'default' ? 'Default Tenant' : fallbackTenantId,
+        name: fallbackTenantId,
         domain: fallbackTenantId
       };
       
