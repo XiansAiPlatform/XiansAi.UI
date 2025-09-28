@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Typography, Container, TextField, Button, MenuItem } from '@mui/material';
+import { Box, Typography, Container, TextField, Button, MenuItem, Alert, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { FiArrowLeft, FiHome, FiSend } from 'react-icons/fi';
+import { FiArrowLeft, FiHome, FiSend, FiCheck, FiExternalLink } from 'react-icons/fi';
 import { useAuth } from '../../../Manager/auth/AuthContext';
 import { AuthInfoMessage, UnauthenticatedMessage, RegisterFooter } from './components/SharedComponents';
+import { useRegistrationApi } from '../../services/registration-api';
 
 // Nordic-inspired styled components (reusing from RegisterJoin for consistency)
 const PageContainer = styled(Box)(({ theme }) => ({
@@ -91,7 +92,7 @@ const FormGrid = styled(Box)(({ theme }) => ({
 const StyledTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02) !important',
     borderRadius: '12px',
     fontSize: '1rem',
     fontWeight: 300,
@@ -106,6 +107,28 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     '&.Mui-focused fieldset': {
       borderColor: '#0ea5e9',
       borderWidth: '2px',
+    },
+    // Force background for all input types
+    '& input': {
+      backgroundColor: 'transparent !important',
+      '&:-webkit-autofill': {
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
+        WebkitTextFillColor: '#ffffff !important',
+        backgroundColor: 'rgba(255, 255, 255, 0.02) !important',
+        transition: 'background-color 5000s ease-in-out 0s',
+      },
+      '&:-webkit-autofill:hover': {
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
+        WebkitTextFillColor: '#ffffff !important',
+      },
+      '&:-webkit-autofill:focus': {
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
+        WebkitTextFillColor: '#ffffff !important',
+      },
+      '&:-webkit-autofill:active': {
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
+        WebkitTextFillColor: '#ffffff !important',
+      },
     },
   },
   '& .MuiInputLabel-root': {
@@ -122,6 +145,16 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     '&::placeholder': {
       color: '#64748b',
       opacity: 1,
+    },
+  },
+  '& .MuiFormHelperText-root': {
+    color: '#64748b',
+    fontSize: '0.75rem',
+    fontWeight: 400,
+    marginTop: theme.spacing(0.5),
+    marginLeft: theme.spacing(1.75),
+    '&.Mui-error': {
+      color: '#ef4444',
     },
   },
 }));
@@ -196,14 +229,21 @@ const NavLink = styled(Link)(({ theme }) => ({
 export default function RegisterNew() {
   const navigate = useNavigate();
   const auth = useAuth();
-  const { user, isAuthenticated } = auth;
+  const { user, isAuthenticated, getAccessTokenSilently } = auth;
+  const registrationApi = useRegistrationApi();
 
   const [formData, setFormData] = useState({
+    tenantId: '',
     tenantName: '',
     companyUrl: '',
     companyEmail: '',
     subscription: 'Free',
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [createdTenant, setCreatedTenant] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -215,10 +255,60 @@ export default function RegisterNew() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const validateTenantId = (tenantId) => {
+    if (!tenantId) return '';
+    if (tenantId.length > 100) return 'Tenant ID must be 100 characters or less';
+    if (!/^[a-zA-Z0-9._-]+$/.test(tenantId)) return 'Tenant ID can only contain letters, numbers, dots, underscores, and hyphens';
+    return '';
+  };
+
+  const tenantIdError = validateTenantId(formData.tenantId);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // TODO: Implement new tenant creation logic
+    setSubmitError(null);
+    
+    // Validate form before submission
+    if (tenantIdError) {
+      setSubmitError('Please fix the validation errors before submitting.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+
+    try {
+      // Get access token for API call
+      const accessToken = await getAccessTokenSilently();
+      if (!accessToken) {
+        throw new Error('Failed to get access token. Please try logging in again.');
+      }
+
+      // Prepare tenant data for API call
+      const tenantData = {
+        tenantId: formData.tenantId.trim(),
+        name: formData.tenantName.trim(),
+        domain: formData.companyUrl.trim(),
+        description: `${formData.tenantName} - ${formData.subscription} plan`
+      };
+
+      // Call the API to create the tenant
+      const response = await registrationApi.createTenant(tenantData, accessToken);
+      
+      if (response.success) {
+        setCreatedTenant({
+          tenantId: response.tenantId,
+          name: formData.tenantName
+        });
+        setIsSuccess(true);
+      } else {
+        throw new Error(response.message || 'Failed to create tenant');
+      }
+    } catch (error) {
+      console.error('Error creating tenant:', error);
+      setSubmitError(error.message || 'Failed to create tenant. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleBack = () => {
@@ -232,7 +322,7 @@ export default function RegisterNew() {
         
         {!isAuthenticated && <UnauthenticatedMessage />}
         
-        {isAuthenticated && (
+        {isAuthenticated && !isSuccess && (
           <FormContainer>
             <TitleSection>
               <StepIndicator>Step 2 of 2</StepIndicator>
@@ -250,9 +340,28 @@ export default function RegisterNew() {
               </Typography>
             </TitleSection>
 
+            {submitError && (
+              <Alert severity="error" sx={{ mb: 3 }}>
+                {submitError}
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit}>
               <FormGrid>
                 <Box>
+                  <StyledTextField
+                    fullWidth
+                    label="Tenant ID"
+                    name="tenantId"
+                    value={formData.tenantId}
+                    onChange={handleChange}
+                    placeholder="my-company"
+                    required
+                    variant="outlined"
+                    helperText={tenantIdError || "Unique identifier for your tenant (letters, numbers, dots, underscores, and hyphens only)"}
+                    error={!!tenantIdError}
+                    disabled={isSubmitting}
+                  />
                   <StyledTextField
                     fullWidth
                     label="Tenant Name"
@@ -262,6 +371,7 @@ export default function RegisterNew() {
                     placeholder="My Company Workspace"
                     required
                     variant="outlined"
+                    disabled={isSubmitting}
                   />
                   <StyledTextField
                     fullWidth
@@ -273,6 +383,7 @@ export default function RegisterNew() {
                     placeholder="https://mycompany.com"
                     required
                     variant="outlined"
+                    disabled={isSubmitting}
                   />
                 </Box>
                 <Box>
@@ -286,6 +397,7 @@ export default function RegisterNew() {
                     placeholder="admin@mycompany.com"
                     required
                     variant="outlined"
+                    disabled={isSubmitting}
                   />
                   <StyledTextField
                     fullWidth
@@ -295,10 +407,10 @@ export default function RegisterNew() {
                     value={formData.subscription}
                     onChange={handleChange}
                     variant="outlined"
+                    disabled={isSubmitting}
                   >
-                    <MenuItem value="Free">Free - Basic features</MenuItem>
-                    <MenuItem value="Standard">Standard - Enhanced capabilities</MenuItem>
-                    <MenuItem value="Enterprise">Enterprise - Full feature set</MenuItem>
+                    <MenuItem value="Free">Free - Limited Agent Runs</MenuItem>
+
                   </StyledTextField>
                 </Box>
               </FormGrid>
@@ -309,6 +421,7 @@ export default function RegisterNew() {
                   onClick={handleBack}
                   startIcon={<FiArrowLeft />}
                   sx={{ flex: 1 }}
+                  disabled={isSubmitting}
                 >
                   Back
                 </ActionButton>
@@ -319,6 +432,7 @@ export default function RegisterNew() {
                   to="/"
                   startIcon={<FiHome />}
                   sx={{ flex: 1 }}
+                  disabled={isSubmitting}
                 >
                   Home
                 </ActionButton>
@@ -326,13 +440,83 @@ export default function RegisterNew() {
                 <ActionButton
                   variant="primary"
                   type="submit"
-                  startIcon={<FiSend />}
+                  startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : <FiSend />}
                   sx={{ flex: 2 }}
+                  disabled={isSubmitting || !!tenantIdError}
                 >
-                  Create Tenant
+                  {isSubmitting ? 'Creating...' : 'Create Tenant'}
                 </ActionButton>
               </ButtonContainer>
             </form>
+          </FormContainer>
+        )}
+
+        {isAuthenticated && isSuccess && createdTenant && (
+          <FormContainer>
+            <TitleSection>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  width: '80px', 
+                  height: '80px', 
+                  borderRadius: '50%', 
+                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.3)'
+                }}>
+                  <FiCheck size={40} color="white" />
+                </Box>
+              </Box>
+              <MainTitle sx={{ color: '#10b981', mb: 2 }}>
+                Tenant Created Successfully!
+              </MainTitle>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: '#94a3b8',
+                  fontSize: '1.125rem',
+                  fontWeight: 300,
+                  lineHeight: 1.6,
+                  textAlign: 'center',
+                  mb: 3
+                }}
+              >
+                Your tenant <strong style={{ color: '#0ea5e9' }}>{createdTenant.name}</strong> has been created successfully.
+                You have been assigned as the tenant administrator.
+              </Typography>
+            </TitleSection>
+
+            <Alert severity="success" sx={{ mb: 4 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                <strong>Tenant ID:</strong> {createdTenant.tenantId}
+              </Typography>
+              <Typography variant="body2">
+                You can now access your dashboard and start managing your tenant.
+              </Typography>
+            </Alert>
+            
+            <ButtonContainer>
+              <ActionButton
+                variant="secondary"
+                component={Link}
+                to="/"
+                startIcon={<FiHome />}
+                sx={{ flex: 1 }}
+              >
+                Home
+              </ActionButton>
+              
+              <ActionButton
+                variant="primary"
+                component={Link}
+                to="/manager"
+                startIcon={<FiExternalLink />}
+                sx={{ flex: 2 }}
+              >
+                Access Dashboard
+              </ActionButton>
+            </ButtonContainer>
           </FormContainer>
         )}
       </MainContent>

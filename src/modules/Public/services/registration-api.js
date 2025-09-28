@@ -23,6 +23,30 @@ export const useRegistrationApi = () => {
           console.error('Failed to submit tenant join request:', error);
           throw error;
         }
+      },
+
+      // Create new tenant request
+      createTenant: async (tenantData, userToken) => {
+        try {
+          const response = await apiClient.post('/api/public/register/new-tenant', 
+            {
+              TenantId: tenantData.tenantId,
+              Name: tenantData.name,
+              Domain: tenantData.domain,
+              Description: tenantData.description
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${userToken}`
+              }
+            }
+          );
+          
+          return response;
+        } catch (error) {
+          console.error('Failed to create new tenant:', error);
+          throw error;
+        }
       }
     };
   }, [apiClient]);

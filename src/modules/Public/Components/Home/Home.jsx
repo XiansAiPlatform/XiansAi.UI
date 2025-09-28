@@ -74,7 +74,6 @@ const HeroSubtitle = styled(Typography)(({ theme }) => ({
     marginBottom: theme.spacing(4),
     maxWidth: '600px',
     margin: '0 auto',
-    marginBottom: theme.spacing(4),
 }));
 
 // Nordic feature section
@@ -196,7 +195,7 @@ const NordicFooter = styled(Box)(({ theme }) => ({
 
 export default function NewHome() {
     const navigate = useNavigate();
-    const { isAuthenticated, login, logout, isLoading } = useAuth();
+    const { isAuthenticated, login, isLoading } = useAuth();
 
     // Show loading animation while authentication is being initialized
     if (isLoading) {

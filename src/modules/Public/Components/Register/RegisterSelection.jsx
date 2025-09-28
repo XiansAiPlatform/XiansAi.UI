@@ -238,7 +238,10 @@ export default function RegisterSelection() {
             {isAuthenticated && <SelectionArrow className="selection-arrow" />}
           </SelectionCard>
           
-          <SelectionCard disabled>
+          <SelectionCard 
+            disabled={!isAuthenticated}
+            onClick={() => isAuthenticated && handleSelection(false)}
+          >
             <SelectionIcon className="selection-icon">
               <FiPlusCircle />
             </SelectionIcon>
@@ -246,24 +249,7 @@ export default function RegisterSelection() {
             <SelectionDescription>
               Start fresh with a new tenant workspace. Perfect for new organizations or independent projects.
             </SelectionDescription>
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: '#ef4444',
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  padding: '0.25rem 0.75rem',
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)'
-                }}
-              >
-                Coming Soon
-              </Typography>
-            </Box>
+            {isAuthenticated && <SelectionArrow className="selection-arrow" />}
           </SelectionCard>
         </SelectionGrid>
       </MainContent>
