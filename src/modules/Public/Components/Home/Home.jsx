@@ -119,7 +119,7 @@ export default function NewHome() {
                                 marginBottom: 2
                             }}
                         >
-                            AI Workflow Platform
+                            Agent Development Kit
                         </Typography>
                         <Typography
                             variant="h5"
@@ -129,7 +129,7 @@ export default function NewHome() {
                                 color: '#e4e4e7'
                             }}
                         >
-                            Enterprise Agent Development Kit
+                            Enterprise-grade Agent Platform for Building Complex AI Workflows
                         </Typography>
                     </HeaderSection>
 
@@ -187,14 +187,6 @@ export default function NewHome() {
                     </div>
 
                     <ContentSection elevation={0}>
-                        <Typography variant="h4" gutterBottom sx={{
-                            fontWeight: 600,
-                            marginBottom: 3,
-                            color: '#ffffff'
-                        }}>
-                            Enterprise-Grade AI Agent Platform
-                        </Typography>
-
                         <Typography variant="body1" paragraph sx={{
                             fontSize: '1.1rem',
                             lineHeight: 1.6,
@@ -211,10 +203,10 @@ export default function NewHome() {
                                 <FiUsers size={24} style={{ color: '#0ea5e9' }} />
                                 <Box>
                                     <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 600 }}>
-                                        Dual Agent Architecture
+                                        Agent Development SDK
                                     </Typography>
                                     <Typography variant="body2" sx={{ color: '#e4e4e7' }}>
-                                        Build both conversational AI agents and deterministic business process workflows with seamless handoffs
+                                        Full-featured SDK for building complex AI workflows. Available for .NET at <a href="https://www.nuget.org/packages/XiansAi.Lib" target="_blank" rel="noopener noreferrer">Xians.Lib</a>.
                                     </Typography>
                                 </Box>
                             </FeatureCard>
@@ -223,10 +215,10 @@ export default function NewHome() {
                                 <FiZap size={24} style={{ color: '#0ea5e9' }} />
                                 <Box>
                                     <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 600 }}>
-                                        Enterprise Management Portal
+                                        Agent Management Portal
                                     </Typography>
                                     <Typography variant="body2" sx={{ color: '#e4e4e7' }}>
-                                        Complete web interface for agent management, knowledge administration, and workflow monitoring
+                                        Complete web interface for agent management, knowledge administration, and workflow monitoring. Available at <a href="https://github.com/XiansAiPlatform/community-edition" target="_blank" rel="noopener noreferrer">Xians Community Edition</a>.
                                     </Typography>
                                 </Box>
                             </FeatureCard>
