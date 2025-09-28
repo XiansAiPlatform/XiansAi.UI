@@ -6,6 +6,7 @@ import { useAuth } from '../../auth/AuthContext';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import MenuIcon from '@mui/icons-material/Menu';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
@@ -136,6 +137,13 @@ const Header = ({ pageTitle = "", toggleNav }) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleJoinTenant = () => {
+    // Close the menu
+    handleClose();
+    // Navigate to the register page
+    navigate('/register');
   };
 
   const handleLogout = () => {
@@ -385,6 +393,22 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                 </Typography>
               )}
             </Box>
+            <MenuItem
+              className="user-menu-item join-tenant"
+              onClick={handleJoinTenant}
+              sx={{
+                gap: '8px',
+                margin: '4px',
+                borderRadius: 'var(--radius-md)',
+                '&:hover': {
+                  backgroundColor: 'var(--bg-hover)',
+                  fontWeight: 500
+                }
+              }}
+            >
+              <GroupAddIcon fontSize="small" />
+              Join a Tenant
+            </MenuItem>
             <MenuItem
               className="user-menu-item logout"
               onClick={handleLogout}
