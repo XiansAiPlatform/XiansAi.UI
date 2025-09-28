@@ -85,6 +85,7 @@ const Callback = () => {
     
     // Only redirect if successfully authenticated
     if (isAuthenticated && !error) {
+      console.log("Callback: Successfully authenticated, redirecting to /manager/definitions");
       navigate('/manager/definitions');
     }
   }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError, providerInstance, isAccountConflictError]);

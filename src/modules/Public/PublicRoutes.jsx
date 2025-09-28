@@ -10,7 +10,7 @@ function PublicRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/register" element={
+      <Route path="/register/*" element={
         <NotificationProvider>
           <OrganizationProvider>
             <Register />

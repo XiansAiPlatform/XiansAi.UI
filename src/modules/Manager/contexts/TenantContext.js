@@ -106,7 +106,7 @@ export const TenantProvider = ({ children }) => {
         }
 
         // Skip tenant loading for public routes
-        const publicPaths = ['/', '/login', '/register', '/callback'];
+        const publicPaths = ['/', '/login', '/register', '/register/join', '/register/new', '/callback'];
         if (publicPaths.includes(location.pathname)) {
           setIsLoading(false);
           return;

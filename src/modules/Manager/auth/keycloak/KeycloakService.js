@@ -19,6 +19,7 @@ class KeycloakService {
 
     this.onAuthStateChangedCallback = () => {};
     this.isLoggingOut = false;
+    this.callbackProcessed = false; // Flag to prevent infinite callback processing
   }
 
   async init() {
@@ -77,6 +78,9 @@ class KeycloakService {
 
   async login() {
     try {
+      // Reset callback processed flag when initiating new login
+      this.callbackProcessed = false;
+      
       await this.keycloakInstance.login({
         redirectUri: `${window.location.origin}/callback`,
       });
@@ -93,6 +97,7 @@ class KeycloakService {
     try {
       console.log("KeycloakService: Starting logout process");
       this.isLoggingOut = true;
+      this.callbackProcessed = false; // Reset callback flag on logout
       
       // Set a flag to indicate logout is in progress
       sessionStorage.setItem('keycloak_logout_in_progress', 'true');
@@ -184,6 +189,30 @@ class KeycloakService {
       console.log("KeycloakService: Handling redirect callback");
       console.log("KeycloakService: Current URL:", window.location.href);
       
+      // Check if we have callback parameters on a non-callback URL
+      const validCallbackUrls = ['/callback', '/register', '/register/join', '/register/new', '/'];
+      const isValidCallbackUrl = validCallbackUrls.some(path => 
+        window.location.pathname === path || window.location.pathname.startsWith(path + '/')
+      );
+      const hasCallbackParams = this.isInCallbackFlow();
+      
+      if (hasCallbackParams && !isValidCallbackUrl) {
+        console.log("KeycloakService: Found callback parameters on non-valid callback URL:", window.location.pathname);
+        console.log("KeycloakService: This indicates a misconfigured redirect URI. Redirecting to proper callback URL.");
+        
+        // Mark callback as processed to prevent infinite loops
+        this.callbackProcessed = true;
+        
+        // Instead of just cleaning up, redirect to the proper callback URL with the parameters
+        // This ensures proper callback handling while avoiding infinite loops
+        const callbackUrl = `${window.location.origin}/callback${window.location.hash}`;
+        console.log("KeycloakService: Redirecting to proper callback URL:", callbackUrl);
+        
+        // Use replace to avoid back button issues
+        window.location.replace(callbackUrl);
+        return false; // Don't proceed with init, let the redirect handle it
+      }
+      
       // Check if this is a logout callback using multiple detection methods
       const wasLoggingOut = sessionStorage.getItem('keycloak_logout_in_progress') === 'true';
       const hasLogoutIndicators = this.isLogoutCallback();
@@ -221,6 +250,7 @@ class KeycloakService {
       
       // Normal login callback - proceed with initialization
       console.log("KeycloakService: Processing login callback");
+      this.callbackProcessed = true; // Mark as processed to prevent re-processing
       return await this.init();
     } catch (error) {
       console.error(
@@ -295,6 +325,11 @@ class KeycloakService {
 
   // Generic method to detect if we're in a callback flow
   isInCallbackFlow() {
+    // If we've already processed a callback, don't detect it again to prevent loops
+    if (this.callbackProcessed) {
+      return false;
+    }
+    
     // Only return true for LOGIN callbacks, not logout callbacks
     // Logout callbacks should be handled separately by isLogoutCallback()
     const hasLoginCallback = (window.location.hash.includes("code=") && window.location.hash.includes("state=")) ||
@@ -310,7 +345,7 @@ class KeycloakService {
     
     // Check for Keycloak-specific logout callback parameters
     const hasLogoutParams = currentUrl.includes('post_logout_redirect_u') || 
-                           currentUrl.includes('client_id=') && !currentUrl.includes('code=');
+                           (currentUrl.includes('client_id=') && !currentUrl.includes('code='));
     
     // Check for explicit logout completion indicators
     const hasSessionState = hash.includes("session_state=") || search.includes("session_state=");

@@ -19,7 +19,8 @@ export function OrganizationProvider({ children }) {
   
   useEffect(() => {
     const initializeOrg = async () => {
-      const publicPaths = ['/', '/login', '/register', '/callback'];
+      const publicPaths = ['/', '/login', '/register', '/register/join', '/register/new', '/callback'];
+      
       // Wait for auth loading to complete before checking isAuthenticated
       if (isAuthLoading) {
         setIsOrgLoading(true); // Keep org loading true while auth is loading
@@ -32,7 +33,14 @@ export function OrganizationProvider({ children }) {
         return;
       }
       
-      if (!isAuthenticated || publicPaths.includes(location.pathname)) {
+      // Skip org initialization for public paths entirely, regardless of auth status
+      if (publicPaths.includes(location.pathname) || location.pathname.startsWith('/register')) {
+        setIsOrgLoading(false);
+        return;
+      }
+      
+      // Only proceed with org initialization if user is authenticated and not on public paths
+      if (!isAuthenticated) {
         setIsOrgLoading(false);
         return;
       }
@@ -63,18 +71,18 @@ export function OrganizationProvider({ children }) {
             setSelectedOrg(orgs[0]);
             localStorage.setItem(STORAGE_KEY, orgs[0]);
           } else {
-            // Only show organization errors for authenticated protected routes
-            if (!publicPaths.includes(location.pathname)) {
-              showError('No organizations available for this user');
-            }
+        // Only show organization errors for authenticated protected routes
+        if (!publicPaths.includes(location.pathname) ) {
+          showError('No organizations available for this user');
+        }
           }
-        } else if (location.pathname !== "/" && location.pathname !== "/register" && location.pathname !== "/login") {
+        } else if (location.pathname !== "/" && location.pathname !== "/login" && !location.pathname.startsWith('/register')) {
           navigate('/register');
         }
       } catch (error) {
         console.error('Error initializing organization:', error);
         // Only show organization errors for authenticated protected routes
-        if (!publicPaths.includes(location.pathname)) {
+        if (!publicPaths.includes(location.pathname) ) {
           showError('Failed to load organization information');
         }
       } finally {
