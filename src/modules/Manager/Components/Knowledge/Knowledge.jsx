@@ -59,12 +59,15 @@ const Knowledge = () => {
         try {
           // Get all knowledge items with full content if search query is substantial
           const fullKnowledgeItems = await knowledgeApi.getLatestKnowledge();
-          const results = fullKnowledgeItems.filter(item => 
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
-          ).filter(item => !selectedAgent || item.agent === selectedAgent);
-          
-          setSearchResults(results);
+          // Handle case where API client redirects on 403 and returns undefined
+          if (fullKnowledgeItems !== undefined) {
+            const results = fullKnowledgeItems.filter(item => 
+              item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
+            ).filter(item => !selectedAgent || item.agent === selectedAgent);
+            
+            setSearchResults(results);
+          }
         } catch (error) {
           console.error('Error searching knowledge content:', error);
         } finally {
@@ -91,7 +94,10 @@ const Knowledge = () => {
       setIsLoadingAgents(true);
       try {
         const response = await agentsApi.getAllAgents();
-        setAgents(response.data || response || []);
+        // Handle case where API client redirects on 403 and returns undefined
+        if (response !== undefined) {
+          setAgents(response.data || response || []);
+        }
       } catch (error) {
         console.error('Failed to fetch agents:', error);
       } finally {
@@ -107,9 +113,12 @@ const Knowledge = () => {
       setLoading(true);
       try {
         const data = await knowledgeApi.getLatestKnowledge();
-        // Sort knowledge by createdAt in descending order
-        const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setKnowledgeItems(sortedData);
+        // Handle case where API client redirects on 403 and returns undefined
+        if (data !== undefined) {
+          // Sort knowledge by createdAt in descending order
+          const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setKnowledgeItems(sortedData);
+        }
       } catch (error) {
         console.error('Failed to fetch knowledge:', error);
         await handleApiError(error, 'Failed to fetch knowledge items', showError);
@@ -126,8 +135,12 @@ const Knowledge = () => {
     setIsLoadingItem(true);
     try {
       const data = await knowledgeApi.getKnowledge(id);
-      setActiveKnowledge(data);
-      return data;
+      // Handle case where API client redirects on 403 and returns undefined
+      if (data !== undefined) {
+        setActiveKnowledge(data);
+        return data;
+      }
+      return null;
     } catch (error) {
       console.error('Failed to fetch knowledge by ID:', error);
       await handleApiError(error, 'Failed to load knowledge details', showError);
@@ -148,8 +161,11 @@ const Knowledge = () => {
             await knowledgeApi.createKnowledge(newKnowledge);
             // Fetch fresh data after creating
             const updatedKnowledge = await knowledgeApi.getLatestKnowledge();
-            const sortedKnowledge = updatedKnowledge.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            setKnowledgeItems(sortedKnowledge);
+            // Handle case where API client redirects on 403 and returns undefined
+            if (updatedKnowledge !== undefined) {
+              const sortedKnowledge = updatedKnowledge.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+              setKnowledgeItems(sortedKnowledge);
+            }
             closeSlider();
             showSuccess('Knowledge created successfully');
           } catch (error) {
@@ -171,8 +187,11 @@ const Knowledge = () => {
       await knowledgeApi.createKnowledge(updatedKnowledge);
       // Fetch fresh data after updating
       const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge();
-      const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setKnowledgeItems(sortedKnowledgeItems);
+      // Handle case where API client redirects on 403 and returns undefined
+      if (updatedKnowledgeItems !== undefined) {
+        const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setKnowledgeItems(sortedKnowledgeItems);
+      }
       closeSlider();
       showSuccess('Knowledge updated successfully');
     } catch (error) {
@@ -190,8 +209,11 @@ const Knowledge = () => {
       if (success) {
         // Fetch fresh data after deletion
         const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge();
-        const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setKnowledgeItems(sortedKnowledgeItems);
+        // Handle case where API client redirects on 403 and returns undefined
+        if (updatedKnowledgeItems !== undefined) {
+          const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setKnowledgeItems(sortedKnowledgeItems);
+        }
         closeSlider();
         showSuccess('All versions deleted successfully');
       }
@@ -214,8 +236,11 @@ const Knowledge = () => {
       if (success) {
         // Fetch fresh data after creating
         const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge();
-        const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setKnowledgeItems(sortedKnowledgeItems);
+        // Handle case where API client redirects on 403 and returns undefined
+        if (updatedKnowledgeItems !== undefined) {
+          const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          setKnowledgeItems(sortedKnowledgeItems);
+        }
         closeSlider();
         showSuccess('Version deleted successfully');
       }
