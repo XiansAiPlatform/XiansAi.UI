@@ -1,7 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import { useDefinitions } from './useDefinitions';
 import { useSlider } from '../../contexts/SliderContext';
-import DefinitionListHeader, { getHeaderActions } from './DefinitionListHeader';
+import { getHeaderActions } from './DefinitionListHeader';
 import AgentGroup from './AgentGroup';
 import DefinitionActions from './DefinitionActions';
 import EmptyState from './EmptyState';

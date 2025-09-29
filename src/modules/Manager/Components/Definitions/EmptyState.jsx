@@ -1,4 +1,4 @@
-import { Box, Typography, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import PageLayout from '../Common/PageLayout';
 import { getHeaderActions } from './DefinitionListHeader';
 

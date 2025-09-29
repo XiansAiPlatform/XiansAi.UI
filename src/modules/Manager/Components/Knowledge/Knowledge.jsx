@@ -4,12 +4,10 @@ import {
   Typography,
   Fab,
   CircularProgress,
-  TextField,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
-  InputAdornment,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -22,7 +20,6 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import PageLayout from '../Common/PageLayout';
 import PageFilters from '../Common/PageFilters';
-import SearchIcon from '@mui/icons-material/Search';
 
 const Knowledge = () => {
   const [knowledgeItems, setKnowledgeItems] = useState([]);
