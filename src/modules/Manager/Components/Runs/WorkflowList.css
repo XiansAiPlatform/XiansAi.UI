@@ -10,6 +10,8 @@
   --status-total-color: #424242;
   --status-continuedAsNew-bg: #e1bee7;
   --status-continuedAsNew-color: #4a148c;
+  --status-failed-bg: #ffecb3;
+  --status-failed-color: #e65100;
 }
 
 /* Responsive container */
@@ -366,6 +368,22 @@
   justify-content: center;
 }
 
+.failed-indicator {
+  height: 24px;
+  padding: 0 var(--spacing-md);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  background-color: var(--status-failed-bg);
+  color: var(--status-failed-color);
+  border: 1px solid rgba(230, 81, 0, 0.2);
+  min-width: 70px;
+  justify-content: center;
+}
+
 @keyframes pulse {
   0% {
     background-color: var(--status-running-bg);
@@ -402,7 +420,8 @@
   .running-indicator,
   .continuedAsNew-indicator,
   .completed-indicator,
-  .terminated-indicator {
+  .terminated-indicator,
+  .failed-indicator {
     height: 20px;
     font-size: var(--text-xs);
     min-width: 60px;
@@ -424,7 +443,8 @@
   .running-indicator,
   .continuedAsNew-indicator,
   .completed-indicator,
-  .terminated-indicator {
+  .terminated-indicator,
+  .failed-indicator {
     flex: 1;
     min-width: 0;
     justify-content: center;
@@ -690,6 +710,8 @@
 .MuiToggleButtonGroup-root .MuiToggleButton-root:hover {
   background-color: var(--bg-hover) !important;
   color: var(--text-primary) !important;
+  outline: none !important;
+  border-color: transparent !important;
 }
 
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected {
@@ -701,6 +723,8 @@
 
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected:hover {
   background-color: var(--bg-selected-hover, #e6f0fa) !important;
+  outline: none !important;
+  border-color: transparent !important;
 }
 
 /* These status-specific styles will be replaced by the more specific ones below */
@@ -708,6 +732,7 @@
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.completed,
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.continuedAsNew,
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.terminated,
+.MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.failed,
 .MuiToggleButtonGroup-root .MuiToggleButton-root.Mui-selected.total {
   /* Common styles reset */
 }
@@ -801,6 +826,13 @@
     color-mix(in srgb, var(--status-total-bg) 50%, white),
     color-mix(in srgb, var(--status-total-bg) 20%, white));
   color: var(--status-total-color);
+}
+
+.status-box.failed {
+  background: linear-gradient(145deg,
+    color-mix(in srgb, var(--status-failed-bg) 50%, white),
+    color-mix(in srgb, var(--status-failed-bg) 20%, white));
+  color: var(--status-failed-color);
 }
 
 @keyframes subtle-pulse {
@@ -921,6 +953,59 @@
   z-index: 5;
 }
 
+/* Enhanced combined filter container styles */
+.filter-controls .MuiBox-root {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Agent selector section styling */
+.filter-controls .MuiBox-root:first-child .MuiBox-root:first-child {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.02) 0%, rgba(25, 118, 210, 0.05) 100%);
+}
+
+/* Status filter section enhancements */
+.filter-controls .status-filter {
+  box-shadow: none !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+/* Remove dark outlines on hover and focus */
+.filter-controls * {
+  outline: none !important;
+}
+
+.filter-controls button:hover,
+.filter-controls button:focus,
+.MuiToggleButton-root:hover,
+.MuiToggleButton-root:focus,
+.MuiButton-root:hover,
+.MuiButton-root:focus,
+.MuiIconButton-root:hover,
+.MuiIconButton-root:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Mobile responsive improvements for combined filters */
+@media (max-width: 768px) {
+  .filter-controls .status-filter .MuiToggleButton-root {
+    min-height: 36px;
+    border-radius: 6px !important;
+    margin: 1px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    outline: none !important;
+  }
+  
+  .filter-controls .status-filter {
+    gap: 2px;
+    padding: 4px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 10px !important;
+  }
+}
+
 /* Ensure filters stay on top */
 .MuiToggleButtonGroup-root {
   position: relative;
@@ -988,27 +1073,52 @@
   z-index: 1;
 }
 
+.status-filter .MuiToggleButton-root.Mui-selected.failed {
+  background-color: rgba(255, 236, 179, 0.4) !important;
+  color: var(--status-failed-color) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 0 0 1px var(--status-failed-bg) inset !important;
+  z-index: 1;
+}
+
 .status-filter .MuiToggleButton-root.Mui-selected.running:hover {
   background-color: rgba(184, 224, 255, 0.5) !important;
   opacity: 1;
+  outline: none !important;
+  border-color: transparent !important;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.completed:hover {
   background-color: rgba(200, 230, 201, 0.5) !important;
   opacity: 1;
+  outline: none !important;
+  border-color: transparent !important;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.continuedAsNew:hover {
   background-color: rgba(225, 190, 231, 0.5) !important;
   opacity: 1;
+  outline: none !important;
+  border-color: transparent !important;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.terminated:hover {
   background-color: rgba(255, 205, 210, 0.5) !important;
   opacity: 1;
+  outline: none !important;
+  border-color: transparent !important;
 }
 
 .status-filter .MuiToggleButton-root.Mui-selected.total:hover {
   background-color: rgba(245, 245, 245, 0.8) !important;
   opacity: 1;
+  outline: none !important;
+  border-color: transparent !important;
+}
+
+.status-filter .MuiToggleButton-root.Mui-selected.failed:hover {
+  background-color: rgba(255, 236, 179, 0.5) !important;
+  opacity: 1;
+  outline: none !important;
+  border-color: transparent !important;
 }

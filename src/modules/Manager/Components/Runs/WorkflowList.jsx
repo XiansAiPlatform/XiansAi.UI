@@ -305,7 +305,7 @@ const WorkflowList = () => {
                   startIcon={<StopCircleIcon />}
                   size="small"
                 >
-                  Terminate all running
+                  Terminate All
                 </Button>
               )}
             </>
@@ -366,7 +366,7 @@ const WorkflowList = () => {
           alignItems: 'flex-start',
           mb: 3,
           flexDirection: 'column',
-          gap: 2,
+          gap: 0,
           px: isMobile ? 2 : 0,
           width: '100%',
           overflowX: 'auto',
@@ -374,94 +374,114 @@ const WorkflowList = () => {
           zIndex: 10
         }}
       >
-        {/* Agent Selector */}
+        {/* Combined Filters Container */}
         <Box sx={{ 
           display: 'flex', 
-          alignItems: 'center',
-          gap: 2,
+          flexDirection: 'column',
+          gap: 0,
           width: '100%',
-          p: 2,
           backgroundColor: 'var(--bg-surface)',
-          borderRadius: 2,
+          borderRadius: 3,
           border: '1px solid var(--border-color)',
+          overflow: 'hidden',
           transition: 'all 0.2s ease',
-          '&:hover': {
-            borderColor: 'var(--border-hover)',
-            boxShadow: 'var(--shadow-sm)',
-          }
         }}>
+          {/* Agent Filter Section */}
           <Box sx={{ 
             display: 'flex', 
-            alignItems: 'center', 
-            gap: 1,
-            color: 'var(--text-secondary)'
+            alignItems: 'center',
+            gap: 2,
+            width: '100%',
+            p: isMobile ? 2 : 2.5,
+            borderBottom: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-muted)',
           }}>
-            <PersonIcon sx={{ fontSize: 18 }} />
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1,
+              color: 'var(--text-secondary)',
+              minWidth: 'max-content'
+            }}>
+              <PersonIcon sx={{ fontSize: 18 }} />
+              <Typography 
+                variant="body2" 
+                color="text.secondary" 
+                sx={{ 
+                  fontWeight: 600,
+                  fontSize: isMobile ? '0.8rem' : '0.875rem'
+                }}
+              >
+                {isMobile ? 'Agent' : 'Filter by Agent'}
+              </Typography>
+            </Box>
+            <AgentSelector
+              selectedAgent={selectedAgent}
+              onAgentChange={handleAgentChange}
+              disabled={isLoading}
+              size="small"
+              showAllOption={true}
+            />
+          </Box>
+
+          {/* Status Filter Section */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? 1.5 : 2,
+            width: '100%',
+            p: isMobile ? 2 : 2.5,
+            alignItems: isMobile ? 'flex-start' : 'center'
+          }}>
             <Typography 
               variant="body2" 
               color="text.secondary" 
               sx={{ 
                 minWidth: 'max-content',
-                fontWeight: 500,
+                fontWeight: 600,
                 fontSize: isMobile ? '0.8rem' : '0.875rem'
               }}
             >
-              {isMobile ? 'Agent' : 'Filter by Agent'}
+              Status Filter
             </Typography>
+            <ToggleButtonGroup
+              value={statusFilter}
+              exclusive
+              onChange={handleStatusFilterChange}
+              size="small"
+              className="filter-toggle-group status-filter"
+              sx={{ 
+                minWidth: isMobile ? '100%' : 'max-content',
+                width: isMobile ? '100%' : 'auto',
+                '& .MuiToggleButton-root': {
+                  px: isMobile ? 1.5 : 2,
+                  flex: isMobile ? 1 : 'none',
+                  fontSize: isMobile ? '0.75rem' : '0.875rem'
+                },
+                zIndex: 2,
+                flexWrap: isSmallMobile ? 'wrap' : 'nowrap'
+              }}
+            >
+              <ToggleButton value="all" className="total">
+                All
+              </ToggleButton>
+              <ToggleButton value="running" className="running">
+                Running
+              </ToggleButton>
+              <ToggleButton value="completed" className="completed">
+                Completed
+              </ToggleButton>
+              <ToggleButton value="continuedAsNew" className="continuedAsNew">
+                {isMobile ? 'Continued' : 'Continued As New'}
+              </ToggleButton>
+              <ToggleButton value="terminated" className="terminated">
+                Terminated
+              </ToggleButton>
+              <ToggleButton value="failed" className="failed">
+                Failed
+              </ToggleButton>
+            </ToggleButtonGroup>
           </Box>
-          <AgentSelector
-            selectedAgent={selectedAgent}
-            onAgentChange={handleAgentChange}
-            disabled={isLoading}
-            size="small"
-            showAllOption={true}
-          />
-        </Box>
-
-        {/* Status Filter */}
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 1,
-          flexWrap: isSmallMobile ? 'wrap' : 'nowrap',
-          width: '100%',
-          alignItems: 'center'
-        }}>
-          <Typography variant="body2" color="text.secondary" sx={{ minWidth: 'max-content', mr: 1 }}>
-            Status:
-          </Typography>
-          <ToggleButtonGroup
-            value={statusFilter}
-            exclusive
-            onChange={handleStatusFilterChange}
-            size="small"
-            className="filter-toggle-group status-filter"
-            sx={{ 
-              minWidth: isMobile ? 'max-content' : 'auto',
-              '& .MuiToggleButton-root': {
-                px: isMobile ? 1 : 2
-              },
-              zIndex: 2
-            }}
-          >
-            <ToggleButton value="all" className="total">
-              All
-            </ToggleButton>
-            <ToggleButton value="running" className="running">
-              Running
-            </ToggleButton>
-            <ToggleButton value="completed" className="completed">
-              Completed
-            </ToggleButton>
-            <ToggleButton value="continuedAsNew" className="continuedAsNew">
-              Continued As New
-            </ToggleButton>
-            <ToggleButton value="terminated" className="terminated">
-              Terminated
-            </ToggleButton>
-            <ToggleButton value="failed" className="failed">
-              Failed
-            </ToggleButton>
-          </ToggleButtonGroup>
         </Box>
       </Box>
 

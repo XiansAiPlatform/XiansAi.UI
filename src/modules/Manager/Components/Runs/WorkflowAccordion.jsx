@@ -105,6 +105,9 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
   
   const terminatedWorkflowsCount = runs.filter(run => (run.status.toLowerCase() === 'terminated' || run.status.toLowerCase() === 'canceled')).length;
   const hasTerminatedWorkflows = terminatedWorkflowsCount > 0;
+  
+  const failedWorkflowsCount = runs.filter(run => run.status.toLowerCase() === 'failed').length;
+  const hasFailedWorkflows = failedWorkflowsCount > 0;
 
   const handleChange = (event, expanded) => {
     setIsExpanded(expanded);
@@ -300,6 +303,11 @@ const WorkflowAccordion = ({ agentInfo, runs, isMobile }) => {
                   {isExpanded && hasTerminatedWorkflows && (
                     <div className="terminated-indicator" style={{ flexShrink: 0 }}>
                       {terminatedWorkflowsCount} terminated
+                    </div>
+                  )}
+                  {isExpanded && hasFailedWorkflows && (
+                    <div className="failed-indicator" style={{ flexShrink: 0 }}>
+                      {failedWorkflowsCount} failed
                     </div>
                   )}
                 </div>
