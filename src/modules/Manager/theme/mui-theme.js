@@ -51,245 +51,294 @@ export const colorThemes = {
     },
     divider: 'rgba(0, 0, 0, 0.08)',
   },  
-  // Nordic Fjord Theme
-  nordicFjord: {
+  // Nordic Midnight Sun Theme (Midnattssol)
+  nordicMidnightSun: {
     primary: {
-      main: '#005F86',
-      light: '#4A9CBF',
-      dark: '#003D5C',
+      main: '#F59E0B', // Warm golden amber - the low-hanging midnight sun
+      light: '#FCD34D',
+      dark: '#D97706',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#3E5F6B',
-      light: '#607D8B',
-      dark: '#263238',
+      main: '#1E3A8A', // Deep twilight blue - the never-quite-dark summer sky
+      light: '#3B82F6',
+      dark: '#1E293B',
       contrastText: '#ffffff',
     },
     error: {
-      main: '#CC4B37', 
-      light: '#F8DBDB',
-      dark: '#A02F2F',
+      main: '#DC2626',
+      light: '#FEE2E2',
+      dark: '#991B1B',
       contrastText: '#ffffff',
     },
     success: {
-      main: '#2D6A4F', // Nordic forest green (inspired by Norwegian pine forests)
-      light: '#74B49B',
-      dark: '#1B4332',
+      main: '#059669',
+      light: '#34D399',
+      dark: '#047857',
       contrastText: '#ffffff',
     },
     warning: {
-      main: '#CF7F32', // Nordic amber with improved contrast
-      light: '#F5E7D3',
-      dark: '#A45E06',
+      main: '#EA580C',
+      light: '#FED7AA',
+      dark: '#C2410C',
       contrastText: '#ffffff',
     },
     info: {
-      main: '#0077B6', // Norwegian sea blue
-      light: '#90E0EF',
-      dark: '#023E8A',
+      main: '#0891B2',
+      light: '#67E8F9',
+      dark: '#0E7490',
       contrastText: '#ffffff',
     },
     background: {
-      default: '#F7FAFD', // Clean Nordic white with slight blue tint
+      default: '#FFFBEB', // Warm, light background like endless summer daylight
       paper: '#ffffff',
     },
     text: {
-      primary: '#26353F', // Dark slate for better readability
-      secondary: '#546E7A',
+      primary: '#1F2937',
+      secondary: '#6B7280',
     },
     divider: 'rgba(0, 0, 0, 0.08)',
   },  
-  // Nordic Aurora Theme
+  // Nordic Forest Theme (Skogsrike)
+  nordicForest: {
+    primary: {
+      main: '#15803D', // Deep evergreen - Swedish pine forests
+      light: '#22C55E',
+      dark: '#14532D',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#92400E', // Warm earth brown - forest floor and tree bark
+      light: '#D97706',
+      dark: '#451A03',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#DC2626',
+      light: '#FEE2E2',
+      dark: '#991B1B',
+      contrastText: '#ffffff',
+    },
+    success: {
+      main: '#166534',
+      light: '#4ADE80',
+      dark: '#14532D',
+      contrastText: '#ffffff',
+    },
+    warning: {
+      main: '#CA8A04',
+      light: '#FDE047',
+      dark: '#A16207',
+      contrastText: '#ffffff',
+    },
+    info: {
+      main: '#0F766E',
+      light: '#2DD4BF',
+      dark: '#115E59',
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#F0FDF4', // Light mint - fresh forest air
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#1A2E05',
+      secondary: '#365314',
+    },
+    divider: 'rgba(0, 0, 0, 0.08)',
+  },  
+  // Nordic Ice Theme (Isblink)
+  nordicIce: {
+    primary: {
+      main: '#0EA5E9', // Glacial blue - crystal clear ice
+      light: '#38BDF8',
+      dark: '#0369A1',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#52525B', // Warm charcoal - volcanic rock contrast
+      light: '#71717A',
+      dark: '#27272A',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#E11D48',
+      light: '#FBE4E8',
+      dark: '#BE123C',
+      contrastText: '#ffffff',
+    },
+    success: {
+      main: '#0D9488',
+      light: '#5EEAD4',
+      dark: '#0F766E',
+      contrastText: '#ffffff',
+    },
+    warning: {
+      main: '#F97316',
+      light: '#FED7AA',
+      dark: '#EA580C',
+      contrastText: '#ffffff',
+    },
+    info: {
+      main: '#06B6D4',
+      light: '#A5F3FC',
+      dark: '#0891B2',
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#F0F9FF', // Ice-blue tinted white
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#0F172A',
+      secondary: '#475569',
+    },
+    divider: 'rgba(0, 0, 0, 0.08)',
+  },  
+  // Nordic Aurora Theme (Nordlys)
   nordicAurora: {
     primary: {
-      main: '#006AA7', // Swedish blue (from national flag)
-      light: '#62A6D9',
-      dark: '#004E7C',
+      main: '#10B981', // Aurora green - most common northern lights color
+      light: '#34D399',
+      dark: '#059669',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#7E4E8E', // Aurora purple with improved contrast ratio
-      light: '#B491C8',
-      dark: '#5B2E6E',
+      main: '#7C3AED', // Deep purple - aurora borealis purple bands
+      light: '#A78BFA',
+      dark: '#5B21B6',
       contrastText: '#ffffff',
     },
     error: {
-      main: '#D32F2F', // Accessible red
-      light: '#EFCBCB',
-      dark: '#9A0007',
+      main: '#EF4444',
+      light: '#FEE2E2',
+      dark: '#DC2626',
       contrastText: '#ffffff',
     },
     success: {
-      main: '#347C59', // Swedish forest green (conforming to accessibility standards)
-      light: '#8CBBA6',
-      dark: '#1E5237',
+      main: '#14B8A6',
+      light: '#5EEAD4',
+      dark: '#0F766E',
       contrastText: '#ffffff',
     },
     warning: {
-      main: '#E6A01E', // Nordic amber (matches traditional Swedish design)
-      light: '#F2E3C9',
-      dark: '#AD7200',
+      main: '#F59E0B',
+      light: '#FDE68A',
+      dark: '#D97706',
       contrastText: '#ffffff',
     },
     info: {
-      main: '#0288D1', // Baltic sea blue
-      light: '#B1D5E8',
-      dark: '#01579B',
+      main: '#3B82F6',
+      light: '#93C5FD',
+      dark: '#2563EB',
       contrastText: '#ffffff',
     },
     background: {
-      default: '#F8F9FC', // Clean Scandinavian background (slight warm undertone)
+      default: '#F0FDF4', // Soft aurora glow
       paper: '#ffffff',
     },
     text: {
-      primary: '#263238',
-      secondary: '#4F5B62',
-    },
-    divider: 'rgba(0, 0, 0, 0.07)',
-  },  
-  // Nordic Minimalist Theme
-  nordicMinimalist: {
-    primary: {
-      main: '#C8102E', // Danish red (from national flag)
-      light: '#E35D6A',
-      dark: '#8B0000',
-      contrastText: '#ffffff',
-    },
-    secondary: {
-      main: '#4C566A', // Danish blue-gray (inspired by Copenhagen architecture)
-      light: '#7B88A1',
-      dark: '#2E3440',
-      contrastText: '#ffffff',
-    },
-    error: {
-      main: '#BF4040', // Scandinavian red with proper contrast
-      light: '#E9D1D1',
-      dark: '#8C2828',
-      contrastText: '#ffffff',
-    },
-    success: {
-      main: '#3B7868', // Nordic teal (used in Danish modern furniture)
-      light: '#83B5A8',
-      dark: '#204038',
-      contrastText: '#ffffff',
-    },
-    warning: {
-      main: '#B27D4B', // Danish amber with improved contrast
-      light: '#E5D0B1',
-      dark: '#7D572D',
-      contrastText: '#ffffff',
-    },
-    info: {
-      main: '#3A6EA5', // Copenhagen harbor blue
-      light: '#B6D0DE',
-      dark: '#1E466F',
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#ECEFF4', // Danish minimalist background (true to Danish design)
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#2E3440', // Nordic dark gray for optimal readability
-      secondary: '#4C566A',
-    },
-    divider: 'rgba(0, 0, 0, 0.08)',
-  },  
-  // European Classic Theme
-  europeanClassic: {
-    primary: {
-      main: '#1A5F7A', // European blue (inspired by EU flag)
-      light: '#64B5CD',
-      dark: '#003F5C',
-      contrastText: '#ffffff',
-    },
-    secondary: {
-      main: '#6B5B95', // Central European purple (cultural heritage inspired)
-      light: '#9D8AB7',
-      dark: '#48406B',
-      contrastText: '#ffffff',
-    },
-    error: {
-      main: '#D64045',
-      light: '#FFCCCB',
-      dark: '#A32226',
-      contrastText: '#ffffff',
-    },
-    success: {
-      main: '#436B56', // Alpine forest green
-      light: '#88AE9B',
-      dark: '#2A453A',
-      contrastText: '#ffffff',
-    },
-    warning: {
-      main: '#D4A24E', // Continental gold
-      light: '#F5E6CA',
-      dark: '#9C722F',
-      contrastText: '#ffffff',
-    },
-    info: {
-      main: '#3E7CB2', // Mediterranean blue
-      light: '#A8C8E6',
-      dark: '#265785',
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#F6F9FB', // Clean European white with slight warmth
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#2D3E50',
-      secondary: '#54626F',
+      primary: '#064E3B',
+      secondary: '#047857',
     },
     divider: 'rgba(0, 0, 0, 0.08)',
   },
-  // Australasian Coastal Theme
-  australasianCoastal: {
+  // Nordic Fjord Theme (Fjordblå)
+  nordicFjord: {
     primary: {
-      main: '#00859B', // Great Barrier Reef blue
-      light: '#5CBBCB',
-      dark: '#005F6E',
+      main: '#1E40AF', // Deep fjord blue - Norwegian fjord waters
+      light: '#3B82F6',
+      dark: '#1E3A8A',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#6B4226', // Australian outback red-brown
-      light: '#9B7A65',
-      dark: '#3D2416',
+      main: '#6B7280', // Mountain stone gray - steep fjord cliffs
+      light: '#9CA3AF',
+      dark: '#374151',
       contrastText: '#ffffff',
     },
     error: {
-      main: '#D63230', // Australasian warning red
-      light: '#F5CBCB',
-      dark: '#A32121',
+      main: '#DC2626',
+      light: '#FEE2E2',
+      dark: '#991B1B',
       contrastText: '#ffffff',
     },
     success: {
-      main: '#107869', // New Zealand forest green
-      light: '#5AB1A2',
-      dark: '#074D42',
+      main: '#059669',
+      light: '#10B981',
+      dark: '#047857',
       contrastText: '#ffffff',
     },
     warning: {
-      main: '#E29839', // Australian golden wattle
-      light: '#F5D6A8',
-      dark: '#B97516',
+      main: '#D97706',
+      light: '#FCD34D',
+      dark: '#B45309',
       contrastText: '#ffffff',
     },
     info: {
-      main: '#3776AB', // Southern Ocean blue
-      light: '#A2C3E3',
-      dark: '#1C4D82',
+      main: '#0891B2',
+      light: '#22D3EE',
+      dark: '#0E7490',
       contrastText: '#ffffff',
     },
     background: {
-      default: '#F8FBF8', // Clean beach sand inspired background
+      default: '#F8FAFC', // Misty fjord morning
       paper: '#ffffff',
     },
     text: {
-      primary: '#2A3F36', // Eucalyptus dark green
-      secondary: '#546B61',
+      primary: '#1E293B',
+      secondary: '#475569',
     },
-    divider: 'rgba(0, 0, 0, 0.07)',
+    divider: 'rgba(0, 0, 0, 0.08)',
+  },
+  
+  // Nordic Winter Theme (Vintervit)
+  nordicWinter: {
+    primary: {
+      main: '#06B6D4', // Cool ice blue - frozen lakes and winter sky
+      light: '#67E8F9',
+      dark: '#0891B2',
+      contrastText: '#ffffff',
+    },
+    secondary: {
+      main: '#E11D48', // Warm coral red - winter berries, traditional textiles
+      light: '#FB7185',
+      dark: '#BE123C',
+      contrastText: '#ffffff',
+    },
+    error: {
+      main: '#DC2626',
+      light: '#FEE2E2',
+      dark: '#991B1B',
+      contrastText: '#ffffff',
+    },
+    success: {
+      main: '#059669',
+      light: '#34D399',
+      dark: '#047857',
+      contrastText: '#ffffff',
+    },
+    warning: {
+      main: '#F59E0B',
+      light: '#FCD34D',
+      dark: '#D97706',
+      contrastText: '#ffffff',
+    },
+    info: {
+      main: '#3B82F6',
+      light: '#93C5FD',
+      dark: '#2563EB',
+      contrastText: '#ffffff',
+    },
+    background: {
+      default: '#F0F9FF', // Fresh snow on a clear day
+      paper: '#ffffff',
+    },
+    text: {
+      primary: '#0F172A',
+      secondary: '#475569',
+    },
+    divider: 'rgba(0, 0, 0, 0.08)',
   }
 };
 

@@ -144,10 +144,12 @@
 .section-title {
   display: flex;
   align-items: center;
-  font-size: 1rem !important;
+  font-size: 0.95rem !important;
   font-weight: 500 !important;
   margin-bottom: 8px !important;
-  color: rgba(0, 0, 0, 0.87);
+  color: #1a252f !important;
+  letter-spacing: -0.005em !important;
+  line-height: 1.4 !important;
 }
 
 .section-count {

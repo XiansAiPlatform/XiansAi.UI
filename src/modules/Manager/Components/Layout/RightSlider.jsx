@@ -84,15 +84,15 @@ const RightSlider = ({ onClose, children, title }) => {
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
         }}>
           <Typography variant="h6" sx={{ 
-            fontWeight: 700, 
-            color: 'var(--text-primary)',
+            fontWeight: 500, 
+            color: '#1a252f',
             fontFamily: 'var(--font-family)',
-            fontSize: '1.125rem',
-            letterSpacing: '-0.02em',
+            fontSize: '1.0625rem',
+            letterSpacing: '-0.01em',
             flex: 1,
             pr: 2,
             wordBreak: 'break-word',
-            lineHeight: 1.3
+            lineHeight: 1.4
           }}>
             {title}
           </Typography>

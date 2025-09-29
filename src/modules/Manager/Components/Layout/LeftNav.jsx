@@ -96,9 +96,14 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeC
       <ListItemIcon 
         sx={{ 
           minWidth: isCollapsed ? 'auto' : '40px',
-          color: selected ? 'var(--primary)' : 'var(--text-secondary)',
-          opacity: selected ? 1 : 0.7,
-          mr: isCollapsed ? 0 : 2
+          color: selected ? 'var(--primary)' : '#37474F',
+          opacity: selected ? 1 : 0.85,
+          mr: isCollapsed ? 0 : 2,
+          '& .MuiSvgIcon-root': {
+            fontSize: '1.25rem',
+            strokeWidth: 0.5,
+            fontWeight: 300
+          }
         }}
       >
         {badgeCount > 0 ? (
@@ -126,11 +131,12 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeC
           primary={label}
           sx={{
             '& .MuiTypography-root': {
-              fontSize: 'var(--text-sm) !important',
-              fontWeight: selected ? '600 !important' : '500 !important',
-              color: selected ? 'var(--text-primary) !important' : 'var(--text-secondary) !important',
+              fontSize: '0.813rem !important',
+              fontWeight: selected ? '600 !important' : '400 !important',
+              color: selected ? '#1a252f !important' : '#37474F !important',
               fontFamily: 'var(--font-family) !important',
-              letterSpacing: '0.2px !important'
+              letterSpacing: '0.15px !important',
+              lineHeight: '1.5 !important'
             }
           }}
         />
@@ -195,7 +201,7 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
                   sx={{
                     backgroundColor: 'var(--bg-paper)',
                     border: '1px solid var(--border-color)',
-                    color: 'var(--text-secondary)',
+                    color: '#546E7A',
                     width: '24px',
                     height: '24px',
                     transition: 'all 0.3s ease',
@@ -204,6 +210,10 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
                       borderColor: 'var(--primary)',
                       color: 'var(--primary)',
                       transform: 'scale(1.1)'
+                    },
+                    '& .MuiSvgIcon-root': {
+                      fontSize: '16px',
+                      strokeWidth: 0.5
                     }
                   }}
                 >
@@ -218,11 +228,11 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
                 variant="overline"
                 sx={{
                   display: 'block',
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  letterSpacing: '1px',
-                  opacity: 0.7,
+                  color: '#546E7A',
+                  fontSize: '0.65rem',
+                  fontWeight: 500,
+                  letterSpacing: '1.2px',
+                  opacity: 0.9,
                   padding: '0 16px',
                   marginBottom: '8px',
                   transition: 'opacity 0.3s ease'
@@ -252,11 +262,12 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
                 variant="caption"
                 sx={{
                   display: 'block',
-                  color: 'var(--text-secondary)',
+                  color: '#78909C',
                   fontSize: '0.7rem',
                   padding: '0 16px',
                   textAlign: 'center',
-                  transition: 'opacity 0.3s ease'
+                  transition: 'opacity 0.3s ease',
+                  fontWeight: 400
                 }}
               >
                 Xians.ai &copy; {new Date().getFullYear()}

@@ -219,10 +219,12 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                 fontWeight: 200
               }}>/</Box>
               <Typography variant="h6" sx={{
-                fontWeight: 500,
-                color: 'text.primary',
-                opacity: 0.85,
-                letterSpacing: '0.2px'
+                fontWeight: 400,
+                color: '#37474F',
+                opacity: 0.9,
+                letterSpacing: '0.1px',
+                fontSize: '0.95rem',
+                lineHeight: 1.4
               }}>
                 {pageTitle}
               </Typography>
@@ -259,15 +261,16 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                 opacity: 0.8
               }} />
               <FormControl size="small" sx={{ minWidth: isMobile ? 120 : 180 }}>
-                <Select
+                  <Select
                   value={selectedOrg}
                   onChange={handleOrgChange}
                   displayEmpty
                   sx={{
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: 'var(--text-primary)',
+                    fontSize: '0.825rem',
+                    fontWeight: 500,
+                    color: '#1a252f',
                     fontFamily: 'var(--font-family)',
+                    letterSpacing: '0.05px',
                     '& .MuiSelect-select': {
                       padding: '4px 8px',
                     },
@@ -313,14 +316,15 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontWeight: 600,
-                  color: 'var(--text-primary)',
+                  fontWeight: 500,
+                  color: '#1a252f',
                   maxWidth: '120px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   fontFamily: 'var(--font-family)',
-                  fontSize: '0.875rem'
+                  fontSize: '0.825rem',
+                  letterSpacing: '0.05px'
                 }}
               >
                 {userData.name}
@@ -391,10 +395,11 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
           >
             <Box className="user-info" sx={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
               <Typography className="user-info-name" variant="subtitle1" sx={{ 
-                fontWeight: 700,
-                fontSize: '1rem',
-                color: 'var(--text-primary)',
+                fontWeight: 600,
+                fontSize: '0.95rem',
+                color: '#1a252f',
                 fontFamily: 'var(--font-family)',
+                letterSpacing: '-0.005em',
                 mb: 0.5
               }}>
                 {userData.name}
@@ -402,9 +407,10 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
               {userData.email && (
                 <Typography className="user-info-email" variant="caption" sx={{
                   display: 'block',
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.875rem',
+                  color: '#546E7A',
+                  fontSize: '0.8125rem',
                   fontFamily: 'var(--font-family)',
+                  fontWeight: 400,
                   mb: 0.5
                 }}>
                   {userData.email}
@@ -413,14 +419,15 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
               {userData.id && (
                 <Typography className="user-info-id" variant="caption" sx={{
                   display: 'block',
-                  color: 'var(--text-light)',
+                  color: '#78909C',
                   fontSize: '0.75rem',
                   fontFamily: 'var(--font-mono)',
+                  fontWeight: 400,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   maxWidth: '100%',
-                  opacity: 0.7
+                  opacity: 0.8
                 }}>
                   ID: {userData.id}
                 </Typography>
@@ -435,9 +442,9 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                 padding: '12px 20px',
                 borderRadius: 'var(--radius-md)',
                 fontFamily: 'var(--font-family)',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                color: 'var(--text-primary)',
+                fontSize: '0.8125rem',
+                fontWeight: 400,
+                color: '#1a252f',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
                   backgroundColor: 'var(--bg-hover)',
@@ -458,8 +465,8 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                 padding: '12px 20px',
                 borderRadius: 'var(--radius-md)',
                 fontFamily: 'var(--font-family)',
-                fontSize: '0.875rem',
-                fontWeight: 500,
+                fontSize: '0.8125rem',
+                fontWeight: 400,
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
                   backgroundColor: 'rgba(var(--error-rgb), 0.08)',

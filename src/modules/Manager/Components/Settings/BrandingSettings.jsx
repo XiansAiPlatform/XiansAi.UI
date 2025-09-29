@@ -527,11 +527,12 @@ const BrandingSettings = () => {
                                             onChange={handleThemeChange}
                                         >                                            
                                             <MenuItem value="default">Default Theme</MenuItem>
-                                            <MenuItem value="nordicFjord">Fjord Theme</MenuItem>
-                                            <MenuItem value="nordicAurora">Aurora Theme</MenuItem>
-                                            <MenuItem value="nordicMinimalist">Minimalist Theme</MenuItem>
-                                            <MenuItem value="europeanClassic">Classic Theme</MenuItem>
-                                            <MenuItem value="australasianCoastal">Coastal Theme</MenuItem>
+                                            <MenuItem value="nordicMidnightSun">Midnight Sun (Midnattssol)</MenuItem>
+                                            <MenuItem value="nordicForest">Forest (Skogsrike)</MenuItem>
+                                            <MenuItem value="nordicIce">Ice (Isblink)</MenuItem>
+                                            <MenuItem value="nordicAurora">Aurora (Nordlys)</MenuItem>
+                                            <MenuItem value="nordicFjord">Fjord (Fjordblå)</MenuItem>
+                                            <MenuItem value="nordicWinter">Winter (Vintervit)</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Box>

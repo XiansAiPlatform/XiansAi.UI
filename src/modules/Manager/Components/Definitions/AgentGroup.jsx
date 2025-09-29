@@ -163,11 +163,13 @@ const AgentGroup = ({
             variant="h6" 
             component="h2"
             sx={{ 
-              fontWeight: 600,
-              color: 'var(--text-primary)',
-              fontSize: '1.1rem',
+              fontWeight: 500,
+              color: '#1a252f',
+              fontSize: '1.05rem',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              letterSpacing: '-0.005em',
+              lineHeight: 1.4
             }}
           >
             {agentName !== 'Ungrouped' && (

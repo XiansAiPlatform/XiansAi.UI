@@ -36,11 +36,12 @@ const PageLayout = ({
           variant="h4" 
           component="h1"
           sx={{
-            fontWeight: 700,
-            letterSpacing: '-0.02em',
-            color: 'var(--text-primary)',
-            fontSize: { xs: '1.75rem', md: '2.125rem' },
-            fontFamily: 'var(--font-family)'
+            fontWeight: 500,
+            letterSpacing: '-0.01em',
+            color: '#1a252f',
+            fontSize: { xs: '1.625rem', md: '1.875rem' },
+            fontFamily: 'var(--font-family)',
+            lineHeight: 1.3
           }}
         >
           {title}
