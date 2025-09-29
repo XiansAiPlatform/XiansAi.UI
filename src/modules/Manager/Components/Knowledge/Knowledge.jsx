@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Box, 
-  Typography, 
-  Container,
+  Typography,
   Fab,
   CircularProgress,
   TextField,
@@ -10,6 +9,7 @@ import {
   Select,
   FormControl,
   InputLabel,
+  InputAdornment,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
@@ -20,6 +20,9 @@ import { useKnowledgeApi } from '../../services/knowledge-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
+import PageLayout from '../Common/PageLayout';
+import PageFilters from '../Common/PageFilters';
+import SearchIcon from '@mui/icons-material/Search';
 
 const Knowledge = () => {
   const [knowledgeItems, setKnowledgeItems] = useState([]);
@@ -269,101 +272,87 @@ const Knowledge = () => {
     }
   };
 
-  return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 6, mb: 6 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          mb: 4
-        }}>
-          <Typography 
-            variant="h4" 
-            component="h1"
-            sx={{
-              fontWeight: 'var(--font-weight-semibold)',
-              letterSpacing: 'var(--letter-spacing-tight)',
-              color: 'var(--text-primary)'
-            }}
-          >
-            Knowledge Base
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <TextField
-              size="small"
-              placeholder="Search knowledge..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+  const headerActions = (
+    <PageFilters
+      searchValue={searchQuery}
+      onSearchChange={(e) => setSearchQuery(e.target.value)}
+      searchPlaceholder="Search knowledge..."
+      additionalFilters={
+        <>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel id="agent-select-label">Agent</InputLabel>
+            <Select
+              labelId="agent-select-label"
+              value={selectedAgent}
+              label="Agent"
+              onChange={(e) => setSelectedAgent(e.target.value)}
+              disabled={isLoadingAgents}
               sx={{
-                width: '250px',
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 'var(--radius-md)',
+                bgcolor: 'var(--bg-main)',
+                borderRadius: 'var(--radius-md)',
+                '& .MuiSelect-select': {
+                  fontFamily: 'var(--font-family)',
+                  fontSize: '0.875rem',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--border-color)'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--border-color-hover)'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--primary)',
+                  borderWidth: '2px'
                 }
               }}
-              InputProps={{
-                endAdornment: isSearchingContent && (
-                  <CircularProgress size={16} color="inherit" sx={{ opacity: 0.7 }} />
-                )
-              }}
-            />
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel id="agent-select-label">Agent</InputLabel>
-              <Select
-                labelId="agent-select-label"
-                value={selectedAgent}
-                label="Agent"
-                onChange={(e) => setSelectedAgent(e.target.value)}
-                disabled={isLoadingAgents}
-                sx={{
-                  bgcolor: 'var(--background-light)',
-                  borderRadius: 'var(--radius-md)',
-                  '& .MuiSelect-select': {
-                    color: 'var(--text-primary)',
-                  }
-                }}
-              >
-                <MenuItem value="">
-                  <em>All Agents</em>
-                </MenuItem>
-                {isLoadingAgents ? (
-                  <MenuItem disabled><em>Loading...</em></MenuItem>
-                ) : agents.length === 0 ? (
-                  <MenuItem disabled><em>No agents</em></MenuItem>
-                ) : (
-                  agents.map(agent => (
-                    <MenuItem key={agent} value={agent}>
-                      {agent}
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-            </FormControl>
-            <Fab 
+            >
+              <MenuItem value="">
+                <em>All Agents</em>
+              </MenuItem>
+              {isLoadingAgents ? (
+                <MenuItem disabled><em>Loading...</em></MenuItem>
+              ) : agents.length === 0 ? (
+                <MenuItem disabled><em>No agents</em></MenuItem>
+              ) : (
+                agents.map(agent => (
+                  <MenuItem key={agent} value={agent}>
+                    {agent}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+          <Fab 
               color="primary" 
               size="medium" 
               onClick={handleAdd}
               sx={{ 
                 zIndex: 1,
                 bgcolor: 'var(--primary)',
-                boxShadow: 'var(--shadow-sm)',
+                boxShadow: '0 2px 8px rgba(var(--primary-rgb), 0.3)',
                 '&:hover': {
-                  bgcolor: 'var(--primary)',
-                  opacity: 0.9,
+                  bgcolor: 'var(--primary-dark)',
                   transform: 'scale(1.05)',
-                  boxShadow: 'var(--shadow-md)'
+                  boxShadow: '0 4px 16px rgba(var(--primary-rgb), 0.4)'
                 },
                 '&:active': {
-                  bgcolor: 'var(--primary)',
-                  opacity: 0.8,
+                  transform: 'scale(0.98)',
                 },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
               <Add />
             </Fab>
-          </Box>
-        </Box>
+        </>
+      }
+    />
+  );
+
+  return (
+    <PageLayout
+      title="Knowledge Base"
+      headerActions={headerActions}
+    >
         
         {isLoading ? (
           <Box sx={{ p: 6, textAlign: 'center' }}>
@@ -442,8 +431,7 @@ const Knowledge = () => {
             )}
           </Box>
         )}
-      </Box>
-    </Container>
+    </PageLayout>
   );
 };
 

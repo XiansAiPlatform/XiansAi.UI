@@ -1,4 +1,6 @@
-import { Box, Typography, TextField, ToggleButtonGroup, ToggleButton, Stack } from '@mui/material';
+import { ToggleButtonGroup, ToggleButton } from '@mui/material';
+import PageLayout from '../Common/PageLayout';
+import PageFilters from '../Common/PageFilters';
 
 const DefinitionListHeader = ({ 
   searchQuery, 
@@ -6,77 +8,119 @@ const DefinitionListHeader = ({
   timeFilter, 
   onTimeFilterChange 
 }) => {
-  return (
-    <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      mb: 4,
-      flexDirection: { xs: 'column', md: 'row' },
-      gap: { xs: 2, md: 0 }
-    }}>
-      <Typography 
-        variant="h4" 
-        component="h1"
-        sx={{
-          fontWeight: 'var(--font-weight-semibold)',
-          letterSpacing: 'var(--letter-spacing-tight)',
-          color: 'var(--text-primary)',
-        }}
-      >
-        Agent Definitions
-      </Typography>
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 2, 
-        alignItems: 'center',
-        flexDirection: { xs: 'column', sm: 'row' },
-        width: { xs: '100%', sm: 'auto' }
-      }}>
-        <TextField
+  const headerActions = (
+    <PageFilters
+      searchValue={searchQuery}
+      onSearchChange={onSearchChange}
+      searchPlaceholder="Search by name or agent..."
+      additionalFilters={
+        <ToggleButtonGroup
+          value={timeFilter}
+          exclusive
+          onChange={onTimeFilterChange}
           size="small"
-          placeholder="Search by name or agent..."
-          value={searchQuery}
-          onChange={onSearchChange}
-          sx={{
-            width: { xs: '100%', sm: '250px' },
-            '& .MuiOutlinedInput-root': {
+          sx={{ 
+            backgroundColor: 'var(--bg-main)',
+            borderRadius: 'var(--radius-md)',
+            '& .MuiToggleButton-root': {
+              border: 'none',
               borderRadius: 'var(--radius-md)',
+              px: 2,
+              py: 0.75,
+              color: 'var(--text-secondary)',
+              fontFamily: 'var(--font-family)',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              textTransform: 'none',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'var(--bg-hover)',
+                color: 'var(--text-primary)'
+              },
+              '&.Mui-selected': {
+                backgroundColor: 'var(--primary)',
+                color: 'white',
+                fontWeight: 600,
+                '&:hover': {
+                  backgroundColor: 'var(--primary-dark)'
+                }
+              },
+              '&:first-of-type': {
+                borderTopLeftRadius: 'var(--radius-md)',
+                borderBottomLeftRadius: 'var(--radius-md)'
+              },
+              '&:last-of-type': {
+                borderTopRightRadius: 'var(--radius-md)',
+                borderBottomRightRadius: 'var(--radius-md)'
+              }
             }
           }}
-        />
-        <Stack 
-          direction={{ xs: 'column', sm: 'row' }} 
-          spacing={2}
-          width={{ xs: '100%', sm: 'auto' }}
         >
-          <ToggleButtonGroup
-            value={timeFilter}
-            exclusive
-            onChange={onTimeFilterChange}
-            size="small"
-            sx={{ 
-              width: { xs: '100%', sm: 'auto' },
-              '& .MuiToggleButton-root': {
-                borderColor: 'var(--border-light)',
-                color: 'var(--text-secondary)',
-                textTransform: 'none',
-                '&.Mui-selected': {
-                  backgroundColor: 'var(--bg-selected)',
-                  color: 'var(--text-primary)',
-                  fontWeight: 500
-                }
-              }
-            }}
-          >
-            <ToggleButton value="7days">Last 7 Days</ToggleButton>
-            <ToggleButton value="30days">Last 30 Days</ToggleButton>
-            <ToggleButton value="all">All Time</ToggleButton>
-          </ToggleButtonGroup>
-        </Stack>
-      </Box>
-    </Box>
+          <ToggleButton value="7days">Last 7 Days</ToggleButton>
+          <ToggleButton value="30days">Last 30 Days</ToggleButton>
+          <ToggleButton value="all">All Time</ToggleButton>
+        </ToggleButtonGroup>
+      }
+    />
   );
+
+  return null; // Header is handled by PageLayout in parent
 };
+
+export const getHeaderActions = ({ searchQuery, onSearchChange, timeFilter, onTimeFilterChange }) => (
+  <PageFilters
+    searchValue={searchQuery}
+    onSearchChange={onSearchChange}
+    searchPlaceholder="Search by name or agent..."
+    additionalFilters={
+      <ToggleButtonGroup
+        value={timeFilter}
+        exclusive
+        onChange={onTimeFilterChange}
+        size="small"
+        sx={{ 
+          backgroundColor: 'var(--bg-main)',
+          borderRadius: 'var(--radius-md)',
+          '& .MuiToggleButton-root': {
+            border: 'none',
+            borderRadius: 'var(--radius-md)',
+            px: 2,
+            py: 0.75,
+            color: 'var(--text-secondary)',
+            fontFamily: 'var(--font-family)',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            textTransform: 'none',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              backgroundColor: 'var(--bg-hover)',
+              color: 'var(--text-primary)'
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'var(--primary)',
+              color: 'white',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: 'var(--primary-dark)'
+              }
+            },
+            '&:first-of-type': {
+              borderTopLeftRadius: 'var(--radius-md)',
+              borderBottomLeftRadius: 'var(--radius-md)'
+            },
+            '&:last-of-type': {
+              borderTopRightRadius: 'var(--radius-md)',
+              borderBottomRightRadius: 'var(--radius-md)'
+            }
+          }
+        }}
+      >
+        <ToggleButton value="7days">Last 7 Days</ToggleButton>
+        <ToggleButton value="30days">Last 30 Days</ToggleButton>
+        <ToggleButton value="all">All Time</ToggleButton>
+      </ToggleButtonGroup>
+    }
+  />
+);
 
 export default DefinitionListHeader; 

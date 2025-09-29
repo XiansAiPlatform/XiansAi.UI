@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import {
     Box,
-    Typography,
     Alert,
-    Grid
+    Grid,
+    Typography
 } from '@mui/material';
 import { useMessagingApi } from '../../services/messaging-api';
 import { useAgentsApi } from '../../services/agents-api';
@@ -17,6 +17,7 @@ import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
 import ConversationThreads from './ConversationThreads';
 import ChatConversation from './Conversation/ChatConversation';
+import PageLayout from '../Common/PageLayout';
 
 
 /**
@@ -286,32 +287,28 @@ const MessagingPage = () => {
     // --- Render --- 
 
     return (
-        <Box sx={{
-            p: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            borderRadius: 2
-        }}
+        <PageLayout 
+            title="Messaging Playground"
+            headerActions={
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', minWidth: '400px' }}>
+                    <Box sx={{ minWidth: '300px', flex: 1 }}>
+                        <AgentSelector
+                            agentsApi={agentsApi}
+                            showError={showError}
+                            onAgentSelected={handleAgentSelected}
+                            selectedAgent={selectedAgentName}
+                        />
+                    </Box>
+                    <WorkflowActions
+                        selectedAgentName={selectedAgentName}
+                        onRegisterWebhook={handleRegisterWebhook}
+                        onRefresh={handleRefresh}
+                    />
+                </Box>
+            }
         >
-            <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-                Messaging Playground
-            </Typography>
             {/* Display top-level error if any */}
-            {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
-            {/* Agent selection */}
-            <AgentSelector
-                agentsApi={agentsApi}
-                showError={showError}
-                onAgentSelected={handleAgentSelected}
-                selectedAgent={selectedAgentName}
-            />
-            {/* Action buttons */}
-            <WorkflowActions
-                selectedAgentName={selectedAgentName}
-                onRegisterWebhook={handleRegisterWebhook}
-                onRefresh={handleRefresh}
-            />
+            {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 'var(--radius-lg)' }}>{error}</Alert>}
             {/* Conditionally render Thread/Conversation area */}
             {selectedAgentName ? (
                 <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -362,10 +359,29 @@ const MessagingPage = () => {
                 </Grid>
             ) : (
                 // Placeholder when no agent selected
-                (<Typography variant="body1" color="textSecondary" sx={{ mt: 4, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Please select an agent to view messages.
-                                    </Typography>)
+                (<Box sx={{ 
+                    mt: 4, 
+                    p: 6,
+                    textAlign: 'center', 
+                    flexGrow: 1, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    backgroundColor: 'var(--bg-paper)',
+                    borderRadius: 'var(--radius-lg)',
+                    border: '1px solid var(--border-color)'
+                }}>
+                    <Box>
+                        <Typography variant="h6" sx={{ color: 'var(--text-primary)', fontWeight: 600, mb: 1 }}>
+                            No Agent Selected
+                        </Typography>
+                        <Typography variant="body1" color="textSecondary">
+                            Please select an agent to view and manage messages.
+                        </Typography>
+                    </Box>
+                </Box>)
             )}
-        </Box>
+        </PageLayout>
     );
 };
 

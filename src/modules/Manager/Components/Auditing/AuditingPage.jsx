@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
     Box,
-    Typography,
     Alert,
     Tabs,
     Tab,
@@ -14,6 +13,7 @@ import AgentSelector from './AgentSelector';
 import WorkflowSelector from './WorkflowSelector';
 import WorkflowLogs from './WorkflowLogs';
 import ErrorLogs from './ErrorLogs';
+import PageLayout from '../Common/PageLayout';
 
 /**
  * Parent component that coordinates messaging components and manages shared state
@@ -59,18 +59,9 @@ const AuditingPage = () => {
     };
 
     return (
-        <Box sx={{
-            p: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%'
-        }}>
-            <Typography variant="h4" gutterBottom sx={{ mb: 4 }}>
-                Auditing
-            </Typography>
-
+        <PageLayout title="Auditing">
             {/* Display top-level error if any */} 
-            {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+            {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 'var(--radius-lg)' }}>{error}</Alert>}
 
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
                 <Tabs value={activeTab} onChange={handleTabChange}>
@@ -128,7 +119,7 @@ const AuditingPage = () => {
                     />
                 </>
             )}
-        </Box>
+        </PageLayout>
     );
 };
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Typography, Container, Alert, Tabs, Tab } from '@mui/material';
+import { Box, Alert, Tabs, Tab } from '@mui/material';
 import CACertificates from './AppServerSettings';
 import BrandingSettings from './BrandingSettings';
 import ApiKeySettings from './ApiKeySettings';
@@ -9,6 +9,7 @@ import ApproveUserRequests from "./ApproveUserRequests";
 import InviteUser from "./InviteUser";
 import TenantUserManagement from "./TenantUserManagement";
 import TenantAuthSettings from './TenantAuthSettings';
+import PageLayout from '../Common/PageLayout';
 
 const Settings = () => {
   const [currentTab, setCurrentTab] = useState(0);
@@ -74,21 +75,9 @@ const Settings = () => {
   };
 
   return (
-    <Container maxWidth="lg">
+    <PageLayout title="Tenant Settings">
       <Box className="settings-container">
-        <Typography 
-          variant="h4" 
-          component="h1"
-          sx={{
-            fontWeight: 'var(--font-weight-semibold)',
-            letterSpacing: 'var(--letter-spacing-tight)',
-            color: 'var(--text-primary)',
-            mb: 4
-          }}
-        >
-          Tenant Settings
-        </Typography>
-        <Alert severity="info" className="info-alert">
+        <Alert severity="info" className="info-alert" sx={{ mb: 3 }}>
           These settings are required for your app server to run.
           <br />
           Configure the certificate and key paths in the App Server settings.
@@ -110,7 +99,7 @@ const Settings = () => {
           {renderTabContent()}
         </Box>
       </Box>
-    </Container>
+    </PageLayout>
   );
 };
 

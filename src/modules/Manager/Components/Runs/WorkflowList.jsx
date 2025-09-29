@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
 import { 
-  Container, 
   Typography, 
   Box,
   Paper,
@@ -27,6 +26,8 @@ import './WorkflowList.css';
 import { Link, useLocation } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
+import PageLayout from '../Common/PageLayout';
+import PageFilters from '../Common/PageFilters';
 
 const WorkflowList = () => {  
   // New pagination state
@@ -222,28 +223,9 @@ const WorkflowList = () => {
   };
 
   return (
-    <Container className="workflow-list-container" disableGutters={isMobile} maxWidth={isMobile ? false : "lg"}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexDirection: 'row',
-        mb: isMobile ? 2 : 3,
-        mt: isMobile ? 0.5 : 2,
-        px: isMobile ? 2 : 0
-      }}>
-        <Typography 
-          variant={isMobile ? "h5" : "h4"} 
-          component="h1"
-          sx={{
-            fontWeight: 'var(--font-weight-semibold)',
-            letterSpacing: 'var(--letter-spacing-tight)',
-            color: 'var(--text-primary)',
-          }}
-        >
-          Agent Runs
-        </Typography>
-        
+    <PageLayout 
+      title="Agent Runs"
+      headerActions={
         <Box sx={{ display: 'flex', gap: 1 }}>
           {isMobile ? (
             <>
@@ -311,11 +293,12 @@ const WorkflowList = () => {
             </>
           )}
         </Box>
-      </Box>
+      }
+    >
 
       {/* Hint message for newly activated workflow */}
       <Collapse in={showHint}>
-        <Box sx={{ px: isMobile ? 2 : 0, mb: 2 }}>
+        <Box sx={{ mb: 2 }}>
           <Alert 
             severity="success" 
             icon={<CheckCircleIcon />}
@@ -361,131 +344,114 @@ const WorkflowList = () => {
       <Box 
         className="filter-controls"
         sx={{ 
-          display: 'flex', 
-          justifyContent: 'flex-start',
-          alignItems: 'flex-start',
           mb: 3,
-          flexDirection: 'column',
-          gap: 0,
-          px: isMobile ? 2 : 0,
-          width: '100%',
-          overflowX: 'auto',
           position: 'relative',
           zIndex: 10
         }}
       >
-        {/* Combined Filters Container */}
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          gap: 0,
-          width: '100%',
-          backgroundColor: 'var(--bg-surface)',
-          borderRadius: 3,
-          border: '1px solid var(--border-color)',
-          overflow: 'hidden',
-          transition: 'all 0.2s ease',
-        }}>
-          {/* Agent Filter Section */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            gap: 2,
-            width: '100%',
-            p: isMobile ? 2 : 2.5,
-            borderBottom: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-muted)',
-          }}>
+        <PageFilters
+          fullWidth
+          additionalFilters={
             <Box sx={{ 
               display: 'flex', 
-              alignItems: 'center', 
-              gap: 1,
-              color: 'var(--text-secondary)',
-              minWidth: 'max-content'
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: 2,
+              width: '100%',
+              alignItems: isMobile ? 'stretch' : 'center'
             }}>
-              <PersonIcon sx={{ fontSize: 18 }} />
-              <Typography 
-                variant="body2" 
-                color="text.secondary" 
+              {/* Agent Filter */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                gap: 1.5,
+                backgroundColor: 'var(--bg-main)',
+                px: 2,
+                py: 1,
+                borderRadius: 'var(--radius-md)',
+                minWidth: isMobile ? 'auto' : '200px'
+              }}>
+                <PersonIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                <AgentSelector
+                  selectedAgent={selectedAgent}
+                  onAgentChange={handleAgentChange}
+                  disabled={isLoading}
+                  size="small"
+                  showAllOption={true}
+                />
+              </Box>
+
+              {/* Status Filter */}
+              <ToggleButtonGroup
+                value={statusFilter}
+                exclusive
+                onChange={handleStatusFilterChange}
+                size="small"
+                className="filter-toggle-group status-filter"
                 sx={{ 
-                  fontWeight: 600,
-                  fontSize: isMobile ? '0.8rem' : '0.875rem'
+                  backgroundColor: 'var(--bg-main)',
+                  borderRadius: 'var(--radius-md)',
+                  width: isMobile ? '100%' : 'auto',
+                  '& .MuiToggleButton-root': {
+                    border: 'none',
+                    borderRadius: 'var(--radius-md)',
+                    px: isMobile ? 1.5 : 2,
+                    py: 0.75,
+                    flex: isMobile ? 1 : 'none',
+                    fontSize: isMobile ? '0.75rem' : '0.875rem',
+                    color: 'var(--text-secondary)',
+                    fontFamily: 'var(--font-family)',
+                    fontWeight: 500,
+                    textTransform: 'none',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      backgroundColor: 'var(--bg-hover)',
+                      color: 'var(--text-primary)'
+                    },
+                    '&.Mui-selected': {
+                      backgroundColor: 'var(--primary)',
+                      color: 'white',
+                      fontWeight: 600,
+                      '&:hover': {
+                        backgroundColor: 'var(--primary-dark)'
+                      }
+                    },
+                    '&:first-of-type': {
+                      borderTopLeftRadius: 'var(--radius-md)',
+                      borderBottomLeftRadius: 'var(--radius-md)'
+                    },
+                    '&:last-of-type': {
+                      borderTopRightRadius: 'var(--radius-md)',
+                      borderBottomRightRadius: 'var(--radius-md)'
+                    }
+                  },
+                  flexWrap: isSmallMobile ? 'wrap' : 'nowrap'
                 }}
               >
-                {isMobile ? 'Agent' : 'Filter by Agent'}
-              </Typography>
+                <ToggleButton value="all" className="total">
+                  All
+                </ToggleButton>
+                <ToggleButton value="running" className="running">
+                  Running
+                </ToggleButton>
+                <ToggleButton value="completed" className="completed">
+                  Completed
+                </ToggleButton>
+                <ToggleButton value="continuedAsNew" className="continuedAsNew">
+                  {isMobile ? 'Continued' : 'Continued As New'}
+                </ToggleButton>
+                <ToggleButton value="terminated" className="terminated">
+                  Terminated
+                </ToggleButton>
+                <ToggleButton value="failed" className="failed">
+                  Failed
+                </ToggleButton>
+              </ToggleButtonGroup>
             </Box>
-            <AgentSelector
-              selectedAgent={selectedAgent}
-              onAgentChange={handleAgentChange}
-              disabled={isLoading}
-              size="small"
-              showAllOption={true}
-            />
-          </Box>
-
-          {/* Status Filter Section */}
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: isMobile ? 'column' : 'row',
-            gap: isMobile ? 1.5 : 2,
-            width: '100%',
-            p: isMobile ? 2 : 2.5,
-            alignItems: isMobile ? 'flex-start' : 'center'
-          }}>
-            <Typography 
-              variant="body2" 
-              color="text.secondary" 
-              sx={{ 
-                minWidth: 'max-content',
-                fontWeight: 600,
-                fontSize: isMobile ? '0.8rem' : '0.875rem'
-              }}
-            >
-              Status Filter
-            </Typography>
-            <ToggleButtonGroup
-              value={statusFilter}
-              exclusive
-              onChange={handleStatusFilterChange}
-              size="small"
-              className="filter-toggle-group status-filter"
-              sx={{ 
-                minWidth: isMobile ? '100%' : 'max-content',
-                width: isMobile ? '100%' : 'auto',
-                '& .MuiToggleButton-root': {
-                  px: isMobile ? 1.5 : 2,
-                  flex: isMobile ? 1 : 'none',
-                  fontSize: isMobile ? '0.75rem' : '0.875rem'
-                },
-                zIndex: 2,
-                flexWrap: isSmallMobile ? 'wrap' : 'nowrap'
-              }}
-            >
-              <ToggleButton value="all" className="total">
-                All
-              </ToggleButton>
-              <ToggleButton value="running" className="running">
-                Running
-              </ToggleButton>
-              <ToggleButton value="completed" className="completed">
-                Completed
-              </ToggleButton>
-              <ToggleButton value="continuedAsNew" className="continuedAsNew">
-                {isMobile ? 'Continued' : 'Continued As New'}
-              </ToggleButton>
-              <ToggleButton value="terminated" className="terminated">
-                Terminated
-              </ToggleButton>
-              <ToggleButton value="failed" className="failed">
-                Failed
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-        </Box>
+          }
+        />
       </Box>
 
-      <Box sx={{ px: isMobile ? 2 : 0, position: 'relative', zIndex: 1 }}>
+      <Box sx={{ position: 'relative', zIndex: 1 }}>
         {hasWorkflows ? (
           <Paper 
             elevation={0}
@@ -643,7 +609,7 @@ const WorkflowList = () => {
         onConfirm={handleTerminateAll}
         onCancel={closeConfirmTerminate}
       />
-    </Container>
+    </PageLayout>
   );
 };
 

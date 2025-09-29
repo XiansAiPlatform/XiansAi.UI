@@ -1,12 +1,13 @@
 import { Box, Typography } from '@mui/material';
 import { useDefinitions } from './useDefinitions';
 import { useSlider } from '../../contexts/SliderContext';
-import DefinitionListHeader from './DefinitionListHeader';
+import DefinitionListHeader, { getHeaderActions } from './DefinitionListHeader';
 import AgentGroup from './AgentGroup';
 import DefinitionActions from './DefinitionActions';
 import EmptyState from './EmptyState';
 import PermissionsManager from './PermissionsManager';
 import { tableStyles } from './styles';
+import PageLayout from '../Common/PageLayout';
 
 const DefinitionList = () => {
   const {
@@ -75,15 +76,17 @@ const DefinitionList = () => {
   }
 
   return (
-    <Box sx={tableStyles.container}>
-      <DefinitionListHeader
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
-        timeFilter={timeFilter}
-        onTimeFilterChange={handleTimeFilterChange}
-      />
-
-      {sortedAgentNames.map((agentName) => (
+    <PageLayout
+      title="Agent Definitions"
+      headerActions={getHeaderActions({
+        searchQuery,
+        onSearchChange: handleSearchChange,
+        timeFilter,
+        onTimeFilterChange: handleTimeFilterChange
+      })}
+    >
+      <Box sx={tableStyles.container}>
+        {sortedAgentNames.map((agentName) => (
         <AgentGroup
           key={agentName}
           agentName={agentName}
@@ -98,13 +101,14 @@ const DefinitionList = () => {
         />
       ))}
 
-      <DefinitionActions
-        selectedAgentName={selectedAgentName}
-        deleteDialogOpen={deleteDialogOpen}
-        onDeleteAllCancel={handleDeleteAllCancel}
-        onDeleteAllConfirm={handleDeleteAllConfirm}
-      />
-    </Box>
+        <DefinitionActions
+          selectedAgentName={selectedAgentName}
+          deleteDialogOpen={deleteDialogOpen}
+          onDeleteAllCancel={handleDeleteAllCancel}
+          onDeleteAllConfirm={handleDeleteAllConfirm}
+        />
+      </Box>
+    </PageLayout>
   );
 };
 

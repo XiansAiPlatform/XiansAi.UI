@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Box, Tabs, Tab, Paper, Typography, Container } from "@mui/material";
+import { Box, Tabs, Tab, Paper } from "@mui/material";
 import UserManagement from "./UserManagement";
 import TenantManagement from "./TenantManagement";
+import PageLayout from '../Common/PageLayout';
 
 const tabLabels = [
   "Tenants",
@@ -12,28 +13,42 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState(0);
 
   return (
-    <Container maxWidth="lg">
+    <PageLayout title="System Admin">
       <Box className="settings-container">
-        <Typography
-          variant="h4"
-          component="h1"
-          sx={{
-            fontWeight: 'var(--font-weight-semibold)',
-            letterSpacing: 'var(--letter-spacing-tight)',
-            color: 'var(--text-primary)',
-            mb: 4
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3,
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-paper)'
           }}
         >
-          System Admin
-        </Typography>
-        <Paper elevation={3} sx={{ p: 3, m: 2 }}>
-
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
             variant="scrollable"
             scrollButtons="auto"
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 3,
+              borderBottom: '1px solid var(--border-color)',
+              '& .MuiTab-root': {
+                fontFamily: 'var(--font-family)',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                textTransform: 'none',
+                color: 'var(--text-secondary)',
+                '&.Mui-selected': {
+                  color: 'var(--primary)',
+                  fontWeight: 600
+                }
+              },
+              '& .MuiTabs-indicator': {
+                backgroundColor: 'var(--primary)',
+                height: '3px',
+                borderRadius: '3px 3px 0 0'
+              }
+            }}
           >
             {tabLabels.map((label, idx) => (
               <Tab key={label} label={label} />
@@ -45,6 +60,6 @@ export default function AdminDashboard() {
           </Box>
         </Paper>
       </Box>
-    </Container>
+    </PageLayout>
   );
 }
