@@ -19,7 +19,7 @@ export const ROUTES = {
     SETTINGS: '/manager/settings',
     MESSAGING: '/manager/messaging',
     AUDITING: '/manager/auditing',
-    //UNAUTHORIZED: '/manager/unauthorized',
+    LANDING: '/manager/landing',
     LOGOUT: '/manager/logout',
   },
   

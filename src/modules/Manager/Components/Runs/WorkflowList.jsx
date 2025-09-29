@@ -19,6 +19,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
 import PaginationControls from './PaginationControls';
 import WorkflowRunCard from './WorkflowRunCard';
@@ -88,6 +89,8 @@ const WorkflowList = () => {
       console.error('Error loading paginated workflows:', error);
       setWorkflows([]);
       setHasNextPage(false);
+      // Use the proper error handler for better user experience
+      await handleApiError(error, 'Failed to load workflow runs', showError);
     } finally {
       setLoading(false);
     }
@@ -454,6 +457,9 @@ const WorkflowList = () => {
             </ToggleButton>
             <ToggleButton value="terminated" className="terminated">
               Terminated
+            </ToggleButton>
+            <ToggleButton value="failed" className="failed">
+              Failed
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>

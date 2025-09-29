@@ -47,7 +47,7 @@ const Header = ({ pageTitle = "", toggleNav }) => {
           console.log("Detected image type:", detectedType);
           setLogoImage(logoBase64);
         } else {
-          console.log("No tenant logo available");
+          // No tenant logo configured - using default branding
           setLogoImage(null);
         }
       } catch (error) {
