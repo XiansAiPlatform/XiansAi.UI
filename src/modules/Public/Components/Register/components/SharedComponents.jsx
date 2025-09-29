@@ -114,7 +114,7 @@ export function RegisterFooter() {
             opacity: 0.8
           }}
         >
-          © 2024 XiansAI Platform. Built for developers.
+          © {new Date().getFullYear()} XiansAI Platform. Built for developers.
         </Typography>
       </FooterContent>
     </Footer>
