@@ -24,6 +24,7 @@ import {
   DialogContent,
   DialogActions,
   Stack,
+  Paper,
 } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import EditIcon from "@mui/icons-material/Edit";
@@ -255,16 +256,22 @@ export default function TenantUserManagement() {
 
   if (!tenant?.tenantId) {
     return (
-      <Box>
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
+          Tenant User Management
+        </Typography>
         <Alert severity="warning" sx={{ mb: 2 }}>
           Tenant information is not available. Please ensure you have proper access to this tenant.
         </Alert>
-      </Box>
+      </Paper>
     );
   }
 
   return (
-    <Box>
+    <Paper className="ca-certificates-paper">
+      <Typography variant="h6" gutterBottom>
+        Tenant User Management
+      </Typography>
       <Box
         display="flex"
         alignItems="center"
@@ -313,15 +320,6 @@ export default function TenantUserManagement() {
 
       {/* Divider for separation */}
       <Divider sx={{ my: 2 }} />
-
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Typography variant="h6">Tenant User Management</Typography>
-      </Box>
 
       {loading ? (
         <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
@@ -521,6 +519,6 @@ export default function TenantUserManagement() {
           {success}
         </Alert>
       </Snackbar>
-    </Box>
+    </Paper>
   );
 }

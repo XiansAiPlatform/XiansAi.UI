@@ -384,7 +384,20 @@ const BrandingSettings = () => {
                         xs: 12,
                         md: 6
                     }}>
-                    <Card elevation={2}>
+                    <Card 
+                        elevation={0}
+                        sx={{
+                            border: '1px solid var(--border-color)',
+                            borderRadius: 'var(--radius-lg)',
+                            backgroundColor: 'var(--bg-paper)',
+                            boxShadow: 'var(--shadow-sm)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                borderColor: 'var(--border-color-hover)',
+                                transform: 'translateY(-1px)'
+                            }
+                        }}
+                    >
                         <CardContent>
                             <Typography variant="h6" gutterBottom>
                                 Company Logo
@@ -504,7 +517,20 @@ const BrandingSettings = () => {
                         xs: 12,
                         md: 6
                     }}>
-                    <Card elevation={2}>
+                    <Card 
+                        elevation={0}
+                        sx={{
+                            border: '1px solid var(--border-color)',
+                            borderRadius: 'var(--radius-lg)',
+                            backgroundColor: 'var(--bg-paper)',
+                            boxShadow: 'var(--shadow-sm)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                borderColor: 'var(--border-color-hover)',
+                                transform: 'translateY(-1px)'
+                            }
+                        }}
+                    >
                         <CardContent>                            
                             <Typography variant="h6" gutterBottom>
                                 Theme Colors

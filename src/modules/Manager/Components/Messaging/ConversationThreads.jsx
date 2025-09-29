@@ -237,13 +237,19 @@ const ConversationThreads = ({
                                         px: 2,
                                         py: 1.5,
                                         minWidth: 0,
+                                        borderRadius: 'var(--radius-md)',
+                                        margin: '4px 8px',
+                                        transition: 'all 0.2s ease',
                                         '&.Mui-selected': {
-                                            bgcolor: theme.palette.action.selected,
-                                            borderLeft: '3px solid',
-                                            borderLeftColor: theme.palette.primary.main,
+                                            bgcolor: 'var(--primary-lighter)',
+                                            borderLeft: '3px solid var(--primary)',
                                             '&:hover': {
-                                                bgcolor: theme.palette.action.hover
+                                                bgcolor: 'var(--bg-hover)'
                                             }
+                                        },
+                                        '&:hover': {
+                                            bgcolor: 'var(--bg-hover)',
+                                            transform: 'translateX(4px)'
                                         }
                                     }}
                                 >

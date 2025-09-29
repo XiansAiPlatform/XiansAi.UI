@@ -190,7 +190,7 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
               position: 'absolute',
               right: isCollapsed ? 'auto' : '-12px',
               left: isCollapsed ? '50%' : 'auto',
-              top: '20px',
+              top: '0px',
               transform: isCollapsed ? 'translateX(-50%)' : 'none',
               zIndex: 10
             }}>
@@ -222,25 +222,8 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
               </Tooltip>
             </Box>
           )}
-          <Box sx={{ mb: 3, mt: isMobile ? 0 : 5 }}>
-            {!isCollapsed && (
-              <Typography
-                variant="overline"
-                sx={{
-                  display: 'block',
-                  color: '#546E7A',
-                  fontSize: '0.65rem',
-                  fontWeight: 500,
-                  letterSpacing: '1.2px',
-                  opacity: 0.9,
-                  padding: '0 16px',
-                  marginBottom: '8px',
-                  transition: 'opacity 0.3s ease'
-                }}
-              >
-                NAVIGATION
-              </Typography>
-            )}
+          <Box sx={{ mb: 3, mt: isMobile ? 0 : '20px' }}>
+            
             <List>
               {filteredNavItems.map((item) => (
                 <NavItem

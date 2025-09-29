@@ -28,14 +28,15 @@ const Settings = () => {
 
   // Build main tabs
   const tabs = [
-    { label: 'Agent Settings', component: <CACertificates /> },
+    { label: 'Agent2Server Settings', component: <CACertificates /> },
   ];
   
   if (showTenantTab) {
+
+    tabs.push({ label: "Machine2Agent API Keys", component: <ApiKeySettings /> });
+    tabs.push({ label: "User2Agent OIDC", component: <TenantAuthSettings /> });
     tabs.push({ label: "Users", component: null }); // Will be handled by sub-tabs
     tabs.push({ label: "Branding", component: <BrandingSettings /> });
-    tabs.push({ label: "API Keys", component: <ApiKeySettings /> });
-    tabs.push({ label: "Auth Config", component: <TenantAuthSettings /> });
   }
 
   // Sub-tabs for Users section
@@ -47,7 +48,7 @@ const Settings = () => {
   ];
 
   // Check if current tab is the Users tab
-  const isUsersTab = showTenantTab && currentTab === 1;
+  const isUsersTab = showTenantTab && currentTab === 3;
 
   const renderTabContent = () => {
     if (isUsersTab) {

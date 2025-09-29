@@ -241,10 +241,15 @@ export default function UserManagement() {
                   elevation={0} 
                   sx={{ 
                     width: '100%', 
-                    border: '1px solid',
-                    borderColor: 'divider',
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-lg)',
+                    backgroundColor: 'var(--bg-paper)',
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      backgroundColor: 'action.hover'
+                      backgroundColor: 'var(--bg-hover)',
+                      borderColor: 'var(--border-color-hover)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: 'var(--shadow-sm)'
                     }
                   }} 
                   key={user.userId}

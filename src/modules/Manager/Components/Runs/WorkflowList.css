@@ -1,18 +1,4 @@
-:root {
-  /* Status Colors */
-  --status-running-bg: #b8e0ff;
-  --status-running-color: #1e4976;
-  --status-completed-bg: #c8e6c9;
-  --status-completed-color: #1b5e20;
-  --status-terminated-bg: #ffcdd2;
-  --status-terminated-color: #b71c1c;
-  --status-total-bg: #f5f5f5;
-  --status-total-color: #424242;
-  --status-continuedAsNew-bg: #e1bee7;
-  --status-continuedAsNew-color: #4a148c;
-  --status-failed-bg: #ffecb3;
-  --status-failed-color: #e65100;
-}
+/* Remove duplicate status color definitions - using theme variables from theme.css */
 
 /* Responsive container */
 .workflow-list-container {
@@ -51,12 +37,13 @@
 
 /* Owner chip styles */
 .owner-chip {
-  background-color: rgba(25, 118, 210, 0.08);
-  color: rgb(25, 118, 210);
-  border: 1px solid rgba(25, 118, 210, 0.3);
-  font-size: 0.7rem;
+  background-color: var(--primary-lighter);
+  color: var(--primary);
+  border: 1px solid var(--primary-light);
+  font-size: var(--text-xs);
   height: 20px;
-  padding: 0 6px;
+  padding: 0 var(--spacing-xs);
+  border-radius: var(--radius-sm);
 }
 
 /* Enhanced status indicators */

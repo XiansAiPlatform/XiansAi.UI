@@ -21,7 +21,13 @@ export default function AdminDashboard() {
             p: 3,
             borderRadius: 'var(--radius-lg)',
             border: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-paper)'
+            backgroundColor: 'var(--bg-paper)',
+            boxShadow: 'var(--shadow-sm)',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              borderColor: 'var(--border-color-hover)',
+              transform: 'translateY(-1px)'
+            }
           }}
         >
           <Tabs

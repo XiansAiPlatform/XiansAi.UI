@@ -10,6 +10,7 @@ import {
   Button,
   Snackbar,
   Alert,
+  Paper,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -90,32 +91,32 @@ export default function ApproveUserRequests() {
   // Show loading while tenant data is being loaded
   if (tenantLoading) {
     return (
-      <Box>
-        <Typography variant="h6" mb={2}>
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
           Approve User Requests
         </Typography>
         <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
-      </Box>
+      </Paper>
     );
   }
 
   // Show error if tenant data is not available
   if (!tenant?.tenantId) {
     return (
-      <Box>
-        <Typography variant="h6" mb={2}>
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
           Approve User Requests
         </Typography>
         <Alert severity="warning" sx={{ mb: 2 }}>
           Tenant information is not available. Please ensure you have proper access to this tenant.
         </Alert>
-      </Box>
+      </Paper>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h6" mb={2}>
+    <Paper className="ca-certificates-paper">
+      <Typography variant="h6" gutterBottom>
         Approve User Requests
       </Typography>
 
@@ -182,6 +183,6 @@ export default function ApproveUserRequests() {
       >
         <Alert severity="success">{success}</Alert>
       </Snackbar>
-    </Box>
+    </Paper>
   );
 }

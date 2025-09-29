@@ -230,7 +230,19 @@ export default function TenantManagement() {
               <Paper
                 key={tenantId}
                 variant="outlined"
-                sx={{ p: 2, pl: 1, mb: 1, paddingLeft: 0 }}
+                sx={{ 
+                  p: 2, 
+                  mb: 1,
+                  borderRadius: 'var(--radius-lg)',
+                  border: '1px solid var(--border-color)',
+                  backgroundColor: 'var(--bg-paper)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'var(--border-color-hover)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: 'var(--shadow-sm)'
+                  }
+                }}
               >
                 <Box
                   display="flex"

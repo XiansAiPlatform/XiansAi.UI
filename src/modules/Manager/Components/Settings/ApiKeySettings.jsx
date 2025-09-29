@@ -145,29 +145,57 @@ const ApiKeySettings = () => {
   };
 
   if (tenantLoading) {
-    return <Box sx={{ height: "200px" }}><CircularProgress /></Box>;
+    return (
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
+          API Key Management
+        </Typography>
+        <Box sx={{ height: "200px" }}><CircularProgress /></Box>
+      </Paper>
+    );
   }
   if (!hasAccess) {
-    return <Alert severity="warning" sx={{ mb: 2 }}>You do not have permission to view this page.</Alert>;
+    return (
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
+          API Key Management
+        </Typography>
+        <Alert severity="warning" sx={{ mb: 2 }}>You do not have permission to view this page.</Alert>
+      </Paper>
+    );
   }
   if (loading) {
-    return <Box sx={{ height: "200px" }}><CircularProgress /></Box>;
+    return (
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
+          API Key Management
+        </Typography>
+        <Box sx={{ height: "200px" }}><CircularProgress /></Box>
+      </Paper>
+    );
   }
   if (error) {
-    return <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>;
+    return (
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
+          API Key Management
+        </Typography>
+        <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+      </Paper>
+    );
   }
 
   return (
-    <Box>
+    <Paper className="ca-certificates-paper">
       <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-        <Typography variant="h6" component="h2" sx={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--text-primary)' }}>
+        <Typography variant="h6" gutterBottom>
           API Key Management
         </Typography>
         <Button variant="contained" color="primary" onClick={handleCreateDialogOpen}>
           Create API Key
         </Button>
       </Box>
-      <Paper sx={{ p: 3 }}>
+      <Box>
         <Typography variant="body1" sx={{ mb: 2 }}>
           Total API Keys: {apiKeys.length}
         </Typography>
@@ -222,7 +250,7 @@ const ApiKeySettings = () => {
             </Table>
           </TableContainer>
         )}
-      </Paper>
+      </Box>
 
       {/* Create API Key Dialog */}
       <Dialog open={createDialogOpen} onClose={handleCreateDialogClose} maxWidth="sm" fullWidth>
@@ -336,7 +364,7 @@ const ApiKeySettings = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </Paper>
   );
 };
 

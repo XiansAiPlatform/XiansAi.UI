@@ -32,6 +32,10 @@
   --status-canceled-color: #8B5A00;
   --status-total-bg: #f3f6f9;
   --status-total-color: #26353F;
+  --status-continuedAsNew-bg: #e1bee7;
+  --status-continuedAsNew-color: #4a148c;
+  --status-failed-bg: #ffecb3;
+  --status-failed-color: #e65100;
   
   /* Text colors - Nordic Dark */
   --text-primary: #26353F;

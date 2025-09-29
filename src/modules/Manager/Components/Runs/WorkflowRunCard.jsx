@@ -72,14 +72,17 @@ const WorkflowRunCard = ({
       elevation={0}
       sx={{
         border: 'none',
-        borderRadius: 0,
+        borderRadius: 'var(--radius-md)',
         borderTop: isFirst ? 'none' : '1px solid var(--border-color)',
         borderBottom: isLast ? 'none' : 'none',
-        backgroundColor: 'transparent',
+        backgroundColor: 'var(--bg-paper)',
+        margin: '4px 0',
         '&:hover': {
           backgroundColor: 'var(--bg-hover)',
+          transform: 'translateY(-1px)',
+          boxShadow: 'var(--shadow-sm)'
         },
-        transition: 'background-color 0.2s ease'
+        transition: 'all 0.2s ease'
       }}
     >
       <CardContent sx={{ p: isMobile ? 2 : 3, '&:last-child': { pb: isMobile ? 2 : 3 } }}>

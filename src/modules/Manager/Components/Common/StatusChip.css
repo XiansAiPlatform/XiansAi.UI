@@ -17,13 +17,13 @@
 }
 
 .status-chip.completed {
-  background-color: #a8e6cf !important;
-  color: #2d6a4f !important;
+  background-color: var(--status-completed-bg) !important;
+  color: var(--status-completed-color) !important;
 }
 
 .status-chip.running {
-  background-color: #b8e0ff !important;
-  color: #1e4976 !important;
+  background-color: var(--status-running-bg) !important;
+  color: var(--status-running-color) !important;
   animation: statusPulse 1.5s ease-in-out infinite !important;
   position: relative;
 }
@@ -40,11 +40,11 @@
 }
 
 .status-chip.canceled {
-  background-color: #e9ecef !important;
-  color: #495057 !important;
+  background-color: var(--status-canceled-bg) !important;
+  color: var(--status-canceled-color) !important;
 }
 
 .status-chip.terminated {
-  background-color: #ffd3d1 !important;
-  color: #842029 !important;
+  background-color: var(--status-terminated-bg) !important;
+  color: var(--status-terminated-color) !important;
 } 

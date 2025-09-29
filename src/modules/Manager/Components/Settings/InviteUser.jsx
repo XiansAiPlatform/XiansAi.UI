@@ -105,32 +105,32 @@ export default function InviteUser() {
   // Show loading while tenant data is being loaded
   if (tenantLoading) {
     return (
-      <Box>
-        <Typography variant="h6" mb={3}>
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
           Invite New User
         </Typography>
         <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
-      </Box>
+      </Paper>
     );
   }
 
   // Show error if tenant data is not available
   if (!tenant?.tenantId) {
     return (
-      <Box>
-        <Typography variant="h6" mb={3}>
+      <Paper className="ca-certificates-paper">
+        <Typography variant="h6" gutterBottom>
           Invite New User
         </Typography>
         <Alert severity="warning" sx={{ mb: 2 }}>
           Tenant information is not available. Please ensure you have proper access to this tenant.
         </Alert>
-      </Box>
+      </Paper>
     );
   }
 
   return (
-    <Box>
-      <Typography variant="h6" mb={3}>
+    <Paper className="ca-certificates-paper">
+      <Typography variant="h6" gutterBottom>
         Invite New User
       </Typography>
 
@@ -260,6 +260,6 @@ export default function InviteUser() {
           </Alert>
         )}
       </Box>
-    </Box>
+    </Paper>
   );
 }
