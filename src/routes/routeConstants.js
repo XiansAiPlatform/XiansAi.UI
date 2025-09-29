@@ -19,7 +19,7 @@ export const ROUTES = {
     SETTINGS: '/manager/settings',
     MESSAGING: '/manager/messaging',
     AUDITING: '/manager/auditing',
-    UNAUTHORIZED: '/manager/unauthorized',
+    //UNAUTHORIZED: '/manager/unauthorized',
     LOGOUT: '/manager/logout',
   },
   
@@ -32,17 +32,17 @@ export const ROUTES = {
   },
   
   // Legacy routes for backward compatibility during transition
-  LEGACY: {
-    RUNS: '/runs',
-    RUNS_DETAIL: '/runs/:id/:runId',
-    DEFINITIONS: '/definitions',
-    KNOWLEDGE: '/knowledge',
-    SETTINGS: '/settings',
-    MESSAGING: '/messaging',
-    AUDITING: '/auditing',
-    UNAUTHORIZED: '/unauthorized',
-    LOGOUT: '/logout',
-  }
+  // LEGACY: {
+  //   RUNS: '/runs',
+  //   RUNS_DETAIL: '/runs/:id/:runId',
+  //   DEFINITIONS: '/definitions',
+  //   KNOWLEDGE: '/knowledge',
+  //   SETTINGS: '/settings',
+  //   MESSAGING: '/messaging',
+  //   AUDITING: '/auditing',
+  //   UNAUTHORIZED: '/unauthorized',
+  //   LOGOUT: '/logout',
+  // }
 };
 
 /**

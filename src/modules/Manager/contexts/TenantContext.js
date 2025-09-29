@@ -4,6 +4,8 @@ import { useUserTenantApi } from "../services/user-tenant-api";
 import { useAuth } from '../auth/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useRolesApi } from "../services/roles-api.js";
+import { useNotification } from './NotificationContext';
+import { handleApiError } from '../utils/errorHandler';
 
 const TenantContext = createContext();
 
@@ -21,6 +23,7 @@ export const TenantProvider = ({ children }) => {
   const rolesApi = useRolesApi();
   const { isAuthenticated, isLoading: isAuthLoading, user, getAccessTokenSilently } = useAuth();
   const location = useLocation();
+  const { showDetailedError } = useNotification();
 
   const fetchCurrentTenant = useCallback(async () => {
     try {
@@ -38,6 +41,10 @@ export const TenantProvider = ({ children }) => {
         }
       } catch (error) {
         console.warn('Failed to get tenant from currentTenantInfo API:', error);
+        // Only show error notification for non-authentication errors
+        if (error.status !== 401 && error.status !== 403) {
+          await handleApiError(error, 'Failed to load tenant information', showDetailedError);
+        }
       }
 
       // Fallback: Get user's tenant information and create a basic tenant object
@@ -58,6 +65,10 @@ export const TenantProvider = ({ children }) => {
         }
       } catch (error) {
         console.warn('Failed to get user tenants:', error);
+        // Only show error notification for non-authentication errors
+        if (error.status !== 401 && error.status !== 403) {
+          await handleApiError(error, 'Failed to load user tenant information', showDetailedError);
+        }
       }
 
       // Final fallback: create a default tenant if nothing else works
@@ -73,9 +84,13 @@ export const TenantProvider = ({ children }) => {
     } catch (error) {
       console.error('Error fetching tenant:', error);
       setError(error);
+      // Only show error notification for non-authentication errors
+      if (error.status !== 401 && error.status !== 403) {
+        await handleApiError(error, 'Failed to initialize tenant data', showDetailedError);
+      }
       return null;
     }
-  }, [tenantApi, userTenantApi, getAccessTokenSilently]);
+  }, [tenantApi, userTenantApi, getAccessTokenSilently, showDetailedError]);
 
   // Fetch user roles for the current tenant
   const fetchUserRoles = useCallback(async () => {
@@ -86,9 +101,13 @@ export const TenantProvider = ({ children }) => {
     } catch (err) {
       console.error('Error fetching user roles:', err);
       setUserRoles([]);
+      // Only show error notification for non-authentication errors
+      if (err.status !== 401 && err.status !== 403) {
+        await handleApiError(err, 'Failed to load user roles', showDetailedError);
+      }
       return [];
     }
-  }, [rolesApi]);
+  }, [rolesApi, showDetailedError]);
 
   useEffect(() => {
     const loadTenantData = async () => {
@@ -130,6 +149,10 @@ export const TenantProvider = ({ children }) => {
       } catch (err) {
         console.error('Error loading tenant data:', err);
         setError(err);
+        // Only show error notification for non-authentication errors
+        if (err.status !== 401 && err.status !== 403) {
+          await handleApiError(err, 'Failed to load application data', showDetailedError);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -141,7 +164,7 @@ export const TenantProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated, isAuthLoading, location.pathname, fetchCurrentTenant, fetchUserRoles, user]);
+  }, [isAuthenticated, isAuthLoading, location.pathname, fetchCurrentTenant, fetchUserRoles, user, showDetailedError]);
 
   return (
     (<TenantContext

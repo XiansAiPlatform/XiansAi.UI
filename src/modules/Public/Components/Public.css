@@ -1,26 +1,45 @@
 :root {
-  /* Primary Colors - Updated to match application theme */
-  --home-primary: #0ea5e9;
-  --home-primary-hover: #0284c7;
-  --home-primary-transparent: rgba(14, 165, 233, 0.1);
+  /* Primary Colors - Matching Agentri.ai website */
+  --primary-green-color: #428b83;
+  --secondary-green-color: #8eb9b5;
+  --light-green-color: #b3d1cd;
+  --white-green-color: #d9e7e6;
   
-  /* Background Colors - Adjusted for open source vibe */
+  /* Light Theme Colors (Default) */
+  --home-primary: #428b83;
+  --home-primary-hover: #357067;
+  --home-primary-transparent: rgba(66, 139, 131, 0.1);
+  
+  /* Light Background Colors */
+  --home-bg-primary: #ffffff;
+  --home-bg-secondary: #fafbfc;
+  --home-bg-tertiary: #f8f9fa;
+  --home-bg-card: #ffffff;
+  --home-bg-accent: #f5f7fa;
+  
+  /* Light Text Colors - Enhanced for better contrast */
+  --home-text-primary: #0f172a;
+  --home-text-secondary: #334155;
+  --home-text-muted: #64748b;
+  
+  /* Legacy Dark Theme Colors (for backwards compatibility) */
   --home-bg-dark: #0f172a;
   --home-bg-darker: #030712;
-  --home-bg-card: #1e293b;
   
-  /* Text Colors - Increased contrast */
-  --home-text-primary: #ffffff;
-  --home-text-secondary: #e4e4e7;
-  --home-text-muted: #d4d4d8;
+  /* Light Theme Effects */
+  --home-glow: rgba(66, 139, 131, 0.2);
+  --home-glow-strong: rgba(66, 139, 131, 0.3);
+  --home-border: rgba(229, 231, 235, 0.8);
+  --home-border-accent: rgba(66, 139, 131, 0.15);
   
-  /* Effects */
-  --home-glow: rgba(14, 165, 233, 0.3);
-  --home-glow-strong: rgba(14, 165, 233, 0.5);
-  --home-border: rgba(14, 165, 233, 0.15);
+  /* Light Theme Shadows */
+  --home-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --home-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --home-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --home-shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.1);
   
-  /* Add typography variables from application theme */
-  --font-family: 'JetBrains Mono', 'Fira Code', 'Source Code Pro', monospace;
+  /* Typography - Nordic inspired */
+  --font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   
   /* Add spacing scale */
@@ -71,9 +90,10 @@ body {
 .home-container {
   max-width: 100%;
   overflow-x: hidden;
-  background: var(--home-bg-dark);
+  background: linear-gradient(135deg, var(--home-bg-secondary) 0%, var(--home-bg-primary) 50%, var(--home-bg-tertiary) 100%);
   color: var(--home-text-primary);
   animation: fadeIn 0.3s ease-in;
+  min-height: 100vh;
 }
 
 .home-hero {
@@ -87,10 +107,9 @@ body {
   padding-right: 2rem;
   padding-bottom: 2rem;
   background: 
-    radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.15), transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(14, 165, 233, 0.1), transparent 50%),
-    linear-gradient(to bottom right, rgba(14, 165, 233, 0.05), transparent),
-    var(--home-bg-dark);
+    radial-gradient(circle at 20% 80%, rgba(66, 139, 131, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(66, 139, 131, 0.03) 0%, transparent 50%),
+    linear-gradient(135deg, var(--home-bg-secondary) 0%, var(--home-bg-primary) 50%, var(--home-bg-tertiary) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -118,10 +137,11 @@ body {
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(14, 165, 233, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(14, 165, 233, 0.05) 1px, transparent 1px);
-  background-size: 30px 30px;
+    linear-gradient(rgba(66, 139, 131, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(66, 139, 131, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
   mask-image: radial-gradient(circle at center, black, transparent 80%);
+  opacity: 0.6;
 }
 
 .home-hero-content {
@@ -136,10 +156,7 @@ body {
   font-size: 4rem;
   margin-bottom: 1.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, #e4e4e7 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 30px var(--home-glow);
+  color: var(--home-text-primary);
   letter-spacing: -0.03em;
   line-height: 1.1;
 }
@@ -152,6 +169,7 @@ body {
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
+  font-weight: 500;
 }
 
 .home-cta-buttons {
@@ -191,31 +209,29 @@ body {
   background: linear-gradient(135deg, var(--home-primary) 0%, var(--home-primary-hover) 100%);
   color: white;
   border: none;
-  box-shadow: 
-    0 4px 12px rgba(14, 165, 233, 0.25),
-    0 0 0 1px rgba(14, 165, 233, 0.1);
+  box-shadow: var(--home-shadow-md);
 }
 
 .home-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 
-    0 6px 20px rgba(14, 165, 233, 0.35),
-    0 0 0 1px rgba(14, 165, 233, 0.2);
+  box-shadow: 0 8px 24px rgba(66, 139, 131, 0.25);
   color: white;
 }
 
 .home-btn-secondary {
-  background: rgba(14, 165, 233, 0.1);
+  background: var(--home-bg-primary);
   color: var(--home-text-secondary);
-  border: 1px solid rgba(14, 165, 233, 0.2);
+  border: 2px solid var(--home-border);
   backdrop-filter: blur(10px);
+  box-shadow: var(--home-shadow-sm);
 }
 
 .home-btn-secondary:hover {
-  background: rgba(14, 165, 233, 0.15);
+  background: var(--home-bg-secondary);
   border-color: var(--home-primary);
-  color: var(--home-text-primary);
+  color: var(--home-primary);
   transform: translateY(-2px);
+  box-shadow: var(--home-shadow-md);
 }
 
 
@@ -279,7 +295,7 @@ body {
 
 .home-features {
   padding: 8rem 2rem;
-  background: var(--home-bg-darker);
+  background: var(--home-bg-secondary);
 }
 
 .home-features h2 {
@@ -305,16 +321,16 @@ body {
 .home-feature-card-large {
   grid-column: span 5;
   padding: 3rem;
-  background: var(--home-bg-dark);
+  background: var(--home-bg-card);
   border-radius: 16px;
   border: 1px solid var(--home-border);
   transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--home-shadow-md);
 }
 
 .home-feature-card-large:hover {
-  box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15);
-  border-color: rgba(14, 165, 233, 0.3);
+  box-shadow: var(--home-shadow-xl);
+  border-color: var(--home-border-accent);
   transform: translateY(-4px);
 }
 
@@ -330,18 +346,18 @@ body {
 .home-feature-card-medium {
   grid-column: span 7;
   padding: 3rem;
-  background: var(--home-bg-dark);
+  background: var(--home-bg-card);
   border-radius: 16px;
   border: 1px solid var(--home-border);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--home-shadow-md);
   transition: all 0.3s ease;
 }
 
 .home-feature-card-medium:hover {
-  box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15);
-  border-color: rgba(14, 165, 233, 0.3);
+  box-shadow: var(--home-shadow-xl);
+  border-color: var(--home-border-accent);
   transform: translateY(-4px);
 }
 
@@ -577,11 +593,7 @@ body {
 }
 
 .home-header {
-  background: 
-    radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15), transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba(139, 92, 246, 0.1), transparent 50%),
-    linear-gradient(to bottom right, rgba(139, 92, 246, 0.05), transparent),
-    var(--home-bg-dark);
+  background: rgba(255, 255, 255, 0.95);
   padding: 1.2rem 2.5rem;
   position: fixed;
   width: 100%;
@@ -590,11 +602,9 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
-  backdrop-filter: blur(10px);
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid var(--home-border);
+  backdrop-filter: blur(20px);
+  box-shadow: var(--home-shadow-sm);
 }
 
 /* Update header content wrapper */
@@ -2890,7 +2900,7 @@ h1, h2, h3 {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   min-height: 2.5rem;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(139, 92, 246, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(66, 139, 131, 0.1) 0%, rgba(66, 139, 131, 0.2) 100%);
   border-radius: 8px;
   margin-right: 0.5rem;
   transition: all 0.3s ease;

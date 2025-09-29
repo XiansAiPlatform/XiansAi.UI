@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Typography, Container, TextField, Button, MenuItem, Alert, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { FiArrowLeft, FiHome, FiSend, FiCheck, FiExternalLink } from 'react-icons/fi';
+import { FiArrowLeft, FiSend, FiCheck, FiExternalLink } from 'react-icons/fi';
 import { useAuth } from '../../../Manager/auth/AuthContext';
-import { AuthInfoMessage, UnauthenticatedMessage, RegisterFooter } from './components/SharedComponents';
+import { AuthInfoMessage, RegisterFooter } from './components/SharedComponents';
+import '../PublicLight.css';
 import { useRegistrationApi } from '../../services/registration-api';
 
 // Nordic-inspired styled components (reusing from RegisterJoin for consistency)
 const PageContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+  background: 'linear-gradient(135deg, #fafbfc 0%, #ffffff 50%, #f8fafc 100%)',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
@@ -19,10 +20,10 @@ const PageContainer = styled(Box)(({ theme }) => ({
     position: 'absolute',
     inset: 0,
     backgroundImage: `
-      linear-gradient(rgba(14, 165, 233, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 165, 233, 0.02) 1px, transparent 1px)
+      linear-gradient(rgba(66, 139, 131, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(66, 139, 131, 0.02) 1px, transparent 1px)
     `,
-    backgroundSize: '60px 60px',
+    backgroundSize: '50px 50px',
     maskImage: 'radial-gradient(circle at center, black, transparent 70%)',
     pointerEvents: 'none',
   },
@@ -41,12 +42,36 @@ const MainContent = styled(Container)(({ theme }) => ({
 const FormContainer = styled(Box)(({ theme }) => ({
   maxWidth: '700px',
   margin: '0 auto',
-  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
+  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+  border: '1px solid rgba(229, 231, 235, 0.6)',
   borderRadius: '20px',
   padding: theme.spacing(4),
   backdropFilter: 'blur(20px)',
-  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.4), transparent)',
+    borderRadius: '20px 20px 0 0',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    inset: '1px',
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)',
+    borderRadius: '20px',
+    pointerEvents: 'none',
+  },
+  [theme.breakpoints.down('sm')]: {
+    margin: theme.spacing(0, 2),
+    padding: theme.spacing(3),
+  },
 }));
 
 const TitleSection = styled(Box)(({ theme }) => ({
@@ -56,9 +81,9 @@ const TitleSection = styled(Box)(({ theme }) => ({
 
 const MainTitle = styled(Typography)(({ theme }) => ({
   fontSize: '2rem',
-  fontWeight: 300,
+  fontWeight: 700,
   letterSpacing: '-0.025em',
-  color: '#ffffff',
+  color: '#0f172a',
   marginBottom: theme.spacing(1),
 }));
 
@@ -67,7 +92,7 @@ const StepIndicator = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: '#0ea5e9',
+  color: '#428b83',
   marginBottom: theme.spacing(2),
   position: 'relative',
   '&::after': {
@@ -78,7 +103,7 @@ const StepIndicator = styled(Typography)(({ theme }) => ({
     transform: 'translateX(-50%)',
     width: '40px',
     height: '2px',
-    background: 'linear-gradient(90deg, transparent, #0ea5e9, transparent)',
+    background: 'linear-gradient(90deg, transparent, #428b83, transparent)',
   },
 }));
 
@@ -92,59 +117,88 @@ const FormGrid = styled(Box)(({ theme }) => ({
 const StyledTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.02) !important',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: '12px',
     fontSize: '1rem',
-    fontWeight: 300,
-    color: '#ffffff',
+    fontWeight: 400,
+    color: '#0f172a',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+    transition: 'all 0.2s ease',
     '& fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.12)',
+      borderColor: 'rgba(229, 231, 235, 0.8)',
       transition: 'all 0.2s ease',
     },
     '&:hover fieldset': {
-      borderColor: 'rgba(14, 165, 233, 0.4)',
+      borderColor: 'rgba(66, 139, 131, 0.4)',
     },
-    '&.Mui-focused fieldset': {
-      borderColor: '#0ea5e9',
-      borderWidth: '2px',
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      boxShadow: '0 4px 16px rgba(66, 139, 131, 0.1)',
+      '& fieldset': {
+        borderColor: '#428b83',
+        borderWidth: '2px',
+      },
     },
-    // Force background for all input types
+    '&.Mui-error fieldset': {
+      borderColor: '#ef4444',
+    },
+    '&.Mui-disabled': {
+      backgroundColor: 'rgba(248, 250, 252, 0.8)',
+      '& fieldset': {
+        borderColor: 'rgba(229, 231, 235, 0.5)',
+      },
+    },
+    // Fix autofill for light theme
     '& input': {
-      backgroundColor: 'transparent !important',
+      color: '#0f172a',
       '&:-webkit-autofill': {
-        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
-        WebkitTextFillColor: '#ffffff !important',
-        backgroundColor: 'rgba(255, 255, 255, 0.02) !important',
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.9) inset !important',
+        WebkitTextFillColor: '#0f172a !important',
         transition: 'background-color 5000s ease-in-out 0s',
       },
       '&:-webkit-autofill:hover': {
-        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
-        WebkitTextFillColor: '#ffffff !important',
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.9) inset !important',
+        WebkitTextFillColor: '#0f172a !important',
       },
       '&:-webkit-autofill:focus': {
-        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
-        WebkitTextFillColor: '#ffffff !important',
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.95) inset !important',
+        WebkitTextFillColor: '#0f172a !important',
       },
       '&:-webkit-autofill:active': {
-        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.02) inset !important',
-        WebkitTextFillColor: '#ffffff !important',
+        WebkitBoxShadow: '0 0 0 1000px rgba(255, 255, 255, 0.9) inset !important',
+        WebkitTextFillColor: '#0f172a !important',
+      },
+      '&:disabled': {
+        color: '#64748b',
       },
     },
   },
   '& .MuiInputLabel-root': {
-    color: '#94a3b8',
+    color: '#64748b',
     fontSize: '0.875rem',
-    fontWeight: 400,
+    fontWeight: 500,
     letterSpacing: '0.025em',
     '&.Mui-focused': {
-      color: '#0ea5e9',
+      color: '#428b83',
+      fontWeight: 600,
+    },
+    '&.Mui-error': {
+      color: '#ef4444',
+    },
+    '&.Mui-disabled': {
+      color: '#94a3b8',
     },
   },
   '& .MuiOutlinedInput-input': {
     padding: theme.spacing(1.5),
+    color: '#0f172a',
     '&::placeholder': {
-      color: '#64748b',
+      color: '#94a3b8',
       opacity: 1,
+    },
+    '&:disabled': {
+      color: '#64748b',
     },
   },
   '& .MuiFormHelperText-root': {
@@ -168,24 +222,42 @@ const ActionButton = styled(Button)(({ theme, variant: buttonVariant }) => ({
   textTransform: 'none',
   transition: 'all 0.2s ease',
   minHeight: '48px',
+  position: 'relative',
+  overflow: 'hidden',
   ...(buttonVariant === 'primary' ? {
-    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+    background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
     color: 'white',
     border: 'none',
-    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.25)',
+    boxShadow: '0 4px 12px rgba(66, 139, 131, 0.25)',
     '&:hover': {
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 20px rgba(14, 165, 233, 0.35)',
+      boxShadow: '0 8px 20px rgba(66, 139, 131, 0.35)',
+    },
+    '&:disabled': {
+      background: 'rgba(148, 163, 184, 0.3)',
+      color: 'rgba(148, 163, 184, 0.7)',
+      transform: 'none',
+      boxShadow: 'none',
+      cursor: 'not-allowed',
     },
   } : {
-    background: 'transparent',
-    color: '#94a3b8',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
+    background: 'rgba(255, 255, 255, 0.8)',
+    color: '#475569',
+    border: '1px solid rgba(229, 231, 235, 0.6)',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
     '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      color: '#ffffff',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(66, 139, 131, 0.3)',
+      color: '#428b83',
       transform: 'translateY(-1px)',
+      boxShadow: '0 4px 12px rgba(66, 139, 131, 0.1)',
+    },
+    '&:disabled': {
+      background: 'rgba(248, 250, 252, 0.5)',
+      color: 'rgba(148, 163, 184, 0.7)',
+      borderColor: 'rgba(229, 231, 235, 0.4)',
+      cursor: 'not-allowed',
     },
   }),
 }));
@@ -205,24 +277,41 @@ const NavigationFooter = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(3),
   padding: theme.spacing(3),
-  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-  background: 'rgba(15, 23, 42, 0.8)',
+  borderTop: '1px solid rgba(229, 231, 235, 0.3)',
+  background: 'rgba(250, 251, 252, 0.95)',
   backdropFilter: 'blur(20px)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.3), transparent)',
+  },
+  [theme.breakpoints.down('sm')]: {
+    gap: theme.spacing(2),
+    padding: theme.spacing(2),
+    flexWrap: 'wrap',
+  },
 }));
 
 const NavLink = styled(Link)(({ theme }) => ({
-  color: '#64748b',
+  color: '#475569',
   textDecoration: 'none',
   fontSize: '0.875rem',
-  fontWeight: 400,
+  fontWeight: 500,
   letterSpacing: '0.025em',
   padding: theme.spacing(1, 2),
-  borderRadius: '8px',
+  borderRadius: '10px',
   transition: 'all 0.2s ease',
+  position: 'relative',
   '&:hover': {
-    color: '#0ea5e9',
-    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+    color: '#428b83',
+    backgroundColor: 'rgba(66, 139, 131, 0.08)',
     transform: 'translateY(-1px)',
+    boxShadow: '0 2px 8px rgba(66, 139, 131, 0.15)',
   },
 }));
 
@@ -262,14 +351,43 @@ export default function RegisterNew() {
     return '';
   };
 
+  const validateEmail = (email) => {
+    if (!email) return '';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validateUrl = (url) => {
+    if (!url) return '';
+    try {
+      new URL(url);
+      return '';
+    } catch {
+      return 'Please enter a valid URL (e.g., https://example.com)';
+    }
+  };
+
   const tenantIdError = validateTenantId(formData.tenantId);
+  const emailError = validateEmail(formData.companyEmail);
+  const urlError = validateUrl(formData.companyUrl);
+
+  // Check if form is valid
+  const isFormValid = 
+    formData.tenantId.trim() && 
+    formData.tenantName.trim() && 
+    formData.companyUrl.trim() && 
+    formData.companyEmail.trim() && 
+    !tenantIdError && 
+    !emailError && 
+    !urlError;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError(null);
     
     // Validate form before submission
-    if (tenantIdError) {
+    if (!isFormValid) {
       setSubmitError('Please fix the validation errors before submitting.');
       return;
     }
@@ -316,11 +434,9 @@ export default function RegisterNew() {
   };
 
   return (
-    <PageContainer>
+    <PageContainer className="light-theme">
       <MainContent maxWidth="lg">
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
-        
-        {!isAuthenticated && <UnauthenticatedMessage />}
         
         {isAuthenticated && !isSuccess && (
           <FormContainer>
@@ -330,9 +446,9 @@ export default function RegisterNew() {
               <Typography 
                 variant="body2" 
                 sx={{ 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '1rem',
-                  fontWeight: 300,
+                  fontWeight: 400,
                   lineHeight: 1.6
                 }}
               >
@@ -341,7 +457,24 @@ export default function RegisterNew() {
             </TitleSection>
 
             {submitError && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert 
+                severity="error" 
+                sx={{ 
+                  mb: 3,
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  color: '#dc2626',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.1)',
+                  '& .MuiAlert-icon': {
+                    color: 'inherit',
+                  },
+                  '& .MuiAlert-message': {
+                    fontWeight: 500,
+                  },
+                }}
+              >
                 {submitError}
               </Alert>
             )}
@@ -383,6 +516,8 @@ export default function RegisterNew() {
                     placeholder="https://mycompany.com"
                     required
                     variant="outlined"
+                    helperText={urlError || "Enter your company's website URL"}
+                    error={!!urlError}
                     disabled={isSubmitting}
                   />
                 </Box>
@@ -397,6 +532,8 @@ export default function RegisterNew() {
                     placeholder="admin@mycompany.com"
                     required
                     variant="outlined"
+                    helperText={emailError || "Enter your company's contact email"}
+                    error={!!emailError}
                     disabled={isSubmitting}
                   />
                   <StyledTextField
@@ -427,22 +564,11 @@ export default function RegisterNew() {
                 </ActionButton>
                 
                 <ActionButton
-                  variant="secondary"
-                  component={Link}
-                  to="/"
-                  startIcon={<FiHome />}
-                  sx={{ flex: 1 }}
-                  disabled={isSubmitting}
-                >
-                  Home
-                </ActionButton>
-                
-                <ActionButton
                   variant="primary"
                   type="submit"
                   startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : <FiSend />}
                   sx={{ flex: 2 }}
-                  disabled={isSubmitting || !!tenantIdError}
+                  disabled={isSubmitting || !isFormValid}
                 >
                   {isSubmitting ? 'Creating...' : 'Create Tenant'}
                 </ActionButton>
@@ -474,45 +600,52 @@ export default function RegisterNew() {
               <Typography 
                 variant="body1" 
                 sx={{ 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '1.125rem',
-                  fontWeight: 300,
+                  fontWeight: 400,
                   lineHeight: 1.6,
                   textAlign: 'center',
                   mb: 3
                 }}
               >
-                Your tenant <strong style={{ color: '#0ea5e9' }}>{createdTenant.name}</strong> has been created successfully.
+                Your tenant <strong style={{ color: '#428b83' }}>{createdTenant.name}</strong> has been created successfully.
                 You have been assigned as the tenant administrator.
               </Typography>
             </TitleSection>
 
-            <Alert severity="success" sx={{ mb: 4 }}>
-              <Typography variant="body2" sx={{ mb: 1 }}>
+            <Alert 
+              severity="success" 
+              sx={{ 
+                mb: 4,
+                borderRadius: '12px',
+                backgroundColor: 'rgba(34, 197, 94, 0.08)',
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                color: '#16a34a',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 2px 8px rgba(34, 197, 94, 0.1)',
+                '& .MuiAlert-icon': {
+                  color: 'inherit',
+                },
+                '& .MuiAlert-message': {
+                  fontWeight: 500,
+                },
+              }}
+            >
+              <Typography variant="body2" sx={{ mb: 1, color: 'inherit' }}>
                 <strong>Tenant ID:</strong> {createdTenant.tenantId}
               </Typography>
-              <Typography variant="body2">
+              <Typography variant="body2" sx={{ color: 'inherit' }}>
                 You can now access your dashboard and start managing your tenant.
               </Typography>
             </Alert>
             
             <ButtonContainer>
               <ActionButton
-                variant="secondary"
-                component={Link}
-                to="/"
-                startIcon={<FiHome />}
-                sx={{ flex: 1 }}
-              >
-                Home
-              </ActionButton>
-              
-              <ActionButton
                 variant="primary"
                 component={Link}
                 to="/manager"
                 startIcon={<FiExternalLink />}
-                sx={{ flex: 2 }}
+                sx={{ flex: 1 }}
               >
                 Access Dashboard
               </ActionButton>
@@ -523,10 +656,24 @@ export default function RegisterNew() {
       
       {isAuthenticated && (
         <NavigationFooter>
+          <NavLink to="/">
+            Home
+          </NavLink>
+          <Box sx={{ 
+            width: '1px', 
+            height: '16px', 
+            backgroundColor: 'rgba(229, 231, 235, 0.6)',
+            borderRadius: '0.5px'
+          }} />
           <NavLink to="/manager">
             Dashboard
           </NavLink>
-          <Box sx={{ width: '1px', height: '16px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+          <Box sx={{ 
+            width: '1px', 
+            height: '16px', 
+            backgroundColor: 'rgba(229, 231, 235, 0.6)',
+            borderRadius: '0.5px'
+          }} />
           <NavLink to="/manager/logout">
             Sign Out
           </NavLink>

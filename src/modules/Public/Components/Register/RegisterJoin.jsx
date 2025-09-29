@@ -5,12 +5,13 @@ import { styled } from '@mui/material/styles';
 import { FiArrowLeft, FiSend, FiCheck, FiAlertCircle } from 'react-icons/fi';
 import { useRegistrationApi } from '../../services/registration-api';
 import { useAuth } from '../../../Manager/auth/AuthContext';
-import { AuthInfoMessage, UnauthenticatedMessage, RegisterFooter } from './components/SharedComponents';
+import { AuthInfoMessage, RegisterFooter } from './components/SharedComponents';
+import '../PublicLight.css';
 
-// Nordic-inspired styled components
+// Light Nordic-inspired styled components
 const PageContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+  background: 'linear-gradient(135deg, #fafbfc 0%, #ffffff 50%, #f8fafc 100%)',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
@@ -19,10 +20,10 @@ const PageContainer = styled(Box)(({ theme }) => ({
     position: 'absolute',
     inset: 0,
     backgroundImage: `
-      linear-gradient(rgba(14, 165, 233, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 165, 233, 0.02) 1px, transparent 1px)
+      linear-gradient(rgba(66, 139, 131, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(66, 139, 131, 0.02) 1px, transparent 1px)
     `,
-    backgroundSize: '60px 60px',
+    backgroundSize: '50px 50px',
     maskImage: 'radial-gradient(circle at center, black, transparent 70%)',
     pointerEvents: 'none',
   },
@@ -41,12 +42,36 @@ const MainContent = styled(Container)(({ theme }) => ({
 const FormContainer = styled(Box)(({ theme }) => ({
   maxWidth: '500px',
   margin: '0 auto',
-  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
+  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+  border: '1px solid rgba(229, 231, 235, 0.6)',
   borderRadius: '20px',
   padding: theme.spacing(4),
   backdropFilter: 'blur(20px)',
-  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.4), transparent)',
+    borderRadius: '20px 20px 0 0',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    inset: '1px',
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)',
+    borderRadius: '20px',
+    pointerEvents: 'none',
+  },
+  [theme.breakpoints.down('sm')]: {
+    margin: theme.spacing(0, 2),
+    padding: theme.spacing(3),
+  },
 }));
 
 const TitleSection = styled(Box)(({ theme }) => ({
@@ -56,9 +81,9 @@ const TitleSection = styled(Box)(({ theme }) => ({
 
 const MainTitle = styled(Typography)(({ theme }) => ({
   fontSize: '2rem',
-  fontWeight: 300,
+  fontWeight: 700,
   letterSpacing: '-0.025em',
-  color: '#ffffff',
+  color: '#0f172a',
   marginBottom: theme.spacing(1),
 }));
 
@@ -67,7 +92,7 @@ const StepIndicator = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: '#0ea5e9',
+  color: '#428b83',
   marginBottom: theme.spacing(2),
   position: 'relative',
   '&::after': {
@@ -78,50 +103,79 @@ const StepIndicator = styled(Typography)(({ theme }) => ({
     transform: 'translateX(-50%)',
     width: '40px',
     height: '2px',
-    background: 'linear-gradient(90deg, transparent, #0ea5e9, transparent)',
+    background: 'linear-gradient(90deg, transparent, #428b83, transparent)',
   },
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   marginBottom: theme.spacing(3),
   '& .MuiOutlinedInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderRadius: '12px',
     fontSize: '1rem',
-    fontWeight: 300,
-    color: '#ffffff',
+    fontWeight: 400,
+    color: '#0f172a',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+    transition: 'all 0.2s ease',
     '& fieldset': {
-      borderColor: 'rgba(255, 255, 255, 0.12)',
+      borderColor: 'rgba(229, 231, 235, 0.8)',
       transition: 'all 0.2s ease',
     },
     '&:hover fieldset': {
-      borderColor: 'rgba(14, 165, 233, 0.4)',
+      borderColor: 'rgba(66, 139, 131, 0.4)',
     },
-    '&.Mui-focused fieldset': {
-      borderColor: '#0ea5e9',
-      borderWidth: '2px',
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      boxShadow: '0 4px 16px rgba(66, 139, 131, 0.1)',
+      '& fieldset': {
+        borderColor: '#428b83',
+        borderWidth: '2px',
+      },
     },
     '&.Mui-error fieldset': {
       borderColor: '#ef4444',
     },
+    '&.Mui-disabled': {
+      backgroundColor: 'rgba(248, 250, 252, 0.8)',
+      '& fieldset': {
+        borderColor: 'rgba(229, 231, 235, 0.5)',
+      },
+    },
   },
   '& .MuiInputLabel-root': {
-    color: '#94a3b8',
+    color: '#64748b',
     fontSize: '0.875rem',
-    fontWeight: 400,
+    fontWeight: 500,
     letterSpacing: '0.025em',
     '&.Mui-focused': {
-      color: '#0ea5e9',
+      color: '#428b83',
+      fontWeight: 600,
     },
     '&.Mui-error': {
       color: '#ef4444',
     },
+    '&.Mui-disabled': {
+      color: '#94a3b8',
+    },
   },
   '& .MuiOutlinedInput-input': {
     padding: theme.spacing(1.5),
+    color: '#0f172a',
     '&::placeholder': {
-      color: '#64748b',
+      color: '#94a3b8',
       opacity: 1,
+    },
+    '&:disabled': {
+      color: '#64748b',
+    },
+  },
+  '& .MuiFormHelperText-root': {
+    color: '#64748b',
+    fontSize: '0.75rem',
+    marginTop: theme.spacing(0.5),
+    '&.Mui-error': {
+      color: '#ef4444',
     },
   },
 }));
@@ -135,30 +189,42 @@ const ActionButton = styled(Button)(({ theme, variant: buttonVariant }) => ({
   textTransform: 'none',
   transition: 'all 0.2s ease',
   minHeight: '48px',
+  position: 'relative',
+  overflow: 'hidden',
   ...(buttonVariant === 'primary' ? {
-    background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+    background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
     color: 'white',
     border: 'none',
-    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.25)',
+    boxShadow: '0 4px 12px rgba(66, 139, 131, 0.25)',
     '&:hover': {
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 20px rgba(14, 165, 233, 0.35)',
+      boxShadow: '0 8px 20px rgba(66, 139, 131, 0.35)',
     },
     '&:disabled': {
-      background: 'rgba(255, 255, 255, 0.1)',
-      color: 'rgba(255, 255, 255, 0.5)',
+      background: 'rgba(148, 163, 184, 0.3)',
+      color: 'rgba(148, 163, 184, 0.7)',
       transform: 'none',
       boxShadow: 'none',
+      cursor: 'not-allowed',
     },
   } : {
-    background: 'transparent',
-    color: '#94a3b8',
-    border: '1px solid rgba(255, 255, 255, 0.12)',
+    background: 'rgba(255, 255, 255, 0.8)',
+    color: '#475569',
+    border: '1px solid rgba(229, 231, 235, 0.6)',
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
     '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderColor: 'rgba(255, 255, 255, 0.2)',
-      color: '#ffffff',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(66, 139, 131, 0.3)',
+      color: '#428b83',
       transform: 'translateY(-1px)',
+      boxShadow: '0 4px 12px rgba(66, 139, 131, 0.1)',
+    },
+    '&:disabled': {
+      background: 'rgba(248, 250, 252, 0.5)',
+      color: 'rgba(148, 163, 184, 0.7)',
+      borderColor: 'rgba(229, 231, 235, 0.4)',
+      cursor: 'not-allowed',
     },
   }),
 }));
@@ -176,14 +242,21 @@ const StatusAlert = styled(Alert)(({ theme, severity }) => ({
   borderRadius: '12px',
   marginBottom: theme.spacing(3),
   backgroundColor: severity === 'success' 
-    ? 'rgba(34, 197, 94, 0.1)' 
-    : 'rgba(239, 68, 68, 0.1)',
+    ? 'rgba(34, 197, 94, 0.08)' 
+    : 'rgba(239, 68, 68, 0.08)',
   border: `1px solid ${severity === 'success' 
     ? 'rgba(34, 197, 94, 0.2)' 
     : 'rgba(239, 68, 68, 0.2)'}`,
-  color: severity === 'success' ? '#22c55e' : '#ef4444',
+  color: severity === 'success' ? '#16a34a' : '#dc2626',
+  backdropFilter: 'blur(10px)',
+  boxShadow: severity === 'success' 
+    ? '0 2px 8px rgba(34, 197, 94, 0.1)' 
+    : '0 2px 8px rgba(239, 68, 68, 0.1)',
   '& .MuiAlert-icon': {
     color: 'inherit',
+  },
+  '& .MuiAlert-message': {
+    fontWeight: 500,
   },
 }));
 
@@ -193,24 +266,41 @@ const NavigationFooter = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(3),
   padding: theme.spacing(3),
-  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-  background: 'rgba(15, 23, 42, 0.8)',
+  borderTop: '1px solid rgba(229, 231, 235, 0.3)',
+  background: 'rgba(250, 251, 252, 0.95)',
   backdropFilter: 'blur(20px)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.3), transparent)',
+  },
+  [theme.breakpoints.down('sm')]: {
+    gap: theme.spacing(2),
+    padding: theme.spacing(2),
+    flexWrap: 'wrap',
+  },
 }));
 
 const NavLink = styled(Link)(({ theme }) => ({
-  color: '#64748b',
+  color: '#475569',
   textDecoration: 'none',
   fontSize: '0.875rem',
-  fontWeight: 400,
+  fontWeight: 500,
   letterSpacing: '0.025em',
   padding: theme.spacing(1, 2),
-  borderRadius: '8px',
+  borderRadius: '10px',
   transition: 'all 0.2s ease',
+  position: 'relative',
   '&:hover': {
-    color: '#0ea5e9',
-    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+    color: '#428b83',
+    backgroundColor: 'rgba(66, 139, 131, 0.08)',
     transform: 'translateY(-1px)',
+    boxShadow: '0 2px 8px rgba(66, 139, 131, 0.15)',
   },
 }));
 
@@ -292,11 +382,9 @@ export default function RegisterJoin() {
   };
 
   return (
-    <PageContainer>
+    <PageContainer className="light-theme">
       <MainContent maxWidth="md">
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
-        
-        {!isAuthenticated && <UnauthenticatedMessage />}
         
         {isAuthenticated && (
           <FormContainer>
@@ -306,9 +394,9 @@ export default function RegisterJoin() {
               <Typography 
                 variant="body2" 
                 sx={{ 
-                  color: '#94a3b8',
+                  color: '#64748b',
                   fontSize: '1rem',
-                  fontWeight: 300,
+                  fontWeight: 400,
                   lineHeight: 1.6
                 }}
               >
@@ -375,10 +463,24 @@ export default function RegisterJoin() {
       
       {isAuthenticated && (
         <NavigationFooter>
+          <NavLink to="/">
+            Home
+          </NavLink>
+          <Box sx={{ 
+            width: '1px', 
+            height: '16px', 
+            backgroundColor: 'rgba(229, 231, 235, 0.6)',
+            borderRadius: '0.5px'
+          }} />
           <NavLink to="/manager">
             Dashboard
           </NavLink>
-          <Box sx={{ width: '1px', height: '16px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+          <Box sx={{ 
+            width: '1px', 
+            height: '16px', 
+            backgroundColor: 'rgba(229, 231, 235, 0.6)',
+            borderRadius: '0.5px'
+          }} />
           <NavLink to="/manager/logout">
             Sign Out
           </NavLink>

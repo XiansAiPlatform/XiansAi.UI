@@ -94,23 +94,71 @@ export const useApiClient = () => {
           // a clean user experience by redirecting them to a safe location
           if (response.status === 403) {
             console.error('Access forbidden (403). Redirecting to home page.');
-            navigate('/manager/unauthorized');
+            //navigate('/manager/unauthorized');
+            navigate('/manager/landing');
             return; // Exit early to prevent further error handling
           }
 
           // Parse error response according to standard server format: { error: "message" }
           let errorMessage = 'An error occurred';
+          let errorDetails = null;
+          
           try {
             const errorData = await response.json();
             if (errorData && errorData.error) {
               errorMessage = errorData.error;
+              errorDetails = errorData;
+            } else if (errorData && errorData.message) {
+              // Handle alternative error format: { message: "error text" }
+              errorMessage = errorData.message;
+              errorDetails = errorData;
+            } else if (typeof errorData === 'string') {
+              errorMessage = errorData;
             }
           } catch (parseError) {
             // If JSON parsing fails, try to get text response
             try {
-              errorMessage = (await response.text()) || errorMessage;
+              const textResponse = await response.text();
+              if (textResponse && textResponse.trim()) {
+                errorMessage = textResponse;
+              }
             } catch (textError) {
               console.warn('Could not parse error response:', textError);
+              // Provide more specific error messages based on status code
+              switch (response.status) {
+                case 400:
+                  errorMessage = 'Invalid request. Please check your input and try again.';
+                  break;
+                case 401:
+                  errorMessage = 'Your session has expired. Please log in again.';
+                  break;
+                case 403:
+                  errorMessage = 'You do not have permission to perform this action.';
+                  break;
+                case 404:
+                  errorMessage = 'The requested resource was not found.';
+                  break;
+                case 409:
+                  errorMessage = 'There was a conflict with your request. The resource may already exist.';
+                  break;
+                case 422:
+                  errorMessage = 'The request data is invalid or incomplete.';
+                  break;
+                case 429:
+                  errorMessage = 'Too many requests. Please wait a moment and try again.';
+                  break;
+                case 500:
+                  errorMessage = 'Internal server error. Please try again later.';
+                  break;
+                case 502:
+                  errorMessage = 'Server is temporarily unavailable. Please try again later.';
+                  break;
+                case 503:
+                  errorMessage = 'Service is temporarily unavailable. Please try again later.';
+                  break;
+                default:
+                  errorMessage = `Server error (${response.status}). Please try again later.`;
+              }
             }
           }
           
@@ -122,6 +170,9 @@ export const useApiClient = () => {
           const error = new Error(errorMessage);
           error.status = response.status;
           error.statusText = response.statusText;
+          error.url = url;
+          error.method = options.method || 'GET';
+          error.details = errorDetails;
           throw error;
         }
 
@@ -209,23 +260,71 @@ export const useApiClient = () => {
             // a clean user experience by redirecting them to a safe location
             if (response.status === 403) {
               console.error('Access forbidden (403). Redirecting to home page.');
-              navigate('/manager/unauthorized');
+              //navigate('/manager/unauthorized');
+              navigate('/manager/landing');
               return; // Exit early to prevent further error handling
             }
             
             // Parse error response according to standard server format: { error: "message" }
             let errorMessage = 'An error occurred';
+            let errorDetails = null;
+            
             try {
               const errorData = await response.json();
               if (errorData && errorData.error) {
                 errorMessage = errorData.error;
+                errorDetails = errorData;
+              } else if (errorData && errorData.message) {
+                // Handle alternative error format: { message: "error text" }
+                errorMessage = errorData.message;
+                errorDetails = errorData;
+              } else if (typeof errorData === 'string') {
+                errorMessage = errorData;
               }
             } catch (parseError) {
               // If JSON parsing fails, try to get text response
               try {
-                errorMessage = (await response.text()) || errorMessage;
+                const textResponse = await response.text();
+                if (textResponse && textResponse.trim()) {
+                  errorMessage = textResponse;
+                }
               } catch (textError) {
                 console.warn('Could not parse error response:', textError);
+                // Provide more specific error messages based on status code
+                switch (response.status) {
+                  case 400:
+                    errorMessage = 'Invalid request. Please check your input and try again.';
+                    break;
+                  case 401:
+                    errorMessage = 'Your session has expired. Please log in again.';
+                    break;
+                  case 403:
+                    errorMessage = 'You do not have permission to perform this action.';
+                    break;
+                  case 404:
+                    errorMessage = 'The requested resource was not found.';
+                    break;
+                  case 409:
+                    errorMessage = 'There was a conflict with your request. The resource may already exist.';
+                    break;
+                  case 422:
+                    errorMessage = 'The request data is invalid or incomplete.';
+                    break;
+                  case 429:
+                    errorMessage = 'Too many requests. Please wait a moment and try again.';
+                    break;
+                  case 500:
+                    errorMessage = 'Internal server error. Please try again later.';
+                    break;
+                  case 502:
+                    errorMessage = 'Server is temporarily unavailable. Please try again later.';
+                    break;
+                  case 503:
+                    errorMessage = 'Service is temporarily unavailable. Please try again later.';
+                    break;
+                  default:
+                    errorMessage = `Server error (${response.status}). Please try again later.`;
+                }
               }
             }
             
@@ -233,6 +332,9 @@ export const useApiClient = () => {
             const error = new Error(errorMessage);
             error.status = response.status;
             error.statusText = response.statusText;
+            error.url = url;
+            error.method = 'GET';
+            error.details = errorDetails;
             throw error;
           }
 

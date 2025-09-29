@@ -1,7 +1,7 @@
 import React from "react";
 import { useTenant } from "../../contexts/TenantContext";
 import AdminDashboard from "./AdminDashboard";
-import NotAuthorized from "../NotAuthorized/NotAuthorized";
+import Landing from "../Landing/Landing";
 import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 
 export default function AdminDashboardRoute() {
@@ -23,5 +23,5 @@ export default function AdminDashboardRoute() {
     return <AdminDashboard />;
   }
 
-  return <NotAuthorized />;
+  return <Landing />;
 }

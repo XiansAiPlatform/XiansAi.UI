@@ -4,11 +4,12 @@ import { styled } from '@mui/material/styles';
 import { FiPlusCircle, FiUsers, FiArrowRight } from 'react-icons/fi';
 import { useAuth } from '../../../Manager/auth/AuthContext';
 import { AuthInfoMessage, RegisterFooter } from './components/SharedComponents';
+import '../PublicLight.css';
 
-// Nordic-inspired styled components
+// Light Nordic-inspired styled components
 const PageContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
-  background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+  background: 'linear-gradient(135deg, #fafbfc 0%, #ffffff 50%, #f8fafc 100%)',
   display: 'flex',
   flexDirection: 'column',
   position: 'relative',
@@ -17,12 +18,13 @@ const PageContainer = styled(Box)(({ theme }) => ({
     position: 'absolute',
     inset: 0,
     backgroundImage: `
-      linear-gradient(rgba(14, 165, 233, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(14, 165, 233, 0.02) 1px, transparent 1px)
+      linear-gradient(rgba(66, 139, 131, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(66, 139, 131, 0.02) 1px, transparent 1px)
     `,
-    backgroundSize: '60px 60px',
-    maskImage: 'radial-gradient(circle at center, black, transparent 70%)',
+    backgroundSize: '50px 50px',
+    maskImage: 'radial-gradient(circle at center, black, transparent 80%)',
     pointerEvents: 'none',
+    opacity: 0.6,
   },
 }));
 
@@ -43,14 +45,10 @@ const TitleSection = styled(Box)(({ theme }) => ({
 
 const MainTitle = styled(Typography)(({ theme }) => ({
   fontSize: '2.5rem',
-  fontWeight: 300,
+  fontWeight: 700,
   letterSpacing: '-0.025em',
-  color: '#ffffff',
+  color: '#0f172a',
   marginBottom: theme.spacing(1),
-  background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
-  backgroundClip: 'text',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
 }));
 
 const StepIndicator = styled(Typography)(({ theme }) => ({
@@ -58,7 +56,7 @@ const StepIndicator = styled(Typography)(({ theme }) => ({
   fontWeight: 400,
   letterSpacing: '0.1em',
   textTransform: 'uppercase',
-  color: '#0ea5e9',
+  color: '#428b83',
   marginBottom: theme.spacing(1),
   position: 'relative',
   '&::after': {
@@ -69,7 +67,7 @@ const StepIndicator = styled(Typography)(({ theme }) => ({
     transform: 'translateX(-50%)',
     width: '40px',
     height: '2px',
-    background: 'linear-gradient(90deg, transparent, #0ea5e9, transparent)',
+    background: 'linear-gradient(90deg, transparent, #428b83, transparent)',
   },
 }));
 
@@ -84,10 +82,10 @@ const SelectionGrid = styled(Box)(({ theme }) => ({
 
 const SelectionCard = styled(Box)(({ theme, disabled }) => ({
   background: disabled 
-    ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)'
-    : 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
-  border: '1px solid rgba(255, 255, 255, 0.08)',
-  borderRadius: '16px',
+    ? 'rgba(248, 250, 252, 0.5)'
+    : '#ffffff',
+  border: '2px solid rgba(229, 231, 235, 0.8)',
+  borderRadius: '20px',
   padding: theme.spacing(4),
   cursor: disabled ? 'not-allowed' : 'pointer',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -95,24 +93,25 @@ const SelectionCard = styled(Box)(({ theme, disabled }) => ({
   overflow: 'hidden',
   opacity: disabled ? 0.5 : 1,
   backdropFilter: 'blur(10px)',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)',
   '&::before': {
     content: '""',
     position: 'absolute',
     inset: 0,
-    background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.1), transparent 50%)',
+    background: 'linear-gradient(135deg, rgba(66, 139, 131, 0.05), transparent 50%)',
     opacity: 0,
     transition: 'opacity 0.3s ease',
   },
   '&:hover': disabled ? {} : {
     transform: 'translateY(-4px)',
-    borderColor: 'rgba(14, 165, 233, 0.3)',
-    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(14, 165, 233, 0.1)',
+    borderColor: 'rgba(66, 139, 131, 0.3)',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(66, 139, 131, 0.1)',
     '&::before': {
       opacity: 1,
     },
     '& .selection-icon': {
       transform: 'scale(1.1)',
-      color: '#0ea5e9',
+      color: '#428b83',
     },
     '& .selection-arrow': {
       transform: 'translateX(4px)',
@@ -123,7 +122,7 @@ const SelectionCard = styled(Box)(({ theme, disabled }) => ({
 
 const SelectionIcon = styled(Box)(({ theme }) => ({
   fontSize: '3rem',
-  color: '#64748b',
+  color: '#475569',
   marginBottom: theme.spacing(3),
   transition: 'all 0.3s ease',
   display: 'flex',
@@ -132,25 +131,25 @@ const SelectionIcon = styled(Box)(({ theme }) => ({
 
 const SelectionTitle = styled(Typography)(({ theme }) => ({
   fontSize: '1.5rem',
-  fontWeight: 500,
-  letterSpacing: '-0.01em',
-  color: '#ffffff',
+  fontWeight: 600,
+  letterSpacing: '-0.015em',
+  color: '#0f172a',
   marginBottom: theme.spacing(2),
   textAlign: 'center',
 }));
 
 const SelectionDescription = styled(Typography)(({ theme }) => ({
   fontSize: '1rem',
-  fontWeight: 300,
+  fontWeight: 400,
   lineHeight: 1.6,
-  color: '#94a3b8',
+  color: '#334155',
   textAlign: 'center',
   marginBottom: theme.spacing(3),
 }));
 
 const SelectionArrow = styled(FiArrowRight)(({ theme }) => ({
   fontSize: '1.25rem',
-  color: '#0ea5e9',
+  color: '#428b83',
   opacity: 0,
   transition: 'all 0.3s ease',
   marginLeft: 'auto',
@@ -164,24 +163,49 @@ const NavigationFooter = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(3),
   padding: theme.spacing(3),
-  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-  background: 'rgba(15, 23, 42, 0.8)',
+  borderTop: '1px solid rgba(229, 231, 235, 0.3)',
+  background: 'rgba(250, 251, 252, 0.95)',
   backdropFilter: 'blur(20px)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '1px',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.3), transparent)',
+  },
+  [theme.breakpoints.down('sm')]: {
+    gap: theme.spacing(2),
+    padding: theme.spacing(2),
+    flexWrap: 'wrap',
+  },
 }));
 
 const NavLink = styled(Link)(({ theme }) => ({
-  color: '#64748b',
-  textDecoration: 'none',
+  color: '#475569 !important',
+  textDecoration: 'none !important',
   fontSize: '0.875rem',
-  fontWeight: 400,
+  fontWeight: 500,
   letterSpacing: '0.025em',
   padding: theme.spacing(1, 2),
-  borderRadius: '8px',
+  borderRadius: '10px',
   transition: 'all 0.2s ease',
-  '&:hover': {
-    color: '#0ea5e9',
-    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+  position: 'relative',
+  display: 'inline-block',
+  '&:hover, &:focus': {
+    color: '#428b83 !important',
+    backgroundColor: 'rgba(66, 139, 131, 0.08) !important',
     transform: 'translateY(-1px)',
+    boxShadow: '0 2px 8px rgba(66, 139, 131, 0.15)',
+    textDecoration: 'none !important',
+  },
+  '&:visited': {
+    color: '#475569 !important',
+  },
+  '&:active': {
+    color: '#428b83 !important',
   },
 }));
 
@@ -199,7 +223,7 @@ export default function RegisterSelection() {
   };
 
   return (
-    <PageContainer>
+    <PageContainer className="light-theme">
       <MainContent maxWidth="lg">
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
         
@@ -256,10 +280,24 @@ export default function RegisterSelection() {
       
       {isAuthenticated && (
         <NavigationFooter>
+          <NavLink to="/">
+            Home
+          </NavLink>
+          <Box sx={{ 
+            width: '1px', 
+            height: '16px', 
+            backgroundColor: 'rgba(229, 231, 235, 0.6)',
+            borderRadius: '0.5px'
+          }} />
           <NavLink to="/manager">
             Dashboard
           </NavLink>
-          <Box sx={{ width: '1px', height: '16px', backgroundColor: 'rgba(255, 255, 255, 0.1)' }} />
+          <Box sx={{ 
+            width: '1px', 
+            height: '16px', 
+            backgroundColor: 'rgba(229, 231, 235, 0.6)',
+            borderRadius: '0.5px'
+          }} />
           <NavLink to="/manager/logout">
             Sign Out
           </NavLink>

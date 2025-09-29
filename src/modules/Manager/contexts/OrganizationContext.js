@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext'; // New import
 import { useNotification } from './NotificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {useUserTenantApi} from '../services/user-tenant-api';
+import { handleApiError } from '../utils/errorHandler';
 
 const OrganizationContext = createContext();
 const STORAGE_KEY = 'selectedOrganization';
@@ -12,7 +13,7 @@ export function OrganizationProvider({ children }) {
   const [organizations, setOrganizations] = useState([]);
   const [isOrgLoading, setIsOrgLoading] = useState(true);
   const { getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading, user, isProcessingCallback } = useAuth();
-  const { showError } = useNotification();
+  const { showDetailedError } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
   const userTenantApi = useUserTenantApi();
@@ -73,7 +74,7 @@ export function OrganizationProvider({ children }) {
           } else {
         // Only show organization errors for authenticated protected routes
         if (!publicPaths.includes(location.pathname) ) {
-          showError('No organizations available for this user');
+          showDetailedError('No organizations available for this user');
         }
           }
         } else if (location.pathname !== "/" && location.pathname !== "/login" && !location.pathname.startsWith('/register')) {
@@ -82,8 +83,8 @@ export function OrganizationProvider({ children }) {
       } catch (error) {
         console.error('Error initializing organization:', error);
         // Only show organization errors for authenticated protected routes
-        if (!publicPaths.includes(location.pathname) ) {
-          showError('Failed to load organization information');
+        if (!publicPaths.includes(location.pathname)) {
+          await handleApiError(error, 'Failed to load organization information', showDetailedError);
         }
       } finally {
         setIsOrgLoading(false);
@@ -91,7 +92,7 @@ export function OrganizationProvider({ children }) {
     };
 
     initializeOrg();
-  }, [isAuthenticated, getAccessTokenSilently, showError, navigate, location, isAuthLoading, user, isProcessingCallback, userTenantApi]); // Added isAuthLoading and user
+  }, [isAuthenticated, getAccessTokenSilently, showDetailedError, navigate, location, isAuthLoading, user, isProcessingCallback, userTenantApi]); // Added isAuthLoading and user
 
   const updateSelectedOrg = (newOrg) => {
     setSelectedOrg(newOrg);

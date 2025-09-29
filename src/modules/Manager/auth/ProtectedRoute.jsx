@@ -6,6 +6,7 @@ import { useSelectedOrg } from '../contexts/OrganizationContext';
 import { useAuth } from './AuthContext';
 import AccountConflictHandler from '../Components/Common/AccountConflictHandler';
 import useAccountConflictHandler from '../Components/Common/useAccountConflictHandler';
+import NoOrganizationAvailable from '../Components/Common/NoOrganizationAvailable';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading, login, error, isProcessingCallback, clearError } = useAuth();
@@ -117,19 +118,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (isAuthenticated && !selectedOrg) {
-    return (
-      <Container maxWidth="sm" sx={{ mt: 8 }}>
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <ErrorOutline color="warning" sx={{ fontSize: 60, mb: 2 }} />
-          <Typography variant="h5" gutterBottom>
-            No Organization Available
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Please ensure you are part of an organization to access this application.
-          </Typography>
-        </Paper>
-      </Container>
-    );
+    return <NoOrganizationAvailable />;
   }
 
   return isAuthenticated ? children : null;

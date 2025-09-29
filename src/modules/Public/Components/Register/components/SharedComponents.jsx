@@ -2,14 +2,14 @@ import { Typography, Box, Link as MuiLink } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 
-// Enhanced footer with Nordic styling
+// Enhanced footer with Light Nordic styling
 export const Footer = styled(Box)(({ theme }) => ({
-  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98) 0%, rgba(3, 7, 18, 0.95) 100%)',
+  background: 'rgba(250, 251, 252, 0.95)',
   backdropFilter: 'blur(20px)',
-  borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+  borderTop: '1px solid rgba(229, 231, 235, 0.8)',
   padding: theme.spacing(3, 0),
   marginTop: 'auto',
-  color: '#9ca3af',
+  color: '#64748b',
   position: 'relative',
   '&::before': {
     content: '""',
@@ -18,7 +18,7 @@ export const Footer = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.5), transparent)',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.3), transparent)',
   },
 }));
 
@@ -33,14 +33,15 @@ const FooterContent = styled(Box)(({ theme }) => ({
 }));
 
 export const InfoMessage = styled(Box)(({ theme }) => ({
-  padding: theme.spacing(2.5),
-  marginBottom: theme.spacing(3),
-  background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(14, 165, 233, 0.05) 100%)',
-  border: '1px solid rgba(14, 165, 233, 0.2)',
-  borderRadius: theme.spacing(1.5),
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(4),
+  background: 'linear-gradient(135deg, rgba(217, 231, 230, 0.4) 0%, rgba(217, 231, 230, 0.15) 100%)',
+  border: '1px solid rgba(66, 139, 131, 0.2)',
+  borderRadius: theme.spacing(2),
   textAlign: 'center',
-  backdropFilter: 'blur(10px)',
+  backdropFilter: 'blur(15px)',
   position: 'relative',
+  boxShadow: '0 4px 16px rgba(66, 139, 131, 0.08)',
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -48,8 +49,16 @@ export const InfoMessage = styled(Box)(({ theme }) => ({
     left: 0,
     right: 0,
     height: '2px',
-    background: 'linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.8), transparent)',
-    borderRadius: theme.spacing(1.5, 1.5, 0, 0),
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.6), transparent)',
+    borderRadius: theme.spacing(2, 2, 0, 0),
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    inset: '1px',
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)',
+    borderRadius: theme.spacing(2),
+    pointerEvents: 'none',
   },
 }));
 
@@ -63,9 +72,9 @@ export function RegisterFooter() {
           <Typography 
             variant="body2" 
             sx={{ 
-              color: '#6b7280',
+              color: '#64748b',
               fontSize: '0.875rem',
-              fontWeight: 300,
+              fontWeight: 400,
               letterSpacing: '0.05em'
             }}
           >
@@ -76,7 +85,7 @@ export function RegisterFooter() {
             target="_blank"
             rel="noopener noreferrer"
             sx={{
-              color: '#0ea5e9',
+              color: '#428b83',
               fontWeight: 500,
               textDecoration: 'none',
               transition: 'all 0.2s ease',
@@ -86,8 +95,8 @@ export function RegisterFooter() {
               padding: '0.25rem 0.5rem',
               borderRadius: '6px',
               '&:hover': {
-                color: '#0284c7',
-                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                color: '#357067',
+                backgroundColor: 'rgba(66, 139, 131, 0.1)',
                 transform: 'translateY(-1px)',
               }
             }}
@@ -107,14 +116,13 @@ export function RegisterFooter() {
         <Typography 
           variant="caption" 
           sx={{ 
-            color: '#6b7280',
+            color: '#64748b',
             fontSize: '0.75rem',
-            fontWeight: 300,
-            letterSpacing: '0.05em',
-            opacity: 0.8
+            fontWeight: 400,
+            letterSpacing: '0.05em'
           }}
         >
-          © {new Date().getFullYear()} XiansAI Platform. Built for developers.
+          © {new Date().getFullYear()} XiansAI Platform.
         </Typography>
       </FooterContent>
     </Footer>
@@ -127,7 +135,7 @@ const AuthButton = styled(MuiLink)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(1),
   padding: theme.spacing(1, 2),
-  background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+  background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
   color: 'white',
   textDecoration: 'none',
   borderRadius: '8px',
@@ -135,10 +143,10 @@ const AuthButton = styled(MuiLink)(({ theme }) => ({
   fontWeight: 500,
   letterSpacing: '0.025em',
   transition: 'all 0.2s ease',
-  boxShadow: '0 2px 8px rgba(14, 165, 233, 0.25)',
+  boxShadow: '0 2px 8px rgba(66, 139, 131, 0.25)',
   '&:hover': {
     transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.35)',
+    boxShadow: '0 4px 12px rgba(66, 139, 131, 0.35)',
     color: 'white',
   },
 }));
@@ -148,24 +156,36 @@ const UserBadge = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   gap: theme.spacing(1),
   padding: theme.spacing(0.75, 1.5),
-  background: 'rgba(255, 255, 255, 0.08)',
-  border: '1px solid rgba(255, 255, 255, 0.12)',
+  background: 'rgba(66, 139, 131, 0.08)',
+  border: '1px solid rgba(66, 139, 131, 0.2)',
   borderRadius: '20px',
   fontSize: '0.875rem',
   fontWeight: 500,
-  color: '#ffffff',
+  color: '#0f172a',
+  backdropFilter: 'blur(10px)',
+  boxShadow: '0 2px 8px rgba(66, 139, 131, 0.1)',
+  transition: 'all 0.2s ease',
+  maxWidth: '280px',
+  overflow: 'hidden',
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '0.8rem',
+    padding: theme.spacing(0.5, 1.25),
+    maxWidth: '240px',
+  },
 }));
 
 const UserIcon = styled(Box)(({ theme }) => ({
-  width: '20px',
-  height: '20px',
+  width: '24px',
+  height: '24px',
   borderRadius: '50%',
-  background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)',
+  background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontSize: '0.75rem',
   fontWeight: 600,
+  color: 'white',
+  boxShadow: '0 2px 4px rgba(66, 139, 131, 0.3)',
 }));
 
 export function AuthInfoMessage({ isAuthenticated, user }) {
@@ -176,7 +196,7 @@ export function AuthInfoMessage({ isAuthenticated, user }) {
           <Typography 
             variant="body2" 
             sx={{ 
-              color: '#0ea5e9',
+              color: '#428b83',
               fontWeight: 500,
               fontSize: '0.875rem',
               letterSpacing: '0.05em',
@@ -190,7 +210,17 @@ export function AuthInfoMessage({ isAuthenticated, user }) {
               <UserIcon>
                 {user.email.charAt(0).toUpperCase()}
               </UserIcon>
-              <Typography variant="body2" sx={{ color: '#ffffff', fontWeight: 500 }}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: '#0f172a', 
+                  fontWeight: 500,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  maxWidth: '200px'
+                }}
+              >
                 {user.email}
               </Typography>
             </UserBadge>
@@ -201,8 +231,8 @@ export function AuthInfoMessage({ isAuthenticated, user }) {
           <Typography 
             variant="h6" 
             sx={{ 
-              color: '#ffffff',
-              fontWeight: 300,
+              color: '#0f172a',
+              fontWeight: 600,
               fontSize: '1.1rem',
               letterSpacing: '-0.01em'
             }}
@@ -212,7 +242,7 @@ export function AuthInfoMessage({ isAuthenticated, user }) {
           <Typography 
             variant="body2" 
             sx={{ 
-              color: '#9ca3af',
+              color: '#334155',
               fontSize: '0.875rem',
               lineHeight: 1.6,
               maxWidth: '400px',
@@ -272,7 +302,7 @@ export function UnauthenticatedMessage() {
         <Typography 
           variant="body2" 
           sx={{ 
-            color: '#9ca3af',
+            color: '#64748b',
             fontSize: '0.875rem',
             lineHeight: 1.6,
             maxWidth: '300px'

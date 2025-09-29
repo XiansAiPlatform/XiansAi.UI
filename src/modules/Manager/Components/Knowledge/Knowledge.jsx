@@ -32,7 +32,7 @@ const Knowledge = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgent, setSelectedAgent] = useState('');
-  const { showError, showSuccess } = useNotification();
+  const { showError, showSuccess, showDetailedError } = useNotification();
   const [agents, setAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [activeKnowledge, setActiveKnowledge] = useState(null);
@@ -100,13 +100,14 @@ const Knowledge = () => {
         }
       } catch (error) {
         console.error('Failed to fetch agents:', error);
+        await handleApiError(error, 'Failed to load agents', showDetailedError);
       } finally {
         setIsLoadingAgents(false);
       }
     };
 
     fetchAgents();
-  }, [agentsApi]);
+  }, [agentsApi, showDetailedError]);
 
   useEffect(() => {
     const fetchKnowledge = async () => {
@@ -121,7 +122,7 @@ const Knowledge = () => {
         }
       } catch (error) {
         console.error('Failed to fetch knowledge:', error);
-        await handleApiError(error, 'Failed to fetch knowledge items', showError);
+        await handleApiError(error, 'Failed to fetch knowledge items', showDetailedError);
       } finally {
         setIsLoading(false);
         setLoading(false);
@@ -129,7 +130,7 @@ const Knowledge = () => {
     };
 
     fetchKnowledge();
-  }, [knowledgeApi, showError, setLoading]);
+  }, [knowledgeApi, showDetailedError, setLoading]);
 
   const fetchKnowledgeById = async (id) => {
     setIsLoadingItem(true);
@@ -143,7 +144,7 @@ const Knowledge = () => {
       return null;
     } catch (error) {
       console.error('Failed to fetch knowledge by ID:', error);
-      await handleApiError(error, 'Failed to load knowledge details', showError);
+      await handleApiError(error, 'Failed to load knowledge details', showDetailedError);
       return null;
     } finally {
       setIsLoadingItem(false);

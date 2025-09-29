@@ -15,7 +15,7 @@ import { OrganizationProvider } from './contexts/OrganizationContext';
 import { TenantProvider } from './contexts/TenantContext';
 import DefinitionList from './Components/Definitions/DefinitionList';
 import NotImplemented from './Components/NotImplemented/NotImplemented';
-import NotAuthorized from './Components/NotAuthorized';
+import Landing from './Components/Landing/Landing';
 import MessagingPage from './Components/Messaging/MessagingPage';
 import ProtectedRoute from './auth/ProtectedRoute';
 import { useAuth } from './auth/AuthContext';
@@ -53,7 +53,7 @@ function ManagerRoutes() {
                   <Routes>
                     <Route path="logout" element={<LogoutHandler onLogout={handleLogout} />} />
                     <Route element={<Layout />}>
-                      <Route path="unauthorized" element={<NotAuthorized />} />
+                      <Route path="landing" element={<Landing />} />
                       <Route path="runs" element={
                         <ProtectedRoute>
                           <WorkflowList />

@@ -1,29 +1,30 @@
 import { useNavigate } from 'react-router-dom';
-import { Typography, Box, Paper, Link, CircularProgress, Fade, Container, Chip } from '@mui/material';
+import { Typography, Box, Paper, Link, CircularProgress, Fade, Container, Chip, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { BiLogoGithub } from 'react-icons/bi';
 import { FiExternalLink, FiUsers, FiZap, FiCode, FiTerminal, FiGitBranch, FiStar } from 'react-icons/fi';
 import { useAuth } from '../../../Manager/auth/AuthContext';
 import '../Public.css';
+import '../PublicLight.css';
 import { ArrowForward } from '@mui/icons-material';
 
-// Nordic-inspired page container
+// Light Nordic-inspired page container
 const PageContainer = styled(Box)(({ theme }) => ({
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+    background: 'linear-gradient(135deg, #fafbfc 0%, #ffffff 50%, #f8fafc 100%)',
     position: 'relative',
     '&::before': {
         content: '""',
         position: 'absolute',
         inset: 0,
         backgroundImage: `
-            linear-gradient(rgba(14, 165, 233, 0.015) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(14, 165, 233, 0.015) 1px, transparent 1px)
+            linear-gradient(rgba(66, 139, 131, 0.02) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(66, 139, 131, 0.02) 1px, transparent 1px)
         `,
-        backgroundSize: '80px 80px',
-        maskImage: 'radial-gradient(circle at center, black, transparent 70%)',
+        backgroundSize: '50px 50px',
+        maskImage: 'radial-gradient(circle at center, black, transparent 80%)',
         pointerEvents: 'none',
-        opacity: 0.4,
+        opacity: 0.6,
     },
 }));
 
@@ -55,22 +56,19 @@ const HeroContent = styled(Container)(({ theme }) => ({
 // Nordic typography
 const HeroTitle = styled(Typography)(({ theme }) => ({
     fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-    fontWeight: 300,
+    fontWeight: 700,
     letterSpacing: '-0.02em',
     lineHeight: 1.1,
     marginBottom: theme.spacing(2),
-    background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 70%, #cbd5e1 100%)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
+    color: '#0f172a',
     position: 'relative',
 }));
 
 const HeroSubtitle = styled(Typography)(({ theme }) => ({
     fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)',
-    fontWeight: 300,
+    fontWeight: 500,
     lineHeight: 1.6,
-    color: '#94a3b8',
+    color: '#334155',
     marginBottom: theme.spacing(4),
     maxWidth: '600px',
     margin: '0 auto',
@@ -78,16 +76,30 @@ const HeroSubtitle = styled(Typography)(({ theme }) => ({
 
 // Nordic feature section
 const FeatureSection = styled(Box)(({ theme }) => ({
-    padding: theme.spacing(8, 3),
-    background: 'rgba(15, 23, 42, 0.6)',
-    borderTop: '1px solid rgba(255, 255, 255, 0.03)',
-    backdropFilter: 'blur(20px)',
-    [theme.breakpoints.down('md')]: {
-        padding: theme.spacing(6, 2),
-    },
-    [theme.breakpoints.down('sm')]: {
-        padding: theme.spacing(4, 1.5),
-    },
+  padding: theme.spacing(8, 3),
+  background: 'linear-gradient(135deg, #fafbfc 0%, #ffffff 50%, #f8fafc 100%)',
+  borderTop: '1px solid rgba(229, 231, 235, 0.3)',
+  backdropFilter: 'blur(20px)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: `
+      linear-gradient(rgba(66, 139, 131, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(66, 139, 131, 0.02) 1px, transparent 1px)
+    `,
+    backgroundSize: '50px 50px',
+    maskImage: 'radial-gradient(circle at center, black, transparent 80%)',
+    pointerEvents: 'none',
+    opacity: 0.6,
+  },
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(6, 2),
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(4, 1.5),
+  },
 }));
 
 const FeatureGrid = styled(Box)(({ theme }) => ({
@@ -107,63 +119,92 @@ const FeatureGrid = styled(Box)(({ theme }) => ({
 }));
 
 const FeatureCard = styled(Paper)(({ theme }) => ({
-    padding: theme.spacing(4),
-    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%)',
-    border: '1px solid rgba(255, 255, 255, 0.05)',
-    borderRadius: '8px',
-    backdropFilter: 'blur(10px)',
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    cursor: 'pointer',
+  padding: theme.spacing(4),
+  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%)',
+  border: '1px solid rgba(229, 231, 235, 0.6)',
+  borderRadius: '20px',
+  backdropFilter: 'blur(20px)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  cursor: 'pointer',
+  aspectRatio: '1 / 1',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-start',
+  height: 'auto',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.4), transparent)',
+    borderRadius: '20px 20px 0 0',
+  },
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    borderColor: 'rgba(66, 139, 131, 0.3)',
+    boxShadow: '0 8px 24px rgba(66, 139, 131, 0.15), 0 0 0 1px rgba(66, 139, 131, 0.1)',
+    '& .feature-icon': {
+      transform: 'scale(1.1)',
+      color: '#428b83',
+    },
+  },
+  [theme.breakpoints.down('md')]: {
+    padding: theme.spacing(3),
+    borderRadius: '16px',
     aspectRatio: '1 / 1',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    height: 'auto',
+  },
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(2.5),
+    borderRadius: '12px',
+    aspectRatio: 'auto',
     '&:hover': {
-        transform: 'translateY(-4px)',
-        borderColor: 'rgba(14, 165, 233, 0.2)',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(14, 165, 233, 0.05)',
-        '& .feature-icon': {
-            transform: 'scale(1.1)',
-            color: '#0ea5e9',
-        },
+      transform: 'translateY(-2px)',
     },
-    [theme.breakpoints.down('md')]: {
-        padding: theme.spacing(3),
-        borderRadius: '8px',
-        aspectRatio: '1 / 1',
-    },
-    [theme.breakpoints.down('sm')]: {
-        padding: theme.spacing(2.5),
-        borderRadius: '8px',
-        aspectRatio: 'auto',
-        '&:hover': {
-            transform: 'translateY(-2px)',
-        },
-    },
+  },
 }));
 
 const FeatureIcon = styled(Box)(({ theme }) => ({
-    fontSize: '4.5rem',
-    color: '#64748b',
-    marginTop: theme.spacing(3),
-    marginBottom: theme.spacing(4),
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '120px',
+  fontSize: '3rem',
+  color: '#428b83',
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+  transition: 'all 0.3s ease',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  width: '80px',
+  height: '80px',
+  background: 'linear-gradient(135deg, rgba(66, 139, 131, 0.08) 0%, rgba(66, 139, 131, 0.12) 100%)',
+  border: '1px solid rgba(66, 139, 131, 0.15)',
+  borderRadius: '20px',
+  margin: '0 auto',
+  backdropFilter: 'blur(10px)',
+  boxShadow: '0 4px 12px rgba(66, 139, 131, 0.1)',
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    inset: '1px',
+    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent)',
+    borderRadius: '20px',
+    pointerEvents: 'none',
+  },
 }));
 
 // Nordic badge/chip styling
 const DevBadge = styled(Chip)(({ theme }) => ({
-    backgroundColor: 'rgba(14, 165, 233, 0.1)',
-    color: '#0ea5e9',
-    border: '1px solid rgba(14, 165, 233, 0.2)',
-    fontWeight: 400,
+    backgroundColor: 'rgba(66, 139, 131, 0.1)',
+    color: '#428b83',
+    border: '1px solid rgba(66, 139, 131, 0.2)',
+    fontWeight: 500,
     letterSpacing: '0.025em',
     '& .MuiChip-icon': {
-        color: '#0ea5e9',
+        color: '#428b83',
     },
 }));
 
@@ -184,11 +225,63 @@ const ActionButtonGroup = styled(Box)(({ theme }) => ({
     },
 }));
 
+// Nordic-styled action button
+const ActionButton = styled(Button)(({ theme, variant: buttonVariant }) => ({
+    borderRadius: '12px',
+    padding: theme.spacing(1.25, 3),
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    letterSpacing: '0.025em',
+    textTransform: 'none',
+    transition: 'all 0.2s ease',
+    minHeight: '48px',
+    position: 'relative',
+    overflow: 'hidden',
+    ...(buttonVariant === 'primary' ? {
+        background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
+        color: 'white',
+        border: 'none',
+        boxShadow: '0 4px 12px rgba(66, 139, 131, 0.25)',
+        '&:hover': {
+            background: 'linear-gradient(135deg, #357067 0%, #2d5a54 100%)',
+            color: 'white',
+            transform: 'translateY(-2px)',
+            boxShadow: '0 8px 20px rgba(66, 139, 131, 0.35)',
+        },
+        '&:disabled': {
+            background: 'rgba(148, 163, 184, 0.3)',
+            color: 'rgba(148, 163, 184, 0.7)',
+            transform: 'none',
+            boxShadow: 'none',
+            cursor: 'not-allowed',
+        },
+    } : {
+        background: 'rgba(255, 255, 255, 0.8)',
+        color: '#475569',
+        border: '1px solid rgba(229, 231, 235, 0.6)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+        '&:hover': {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderColor: 'rgba(66, 139, 131, 0.3)',
+            color: '#428b83',
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 12px rgba(66, 139, 131, 0.1)',
+        },
+        '&:disabled': {
+            background: 'rgba(248, 250, 252, 0.5)',
+            color: 'rgba(148, 163, 184, 0.7)',
+            borderColor: 'rgba(229, 231, 235, 0.4)',
+            cursor: 'not-allowed',
+        },
+    }),
+}));
+
 // Nordic footer
 const NordicFooter = styled(Box)(({ theme }) => ({
     padding: theme.spacing(4, 3),
-    borderTop: '1px solid rgba(255, 255, 255, 0.03)',
-    background: 'rgba(15, 23, 42, 0.8)',
+    borderTop: '1px solid rgba(229, 231, 235, 0.8)',
+    background: 'rgba(250, 251, 252, 0.95)',
     backdropFilter: 'blur(20px)',
     textAlign: 'center',
 }));
@@ -208,9 +301,9 @@ export default function NewHome() {
                                 size={48}
                                 thickness={3}
                                 sx={{
-                                    color: '#0ea5e9',
+                                    color: '#428b83',
                                     mb: 3,
-                                    filter: 'drop-shadow(0 0 8px rgba(14, 165, 233, 0.3))'
+                                    filter: 'drop-shadow(0 0 8px rgba(66, 139, 131, 0.3))'
                                 }}
                             />
                             <Typography
@@ -227,7 +320,7 @@ export default function NewHome() {
                             <Typography
                                 variant="body1"
                                 sx={{
-                                    color: '#94a3b8',
+                                    color: '#334155',
                                     fontWeight: 300
                                 }}
                             >
@@ -241,7 +334,7 @@ export default function NewHome() {
     }
 
     return (
-        <PageContainer>
+        <PageContainer className="light-theme">
             {/* Hero Section */}
             <HeroSection>
                 <HeroContent>
@@ -275,72 +368,36 @@ export default function NewHome() {
                     <ActionButtonGroup>
                         {isAuthenticated ? (
                             <>
-                                <button
-                                    className="home-btn home-btn-primary"
+                                <ActionButton
+                                    variant="primary"
                                     onClick={() => navigate('/manager/definitions')}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.875rem 1.75rem',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 400,
-                                        letterSpacing: '0.025em'
-                                    }}
+                                    startIcon={<ArrowForward />}
                                 >
-                                    <ArrowForward style={{ fontSize: '1.1em' }} />
                                     Dashboard
-                                </button>
-                                <button
-                                    className="home-btn home-btn-secondary"
+                                </ActionButton>
+                                <ActionButton
+                                    variant="secondary"
                                     onClick={() => navigate('/manager/logout')}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.875rem 1.75rem',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 400,
-                                        letterSpacing: '0.025em'
-                                    }}
                                 >
                                     Sign Out
-                                </button>
+                                </ActionButton>
                             </>
                         ) : (
                             <>
-                                <button
-                                    className="home-btn home-btn-primary"
+                                <ActionButton
+                                    variant="primary"
                                     onClick={() => login({ returnTo: window.location.origin })}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.875rem 1.75rem',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 400,
-                                        letterSpacing: '0.025em'
-                                    }}
+                                    startIcon={<FiTerminal />}
                                 >
-                                    <FiTerminal style={{ fontSize: '1.1em' }} />
                                     Login
-                                </button>
-                                <button
-                                    className="home-btn home-btn-secondary"
+                                </ActionButton>
+                                <ActionButton
+                                    variant="secondary"
                                     onClick={() => navigate('/register')}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '0.5rem',
-                                        padding: '0.875rem 1.75rem',
-                                        fontSize: '0.95rem',
-                                        fontWeight: 400,
-                                        letterSpacing: '0.025em'
-                                    }}
+                                    endIcon={<ArrowForward />}
                                 >
                                     Get Started
-                                    <ArrowForward style={{ fontSize: '1em' }} />
-                                </button>
+                                </ActionButton>
                             </>
                         )}
                     </ActionButtonGroup>
@@ -358,7 +415,7 @@ export default function NewHome() {
                             mb: 6,
                             fontWeight: 300,
                             letterSpacing: '-0.02em',
-                            color: '#ffffff',
+                            color: '#0f172a',
                             fontSize: 'clamp(2rem, 4vw, 3rem)',
                         }}
                     >
@@ -375,7 +432,7 @@ export default function NewHome() {
                                 sx={{
                                     fontWeight: 400,
                                     letterSpacing: '-0.01em',
-                                    color: '#ffffff',
+                                    color: '#0f172a',
                                     mb: 2
                                     
                                 }}
@@ -385,7 +442,7 @@ export default function NewHome() {
                             <Typography
                                 variant="body1"
                                 sx={{
-                                    color: '#94a3b8',
+                                    color: '#334155',
                                     fontWeight: 300,
                                     lineHeight: 1.7,
                                     mb: 3
@@ -398,7 +455,7 @@ export default function NewHome() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 sx={{
-                                    color: '#0ea5e9',
+                                    color: '#428b83',
                                     textDecoration: 'none',
                                     fontSize: '0.875rem',
                                     fontWeight: 400,
@@ -424,7 +481,7 @@ export default function NewHome() {
                                 sx={{
                                     fontWeight: 400,
                                     letterSpacing: '-0.01em',
-                                    color: '#ffffff',
+                                    color: '#0f172a',
                                     mb: 2
                                 }}
                             >
@@ -433,7 +490,7 @@ export default function NewHome() {
                             <Typography
                                 variant="body1"
                                 sx={{
-                                    color: '#94a3b8',
+                                    color: '#334155',
                                     fontWeight: 300,
                                     lineHeight: 1.7,
                                     mb: 3
@@ -446,7 +503,7 @@ export default function NewHome() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 sx={{
-                                    color: '#0ea5e9',
+                                    color: '#428b83',
                                     textDecoration: 'none',
                                     fontSize: '0.875rem',
                                     fontWeight: 400,
@@ -472,7 +529,7 @@ export default function NewHome() {
                                 sx={{
                                     fontWeight: 400,
                                     letterSpacing: '-0.01em',
-                                    color: '#ffffff',
+                                    color: '#0f172a',
                                     mb: 2
                                 }}
                             >
@@ -481,7 +538,7 @@ export default function NewHome() {
                             <Typography
                                 variant="body1"
                                 sx={{
-                                    color: '#94a3b8',
+                                    color: '#334155',
                                     fontWeight: 300,
                                     lineHeight: 1.7,
                                     mb: 3
@@ -494,7 +551,7 @@ export default function NewHome() {
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 sx={{
-                                    color: '#0ea5e9',
+                                    color: '#428b83',
                                     textDecoration: 'none',
                                     fontSize: '0.875rem',
                                     fontWeight: 400,
@@ -528,38 +585,20 @@ export default function NewHome() {
                             Explore comprehensive guides, API references, and working examples to build enterprise AI agents.
                         </Typography>
                         <ActionButtonGroup>
-                            <button
-                                className="home-btn home-btn-primary"
+                            <ActionButton
+                                variant="primary"
                                 onClick={() => window.open('https://github.com/XiansAiPlatform', '_blank')}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    padding: '0.875rem 1.75rem',
-                                    fontSize: '0.95rem',
-                                    fontWeight: 400,
-                                    letterSpacing: '0.025em'
-                                }}
+                                startIcon={<BiLogoGithub />}
                             >
-                                <BiLogoGithub style={{ fontSize: '1.2em' }} />
                                 View on GitHub
-                            </button>
-                            <button
-                                className="home-btn home-btn-secondary"
+                            </ActionButton>
+                            <ActionButton
+                                variant="secondary"
                                 onClick={() => window.open('https://xiansaiplatform.github.io/XiansAi.PublicDocs', '_blank')}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '0.5rem',
-                                    padding: '0.875rem 1.75rem',
-                                    fontSize: '0.95rem',
-                                    fontWeight: 400,
-                                    letterSpacing: '0.025em'
-                                }}
+                                endIcon={<FiExternalLink />}
                             >
                                 Documentation
-                                <FiExternalLink style={{ fontSize: '1.1em' }} />
-                            </button>
+                            </ActionButton>
                         </ActionButtonGroup>
                     </Box>
                 </Container>
@@ -570,7 +609,7 @@ export default function NewHome() {
                 <Typography 
                     variant="body2" 
                     sx={{ 
-                        color: '#64748b',
+                        color: '#334155',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -585,7 +624,7 @@ export default function NewHome() {
                         target="_blank"
                         rel="noopener noreferrer"
                         sx={{
-                            color: '#0ea5e9',
+                            color: '#428b83',
                             fontWeight: 400,
                             textDecoration: 'none',
                             transition: 'all 0.2s ease',
@@ -593,7 +632,7 @@ export default function NewHome() {
                             alignItems: 'center',
                             gap: 0.5,
                             '&:hover': {
-                                color: '#0284c7',
+                                color: '#357067',
                                 transform: 'translateY(-1px)'
                             }
                         }}
