@@ -12,7 +12,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 import { useTenant } from '../../contexts/TenantContext';
 
-const Header = ({ pageTitle = "", toggleNav }) => {
+const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -169,10 +169,16 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               color="inherit"
               aria-label="menu"
               sx={{
-                transition: 'all 0.2s ease',
+                backgroundColor: 'var(--bg-paper)',
+                border: '1px solid var(--border-color)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-secondary)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
                   transform: 'scale(1.05)',
-                  backgroundColor: 'var(--bg-hover)'
+                  backgroundColor: 'var(--bg-hover)',
+                  borderColor: 'var(--primary)',
+                  color: 'var(--primary)'
                 }
               }}
             >
@@ -235,19 +241,22 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               alignItems: 'center',
               gap: '8px',
               backgroundColor: 'var(--bg-paper)',
-              padding: '4px 8px',
+              padding: '6px 12px',
               borderRadius: 'var(--radius-lg)',
-              transition: 'all 0.2s ease-in-out',
-              border: '1px solid transparent',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              border: '1px solid var(--border-color)',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)',
               '&:hover': {
                 backgroundColor: 'var(--bg-hover)',
-                borderColor: 'var(--border-color)'
+                borderColor: 'var(--primary)',
+                transform: 'translateY(-1px)',
+                boxShadow: 'var(--shadow-sm)'
               }
             }}>
               <BusinessIcon sx={{
-                color: 'text.secondary',
+                color: 'var(--primary)',
                 fontSize: '20px',
-                opacity: 0.7
+                opacity: 0.8
               }} />
               <FormControl size="small" sx={{ minWidth: isMobile ? 120 : 180 }}>
                 <Select
@@ -256,12 +265,16 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                   displayEmpty
                   sx={{
                     fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: 'text.secondary',
+                    fontWeight: 600,
+                    color: 'var(--text-primary)',
+                    fontFamily: 'var(--font-family)',
                     '& .MuiSelect-select': {
                       padding: '4px 8px',
                     },
                     '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none'
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
                       border: 'none'
                     }
                   }}
@@ -282,13 +295,16 @@ const Header = ({ pageTitle = "", toggleNav }) => {
           <Box sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
             cursor: 'pointer',
-            padding: '4px 12px',
+            padding: '6px 12px',
             borderRadius: 'var(--radius-lg)',
-            transition: 'all 0.2s ease',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            border: '1px solid transparent',
             '&:hover': {
               backgroundColor: 'var(--bg-hover)',
+              borderColor: 'var(--border-color)',
+              transform: 'translateY(-1px)'
             }
           }}
             onClick={handleMenu}
@@ -297,12 +313,14 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               <Typography
                 variant="body2"
                 sx={{
-                  fontWeight: 500,
-                  color: 'text.secondary',
+                  fontWeight: 600,
+                  color: 'var(--text-primary)',
                   maxWidth: '120px',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
+                  whiteSpace: 'nowrap',
+                  fontFamily: 'var(--font-family)',
+                  fontSize: '0.875rem'
                 }}
               >
                 {userData.name}
@@ -315,13 +333,15 @@ const Header = ({ pageTitle = "", toggleNav }) => {
                 alt={userData.name}
                 sx={{
                   border: '2px solid transparent',
-                  transition: 'all 0.2s ease',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  background: user?.picture ? 'transparent' : 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
                   '&:hover': {
-                    borderColor: 'var(--primary)'
+                    borderColor: 'var(--primary)',
+                    transform: 'scale(1.05)'
                   }
                 }}
               >
-                {!user?.picture && <PersonIcon />}
+                {!user?.picture && <PersonIcon sx={{ fontSize: '1.25rem' }} />}
               </Avatar>
             </Tooltip>
           </Box>
@@ -344,19 +364,23 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               className: "user-menu-paper",
               elevation: 3,
               sx: {
-                minWidth: 200,
-                mt: 1,
+                minWidth: 280,
+                mt: 1.5,
                 overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.08))',
+                borderRadius: 'var(--radius-xl)',
+                border: '1px solid var(--border-color)',
+                filter: 'drop-shadow(0px 4px 20px rgba(0,0,0,0.08))',
+                backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                backdropFilter: 'blur(20px)',
                 '&:before': {
                   content: '""',
                   display: 'block',
                   position: 'absolute',
                   top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
+                  right: 20,
+                  width: 12,
+                  height: 12,
+                  bgcolor: 'white',
                   transform: 'translateY(-50%) rotate(45deg)',
                   zIndex: 0,
                   borderLeft: '1px solid var(--border-color)',
@@ -365,14 +389,22 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               }
             }}
           >
-            <Box className="user-info" sx={{ padding: '8px 16px' }}>
-              <Typography className="user-info-name" variant="subtitle1" sx={{ fontWeight: 500 }}>
+            <Box className="user-info" sx={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
+              <Typography className="user-info-name" variant="subtitle1" sx={{ 
+                fontWeight: 700,
+                fontSize: '1rem',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-family)',
+                mb: 0.5
+              }}>
                 {userData.name}
               </Typography>
               {userData.email && (
                 <Typography className="user-info-email" variant="caption" sx={{
                   display: 'block',
-                  color: 'text.secondary',
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.875rem',
+                  fontFamily: 'var(--font-family)',
                   mb: 0.5
                 }}>
                   {userData.email}
@@ -381,13 +413,14 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               {userData.id && (
                 <Typography className="user-info-id" variant="caption" sx={{
                   display: 'block',
-                  color: 'text.secondary',
-                  fontSize: '0.7rem',
+                  color: 'var(--text-light)',
+                  fontSize: '0.75rem',
+                  fontFamily: 'var(--font-mono)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   maxWidth: '100%',
-                  opacity: 0.8
+                  opacity: 0.7
                 }}>
                   ID: {userData.id}
                 </Typography>
@@ -397,30 +430,41 @@ const Header = ({ pageTitle = "", toggleNav }) => {
               className="user-menu-item join-tenant"
               onClick={handleJoinTenant}
               sx={{
-                gap: '8px',
-                margin: '4px',
+                gap: '12px',
+                margin: '8px',
+                padding: '12px 20px',
                 borderRadius: 'var(--radius-md)',
+                fontFamily: 'var(--font-family)',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                color: 'var(--text-primary)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
                   backgroundColor: 'var(--bg-hover)',
-                  fontWeight: 500
+                  transform: 'translateX(4px)'
                 }
               }}
             >
-              <GroupAddIcon fontSize="small" />
+              <GroupAddIcon fontSize="small" sx={{ color: 'var(--primary)' }} />
               Join a Tenant
             </MenuItem>
             <MenuItem
               className="user-menu-item logout"
               onClick={handleLogout}
               sx={{
-                color: 'error.main',
-                gap: '8px',
-                margin: '4px',
+                color: 'var(--error-main)',
+                gap: '12px',
+                margin: '8px',
+                padding: '12px 20px',
                 borderRadius: 'var(--radius-md)',
+                fontFamily: 'var(--font-family)',
+                fontSize: '0.875rem',
+                fontWeight: 500,
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  backgroundColor: 'rgba(211, 47, 47, 0.1)',
-                  color: 'error.dark',
-                  fontWeight: 500
+                  backgroundColor: 'rgba(var(--error-rgb), 0.08)',
+                  color: 'var(--error-main)',
+                  transform: 'translateX(4px)'
                 }
               }}
             >

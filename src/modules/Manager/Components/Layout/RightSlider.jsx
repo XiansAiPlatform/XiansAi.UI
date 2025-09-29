@@ -41,10 +41,11 @@ const RightSlider = ({ onClose, children, title }) => {
           left: 0,
           right: 0,
           bottom: 0,
-          bgcolor: 'rgba(0, 0, 0, 0.5)',
+          bgcolor: 'rgba(38, 53, 63, 0.6)',
+          backdropFilter: 'blur(4px)',
           zIndex: 1200,
           opacity: isVisible ? 1 : 0,
-          transition: 'opacity 0.3s ease-out'
+          transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onClick={onClose}
       />
@@ -54,39 +55,44 @@ const RightSlider = ({ onClose, children, title }) => {
           position: 'fixed',
           top: 0,
           right: 0,
-          backgroundColor: '#fff',
+          backgroundColor: 'var(--bg-paper)',
           height: '100vh',
           width: sliderWidth,
           maxWidth: sliderMaxWidth,
-          boxShadow: '-4px 0 8px rgba(0, 0, 0, 0.1)',
-          borderLeft: '1px solid rgba(0, 0, 0, 0.12)',
+          boxShadow: 'var(--shadow-lg)',
+          borderLeft: '1px solid var(--border-color)',
           zIndex: 1300,
           display: 'flex',
           flexDirection: 'column',
           opacity: isVisible ? 1 : 0,
-          transform: isVisible ? 'translateX(0)' : 'translateX(20px)',
-          transition: 'transform 0.3s ease-out, opacity 0.3s ease-out, width 0.3s ease-out, max-width 0.3s ease-out'
+          transform: isVisible ? 'translateX(0)' : 'translateX(40px)',
+          transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s ease-out, max-width 0.3s ease-out'
         }}
       >
         <Box sx={{ 
           position: 'sticky',
           top: 0,
-          padding: '16px 24px',
-          backgroundColor: '#fff',
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          padding: '20px 28px',
+          backgroundColor: 'var(--bg-paper)',
+          borderBottom: '1px solid var(--border-color)',
+          backdropFilter: 'blur(20px)',
           zIndex: 1,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 2
+          gap: 2,
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.04)'
         }}>
           <Typography variant="h6" sx={{ 
-            fontWeight: 600, 
-            color: 'grey.900',
+            fontWeight: 700, 
+            color: 'var(--text-primary)',
+            fontFamily: 'var(--font-family)',
+            fontSize: '1.125rem',
+            letterSpacing: '-0.02em',
             flex: 1,
             pr: 2,
             wordBreak: 'break-word',
-            lineHeight: 1.2
+            lineHeight: 1.3
           }}>
             {title}
           </Typography>
@@ -94,10 +100,13 @@ const RightSlider = ({ onClose, children, title }) => {
             <IconButton 
               onClick={() => setIsFullScreen(!isFullScreen)}
               sx={{ 
-                color: 'grey.600',
+                color: 'var(--text-secondary)',
+                borderRadius: 'var(--radius-md)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  color: 'grey.900'
+                  backgroundColor: 'var(--bg-hover)',
+                  color: 'var(--primary)',
+                  transform: 'scale(1.05)'
                 }
               }}
             >
@@ -106,10 +115,13 @@ const RightSlider = ({ onClose, children, title }) => {
             <IconButton 
               onClick={onClose}
               sx={{ 
-                color: 'grey.600',
+                color: 'var(--text-secondary)',
+                borderRadius: 'var(--radius-md)',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': {
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  color: 'grey.900'
+                  backgroundColor: 'rgba(var(--error-rgb), 0.08)',
+                  color: 'var(--error-main)',
+                  transform: 'scale(1.05)'
                 }
               }}
             >
@@ -118,11 +130,25 @@ const RightSlider = ({ onClose, children, title }) => {
           </Box>
         </Box>
         <Box sx={{ 
-          padding: '24px',
+          padding: '28px',
           overflowY: 'auto',
           flex: 1,
           minHeight: 0,
-          height: '100%'
+          height: '100%',
+          backgroundColor: 'var(--bg-paper)',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--border-color) transparent',
+          '&::-webkit-scrollbar': {
+            width: '8px'
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'transparent'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'var(--border-color)',
+            borderRadius: '20px',
+            border: '2px solid var(--bg-paper)'
+          }
         }}>
           {children}
         </Box>

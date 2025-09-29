@@ -320,10 +320,12 @@ const createAppTheme = (colorSet) => createTheme({
   palette: colorSet,
   typography: {
     fontFamily: [
-      'JetBrains Mono',
-      'Fira Code',
-      'Source Code Pro',
-      'monospace'
+      'Inter',
+      '-apple-system',
+      'BlinkMacSystemFont',
+      'Segoe UI',
+      'Roboto',
+      'sans-serif'
     ].join(','),
     h1: {
       fontWeight: 700,
@@ -355,14 +357,14 @@ const createAppTheme = (colorSet) => createTheme({
     }
   },
   shape: {
-    borderRadius: 6, // Match --radius-md (6px)
+    borderRadius: 8, // Match --radius-md (8px) for Nordic design
   },
   spacing: 8, // Keep MUI's default 8px spacing unit
   components: {
     MuiCssBaseline: {
       styleOverrides: {
         body: {
-          fontFamily: 'JetBrains Mono, monospace',
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
         },
       },
     },
