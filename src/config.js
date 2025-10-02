@@ -39,6 +39,11 @@ export function getConfig() {
     config.keycloakUrl = getEnvVar('REACT_APP_KEYCLOAK_URL');
     config.keycloakRealm = getEnvVar('REACT_APP_KEYCLOAK_REALM');
     config.keycloakClientId = getEnvVar('REACT_APP_KEYCLOAK_CLIENT_ID');
+  } else if (authProvider === 'genericOidc') {
+    config.genericOidcAuthority = getEnvVar('REACT_APP_GENERIC_OIDC_AUTHORITY');
+    config.genericOidcClientId = getEnvVar('REACT_APP_GENERIC_OIDC_CLIENT_ID');
+    config.genericOidcScope = getEnvVar('REACT_APP_GENERIC_OIDC_SCOPE', 'openid profile');
+    config.organizationClaim = getEnvVar('REACT_APP_GENERIC_OIDC_ORGANIZATION_CLAIM', 'https://xians.ai/tenants');
   } else {
     throw new Error(`Unsupported auth provider: ${authProvider}`);
   }

@@ -9,6 +9,7 @@ import ApproveUserRequests from "./ApproveUserRequests";
 import InviteUser from "./InviteUser";
 import TenantUserManagement from "./TenantUserManagement";
 import TenantAuthSettings from './TenantAuthSettings';
+import GenericOidcSettings from './GenericOidcSettings';
 import PageLayout from '../Common/PageLayout';
 
 const Settings = () => {
@@ -35,6 +36,7 @@ const Settings = () => {
 
     tabs.push({ label: "Machine2Agent API Keys", component: <ApiKeySettings /> });
     tabs.push({ label: "User2Agent OIDC", component: <TenantAuthSettings /> });
+    tabs.push({ label: "Generic OIDC", component: <GenericOidcSettings /> });
     tabs.push({ label: "Users", component: null }); // Will be handled by sub-tabs
     tabs.push({ label: "Branding", component: <BrandingSettings /> });
   }
@@ -48,7 +50,7 @@ const Settings = () => {
   ];
 
   // Check if current tab is the Users tab
-  const isUsersTab = showTenantTab && currentTab === 3;
+  const isUsersTab = showTenantTab && currentTab === 4;
 
   const renderTabContent = () => {
     if (isUsersTab) {
