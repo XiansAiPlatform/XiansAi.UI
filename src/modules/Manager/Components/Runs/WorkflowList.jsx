@@ -23,11 +23,12 @@ import AgentSelector from './AgentSelector';
 import PaginationControls from './PaginationControls';
 import WorkflowRunCard from './WorkflowRunCard';
 import './WorkflowList.css';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ConfirmationDialog from '../Common/ConfirmationDialog';
 import PageLayout from '../Common/PageLayout';
 import PageFilters from '../Common/PageFilters';
+import EmptyState from '../Common/EmptyState';
 
 const WorkflowList = () => {  
   // New pagination state
@@ -552,47 +553,27 @@ const WorkflowList = () => {
             />
           </Paper>
         ) : (
-          <Paper 
-            elevation={0}
-            className="empty-state-container"
-            sx={{ 
-              textAlign: 'center', 
-              py: isMobile ? 4 : 8, 
-              px: isMobile ? 2 : 4,
-              borderRadius: 3,
-              bgcolor: 'background.paper',
-              border: '1px solid var(--border-color)'
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              {isLoading ? 'Loading workflow runs...' : selectedAgent ? `No workflow runs found for "${selectedAgent}"` : 'No workflow runs found'}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              {selectedAgent ? 
-                'Try changing the status filter, selecting a different agent, or check if workflows have been started for this agent.' :
-                <>To get started, <Link to="/manager/definitions" style={{ color: 'var(--primary-color)' }}>navigate to Flow Definitions</Link> to create and activate new workflow definitions.</>
+          <EmptyState
+            title={isLoading ? 'Loading Workflow Runs...' : selectedAgent ? `No Workflow Runs Found for "${selectedAgent}"` : 'No Workflow Runs Found'}
+            description={selectedAgent ? 
+              'Try changing the status filter, selecting a different agent, or check if workflows have been started for this agent.' :
+              'To get started, navigate to Flow Definitions to create and activate new workflow definitions.'}
+            context="runs"
+            actions={[
+              {
+                label: 'Refresh',
+                onClick: () => loadPaginatedWorkflows(null, true),
+                variant: 'contained',
+                startIcon: <RefreshIcon />,
+                disabled: isLoading
+              },
+              {
+                label: 'Go to Agents',
+                onClick: () => window.location.href = '/manager/definitions',
+                variant: 'outlined'
               }
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                onClick={() => loadPaginatedWorkflows(null, true)}
-                variant="contained"
-                color="primary"
-                disabled={isLoading}
-                startIcon={<RefreshIcon />}
-              >
-                Refresh
-              </Button>
-              <Button
-                component={Link}
-                to="/manager/definitions"
-                variant="outlined"
-                color="primary"
-              >
-                Go to Agents
-              </Button>
-            </Box>
-          </Paper>  
+            ]}
+          />  
         )}
       </Box>
 

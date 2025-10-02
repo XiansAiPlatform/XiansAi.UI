@@ -17,6 +17,7 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import { format } from 'date-fns';
 import SendMessageForm from './SendMessageForm';
+import EmptyState from '../Common/EmptyState';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { handleApiError } from '../../utils/errorHandler';
@@ -220,11 +221,11 @@ const ConversationThreads = ({
                      </Box>
                 )}
                 {!error && threads.length === 0 && !isLoading && (
-                    <Box sx={{ p: 3, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                        <Typography color="text.secondary" align="center">
-                            No conversation threads found
-                        </Typography>
-                    </Box>
+                    <EmptyState
+                        title="No Conversations"
+                        description="No conversation threads found for this agent. Start a new conversation to begin."
+                        context="conversations"
+                    />
                 )}
                 {!error && threads.length > 0 && (
                     <List disablePadding>

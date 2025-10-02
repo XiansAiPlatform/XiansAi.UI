@@ -71,7 +71,7 @@ const Landing = () => {
     setRefreshing(true);
     // Add a small delay to show the loading state
     setTimeout(() => {
-      window.location.href = '/manager';
+      window.location.href = '/manager/definitions/deployed';
     }, 500);
   };
 
@@ -115,8 +115,8 @@ const Landing = () => {
   const scenarioConfig = {
     token_expired: {
       icon: <AccessTime sx={{ fontSize: 80 }} />,
-      title: "Session Expired",
-      description: "Your session has expired or there's an authentication issue. This is typically due to token expiry or account conflicts.",
+      title: "Permission Error",
+      description: "Server returned a permission error. Possible causes are that your token has expired. Please click the button to refresh the application.",
       color: 'warning',
       actions: [
         {
@@ -149,11 +149,19 @@ const Landing = () => {
       ]
     },
     unauthorized: {
-      icon: <ErrorOutline sx={{ fontSize: 80 }} />,
-      title: "Access Not Authorized",
-      description: "You don't have permission to access this resource. Please contact System Admin for account approval to get started with Xians.ai.",
+      icon: null,
+      title: "Permission Error",
+      description: "Server returned a permission error. Possible causes are that your token has expired. Please click the button to refresh the application.",
       color: 'error',
-      actions: []
+      actions: [
+        {
+          label: refreshing ? 'Refreshing...' : 'Refresh Application',
+          onClick: handleRefreshToManager,
+          variant: 'contained',
+          icon: <Refresh />,
+          disabled: refreshing
+        }
+      ]
     }
   };
 
@@ -196,27 +204,30 @@ const Landing = () => {
 
         {/* Main Card */}
         <Card 
-          elevation={3}
+          elevation={0}
           sx={{ 
             maxWidth: 600, 
             width: '100%',
-            borderRadius: 3,
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: 0,
+            background: 'transparent',
+            backdropFilter: 'none',
+            border: 'none',
+            boxShadow: 'none',
           }}
         >
           <CardContent sx={{ p: 4 }}>
             {/* Icon */}
-            <Box
-              sx={{
-                mb: 3,
-                color: `${config.color}.main`,
-                opacity: 0.8,
-              }}
-            >
-              {config.icon}
-            </Box>
+            {config.icon && (
+              <Box
+                sx={{
+                  mb: 3,
+                  color: `${config.color}.main`,
+                  opacity: 0.8,
+                }}
+              >
+                {config.icon}
+              </Box>
+            )}
 
             {/* Title */}
             <Typography
@@ -312,22 +323,6 @@ const Landing = () => {
           </CardContent>
         </Card>
 
-        {/* Home Button - Always Available */}
-        <Button
-          variant="text"
-          size="large"
-          startIcon={<Home />}
-          onClick={handleHomeClick}
-          sx={{
-            mt: 3,
-            color: 'text.secondary',
-            '&:hover': {
-              backgroundColor: 'rgba(255,255,255,0.05)',
-            },
-          }}
-        >
-          Go to Home
-        </Button>
       </Box>
     </Container>
   );

@@ -20,6 +20,7 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import PageLayout from '../Common/PageLayout';
 import PageFilters from '../Common/PageFilters';
+import EmptyState from '../Common/EmptyState';
 
 const Knowledge = () => {
   const [knowledgeItems, setKnowledgeItems] = useState([]);
@@ -398,36 +399,33 @@ const Knowledge = () => {
               ))}
           </div>
         ) : (
-          <Box
-            sx={{
-              p: 6,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              color: 'var(--text-secondary)'
-            }}
-          >
+          <>
             {isSearchingContent ? (
-              <>
+              <Box
+                sx={{
+                  p: 6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  color: 'var(--text-secondary)'
+                }}
+              >
                 <CircularProgress size={24} sx={{ mb: 2 }} />
                 <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
                   Searching knowledge content...
                 </Typography>
-              </>
+              </Box>
             ) : (
-              <>
-                <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
-                  {searchQuery ? 'No matching knowledge found' : 'No knowledge yet'}
-                </Typography>
-                <Typography variant="body1" component="div" sx={{ mb: 3, maxWidth: 460 }}>
-                  {searchQuery 
-                    ? 'Try adjusting your search terms or clear the search to see all knowledge.'
-                    : 'Create your first knowledge item by clicking the + button above. Knowledge helps customize the AI\'s behavior and responses.'}
-                </Typography>
-              </>
+              <EmptyState
+                title={searchQuery ? 'No Matching Knowledge Found' : 'No Knowledge Yet'}
+                description={searchQuery 
+                  ? 'Try adjusting your search terms or clear the search to see all knowledge.'
+                  : 'Create your first knowledge item by clicking the + button above. Knowledge helps customize the AI\'s behavior and responses.'}
+                context={searchQuery ? 'search' : 'knowledge'}
+              />
             )}
-          </Box>
+          </>
         )}
     </PageLayout>
   );

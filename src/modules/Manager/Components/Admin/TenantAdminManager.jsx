@@ -23,7 +23,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import PersonIcon from "@mui/icons-material/Person";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import TuneIcon from "@mui/icons-material/Tune";
 import { useRolesApi } from "../../services/roles-api";
 import { useUserApi } from "../../services/user-api";
 import { useAuth } from "../../auth/AuthContext";
@@ -112,7 +112,7 @@ export default function TenantAdminManager({ tenant, onClose, onChanged }) {
   return (
     <Box>
       <Box display="flex" alignItems="center" gap={1} mb={3}>
-        <AdminPanelSettingsIcon color="primary" />
+        <TuneIcon color="primary" />
         <Typography variant="h6">
           Admins for {tenant.name}
         </Typography>

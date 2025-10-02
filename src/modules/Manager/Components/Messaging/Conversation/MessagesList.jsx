@@ -4,6 +4,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MessageItem from './MessageItem';
 import TypingIndicator from './TypingIndicator';
 import { ContentLoader } from '../../Common/StandardLoaders';
+import EmptyState from '../../Common/EmptyState';
 
 /**
  * Component to display a list of messages with load more functionality
@@ -144,15 +145,12 @@ const MessagesList = ({
 
     if (messages.length === 0) {
         return (
-            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center' }}>
-                <Box sx={{ p: 3 }}>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                        No messages found
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Start a conversation or select another thread
-                    </Typography>
-                </Box>
+            <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <EmptyState
+                    title="No Messages Found"
+                    description="Start a conversation or select another thread to begin messaging."
+                    context="messages"
+                />
             </Box>
         );
     }

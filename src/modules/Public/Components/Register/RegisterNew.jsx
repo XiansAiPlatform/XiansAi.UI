@@ -642,8 +642,7 @@ export default function RegisterNew() {
             <ButtonContainer>
               <ActionButton
                 variant="primary"
-                component={Link}
-                to="/manager"
+                onClick={() => window.location.href = '/manager/definitions/templates'}
                 startIcon={<FiExternalLink />}
                 sx={{ flex: 1 }}
               >

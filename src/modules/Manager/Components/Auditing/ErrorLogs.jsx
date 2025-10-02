@@ -29,6 +29,7 @@ import { useAuditingApi } from '../../services/auditing-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
+import EmptyState from '../Common/EmptyState';
 import { ContentLoader } from '../Common/StandardLoaders';
 
 const CriticalLogs = () => {
@@ -212,9 +213,11 @@ const CriticalLogs = () => {
                         </ToggleButtonGroup>
                     </Stack>
                 </Box>
-                <Alert severity="info">
-                    No critical logs found for the selected time period.
-                </Alert>
+                <EmptyState
+                    title="No Critical Logs Found"
+                    description="No critical logs were found for the selected time period. Try adjusting the time filter or check back later."
+                    context="audits"
+                />
             </Box>
         );
     }

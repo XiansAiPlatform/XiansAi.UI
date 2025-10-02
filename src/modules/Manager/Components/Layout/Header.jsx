@@ -128,7 +128,13 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;
     setSelectedOrg(newOrg);
-    navigate('/manager/definitions');
+    
+    // Only navigate if this is a user-initiated change (not during initialization)
+    // Check if we're currently on a definitions page to avoid unnecessary navigation
+    const currentPath = window.location.pathname;
+    if (!currentPath.startsWith('/manager/definitions')) {
+      navigate('/manager/definitions');
+    }
   };
 
   const handleMenu = (event) => {

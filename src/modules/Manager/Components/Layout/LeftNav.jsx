@@ -2,15 +2,15 @@ import { Box, List, ListItem, ListItemIcon, ListItemText, Typography, Divider, B
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import { useAuditContext } from '../../contexts/AuditContext';
 import { useTenant } from '../../contexts/TenantContext';
-import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import TuneIcon from '@mui/icons-material/Tune';
 const NAV_ITEMS = [
   {
     to: '/manager/definitions',
@@ -27,7 +27,7 @@ const NAV_ITEMS = [
 
   {
     to: '/manager/knowledge',
-    icon: <MenuBookOutlinedIcon />,
+    icon: <TextSnippetIcon />,
     label: 'Knowledge',
     isSelected: (pathname) => pathname === '/manager/knowledge' || pathname.startsWith('/manager/knowledge/'),
   },
@@ -45,13 +45,13 @@ const NAV_ITEMS = [
   },
   {
     to: '/manager/settings',
-    icon: <SettingsOutlinedIcon />,
+    icon: <TuneIcon />,
     label: 'Tenant Settings',
     isSelected: (pathname) => pathname === '/manager/settings' || pathname.startsWith('/manager/settings/'),
   },
   {
     to: '/manager/admin',
-    icon: <AdminPanelSettingsIcon />,
+    icon: <SettingsOutlinedIcon />,
     label: 'System Settings',
     isSelected: (pathname) => pathname === '/manager/admin' || pathname.startsWith('/manager/admin/'),
   },

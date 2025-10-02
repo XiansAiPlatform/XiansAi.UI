@@ -200,6 +200,11 @@ class KeycloakService {
         console.log("KeycloakService: Found callback parameters on non-valid callback URL:", window.location.pathname);
         console.log("KeycloakService: This indicates a misconfigured redirect URI. Redirecting to proper callback URL.");
         
+        // Store the original URL before redirecting to callback
+        const originalUrl = window.location.pathname + window.location.search;
+        console.log("KeycloakService: Storing original URL for later redirect:", originalUrl);
+        sessionStorage.setItem('returnUrl', originalUrl);
+        
         // Mark callback as processed to prevent infinite loops
         this.callbackProcessed = true;
         

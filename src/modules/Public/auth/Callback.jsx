@@ -31,7 +31,9 @@ const Callback = () => {
     },
     onResolved: () => {
       console.log('Account conflict resolved in Callback, attempting navigation');
-      navigate('/manager/definitions');
+      const returnUrl = sessionStorage.getItem('returnUrl') || '/manager/definitions/deployed';
+      sessionStorage.removeItem('returnUrl');
+      navigate(returnUrl);
     }
   });
 
@@ -85,8 +87,13 @@ const Callback = () => {
     
     // Only redirect if successfully authenticated
     if (isAuthenticated && !error) {
-      console.log("Callback: Successfully authenticated, redirecting to /manager/definitions");
-      navigate('/manager/definitions');
+      console.log("Callback: Successfully authenticated, checking for return URL");
+      const storedReturnUrl = sessionStorage.getItem('returnUrl');
+      console.log('Callback: Stored return URL:', storedReturnUrl);
+      const returnUrl = storedReturnUrl || '/manager/definitions/deployed';
+      sessionStorage.removeItem('returnUrl');
+      console.log(`Callback: Redirecting to ${returnUrl}`);
+      navigate(returnUrl);
     }
   }, [isAuthenticated, error, isLoading, isProcessingCallback, navigate, showError, hasShownError, providerInstance, isAccountConflictError]);
 

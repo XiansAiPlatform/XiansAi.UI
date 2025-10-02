@@ -35,6 +35,12 @@ const ProtectedRoute = ({ children }) => {
             showError('No internet connection. Please check your network and try again.');
             return;
           }
+          
+          // Store the current URL before redirecting to login
+          const currentPath = window.location.pathname + window.location.search;
+          console.log('ProtectedRoute: Storing return URL:', currentPath);
+          sessionStorage.setItem('returnUrl', currentPath);
+          
           await login();
         } catch (err) {
           console.error('Authentication error during login redirect:', err);

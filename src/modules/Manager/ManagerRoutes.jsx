@@ -13,7 +13,9 @@ import Settings from './Components/Settings/Settings';
 import Knowledge from './Components/Knowledge/Knowledge';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { TenantProvider } from './contexts/TenantContext';
-import DefinitionsContainer from './Components/Definitions/DefinitionsContainer';
+import DefinitionsTabNavigation from './Components/Definitions/DefinitionsTabNavigation';
+import DefinitionList from './Components/Definitions/DefinitionList';
+import TemplatesList from './Components/Definitions/TemplatesList';
 import NotImplemented from './Components/NotImplemented/NotImplemented';
 import Landing from './Components/Landing/Landing';
 import MessagingPage from './Components/Messaging/MessagingPage';
@@ -59,11 +61,21 @@ function ManagerRoutes() {
                           <WorkflowList />
                         </ProtectedRoute>
                       } />
-                      <Route path="definitions/*" element={
+                      <Route path="definitions/deployed" element={
                         <ProtectedRoute>
-                          <DefinitionsContainer />
+                          <DefinitionsTabNavigation>
+                            <DefinitionList />
+                          </DefinitionsTabNavigation>
                         </ProtectedRoute>
                       } />
+                      <Route path="definitions/templates" element={
+                        <ProtectedRoute>
+                          <DefinitionsTabNavigation>
+                            <TemplatesList />
+                          </DefinitionsTabNavigation>
+                        </ProtectedRoute>
+                      } />
+                      <Route path="definitions" element={<Navigate to="/manager/definitions/deployed" replace />} />
                       <Route path="runs/:id/:runId" element={
                         <ProtectedRoute>
                           <WorkflowDetails />
@@ -99,8 +111,9 @@ function ManagerRoutes() {
                           <AdminDashboardRoute />
                         </ProtectedRoute>
                       } />
+                      {/* Default route for manager root */}
+                      <Route index element={<Navigate to="/manager/definitions/deployed" replace />} />
                     </Route>
-                    <Route path="*" element={<Navigate to="/manager/definitions" replace />} />
                   </Routes>
                 </SliderProvider>
               </LoadingProvider>
