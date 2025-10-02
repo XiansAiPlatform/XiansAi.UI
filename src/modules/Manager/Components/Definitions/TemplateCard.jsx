@@ -7,17 +7,29 @@ import {
   Button,
   Box,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import {
   SmartToy as AgentIcon,
   Launch as LaunchIcon,
   Info as InfoIcon,
-  Rocket as DeployIcon
+  Rocket as DeployIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
+import { useSlider } from '../../contexts/SliderContext';
+import DeploymentWizard from './Deploy/DeploymentWizard';
 
-const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }) => {
-  const [deploying, setDeploying] = useState(false);
+const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying = false, isSysAdmin = false }) => {
+  const { openSlider, closeSlider } = useSlider();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const { agent, definitions } = template;
   
@@ -77,14 +89,33 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
     return onboardingData?.url;
   };
 
-  const handleDeploy = async () => {
-    if (onDeploy && !deploying && !isDeploying) {
-      setDeploying(true);
-      try {
-        await onDeploy(agent);
-      } finally {
-        setDeploying(false);
-      }
+  const handleDeploy = () => {
+    if (!isDeploying) {
+      const displayName = parseOnboardingJson()?.['display-name'] || agent.name;
+      
+      openSlider(
+        <DeploymentWizard
+          template={template}
+          onDeploy={async (deploymentData) => {
+            // Call the original onDeploy function if provided
+            if (onDeploy) {
+              return await onDeploy(deploymentData);
+            }
+            // Default deployment simulation
+            return new Promise((resolve) => {
+              setTimeout(() => {
+                resolve({
+                  success: true,
+                  instanceId: `${deploymentData.config.instanceName}-${Date.now()}`,
+                  message: 'Template deployed successfully'
+                });
+              }, 3000);
+            });
+          }}
+          onCancel={closeSlider}
+        />,
+        `Deploy ${displayName}`
+      );
     }
   };
 
@@ -99,7 +130,68 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
     }
   };
 
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (onDelete && agent?.name) {
+      setIsDeleting(true);
+      try {
+        await onDelete(agent.name);
+      } catch (error) {
+        console.error('Error deleting template:', error);
+        // Error notification is handled by the parent component
+      } finally {
+        // Always close the dialog and reset state, whether success or error
+        // The notification will inform the user of the result
+        setIsDeleting(false);
+        setDeleteDialogOpen(false);
+      }
+    }
+  };
+
   return (
+    <>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">
+          Delete Template
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-dialog-description">
+            Are you sure you want to delete the template "<strong>{getDisplayName()}</strong>"?
+            This action cannot be undone and will remove the system-scoped agent and all its associated flow definitions.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button 
+            onClick={handleDeleteCancel} 
+            disabled={isDeleting}
+            sx={{ textTransform: 'none' }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={isDeleting}
+            startIcon={isDeleting ? <CircularProgress size={16} /> : <DeleteIcon />}
+            sx={{ textTransform: 'none' }}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     <Card 
       sx={{ 
         height: '100%',
@@ -113,6 +205,7 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
         bgcolor: 'background.paper',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         overflow: 'hidden',
+        position: 'relative',
         '&:hover': {
           borderColor: 'primary.light',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
@@ -120,6 +213,30 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
         }
       }}
     >
+      {/* Delete Button for System Admins */}
+      {isSysAdmin && (
+        <Tooltip title="Delete template" placement="top">
+          <IconButton
+            onClick={handleDeleteClick}
+            disabled={isDeleting}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 1,
+              bgcolor: 'background.paper',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              '&:hover': {
+                bgcolor: 'error.light',
+                color: 'error.contrastText',
+              }
+            }}
+            size="small"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
       {/* Dynamic Square Image Section */}
       <Box
         sx={{
@@ -312,9 +429,9 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
         <CardActions sx={{ p: 3, pt: 0, gap: 1 }}>
           <Button
             variant="contained"
-            startIcon={deploying || isDeploying ? <CircularProgress size={16} /> : <DeployIcon />}
+            startIcon={isDeploying ? <CircularProgress size={16} /> : <DeployIcon />}
             onClick={handleDeploy}
-            disabled={deploying || isDeploying}
+            disabled={isDeploying}
             sx={{
               fontWeight: 600,
               textTransform: 'none',
@@ -334,7 +451,7 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
               }
             }}
           >
-            {deploying || isDeploying ? 'Deploying...' : 'Deploy'}
+            {isDeploying ? 'Deploying...' : 'Deploy'}
           </Button>
           
           <Button
@@ -362,6 +479,7 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, isDeploying = false }
         </CardActions>
       </Box>
     </Card>
+    </>
   );
 };
 

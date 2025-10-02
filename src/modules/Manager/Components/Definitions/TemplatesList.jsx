@@ -20,6 +20,7 @@ import TemplateCard from './TemplateCard';
 import EmptyState from '../Common/EmptyState';
 import { useTemplatesApi } from '../../services';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useTenant } from '../../contexts/TenantContext';
 
 const TemplatesList = () => {
   const [templates, setTemplates] = useState([]);
@@ -33,7 +34,13 @@ const TemplatesList = () => {
   const [deploying, setDeploying] = useState(false);
 
   const templatesApi = useTemplatesApi();
-  const { showNotification } = useNotification();
+  const { showSuccess, showError } = useNotification();
+  const { userRoles } = useTenant();
+  
+  // Check if user is a system admin
+  const isSysAdmin = userRoles && userRoles.some(
+    (role) => role.toLowerCase() === 'sysadmin'
+  );
 
   const loadTemplates = useCallback(async () => {
     try {
@@ -63,24 +70,24 @@ const TemplatesList = () => {
 
   const handleViewDetails = (template) => {
     // For now, just show a notification. In a real app, this would navigate to a details page
-    showNotification(`Viewing details for ${template.name}`, 'info');
+    showSuccess(`Viewing details for ${template.name}`);
   };
 
   const handleDeployConfirm = async () => {
     if (!deployDialog.template || !deployConfig.agentName.trim()) {
-      showNotification('Please provide a valid agent name', 'error');
+      showError('Please provide a valid agent name');
       return;
     }
 
     try {
       setDeploying(true);
       await templatesApi.deployTemplate(deployDialog.template.name, deployConfig);
-      showNotification(`Template "${deployDialog.template.name}" deployed successfully as "${deployConfig.agentName}"`, 'success');
+      showSuccess(`Template "${deployDialog.template.name}" deployed successfully as "${deployConfig.agentName}"`);
       setDeployDialog({ open: false, template: null });
       setDeployConfig({ agentName: '', systemScoped: false });
     } catch (err) {
       console.error('Error deploying template:', err);
-      showNotification(err.message || 'Failed to deploy template', 'error');
+      showError(err.message || 'Failed to deploy template');
     } finally {
       setDeploying(false);
     }
@@ -89,6 +96,20 @@ const TemplatesList = () => {
   const handleDeployCancel = () => {
     setDeployDialog({ open: false, template: null });
     setDeployConfig({ agentName: '', systemScoped: false });
+  };
+
+  const handleDelete = async (agentName) => {
+    try {
+      await templatesApi.deleteTemplate(agentName);
+      showSuccess(`Template "${agentName}" deleted successfully`);
+      // Reload templates after successful deletion
+      await loadTemplates();
+    } catch (err) {
+      console.error('Error deleting template:', err);
+      const errorMessage = err.message || 'Failed to delete template';
+      showError(errorMessage);
+      throw err; // Re-throw to let the card component know the deletion failed
+    }
   };
 
   const renderContent = () => {
@@ -152,7 +173,9 @@ const TemplatesList = () => {
               template={template}
               onDeploy={handleDeploy}
               onViewDetails={handleViewDetails}
+              onDelete={handleDelete}
               isDeploying={deploying && deployDialog.template?.id === template.agent.id}
+              isSysAdmin={isSysAdmin}
             />
           </Grid>
         ))}

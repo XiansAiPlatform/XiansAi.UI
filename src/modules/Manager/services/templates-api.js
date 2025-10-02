@@ -63,6 +63,22 @@ export const useTemplatesApi = () => {
         console.error('Error deploying template:', error);
         throw error;
       }
+    },
+
+    /**
+     * Delete a system-scoped agent template
+     * Only available to system administrators
+     * @param {string} agentName - Name of the agent template to delete
+     * @returns {Promise<Object>} Deletion result
+     */
+    deleteTemplate: async (agentName) => {
+      try {
+        const response = await apiClient.delete(`/api/client/templates/${agentName}`);
+        return response;
+      } catch (error) {
+        console.error('Error deleting template:', error);
+        throw error;
+      }
     }
   }), [apiClient]);
 };

@@ -11,7 +11,8 @@ import {
 import { 
   ErrorOutline, 
   GroupAdd as GroupAddIcon,
-  Business as BusinessIcon 
+  Business as BusinessIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { ROUTES } from '../../../../routes/routeConstants';
 
@@ -20,6 +21,10 @@ const NoOrganizationAvailable = () => {
 
   const handleRequestAccess = () => {
     navigate(ROUTES.REGISTER);
+  };
+
+  const handleRefresh = () => {
+    navigate(ROUTES.MANAGER.DEFINITIONS_DEPLOYED);
   };
 
   return (
@@ -80,6 +85,29 @@ const NoOrganizationAvailable = () => {
         </Typography>
 
         <Stack spacing={2} direction={{ xs: 'column', sm: 'row' }} justifyContent="center">
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<RefreshIcon />}
+            onClick={handleRefresh}
+            sx={{
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 500,
+              boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
+              '&:hover': {
+                boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              transition: 'all 0.2s ease-in-out'
+            }}
+          >
+            Refresh Application
+          </Button>
           <Button
             variant="contained"
             color="primary"
