@@ -167,7 +167,7 @@ const EmptyState = ({
               gutterBottom 
               sx={{ 
                 color: 'text.primary',
-                fontWeight: 600,
+                fontWeight: 300,
                 fontSize: { xs: '1.75rem', sm: '2rem', md: '2.25rem' },
                 mb: 2
               }}
