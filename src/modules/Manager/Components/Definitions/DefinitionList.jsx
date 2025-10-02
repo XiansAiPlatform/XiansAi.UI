@@ -77,7 +77,8 @@ const DefinitionList = () => {
 
   return (
     <PageLayout
-      title="Agent Definitions"
+      title="Deployed Agents"
+      subtitle={`${sortedAgentNames.length} agent${sortedAgentNames.length !== 1 ? 's' : ''} deployed`}
       headerActions={getHeaderActions({
         searchQuery,
         onSearchChange: handleSearchChange,

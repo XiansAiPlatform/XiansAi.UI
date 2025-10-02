@@ -71,7 +71,29 @@ const MermaidDiagram = ({ diagram, source }) => {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 2 }}>
+      <Tabs 
+        value={activeTab} 
+        onChange={handleTabChange} 
+        aria-label="mermaid diagram tabs"
+        sx={{ 
+          mb: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+          '& .MuiTabs-indicator': {
+            backgroundColor: 'primary.main',
+          },
+          '& .MuiTab-root': {
+            textTransform: 'none',
+            fontSize: '1rem',
+            fontWeight: 500,
+            minWidth: 120,
+            '&.Mui-selected': {
+              color: 'primary.main',
+              fontWeight: 600,
+            },
+          },
+        }}
+      >
         <Tab label="Diagram View" />
         <Tab label="Code View" />
         <Tab label="Mermaid Text" />

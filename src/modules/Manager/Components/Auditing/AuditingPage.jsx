@@ -59,12 +59,28 @@ const AuditingPage = () => {
     };
 
     return (
-        <PageLayout title="Auditing">
-            {/* Display top-level error if any */} 
-            {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 'var(--radius-lg)' }}>{error}</Alert>}
-
+        <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-                <Tabs value={activeTab} onChange={handleTabChange}>
+                <Tabs 
+                    value={activeTab} 
+                    onChange={handleTabChange}
+                    aria-label="auditing tabs"
+                    sx={{
+                        '& .MuiTabs-indicator': {
+                            backgroundColor: 'primary.main',
+                        },
+                        '& .MuiTab-root': {
+                            textTransform: 'none',
+                            fontSize: '1rem',
+                            fontWeight: 200,
+                            minWidth: 120,
+                            '&.Mui-selected': {
+                                color: 'primary.main',
+                                fontWeight: 200,
+                            },
+                        },
+                    }}
+                >
                     <Tab 
                         label={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -90,36 +106,41 @@ const AuditingPage = () => {
                 </Tabs>
             </Box>
 
-            {activeTab === 0 && (
-                <ErrorLogs />
-            )}
+            <PageLayout title="Auditing">
+                {/* Display top-level error if any */} 
+                {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 'var(--radius-lg)' }}>{error}</Alert>}
 
-            {activeTab === 1 && (
-                <>
-                    <AgentSelector
-                        agentsApi={agentsApi}
-                        showError={showError}
-                        onAgentSelected={handleAgentSelected}
-                    />
+                {activeTab === 0 && (
+                    <ErrorLogs />
+                )}
 
-                    {selectedAgentName && (
-                        <WorkflowSelector
+                {activeTab === 1 && (
+                    <>
+                        <AgentSelector
+                            agentsApi={agentsApi}
+                            showError={showError}
+                            onAgentSelected={handleAgentSelected}
+                        />
+
+                        {selectedAgentName && (
+                            <WorkflowSelector
+                                selectedAgentName={selectedAgentName}
+                                selectedWorkflowId={selectedWorkflowId}
+                                selectedWorkflowTypeId={selectedWorkflowTypeId}
+                                onWorkflowSelected={handleWorkflowSelected}
+                                onWorkflowTypeSelected={handleWorkflowTypeSelected}
+                            />
+                        )}
+
+                        <WorkflowLogs
                             selectedAgentName={selectedAgentName}
                             selectedWorkflowId={selectedWorkflowId}
                             selectedWorkflowTypeId={selectedWorkflowTypeId}
-                            onWorkflowSelected={handleWorkflowSelected}
-                            onWorkflowTypeSelected={handleWorkflowTypeSelected}
                         />
-                    )}
-
-                    <WorkflowLogs
-                        selectedAgentName={selectedAgentName}
-                        selectedWorkflowId={selectedWorkflowId}
-                        selectedWorkflowTypeId={selectedWorkflowTypeId}
-                    />
-                </>
-            )}
-        </PageLayout>
+                    </>
+                )}
+            </PageLayout>
+        </Box>
     );
 };
 

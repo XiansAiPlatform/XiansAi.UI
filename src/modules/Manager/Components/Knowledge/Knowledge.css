@@ -11,13 +11,7 @@
   will-change: contents;
 }
 
-/* 2-column layout on larger screens */
-@media (min-width: 768px) {
-  .knowledge-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-}
+/* Single column layout for all screen sizes */
 
 
 

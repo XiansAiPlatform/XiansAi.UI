@@ -13,59 +13,60 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState(0);
 
   return (
-    <PageLayout title="System Admin">
-      <Box className="settings-container">
-        <Paper 
-          elevation={0} 
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="system admin tabs"
           sx={{ 
-            p: 3,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-paper)',
-            boxShadow: 'var(--shadow-sm)',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              borderColor: 'var(--border-color-hover)',
-              transform: 'translateY(-1px)'
-            }
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'primary.main',
+            },
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 200,
+              minWidth: 120,
+              '&.Mui-selected': {
+                color: 'primary.main',
+                fontWeight: 200,
+              },
+            },
           }}
         >
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            variant="scrollable"
-            scrollButtons="auto"
+          {tabLabels.map((label, idx) => (
+            <Tab key={label} label={label} />
+          ))}
+        </Tabs>
+      </Box>
+
+      <PageLayout title="System Admin">
+        <Box className="settings-container">
+          <Paper 
+            elevation={0} 
             sx={{ 
-              mb: 3,
-              borderBottom: '1px solid var(--border-color)',
-              '& .MuiTab-root': {
-                fontFamily: 'var(--font-family)',
-                fontSize: '0.875rem',
-                fontWeight: 500,
-                textTransform: 'none',
-                color: 'var(--text-secondary)',
-                '&.Mui-selected': {
-                  color: 'var(--primary)',
-                  fontWeight: 600
-                }
-              },
-              '& .MuiTabs-indicator': {
-                backgroundColor: 'var(--primary)',
-                height: '3px',
-                borderRadius: '3px 3px 0 0'
+              p: 3,
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-color)',
+              backgroundColor: 'var(--bg-paper)',
+              boxShadow: 'var(--shadow-sm)',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                borderColor: 'var(--border-color-hover)',
+                transform: 'translateY(-1px)'
               }
             }}
           >
-            {tabLabels.map((label, idx) => (
-              <Tab key={label} label={label} />
-            ))}
-          </Tabs>
-          <Box>
-            {tab === 0 && <TenantManagement />}
-            {tab === 1 && <UserManagement />}
-          </Box>
-        </Paper>
-      </Box>
-    </PageLayout>
+            <Box>
+              {tab === 0 && <TenantManagement />}
+              {tab === 1 && <UserManagement />}
+            </Box>
+          </Paper>
+        </Box>
+      </PageLayout>
+    </Box>
   );
 }

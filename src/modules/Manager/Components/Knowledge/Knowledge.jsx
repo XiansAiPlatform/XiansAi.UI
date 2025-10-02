@@ -348,6 +348,7 @@ const Knowledge = () => {
   return (
     <PageLayout
       title="Knowledge Base"
+      subtitle={`${filteredKnowledgeItems.length} knowledge item${filteredKnowledgeItems.length !== 1 ? 's' : ''}`}
       headerActions={headerActions}
     >
         

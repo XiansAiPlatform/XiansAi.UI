@@ -13,7 +13,7 @@ import Settings from './Components/Settings/Settings';
 import Knowledge from './Components/Knowledge/Knowledge';
 import { OrganizationProvider } from './contexts/OrganizationContext';
 import { TenantProvider } from './contexts/TenantContext';
-import DefinitionList from './Components/Definitions/DefinitionList';
+import DefinitionsContainer from './Components/Definitions/DefinitionsContainer';
 import NotImplemented from './Components/NotImplemented/NotImplemented';
 import Landing from './Components/Landing/Landing';
 import MessagingPage from './Components/Messaging/MessagingPage';
@@ -59,9 +59,9 @@ function ManagerRoutes() {
                           <WorkflowList />
                         </ProtectedRoute>
                       } />
-                      <Route path="definitions" element={
+                      <Route path="definitions/*" element={
                         <ProtectedRoute>
-                          <DefinitionList />
+                          <DefinitionsContainer />
                         </ProtectedRoute>
                       } />
                       <Route path="runs/:id/:runId" element={

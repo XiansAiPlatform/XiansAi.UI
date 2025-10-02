@@ -59,6 +59,21 @@ const Settings = () => {
               value={currentUserSubTab} 
               onChange={handleUserSubTabChange}
               aria-label="user management sub-tabs"
+              sx={{
+                '& .MuiTabs-indicator': {
+                  backgroundColor: 'primary.main',
+                },
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  fontWeight: 300,
+                  minWidth: 120,
+                  '&.Mui-selected': {
+                    color: 'primary.main',
+                    fontWeight: 200,
+                  },
+                },
+              }}
             >
               {userSubTabs.map((tab, idx) => (
                 <Tab key={tab.label} label={tab.label} />
@@ -76,31 +91,48 @@ const Settings = () => {
   };
 
   return (
-    <PageLayout title="Tenant Settings">
-      <Box className="settings-container">
-        <Alert severity="info" className="info-alert" sx={{ mb: 3 }}>
-          These settings are required for your app server to run.
-          <br />
-          Configure the certificate and key paths in the App Server settings.
-        </Alert>
-        
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs 
-            value={currentTab} 
-            onChange={handleTabChange}
-            aria-label="settings tabs"
-          >
-            {tabs.map((tab, idx) => (
-              <Tab key={tab.label} label={tab.label} />
-            ))}
-          </Tabs>
-        </Box>
-
-        <Box role="tabpanel">
-          {renderTabContent()}
-        </Box>
+    <Box sx={{ width: '100%' }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Tabs 
+          value={currentTab} 
+          onChange={handleTabChange}
+          aria-label="settings tabs"
+          sx={{
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'primary.main',
+            },
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 200,
+              minWidth: 120,
+              '&.Mui-selected': {
+                color: 'primary.main',
+                fontWeight: 200,
+              },
+            },
+          }}
+        >
+          {tabs.map((tab, idx) => (
+            <Tab key={tab.label} label={tab.label} />
+          ))}
+        </Tabs>
       </Box>
-    </PageLayout>
+
+      <PageLayout title="Tenant Settings">
+        <Box className="settings-container">
+          <Alert severity="info" className="info-alert" sx={{ mb: 3 }}>
+            These settings are required for your app server to run.
+            <br />
+            Configure the certificate and key paths in the App Server settings.
+          </Alert>
+
+          <Box role="tabpanel">
+            {renderTabContent()}
+          </Box>
+        </Box>
+      </PageLayout>
+    </Box>
   );
 };
 

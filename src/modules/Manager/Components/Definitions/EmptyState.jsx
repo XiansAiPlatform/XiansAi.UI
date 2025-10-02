@@ -9,7 +9,7 @@ const EmptyState = ({
   onTimeFilterChange,
 }) => (
   <PageLayout
-    title="Agent Definitions"
+    title="Agents"
     headerActions={getHeaderActions({
       searchQuery,
       onSearchChange,
@@ -32,7 +32,7 @@ const EmptyState = ({
       }}
     >
       <Typography variant="h6" sx={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-        Your Agent Definitions
+        Your Agents
       </Typography>
       <Typography variant="body1" sx={{ color: 'var(--text-secondary)', maxWidth: '600px' }}>
         Agent definitions are automatically created when flows are run for the first time or when the flow code is modified. 

@@ -44,7 +44,7 @@ Built with React 19, Material-UI, React Router, Auth0/Entra ID authentication, C
 
 ```bash
 # Define the version
-export VERSION=v1.3.7 # or 1.3.7-beta for pre-release
+export VERSION=1.3.7 # or 1.3.7-beta for pre-release
 
 # Create and push a version tag
 git tag -a v$VERSION -m "Release v$VERSION"

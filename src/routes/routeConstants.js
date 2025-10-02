@@ -15,6 +15,8 @@ export const ROUTES = {
     RUNS: '/manager/runs',
     RUNS_DETAIL: '/manager/runs/:id/:runId',
     DEFINITIONS: '/manager/definitions',
+    DEFINITIONS_DEPLOYED: '/manager/definitions/deployed',
+    DEFINITIONS_TEMPLATES: '/manager/definitions/templates',
     KNOWLEDGE: '/manager/knowledge',
     SETTINGS: '/manager/settings',
     MESSAGING: '/manager/messaging',

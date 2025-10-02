@@ -2,6 +2,7 @@ import { Box, Typography, Container } from '@mui/material';
 
 const PageLayout = ({ 
   title, 
+  subtitle,
   headerActions, 
   children, 
   maxWidth = 'lg',
@@ -32,20 +33,36 @@ const PageLayout = ({
           flexWrap: 'wrap'
         }}
       >
-        <Typography 
-          variant="h4" 
-          component="h1"
-          sx={{
-            fontWeight: 'var(--font-weight-medium)',
-            letterSpacing: 'var(--letter-spacing-tight)',
-            color: 'var(--text-primary)',
-            fontSize: { xs: 'var(--text-xl)', md: 'var(--text-2xl)' },
-            fontFamily: 'var(--font-family)',
-            lineHeight: 1.3
-          }}
-        >
-          {title}
-        </Typography>
+        <Box>
+          <Typography 
+            variant="h4" 
+            component="h1"
+            sx={{
+              fontWeight: 'var(--font-weight-medium)',
+              letterSpacing: 'var(--letter-spacing-tight)',
+              color: 'var(--text-primary)',
+              fontSize: { xs: 'var(--text-xl)', md: 'var(--text-2xl)' },
+              fontFamily: 'var(--font-family)',
+              lineHeight: 1.3
+            }}
+          >
+            {title}
+          </Typography>
+          {subtitle && (
+            <Typography 
+              variant="body2" 
+              component="p"
+              sx={{
+                color: 'var(--text-secondary)',
+                fontSize: 'var(--text-sm)',
+                fontFamily: 'var(--font-family)',
+                mt: 0.5
+              }}
+            >
+              {subtitle}
+            </Typography>
+          )}
+        </Box>
         
         {headerActions && (
           <Box 

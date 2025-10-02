@@ -589,7 +589,7 @@ const WorkflowList = () => {
                 variant="outlined"
                 color="primary"
               >
-                Go to Agent Definitions
+                Go to Agents
               </Button>
             </Box>
           </Paper>  
