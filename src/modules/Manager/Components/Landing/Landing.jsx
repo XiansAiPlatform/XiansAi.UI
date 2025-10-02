@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Button, Container, CircularProgress, Alert, Card, CardContent } from '@mui/material';
-import { LockOutlined, Home, Refresh, AccessTime, ErrorOutline } from '@mui/icons-material';
+import { LockOutlined, Refresh, AccessTime } from '@mui/icons-material';
 import { useAuth } from '../../auth/AuthContext';
 import { useUserApi } from '../../services/user-api';
 
@@ -61,10 +61,6 @@ const Landing = () => {
     } finally {
       setAccepting(false);
     }
-  };
-
-  const handleHomeClick = () => {
-    navigate('/');
   };
 
   const handleRefreshToManager = () => {

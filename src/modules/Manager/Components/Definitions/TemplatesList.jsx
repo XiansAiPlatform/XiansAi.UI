@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
@@ -35,11 +35,7 @@ const TemplatesList = () => {
   const templatesApi = useTemplatesApi();
   const { showNotification } = useNotification();
 
-  useEffect(() => {
-    loadTemplates();
-  }, []);
-
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -51,7 +47,11 @@ const TemplatesList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [templatesApi]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
 
   const handleDeploy = (template) => {
     setDeployDialog({ open: true, template });
