@@ -187,7 +187,7 @@ export const handleApiError = async (error, customMessage = '', showErrorCallbac
     // Fallback to direct toast call for backward compatibility
     // This shows the full detailed error with styling
     toast.error(<ToastContent />, {
-      position: "bottom-right", // Changed to match NotificationContext
+      position: "bottom-left", // Changed to match NotificationContext
       autoClose: 8000, // Increased duration to allow reading longer messages
       hideProgressBar: false,
       closeOnClick: true,

@@ -58,13 +58,14 @@ const NAV_ITEMS = [
 ];
 
 // Reusable NavItem component
-const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeCount = 0, isCollapsed }) => {
+const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeCount = 0, isCollapsed, search }) => {
   const selected = isSelected(pathname);
+  const linkTo = search ? `${to}${search}` : to;
   
   const content = (
     <ListItem
       component={Link}
-      to={to}
+      to={linkTo}
       className={`nav-item ${selected ? 'selected' : ''} ${isCollapsed ? 'collapsed' : ''}`}
       onClick={onNavItemClick}
       sx={{
@@ -152,7 +153,7 @@ const NavItem = ({ to, icon, label, isSelected, pathname, onNavItemClick, badgeC
 };
 
 const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const isMobile = window.innerWidth <= 768;
   const { navErrorCount, resetNavErrorCount } = useAuditContext();
   const { userRoles } = useTenant();
@@ -230,6 +231,7 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
                   key={item.to}
                   {...item}
                   pathname={pathname}
+                  search={search}
                   onNavItemClick={() => handleNavItemClick(item.to)}
                   badgeCount={item.to === '/auditing' ? navErrorCount : 0}
                   isCollapsed={isCollapsed && !isMobile}

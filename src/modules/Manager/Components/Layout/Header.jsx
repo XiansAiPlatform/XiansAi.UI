@@ -11,6 +11,7 @@ import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link, useNavigate } from 'react-router-dom';
 import PersonIcon from '@mui/icons-material/Person';
 import { useTenant } from '../../contexts/TenantContext';
+import { getConfig } from '../../../../config';
 
 const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
   const { user, logout } = useAuth();
@@ -21,6 +22,8 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
    const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });    
    const [logoImage, setLogoImage] = React.useState(null);
   const { tenant } = useTenant();
+  const config = getConfig();
+  const appName = config.appName || 'Xians.ai';
 
   useEffect(() => {
     // Update user data when auth context changes
@@ -129,12 +132,8 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
     const newOrg = event.target.value;
     setSelectedOrg(newOrg);
     
-    // Only navigate if this is a user-initiated change (not during initialization)
-    // Check if we're currently on a definitions page to avoid unnecessary navigation
-    const currentPath = window.location.pathname;
-    if (!currentPath.startsWith('/manager/definitions')) {
-      navigate('/manager/definitions');
-    }
+    // The OrganizationContext will handle updating the URL parameter
+    // No need to navigate away from current page
   };
 
   const handleMenu = (event) => {
@@ -208,8 +207,14 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                 />
               ) : (
                 <>
-                  <span className="logo-text-primary">Xians</span>
-                  <span className="logo-text-accent">.ai</span>
+                  {appName.includes('.') ? (
+                    <>
+                      <span className="logo-text-primary">{appName.split('.')[0]}</span>
+                      <span className="logo-text-accent">.{appName.split('.').slice(1).join('.')}</span>
+                    </>
+                  ) : (
+                    <span className="logo-text-primary">{appName}</span>
+                  )}
                 </>
               )}
             </Typography>

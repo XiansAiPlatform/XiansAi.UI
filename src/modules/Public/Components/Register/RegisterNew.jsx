@@ -323,7 +323,6 @@ export default function RegisterNew() {
 
   const [formData, setFormData] = useState({
     tenantId: '',
-    tenantName: '',
     companyUrl: '',
     companyEmail: '',
     subscription: 'Free',
@@ -375,7 +374,6 @@ export default function RegisterNew() {
   // Check if form is valid
   const isFormValid = 
     formData.tenantId.trim() && 
-    formData.tenantName.trim() && 
     formData.companyUrl.trim() && 
     formData.companyEmail.trim() && 
     !tenantIdError && 
@@ -404,9 +402,9 @@ export default function RegisterNew() {
       // Prepare tenant data for API call
       const tenantData = {
         tenantId: formData.tenantId.trim(),
-        name: formData.tenantName.trim(),
+        name: formData.tenantId.trim(),
         domain: formData.companyUrl.trim(),
-        description: `${formData.tenantName} - ${formData.subscription} plan`
+        description: `${formData.tenantId.trim()} - ${formData.subscription} plan`
       };
 
       // Call the API to create the tenant
@@ -415,7 +413,7 @@ export default function RegisterNew() {
       if (response.success) {
         setCreatedTenant({
           tenantId: response.tenantId,
-          name: formData.tenantName
+          name: formData.tenantId.trim()
         });
         setIsSuccess(true);
       } else {
@@ -493,17 +491,6 @@ export default function RegisterNew() {
                     variant="outlined"
                     helperText={tenantIdError || "Unique identifier for your tenant (letters, numbers, dots, underscores, and hyphens only)"}
                     error={!!tenantIdError}
-                    disabled={isSubmitting}
-                  />
-                  <StyledTextField
-                    fullWidth
-                    label="Tenant Name"
-                    name="tenantName"
-                    value={formData.tenantName}
-                    onChange={handleChange}
-                    placeholder="My Company Workspace"
-                    required
-                    variant="outlined"
                     disabled={isSubmitting}
                   />
                   <StyledTextField
@@ -642,7 +629,7 @@ export default function RegisterNew() {
             <ButtonContainer>
               <ActionButton
                 variant="primary"
-                onClick={() => window.location.href = '/manager/definitions/templates'}
+                onClick={() => window.location.href = `/manager/definitions/templates?org=${createdTenant.tenantId}`}
                 startIcon={<FiExternalLink />}
                 sx={{ flex: 1 }}
               >

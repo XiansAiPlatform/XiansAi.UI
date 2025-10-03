@@ -139,8 +139,9 @@ const PaginationControls = ({
       <Box sx={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: 1,
-        order: isMobile ? 2 : 1
+        gap: 4,
+        order: isMobile ? 2 : 1,
+        ml: isMobile ? 1 : 2,
       }}>
         <Typography variant="body2" color="text.secondary">
           Show:
@@ -184,7 +185,8 @@ const PaginationControls = ({
       <Box sx={{ 
         display: 'flex', 
         gap: 0.5,
-        order: isMobile ? 3 : 3
+        order: isMobile ? 3 : 3,
+        mr: isMobile ? 1 : 2
       }}>
         <Button
           onClick={handleFirstPage}

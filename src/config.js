@@ -13,6 +13,7 @@ export function getConfig() {
   const authProvider = getEnvVar('REACT_APP_AUTH_PROVIDER');
 
   const config = {
+    appName: getEnvVar('REACT_APP_NAME', 'Xians.ai'),
     authProvider,
     apiBaseUrl: getEnvVar('REACT_APP_API_URL'),
     modules: {

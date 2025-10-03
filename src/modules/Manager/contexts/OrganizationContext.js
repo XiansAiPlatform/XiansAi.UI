@@ -1,12 +1,14 @@
-import { createContext, use, useState, useEffect } from 'react';
+import { createContext, use, useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext'; // New import
 import { useNotification } from './NotificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {useUserTenantApi} from '../services/user-tenant-api';
 import { handleApiError } from '../utils/errorHandler';
+import { useUrlParams } from '../utils/useUrlParams';
 
 const OrganizationContext = createContext();
 const STORAGE_KEY = 'selectedOrganization';
+const URL_PARAM_KEY = 'org';
 
 export function OrganizationProvider({ children }) {
   const [selectedOrg, setSelectedOrg] = useState('');
@@ -17,7 +19,20 @@ export function OrganizationProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const userTenantApi = useUserTenantApi();
+  const { getParam, setParam } = useUrlParams();
   
+  // Sync organization from URL to state
+  useEffect(() => {
+    if (!selectedOrg || organizations.length === 0) return;
+    
+    const urlOrg = getParam(URL_PARAM_KEY);
+    
+    // If URL has a different org than current selection, update it
+    if (urlOrg !== selectedOrg) {
+      setParam(URL_PARAM_KEY, selectedOrg, true);
+    }
+  }, [selectedOrg, organizations, getParam, setParam]);
+
   useEffect(() => {
     const initializeOrg = async () => {
       const publicPaths = ['/', '/login', '/register', '/register/join', '/register/new', '/callback'];
@@ -64,18 +79,37 @@ export function OrganizationProvider({ children }) {
         if (orgs.length > 0) {
           setOrganizations(orgs);
 
-          // Get stored org or use first available
+          // Priority: URL param > localStorage > first available
+          const urlOrg = getParam(URL_PARAM_KEY);
           const storedOrg = localStorage.getItem(STORAGE_KEY);
-          if (storedOrg && orgs.includes(storedOrg)) {
-            setSelectedOrg(storedOrg);
-          } else if (orgs.length > 0) {
-            setSelectedOrg(orgs[0]);
-            localStorage.setItem(STORAGE_KEY, orgs[0]);
+          
+          let orgToSelect = null;
+          
+          // Check URL parameter first
+          if (urlOrg && orgs.includes(urlOrg)) {
+            orgToSelect = urlOrg;
+          } 
+          // Then check localStorage
+          else if (storedOrg && orgs.includes(storedOrg)) {
+            orgToSelect = storedOrg;
+          } 
+          // Finally use first available
+          else if (orgs.length > 0) {
+            orgToSelect = orgs[0];
+          }
+
+          if (orgToSelect) {
+            setSelectedOrg(orgToSelect);
+            localStorage.setItem(STORAGE_KEY, orgToSelect);
+            // Set URL parameter if not already set or different
+            if (getParam(URL_PARAM_KEY) !== orgToSelect) {
+              setParam(URL_PARAM_KEY, orgToSelect, true);
+            }
           } else {
-        // Only show organization errors for authenticated protected routes
-        if (!publicPaths.includes(location.pathname) ) {
-          showDetailedError('No organizations available for this user');
-        }
+            // Only show organization errors for authenticated protected routes
+            if (!publicPaths.includes(location.pathname) ) {
+              showDetailedError('No organizations available for this user');
+            }
           }
         } else if (location.pathname !== "/" && location.pathname !== "/login" && !location.pathname.startsWith('/register')) {
           navigate('/register');
@@ -92,12 +126,14 @@ export function OrganizationProvider({ children }) {
     };
 
     initializeOrg();
-  }, [isAuthenticated, getAccessTokenSilently, showDetailedError, navigate, location, isAuthLoading, user, isProcessingCallback, userTenantApi]); // Added isAuthLoading and user
+  }, [isAuthenticated, getAccessTokenSilently, showDetailedError, navigate, location.pathname, isAuthLoading, user, isProcessingCallback, userTenantApi, getParam, setParam]); // Added isAuthLoading and user
 
-  const updateSelectedOrg = (newOrg) => {
+  const updateSelectedOrg = useCallback((newOrg) => {
     setSelectedOrg(newOrg);
     localStorage.setItem(STORAGE_KEY, newOrg);
-  };
+    // Update URL parameter when org changes
+    setParam(URL_PARAM_KEY, newOrg, true);
+  }, [setParam]);
 
   return (
     (<OrganizationContext

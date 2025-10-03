@@ -1,170 +1,54 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, Container, CircularProgress, Alert, Card, CardContent } from '@mui/material';
-import { LockOutlined, Refresh, AccessTime } from '@mui/icons-material';
-import { useAuth } from '../../auth/AuthContext';
-import { useUserApi } from '../../services/user-api';
+import { useEffect } from 'react';
+import { Box, Typography, Container, CircularProgress } from '@mui/material';
 
 const Landing = () => {
-  const navigate = useNavigate();
-  const userApi = useUserApi();
-  const [invitation, setInvitation] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [accepting, setAccepting] = useState(false);
-  const [tokenExpired, setTokenExpired] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const { getAccessTokenSilently, error: authError } = useAuth();
-
   useEffect(() => {
-    const fetchInvitation = async () => {
-      try {
-        setLoading(true);
-        const token = await getAccessTokenSilently();
-        if (token) {
-          const invitationData = await userApi.getCurrentInvitation(token);
-          if (invitationData?.token) {
-            setInvitation(invitationData);
-          }
-        }
-      } catch (err) {
-        // Check if this is a token expiry or interaction required error
-        if (err?.type === 'INTERACTION_REQUIRED' || err?.code === 'INTERACTION_REQUIRED' || 
-            err?.message?.includes('expired') || err?.message?.includes('token')) {
-          setTokenExpired(true);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchInvitation();
-  }, [getAccessTokenSilently, userApi]);
-
-  // Check for auth errors from context
-  useEffect(() => {
-    if (authError?.type === 'INTERACTION_REQUIRED' || 
-        authError?.message?.includes('expired') || 
-        authError?.message?.includes('token')) {
-      setTokenExpired(true);
-      setLoading(false);
+    // Check if we came here from a 403 error
+    const from403 = sessionStorage.getItem('from403');
+    
+    // Check if we're in a redirect loop
+    const loopCount = parseInt(sessionStorage.getItem('landingLoopCount') || '0', 10);
+    const lastVisit = parseInt(sessionStorage.getItem('landingLastVisit') || '0', 10);
+    const now = Date.now();
+    
+    // Reset counter if more than 10 seconds have passed since last visit
+    if (now - lastVisit > 10000) {
+      sessionStorage.setItem('landingLoopCount', '0');
+      sessionStorage.setItem('landingLastVisit', now.toString());
+      sessionStorage.removeItem('from403');
+      // First visit or after timeout - redirect to manager
+      window.location.href = '/manager';
+      return;
     }
-  }, [authError]);
-
-  const handleAcceptInvitation = async () => {
-    if (!invitation?.token) return;
-    try {
-      setAccepting(true);
-      const token = await getAccessTokenSilently();
-      await userApi.postAcceptInvitation(token, invitation.token);
-      navigate('/');
-    } catch (err) {
-      // Optionally show error
-    } finally {
-      setAccepting(false);
+    
+    // Increment loop counter
+    const newCount = loopCount + 1;
+    sessionStorage.setItem('landingLoopCount', newCount.toString());
+    sessionStorage.setItem('landingLastVisit', now.toString());
+    
+    // If we've been here more than twice in 10 seconds, we're in a loop
+    // Force logout to break the loop and clear session
+    if (newCount > 2 || (from403 && newCount > 1)) {
+      console.warn('Redirect loop detected (403 error loop). Forcing logout to clear session...');
+      sessionStorage.removeItem('landingLoopCount');
+      sessionStorage.removeItem('landingLastVisit');
+      sessionStorage.removeItem('from403');
+      window.location.href = '/manager/logout';
+      return;
     }
-  };
-
-  const handleRefreshToManager = () => {
-    setRefreshing(true);
-    // Add a small delay to show the loading state
-    setTimeout(() => {
-      window.location.href = '/manager/definitions/deployed';
-    }, 500);
-  };
-
-  const handleTryAgain = () => {
-    setTokenExpired(false);
-    setLoading(true);
-    // Trigger a re-fetch by calling the effect again
-    window.location.reload();
-  };
-
-  if (loading) {
-    return (
-      <Container maxWidth='md'>
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: '60vh',
-            textAlign: 'center',
-            py: 4,
-          }}
-        >
-          <CircularProgress />
-          <Typography sx={{ mt: 2 }}>Checking for invitation...</Typography>
-        </Box>
-      </Container>
-    );
-  }
-
-  // Determine the current scenario
-  const getScenario = () => {
-    if (tokenExpired) return 'token_expired';
-    if (invitation?.token) return 'invitation';
-    return 'unauthorized';
-  };
-
-  const scenario = getScenario();
-
-  const scenarioConfig = {
-    token_expired: {
-      icon: <AccessTime sx={{ fontSize: 80 }} />,
-      title: "Permission Error",
-      description: "Server returned a permission error. Possible causes are that your token has expired. Please click the button to refresh the application.",
-      color: 'warning',
-      actions: [
-        {
-          label: refreshing ? 'Refreshing...' : 'Refresh to Manager',
-          onClick: handleRefreshToManager,
-          variant: 'contained',
-          icon: <Refresh />,
-          disabled: refreshing
-        },
-        {
-          label: 'Try Again',
-          onClick: handleTryAgain,
-          variant: 'outlined',
-          icon: <Refresh />
-        }
-      ]
-    },
-    invitation: {
-      icon: <LockOutlined sx={{ fontSize: 80 }} />,
-      title: "Pending Invitation Acceptance",
-      description: "You have been invited to join an organization. Please accept the invitation to get started with Xians.ai.",
-      color: 'info',
-      actions: [
-        {
-          label: accepting ? 'Accepting...' : 'Accept Invitation',
-          onClick: handleAcceptInvitation,
-          variant: 'contained',
-          disabled: accepting
-        }
-      ]
-    },
-    unauthorized: {
-      icon: null,
-      title: "Permission Error",
-      description: "Server returned a permission error. Possible causes are that your token has expired. Please click the button to refresh the application.",
-      color: 'error',
-      actions: [
-        {
-          label: refreshing ? 'Refreshing...' : 'Refresh Application',
-          onClick: handleRefreshToManager,
-          variant: 'contained',
-          icon: <Refresh />,
-          disabled: refreshing
-        }
-      ]
+    
+    // Clear the 403 flag after first check
+    if (from403) {
+      sessionStorage.removeItem('from403');
     }
-  };
+    
+    // Normal case - redirect to manager
+    window.location.href = '/manager';
+  }, []);
 
-  const config = scenarioConfig[scenario];
-
+  // Show a loading state while redirecting
   return (
-    <Container maxWidth="md">
+    <Container maxWidth='md'>
       <Box
         sx={{
           display: 'flex',
@@ -176,149 +60,8 @@ const Landing = () => {
           py: 4,
         }}
       >
-        {/* Status Alert */}
-        {tokenExpired && (
-          <Alert 
-            severity="warning" 
-            sx={{ 
-              mb: 3, 
-              width: '100%',
-              maxWidth: 600,
-              '& .MuiAlert-message': {
-                width: '100%'
-              }
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-              Authentication Issue Detected
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 0.5, opacity: 0.9 }}>
-              Your session may have expired. Try refreshing the page or logging in again.
-            </Typography>
-          </Alert>
-        )}
-
-        {/* Main Card */}
-        <Card 
-          elevation={0}
-          sx={{ 
-            maxWidth: 600, 
-            width: '100%',
-            borderRadius: 0,
-            background: 'transparent',
-            backdropFilter: 'none',
-            border: 'none',
-            boxShadow: 'none',
-          }}
-        >
-          <CardContent sx={{ p: 4 }}>
-            {/* Icon */}
-            {config.icon && (
-              <Box
-                sx={{
-                  mb: 3,
-                  color: `${config.color}.main`,
-                  opacity: 0.8,
-                }}
-              >
-                {config.icon}
-              </Box>
-            )}
-
-            {/* Title */}
-            <Typography
-              variant="h3"
-              component="h1"
-              sx={{
-                mb: 2,
-                fontWeight: 700,
-                color: 'text.primary',
-                background: `linear-gradient(135deg, var(--text-primary) 0%, var(--${config.color}) 100%)`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {config.title}
-            </Typography>
-
-            {/* Description */}
-            <Typography
-              variant="body1"
-              sx={{
-                mb: 4,
-                color: 'text.secondary',
-                lineHeight: 1.6,
-                fontSize: '1.1rem',
-              }}
-            >
-              {config.description}
-            </Typography>
-
-            {/* Action Buttons */}
-            <Box
-              sx={{
-                display: 'flex',
-                gap: 2,
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                mb: 2,
-              }}
-            >
-              {config.actions.map((action, index) => (
-                <Button
-                  key={index}
-                  variant={action.variant}
-                  size="large"
-                  startIcon={action.icon}
-                  onClick={action.onClick}
-                  disabled={action.disabled}
-                  sx={{
-                    minWidth: 160,
-                    py: 1.5,
-                    px: 3,
-                    ...(action.variant === 'contained' && {
-                      backgroundColor: 'var(--primary)',
-                      '&:hover': {
-                        backgroundColor: 'var(--primary-dark)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 25px rgba(14, 165, 233, 0.3)',
-                      },
-                    }),
-                    ...(action.variant === 'outlined' && {
-                      borderColor: 'var(--border-color)',
-                      color: 'text.secondary',
-                      '&:hover': {
-                        borderColor: 'var(--primary)',
-                        backgroundColor: 'var(--primary-lighter)',
-                        transform: 'translateY(-2px)',
-                      },
-                    }),
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  {action.label}
-                </Button>
-              ))}
-            </Box>
-
-            {/* Additional Help */}
-            {scenario === 'token_expired' && (
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                  opacity: 0.8,
-                  fontStyle: 'italic',
-                  mt: 2,
-                }}
-              >
-                💡 Tip: If problems persist, try clearing your browser cache or contact support
-              </Typography>
-            )}
-          </CardContent>
-        </Card>
-
+        <CircularProgress />
+        <Typography sx={{ mt: 2 }}>Redirecting...</Typography>
       </Box>
     </Container>
   );

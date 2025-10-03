@@ -33,6 +33,24 @@ const KnowledgeStep = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stepData.name, agentName]);
 
+  const getDefaultValue = () => {
+    if (!stepData.value) return '';
+    
+    const knowledgeType = stepData.type || 'text';
+    
+    // For JSON type, stringify the value
+    if (knowledgeType === 'json') {
+      return typeof stepData.value === 'string' 
+        ? stepData.value 
+        : JSON.stringify(stepData.value, null, 2);
+    }
+    
+    // For text and markdown, use the value directly as string
+    return typeof stepData.value === 'string' 
+      ? stepData.value 
+      : JSON.stringify(stepData.value, null, 2);
+  };
+
   const loadExistingKnowledge = async () => {
     try {
       setIsLoading(true);
@@ -42,14 +60,14 @@ const KnowledgeStep = ({
         setContent(knowledge.content || '');
       } else {
         // If no existing knowledge, use the default value from workflow
-        const defaultValue = stepData.value ? JSON.stringify(stepData.value, null, 2) : '';
+        const defaultValue = getDefaultValue();
         setContent(defaultValue);
         setIsEditing(true); // Start in edit mode for new knowledge
       }
     } catch (error) {
       // If knowledge doesn't exist (404), that's okay - we'll use the default value from workflow
       if (error.status === 404) {
-        const defaultValue = stepData.value ? JSON.stringify(stepData.value, null, 2) : '';
+        const defaultValue = getDefaultValue();
         setContent(defaultValue);
         setIsEditing(true);
       } else {
@@ -65,19 +83,25 @@ const KnowledgeStep = ({
     try {
       setIsSaving(true);
       
-      // Validate JSON content
-      let parsedContent = content;
-      try {
-        parsedContent = JSON.parse(content);
-      } catch (e) {
-        showError('Invalid JSON format. Please check your content.');
-        return;
+      const knowledgeType = stepData.type || 'text';
+      let contentToSave = content;
+      
+      // Validate and format based on type
+      if (knowledgeType === 'json') {
+        try {
+          const parsedContent = JSON.parse(content);
+          contentToSave = JSON.stringify(parsedContent, null, 2);
+        } catch (e) {
+          showError('Invalid JSON format. Please check your content.');
+          return;
+        }
       }
-
+      // For markdown and text, save content as-is
+      
       const knowledgeData = {
         name: stepData.name,
-        content: JSON.stringify(parsedContent, null, 2),
-        type: 'json',
+        content: contentToSave,
+        type: knowledgeType,
         agent: agentName
       };
 
@@ -111,10 +135,24 @@ const KnowledgeStep = ({
     if (existingKnowledge) {
       setContent(existingKnowledge.content || '');
     } else {
-      const defaultValue = stepData.value ? JSON.stringify(stepData.value, null, 2) : '';
+      const defaultValue = getDefaultValue();
       setContent(defaultValue);
     }
     setIsEditing(false);
+  };
+
+  const getEditorLanguage = () => {
+    const knowledgeType = stepData.type || 'text';
+    
+    switch (knowledgeType) {
+      case 'json':
+        return 'json';
+      case 'markdown':
+        return 'markdown';
+      case 'text':
+      default:
+        return 'plaintext';
+    }
   };
 
   if (isLoading) {
@@ -166,7 +204,7 @@ const KnowledgeStep = ({
                 >
                   <Editor
                     height="300px"
-                    defaultLanguage="json"
+                    defaultLanguage={getEditorLanguage()}
                     value={content}
                     onChange={(value) => setContent(value || '')}
                     options={{

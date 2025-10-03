@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   TextField,
@@ -22,6 +22,7 @@ import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
 const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { selectedOrg } = useSelectedOrg();
   const tenantPrefix = `${selectedOrg}:`;
   
@@ -60,7 +61,8 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         queueNameToSend
       );
       onSuccess();
-      navigate('/manager/runs', { state: { fromNewWorkflow: true } });
+      // Preserve URL search params (like org=...) when navigating
+      navigate(`/manager/runs${location.search}`, { state: { fromNewWorkflow: true } });
     } catch (err) {
       setError(err.message);
     } finally {

@@ -251,7 +251,7 @@ export function AuthInfoMessage({ isAuthenticated, user }) {
           >
             Please authenticate to continue with your registration process
           </Typography>
-          <AuthButton href="/manager/login">
+          <AuthButton href="/manager">
             <Box sx={{ fontSize: '1rem' }}>🔐</Box>
             Sign In to Continue
           </AuthButton>

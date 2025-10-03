@@ -17,6 +17,10 @@ replace_env_vars() {
   # Use envsubst to replace environment variables
   # Only replace variables that are actually set
 
+  echo "Configuration for application branding"
+  export REACT_APP_NAME="${REACT_APP_NAME:-Xians.ai}"
+  echo "REACT_APP_NAME: $REACT_APP_NAME"
+
   echo "Configuration for general environment"
   export REACT_APP_AUTH_PROVIDER="${REACT_APP_AUTH_PROVIDER:-auth0}"
   echo "REACT_APP_AUTH_PROVIDER: $REACT_APP_AUTH_PROVIDER"

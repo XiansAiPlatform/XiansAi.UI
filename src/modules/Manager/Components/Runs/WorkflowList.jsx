@@ -476,9 +476,6 @@ const WorkflowList = () => {
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                 {selectedAgent ? `Showing runs for "${selectedAgent}"` : 'Showing all workflow runs'}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {workflows.length} {workflows.length === 1 ? 'run' : 'runs'} on page {currentPage}
-              </Typography>
             </Box>
 
             {isTerminatingAll && (

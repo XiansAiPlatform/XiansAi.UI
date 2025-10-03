@@ -19,10 +19,12 @@ const DefinitionsTabNavigation = ({ children }) => {
   };
 
   const handleTabChange = (event, newValue) => {
+    // Preserve URL search params (like org=...) when navigating between tabs
+    const searchParams = location.search;
     if (newValue === 0) {
-      navigate(ROUTES.MANAGER.DEFINITIONS_DEPLOYED);
+      navigate(`${ROUTES.MANAGER.DEFINITIONS_DEPLOYED}${searchParams}`);
     } else if (newValue === 1) {
-      navigate(ROUTES.MANAGER.DEFINITIONS_TEMPLATES);
+      navigate(`${ROUTES.MANAGER.DEFINITIONS_TEMPLATES}${searchParams}`);
     }
   };
 

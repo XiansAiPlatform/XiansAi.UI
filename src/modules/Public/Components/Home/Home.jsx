@@ -384,19 +384,20 @@ export default function NewHome() {
                             </>
                         ) : (
                             <>
+
                                 <ActionButton
                                     variant="primary"
-                                    onClick={() => login({ returnTo: window.location.origin })}
-                                    startIcon={<FiTerminal />}
-                                >
-                                    Login
-                                </ActionButton>
-                                <ActionButton
-                                    variant="secondary"
                                     onClick={() => navigate('/register')}
                                     endIcon={<ArrowForward />}
                                 >
                                     Get Started
+                                </ActionButton>
+                                <ActionButton
+                                    variant="secondary"
+                                    onClick={() => login({ returnTo: window.location.origin })}
+                                    startIcon={<FiTerminal />}
+                                >
+                                    Login
                                 </ActionButton>
                             </>
                         )}

@@ -209,7 +209,11 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
         '&:hover': {
           borderColor: 'primary.light',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-          transform: 'translateY(-2px)'
+          transform: 'translateY(-2px)',
+          '& .delete-button': {
+            opacity: 1,
+            visibility: 'visible'
+          }
         }
       }}
     >
@@ -217,15 +221,19 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
       {isSysAdmin && (
         <Tooltip title="Delete template" placement="top">
           <IconButton
+            className="delete-button"
             onClick={handleDeleteClick}
             disabled={isDeleting}
             sx={{
               position: 'absolute',
-              top: 8,
-              right: 8,
+              top: 16,
+              right: 16,
               zIndex: 1,
               bgcolor: 'background.paper',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              opacity: 0,
+              visibility: 'hidden',
+              transition: 'all 0.2s ease-in-out',
               '&:hover': {
                 bgcolor: 'error.light',
                 color: 'error.contrastText',

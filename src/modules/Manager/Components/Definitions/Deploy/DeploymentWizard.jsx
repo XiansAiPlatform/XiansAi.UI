@@ -14,7 +14,7 @@ import {
   CheckCircle as SuccessIcon,
   Rocket as DeployIcon
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useApiClient } from '../../../services/api-client';
 import KnowledgeStep from './KnowledgeStep';
 import DeployStep from './DeployStep';
@@ -33,6 +33,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
   const { agent } = template;
   const apiClient = useApiClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Extract workflow steps from onboardingJson (excluding deploy type)
   useEffect(() => {
@@ -44,7 +45,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
       
       if (parsedData?.workflow && Array.isArray(parsedData.workflow)) {
         // Filter out deploy steps - they will be handled automatically
-        const filteredSteps = parsedData.workflow.filter(step => step.type !== 'deploy');
+        const filteredSteps = parsedData.workflow.filter(step => step.step !== 'deploy');
         setWorkflowSteps(filteredSteps);
       } else {
         // If no workflow defined, just show empty (deploy will happen automatically)
@@ -119,8 +120,8 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
   // Generate steps based on workflow
   const steps = workflowSteps.map((step, index) => ({
     label: step.name,
-    description: step.description || `Complete ${step.type} step`,
-    type: step.type,
+    description: step.description || `Complete ${step.step} step`,
+    type: step.step,
     data: step,
     index: index
   }));
@@ -205,7 +206,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
     return (
       <Box sx={{ mt: 2 }}>
         <Alert severity="warning">
-          Unknown step type: {step.type}
+          Unknown step type: "{step.type}" (from step.data.step: "{step.data?.step}")
         </Alert>
       </Box>
     );
@@ -267,11 +268,14 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
         {deploymentError && !isDeploying && !isDeleting && (
           <>
             <Alert severity={isConflict ? "warning" : "error"} sx={{ mb: 3, textAlign: 'left' }}>
-              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+              <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                 {isConflict ? 'Agent Already Exists' : 'Deployment Failed'}
               </Typography>
-              <Typography variant="body2">
-                {deploymentError}
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Agent <strong>'{agent.name}'</strong> already exists in your tenant.
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Delete the existing agent to proceed with redeployment.
               </Typography>
             </Alert>
             
@@ -315,7 +319,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
           color="success" 
           onClick={() => {
             onCancel();
-            navigate('/manager/definitions/deployed');
+            navigate(`/manager/definitions/deployed${location.search}`);
           }}
         >
           View Deployed Agents
@@ -355,7 +359,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
                     variant="contained"
                     onClick={() => {
                       onCancel();
-                      navigate('/manager/definitions/deployed');
+                      navigate(`/manager/definitions/deployed${location.search}`);
                     }}
                     color="success"
                     startIcon={<SuccessIcon />}

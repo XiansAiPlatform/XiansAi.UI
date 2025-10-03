@@ -3,6 +3,9 @@
 // to override build-time environment variables
 
 window.RUNTIME_CONFIG = {
+  // Application Branding
+  REACT_APP_NAME: '${REACT_APP_NAME}',
+  
   // Authentication Configuration
   REACT_APP_AUTH_PROVIDER: '${REACT_APP_AUTH_PROVIDER}',
   REACT_APP_API_URL: '${REACT_APP_API_URL}',

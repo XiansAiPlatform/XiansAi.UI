@@ -6,7 +6,7 @@ const NotificationContext = createContext();
 export function NotificationProvider({ children }) {
   const showError = (message) => {
     toast.error(message, {
-      position: "bottom-right",
+      position: "bottom-left",
       autoClose: 6000, // Increased duration to match errorHandler
       hideProgressBar: false,
       closeOnClick: true,
@@ -18,7 +18,7 @@ export function NotificationProvider({ children }) {
 
   const showSuccess = (message) => {
     toast.success(message, {
-      position: "bottom-right",
+      position: "bottom-left",
       autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: true,
@@ -30,7 +30,7 @@ export function NotificationProvider({ children }) {
   // Enhanced error function that can handle React components for detailed errors
   const showDetailedError = (content) => {
     toast.error(content, {
-      position: "bottom-right",
+      position: "bottom-left",
       autoClose: 6000,
       hideProgressBar: false,
       closeOnClick: true,

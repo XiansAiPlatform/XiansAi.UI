@@ -68,24 +68,49 @@ export const useApiClient = () => {
       }
     };
 
-    const createAuthHeaders = async () => {
+    const createAuthHeaders = async (endpoint) => {
       const token = await getAccessToken();
-      return {
+      
+      // Check if this is a public registration endpoint that doesn't require tenant ID
+      const isPublicRegistrationEndpoint = endpoint && (
+        endpoint.includes('/api/public/register/') ||
+        endpoint.includes('/api/public/auth/')
+      );
+      
+      // Ensure selectedOrg is available before making requests (except for public registration)
+      if (!isPublicRegistrationEndpoint && !selectedOrg) {
+        console.warn('X-Tenant-Id is not available. Organization must be selected before making API calls.');
+        throw new Error('Organization not selected. Please select an organization to continue.');
+      }
+      
+      const headers = {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
-        'X-Tenant-Id': selectedOrg,
       };
+      
+      // Only add X-Tenant-Id for non-public endpoints
+      if (!isPublicRegistrationEndpoint && selectedOrg) {
+        headers['X-Tenant-Id'] = selectedOrg;
+      }
+      
+      return headers;
     };
 
     const request = async (endpoint, options = {}) => {
       try {
         // First, ensure we have valid auth headers
-        const headers = await createAuthHeaders();
+        const baseHeaders = await createAuthHeaders(endpoint);
         const url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
+        
+        // Merge headers properly - custom headers in options will override base headers
+        const mergedHeaders = {
+          ...baseHeaders,
+          ...(options.headers || {})
+        };
                 
         const response = await fetch(url, {
-          headers,
           ...options,
+          headers: mergedHeaders,
         });
 
         if (!response.ok) {
@@ -94,6 +119,8 @@ export const useApiClient = () => {
           // a clean user experience by redirecting them to a safe location
           if (response.status === 403) {
             console.error('Access forbidden (403). Redirecting to home page.');
+            // Mark that we're redirecting due to 403 to help detect loops
+            sessionStorage.setItem('from403', 'true');
             //navigate('/manager/unauthorized');
             navigate('/manager/landing');
             return; // Exit early to prevent further error handling
@@ -247,7 +274,7 @@ export const useApiClient = () => {
       // Add stream method for event streaming
       stream: async (endpoint, onEventReceived) => {
         try {
-          const headers = await createAuthHeaders();
+          const headers = await createAuthHeaders(endpoint);
           const url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
           
           const response = await fetch(url, {

@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { useRolesApi } from "../services/roles-api.js";
 import { useNotification } from './NotificationContext';
 import { handleApiError } from '../utils/errorHandler';
+import { useSelectedOrg } from './OrganizationContext';
 
 const TenantContext = createContext();
 
@@ -22,6 +23,7 @@ export const TenantProvider = ({ children }) => {
   const userTenantApi = useUserTenantApi();
   const rolesApi = useRolesApi();
   const { isAuthenticated, isLoading: isAuthLoading, user, getAccessTokenSilently } = useAuth();
+  const { selectedOrg, isOrgLoading } = useSelectedOrg();
   const location = useLocation();
   const { showDetailedError } = useNotification();
 
@@ -117,6 +119,11 @@ export const TenantProvider = ({ children }) => {
           return;
         }
 
+        // Skip if organization is still loading
+        if (isOrgLoading) {
+          return;
+        }
+
         // Skip if user is not authenticated (except for public routes)
         if (!isAuthenticated) {
           console.log('User not authenticated, skipping tenant data load');
@@ -127,6 +134,13 @@ export const TenantProvider = ({ children }) => {
         // Skip tenant loading for public routes
         const publicPaths = ['/', '/login', '/register', '/register/join', '/register/new', '/callback'];
         if (publicPaths.includes(location.pathname)) {
+          setIsLoading(false);
+          return;
+        }
+
+        // Skip if organization is not selected
+        if (!selectedOrg) {
+          console.log('Organization not selected, skipping tenant data load');
           setIsLoading(false);
           return;
         }
@@ -142,8 +156,8 @@ export const TenantProvider = ({ children }) => {
           console.warn('Failed to load tenant data');
         }
 
-        // Fetch roles after tenant is available
-        if (user) {
+        // Fetch roles after tenant is available and organization is selected
+        if (user && selectedOrg) {
           await fetchUserRoles();
         }
       } catch (err) {
@@ -164,7 +178,7 @@ export const TenantProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated, isAuthLoading, location.pathname, fetchCurrentTenant, fetchUserRoles, user, showDetailedError]);
+  }, [isAuthenticated, isAuthLoading, isOrgLoading, selectedOrg, location.pathname, fetchCurrentTenant, fetchUserRoles, user, showDetailedError]);
 
   return (
     (<TenantContext
