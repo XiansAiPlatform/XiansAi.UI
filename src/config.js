@@ -44,6 +44,11 @@ export function getConfig() {
     config.genericOidcClientId = getEnvVar('REACT_APP_GENERIC_OIDC_CLIENT_ID');
     config.genericOidcScope = getEnvVar('REACT_APP_GENERIC_OIDC_SCOPE', 'openid profile');
     config.organizationClaim = getEnvVar('REACT_APP_GENERIC_OIDC_ORGANIZATION_CLAIM', 'https://xians.ai/tenants');
+  } else if (authProvider === 'github') {
+    config.githubClientId = getEnvVar('REACT_APP_GITHUB_CLIENT_ID');
+    config.githubAuthUrl = getEnvVar('REACT_APP_GITHUB_AUTH_URL', 'https://github.com/login/oauth/authorize');
+    config.githubRedirectUri = getEnvVar('REACT_APP_GITHUB_REDIRECT_URI', window.location.origin + '/callback');
+    config.githubScope = getEnvVar('REACT_APP_GITHUB_SCOPE', 'read:user user:email');
   } else {
     throw new Error(`Unsupported auth provider: ${authProvider}`);
   }

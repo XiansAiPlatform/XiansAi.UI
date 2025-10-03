@@ -8,6 +8,7 @@ import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrap
 import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
 import KeycloakProviderWrapper from './modules/Manager/auth/keycloak/KeycloakProviderWrapper';
 import GenericOidcProviderWrapper from './modules/Manager/auth/genericOidc/GenericOidcProviderWrapper';
+import GitHubProviderWrapper from './modules/Manager/auth/github/GitHubProviderWrapper';
 import GlobalAccountConflictProvider from './modules/Manager/Components/Common/GlobalAccountConflictProvider';
 import EnhancedLoadingSpinner from './components/EnhancedLoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -29,8 +30,9 @@ const AppAuthProvider = ({ children }) => {
       return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
     case "genericOidc":
       return <GenericOidcProviderWrapper>{children}</GenericOidcProviderWrapper>;
+    case "github":
+      return <GitHubProviderWrapper>{children}</GitHubProviderWrapper>;
     default:
-      // Default to Auth0
       throw new Error(`Unsupported auth provider: ${config.authProvider}`);
   }
 };
