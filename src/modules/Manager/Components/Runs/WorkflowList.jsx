@@ -34,7 +34,7 @@ const WorkflowList = () => {
   // New pagination state
   const [workflows, setWorkflows] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('running');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [hasNextPage, setHasNextPage] = useState(false);
