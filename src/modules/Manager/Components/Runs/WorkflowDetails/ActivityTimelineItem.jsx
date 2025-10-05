@@ -56,12 +56,16 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
     
     // Handle different data types
     if (Array.isArray(parsed)) {
-      const formatted = parsed.map(item => 
-        typeof item === 'string' ? item : JSON.stringify(item)
-      ).join('\n');
+      const formatted = parsed.map(item => {
+        if (typeof item === 'string') {
+          return item === '' ? '-empty-' : item;
+        }
+        return JSON.stringify(item);
+      }).join('\n');
       return formatted.length > maxLength ? `${formatted.slice(0, maxLength)}...` : formatted;
     } else if (typeof parsed === 'string') {
-
+      // Check for empty string
+      if (parsed === '') return '-empty-';
       return parsed.length > maxLength ? `${parsed.slice(0, maxLength)}...` : parsed;
     } else if (typeof parsed === 'object') {
       // For objects, stringify with proper formatting and then truncate
@@ -80,8 +84,13 @@ const ActivityTimelineItem = ({ event, onShowDetails, sortAscending, isHighlight
   };
 
   // Get formatted inputs and outputs
-  const inputs = event.Inputs ? formatText(JSON.stringify(event.Inputs)) : null;
-  const outputs = event.Result ? formatText(JSON.stringify(event.Result)) : null;
+  // Check for undefined/null, but allow empty strings to be formatted
+  const inputs = event.Inputs !== undefined && event.Inputs !== null 
+    ? formatText(JSON.stringify(event.Inputs)) 
+    : null;
+  const outputs = event.Result !== undefined && event.Result !== null 
+    ? formatText(JSON.stringify(event.Result)) 
+    : null;
 
   // Render the timeline item with mobile optimizations
   return (
