@@ -7,6 +7,7 @@ import { getConfig } from './config';
 import Auth0ProviderWrapper from './modules/Manager/auth/auth0/Auth0ProviderWrapper';
 import EntraIdProviderWrapper from './modules/Manager/auth/entraId/EntraIdProviderWrapper';
 import KeycloakProviderWrapper from './modules/Manager/auth/keycloak/KeycloakProviderWrapper';
+import OidcProviderWrapper from './modules/Manager/auth/oidc/OidcProviderWrapper';
 import GlobalAccountConflictProvider from './modules/Manager/Components/Common/GlobalAccountConflictProvider';
 import EnhancedLoadingSpinner from './components/EnhancedLoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -26,8 +27,9 @@ const AppAuthProvider = ({ children }) => {
       return <KeycloakProviderWrapper>{children}</KeycloakProviderWrapper>;
     case "auth0":
       return <Auth0ProviderWrapper>{children}</Auth0ProviderWrapper>;
+    case "oidc":
+      return <OidcProviderWrapper>{children}</OidcProviderWrapper>;
     default:
-      // Default to Auth0
       throw new Error(`Unsupported auth provider: ${config.authProvider}`);
   }
 };
