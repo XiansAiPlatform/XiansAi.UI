@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, Button, useTheme, IconButton, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, Chip, TextField, CircularProgress } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SendIcon from '@mui/icons-material/Send';
@@ -32,6 +32,31 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
     const [quickMessage, setQuickMessage] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
     const [isSending, setIsSending] = useState(false);
+
+    // Load draft message from localStorage when thread changes
+    useEffect(() => {
+        if (selectedThread?.id) {
+            const draftKey = `message_draft_${selectedThread.id}`;
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                setQuickMessage(savedDraft);
+            } else {
+                setQuickMessage('');
+            }
+        }
+    }, [selectedThread?.id]);
+
+    // Save draft message to localStorage as user types
+    useEffect(() => {
+        if (selectedThread?.id) {
+            const draftKey = `message_draft_${selectedThread.id}`;
+            if (quickMessage.trim()) {
+                localStorage.setItem(draftKey, quickMessage);
+            } else {
+                localStorage.removeItem(draftKey);
+            }
+        }
+    }, [quickMessage, selectedThread?.id]);
 
     if (!selectedThread) return null;
 
@@ -83,6 +108,11 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
             if (result.success) {
                 showSuccess('Message sent successfully!');
                 setQuickMessage('');
+                // Clear the draft from localStorage
+                if (selectedThread?.id) {
+                    const draftKey = `message_draft_${selectedThread.id}`;
+                    localStorage.removeItem(draftKey);
+                }
             }
         } catch (error) {
             showError(`Error sending message: ${error.message}`);

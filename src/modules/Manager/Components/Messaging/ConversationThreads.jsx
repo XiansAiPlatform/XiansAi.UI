@@ -222,7 +222,7 @@ const ConversationThreads = ({
                 )}
                 {!error && threads.length === 0 && !isLoading && (
                     <EmptyState
-                        title="No Conversations"
+                        title=""
                         description="No conversation threads found for this agent. Start a new conversation to begin."
                         context="conversations"
                     />
