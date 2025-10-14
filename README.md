@@ -119,10 +119,18 @@ Support for multiple environment configurations:
 
 ```bash
 # API Configuration
-REACT_APP_API_URL=http://localhost:5000
+REACT_APP_API_URL=http://localhost:5005
 
-# Authentication Provider ('auth0' or 'entraId')
+# Authentication Provider ('github' ,'auth0' or 'entraId')
 REACT_APP_AUTH_PROVIDER=auth0
+```
+### GitHub SSO Configuration
+
+```bash
+REACT_APP_GITHUB_CLIENT_ID=your-github-oauth-app-client-id
+REACT_APP_GITHUB_REDIRECT_URI=http://localhost:3000/callback
+REACT_APP_GITHUB_SCOPES=read:user user:email
+REACT_APP_GITHUB_ORGANIZATION_CLAIM=organizations
 ```
 
 ### Auth0 Configuration

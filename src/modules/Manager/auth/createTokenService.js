@@ -3,6 +3,7 @@ import Auth0TokenService from './auth0/Auth0TokenService';
 import EntraIdTokenService from './entraId/EntraIdTokenService';
 import KeycloakTokenService from './keycloak/KeycloakTokenService';
 import OidcTokenService from './oidc/OidcTokenService';
+import GitHubTokenService from './github/GitHubTokenService';
 
 let tokenServiceInstance = null;
 
@@ -25,6 +26,9 @@ export function createTokenService() {
       break;
     case 'oidc':
       tokenServiceInstance = new OidcTokenService();
+      break;
+    case 'github':
+      tokenServiceInstance = new GitHubTokenService();
       break;
     default:
       throw new Error(`Unsupported auth provider: ${authProvider}`);

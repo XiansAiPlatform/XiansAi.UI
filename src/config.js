@@ -50,6 +50,12 @@ export function getConfig() {
     config.oidcScopes = getEnvVar('REACT_APP_OIDC_SCOPES', 'openid profile email');
     config.oidcAudience = getEnvVar('REACT_APP_OIDC_AUDIENCE'); // Optional, required by Auth0
     config.organizationClaim = getEnvVar('REACT_APP_OIDC_ORGANIZATION_CLAIM', 'organizations');
+  } else if (authProvider === 'github') {
+    // GitHub OAuth configuration
+    config.githubClientId = getEnvVar('REACT_APP_GITHUB_CLIENT_ID');
+    config.githubRedirectUri = getEnvVar('REACT_APP_GITHUB_REDIRECT_URI', `${window.location.origin}/callback`);
+    config.githubScopes = getEnvVar('REACT_APP_GITHUB_SCOPES', 'read:user user:email');
+    config.organizationClaim = getEnvVar('REACT_APP_GITHUB_ORGANIZATION_CLAIM', 'organizations');
   } else {
     throw new Error(`Unsupported auth provider: ${authProvider}`);
   }
