@@ -34,7 +34,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
       setUserData({
         name: displayName,
         email: user.email || '',
-        id: user.preferred_username || user.sub || user.id || ''
+        id: user.id || user.sub || user.preferred_username || ''
       });
     }
   }, [user]);

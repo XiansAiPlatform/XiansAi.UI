@@ -40,6 +40,22 @@ export function getConfig() {
     config.keycloakUrl = getEnvVar('REACT_APP_KEYCLOAK_URL');
     config.keycloakRealm = getEnvVar('REACT_APP_KEYCLOAK_REALM');
     config.keycloakClientId = getEnvVar('REACT_APP_KEYCLOAK_CLIENT_ID');
+  } else if (authProvider === 'oidc') {
+    // Generic OIDC configuration
+    // NOTE: Redirect URIs are now handled dynamically in OidcService.js using window.location.origin
+    // This matches the behavior of Auth0, Keycloak, and EntraId providers
+    config.oidcProvider = getEnvVar('REACT_APP_OIDC_PROVIDER', 'OIDC');
+    config.oidcAuthority = getEnvVar('REACT_APP_OIDC_AUTHORITY');
+    config.oidcClientId = getEnvVar('REACT_APP_OIDC_CLIENT_ID');
+    config.oidcScopes = getEnvVar('REACT_APP_OIDC_SCOPES', 'openid profile email');
+    config.oidcAudience = getEnvVar('REACT_APP_OIDC_AUDIENCE'); // Optional, required by Auth0
+    config.organizationClaim = getEnvVar('REACT_APP_OIDC_ORGANIZATION_CLAIM', 'organizations');
+  } else if (authProvider === 'github') {
+    // GitHub OAuth configuration
+    config.githubClientId = getEnvVar('REACT_APP_GITHUB_CLIENT_ID');
+    config.githubRedirectUri = getEnvVar('REACT_APP_GITHUB_REDIRECT_URI', `${window.location.origin}/callback`);
+    config.githubScopes = getEnvVar('REACT_APP_GITHUB_SCOPES', 'read:user user:email');
+    config.organizationClaim = getEnvVar('REACT_APP_GITHUB_ORGANIZATION_CLAIM', 'organizations');
   } else {
     throw new Error(`Unsupported auth provider: ${authProvider}`);
   }
