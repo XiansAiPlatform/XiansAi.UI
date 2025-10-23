@@ -139,6 +139,9 @@ const useAccountConflictHandler = (options = {}) => {
     hideConflictDialog,
     clearConflict,
     
+    // Utility functions
+    isAccountConflictError,
+    
     // For use with AccountConflictHandler component
     dialogProps: {
       open: showDialog,

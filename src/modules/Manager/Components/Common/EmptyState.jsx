@@ -121,24 +121,11 @@ const EmptyState = ({
         elevation={0}
         sx={{ 
           p: { xs: 3, sm: 4, md: 5 }, 
-          backgroundColor: 'background.paper',
           borderRadius: 3,
           width: '100%',
           textAlign: 'center',
-          border: '1px solid',
-          borderColor: 'divider',
           position: 'relative',
           overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '1px',
-            background: 'primary.main',
-            opacity: 0.1,
-          }
         }}
       >
         <Box sx={{ 
