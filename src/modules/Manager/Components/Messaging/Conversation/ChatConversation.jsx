@@ -189,7 +189,7 @@ const ChatConversation = (
         threadId: selectedThreadId,
         fetchMessages: fetchThreadMessages,
         // several attempts with exponential backoff starting at 2s
-        scheduleDelays: [2000, 4000, 4000, 6000, 8000, 10000, 12000, 14000, 16000, 18000, 20000, 22000, 24000, 26000, 28000, 30000],
+        scheduleDelays: [3000, 3000, 3000, 6000, 8000, 10000, 10000, 10000, 10000],
         onStarted: () => { pollingStartTimeRef.current = Date.now(); }
     });
 
