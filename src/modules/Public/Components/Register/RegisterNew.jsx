@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Typography, Container, TextField, Button, MenuItem, Alert, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { FiArrowLeft, FiSend, FiCheck, FiExternalLink } from 'react-icons/fi';
 import { useAuth } from '../../../Manager/auth/AuthContext';
-import { AuthInfoMessage, RegisterFooter } from './components/SharedComponents';
+import { useUserTenantApi } from '../../../Manager/services/user-tenant-api';
+import { AuthInfoMessage, RegisterFooter, NoTenantsWarningMessage } from './components/SharedComponents';
 import '../PublicLight.css';
 import { useRegistrationApi } from '../../services/registration-api';
 
@@ -320,6 +321,10 @@ export default function RegisterNew() {
   const auth = useAuth();
   const { user, isAuthenticated, getAccessTokenSilently } = auth;
   const registrationApi = useRegistrationApi();
+  const userTenantApi = useUserTenantApi();
+  
+  const [hasNoTenants, setHasNoTenants] = useState(false);
+  const [isCheckingTenants, setIsCheckingTenants] = useState(false);
 
   const [formData, setFormData] = useState({
     tenantId: '',
@@ -327,6 +332,35 @@ export default function RegisterNew() {
     companyEmail: '',
     subscription: 'Free',
   });
+
+  // Check if user has any tenants
+  useEffect(() => {
+    const checkUserTenants = async () => {
+      if (!isAuthenticated) {
+        setHasNoTenants(false);
+        return;
+      }
+
+      try {
+        setIsCheckingTenants(true);
+        const token = await getAccessTokenSilently();
+        if (!token) {
+          setHasNoTenants(false);
+          return;
+        }
+
+        const tenants = await userTenantApi.getCurrentUserTenant(token);
+        setHasNoTenants(!tenants || tenants.length === 0);
+      } catch (error) {
+        console.error('Error checking user tenants:', error);
+        setHasNoTenants(false);
+      } finally {
+        setIsCheckingTenants(false);
+      }
+    };
+
+    checkUserTenants();
+  }, [isAuthenticated, getAccessTokenSilently, userTenantApi]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -434,6 +468,7 @@ export default function RegisterNew() {
   return (
     <PageContainer className="light-theme">
       <MainContent maxWidth="lg">
+        {hasNoTenants && isAuthenticated && !isCheckingTenants && <NoTenantsWarningMessage />}
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
         
         {isAuthenticated && !isSuccess && (
@@ -596,7 +631,7 @@ export default function RegisterNew() {
                 }}
               >
                 Your tenant <strong style={{ color: '#428b83' }}>{createdTenant.name}</strong> has been created successfully.
-                You have been assigned as the tenant administrator.
+                You have been assigned as the tenant administrator. <strong style={{ color: '#f59e0b' }}>Please contact your system administrator to enable the tenant.</strong>
               </Typography>
             </TitleSection>
 
@@ -621,8 +656,8 @@ export default function RegisterNew() {
               <Typography variant="body2" sx={{ mb: 1, color: 'inherit' }}>
                 <strong>Tenant ID:</strong> {createdTenant.tenantId}
               </Typography>
-              <Typography variant="body2" sx={{ color: 'inherit' }}>
-                You can now access your dashboard and start managing your tenant.
+              <Typography variant="body2" sx={{ color: '#f59e0b', fontWeight: 600 }}>
+                <strong>Please contact your system administrator to enable the tenant.</strong>
               </Typography>
             </Alert>
             
@@ -633,7 +668,7 @@ export default function RegisterNew() {
                 startIcon={<FiExternalLink />}
                 sx={{ flex: 1 }}
               >
-                Access Dashboard
+                Try Accessing Dashboard
               </ActionButton>
             </ButtonContainer>
           </FormContainer>

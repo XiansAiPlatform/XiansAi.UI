@@ -15,6 +15,7 @@ class GitHubService {
     };
     this.onAuthStateChangedCallback = () => {};
     this.isInitialized = false;
+    this.isLoggingOut = false; // Flag to prevent login during logout
     
     console.log('GitHubService: Initialized with config:', {
       githubClientId: config.githubClientId ? 'configured' : 'missing',
@@ -85,7 +86,13 @@ class GitHubService {
    */
   async login(options = {}) {
     try {
-      console.log('GitHubService: Initiating login with options:', options);
+      console.log('GitHubService: Initiating login');
+      
+      // Prevent login if logout is in progress
+      if (this.isLoggingOut) {
+        console.warn('GitHubService: Login blocked - logout in progress');
+        return;
+      }
       
       // Generate random state for CSRF protection
       const state = this.generateRandomString();
@@ -101,11 +108,14 @@ class GitHubService {
         client_id: this.config.githubClientId,
         redirect_uri: this.config.githubRedirectUri,
         scope: this.config.githubScopes || 'read:user user:email',
-        state: state
+        state: state,
+        // Force GitHub to prompt for login even if user is already logged in
+        // This prevents automatic re-authentication after logout
+        prompt: 'login'
       });
 
       const authUrl = `https://github.com/login/oauth/authorize?${params.toString()}`;
-      console.log('GitHubService: Redirecting to GitHub authorization URL');
+      console.log('GitHubService: Redirecting to GitHub for authentication');
       
       // Redirect to GitHub
       window.location.href = authUrl;
@@ -239,26 +249,44 @@ class GitHubService {
     try {
       console.log('GitHubService: Starting logout process');
       
-      // Clear token
+      // Set logout flag to prevent any login attempts during logout
+      this.isLoggingOut = true;
+      
+      // Clear all GitHub-related storage items
       localStorage.removeItem('github_access_token');
+      sessionStorage.removeItem('github_oauth_state');
+      sessionStorage.removeItem('github_return_to');
+      
+      // Clear returnUrl that might trigger automatic navigation
+      sessionStorage.removeItem('returnUrl');
+      
+      // Set a flag to prevent ProtectedRoute from auto-triggering login
+      sessionStorage.setItem('just_logged_out', 'true');
 
-      // Update auth state
+      // Reset auth state
       this.authState = {
         user: null,
         isAuthenticated: false,
         accessToken: null
       };
 
+      // Reset initialization flag to ensure clean state
+      this.isInitialized = false;
+
       // Notify state change
       this._notifyStateChange();
 
-      console.log('GitHubService: Logout completed');
+      console.log('GitHubService: Logout completed, all storage and state cleared');
 
       // Redirect to login or provided returnTo
       const returnTo = options.returnTo || window.location.origin + '/login';
-      window.location.href = returnTo;
+      
+      // The flag will be cleared when the page reloads
+      // Use window.location.replace instead of href to prevent back button issues
+      window.location.replace(returnTo);
     } catch (error) {
       console.error('GitHubService: Logout error:', error);
+      this.isLoggingOut = false; // Clear flag on error
       throw error;
     }
   }

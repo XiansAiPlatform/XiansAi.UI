@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Box, Typography, Container, TextField, Button, Alert, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { FiArrowLeft, FiSend, FiCheck, FiAlertCircle } from 'react-icons/fi';
 import { useRegistrationApi } from '../../services/registration-api';
 import { useAuth } from '../../../Manager/auth/AuthContext';
-import { AuthInfoMessage, RegisterFooter } from './components/SharedComponents';
+import { useUserTenantApi } from '../../../Manager/services/user-tenant-api';
+import { AuthInfoMessage, RegisterFooter, NoTenantsWarningMessage } from './components/SharedComponents';
 import '../PublicLight.css';
 
 // Light Nordic-inspired styled components
@@ -309,10 +310,43 @@ export default function RegisterJoin() {
   const registrationApi = useRegistrationApi();
   const auth = useAuth();
   const { user, isAuthenticated, accessToken, getAccessTokenSilently } = auth;
+  const userTenantApi = useUserTenantApi();
+  
+  const [hasNoTenants, setHasNoTenants] = useState(false);
+  const [isCheckingTenants, setIsCheckingTenants] = useState(false);
 
   const [formData, setFormData] = useState({
     tenantId: '',
   });
+
+  // Check if user has any tenants
+  useEffect(() => {
+    const checkUserTenants = async () => {
+      if (!isAuthenticated) {
+        setHasNoTenants(false);
+        return;
+      }
+
+      try {
+        setIsCheckingTenants(true);
+        const token = await getAccessTokenSilently();
+        if (!token) {
+          setHasNoTenants(false);
+          return;
+        }
+
+        const tenants = await userTenantApi.getCurrentUserTenant(token);
+        setHasNoTenants(!tenants || tenants.length === 0);
+      } catch (error) {
+        console.error('Error checking user tenants:', error);
+        setHasNoTenants(false);
+      } finally {
+        setIsCheckingTenants(false);
+      }
+    };
+
+    checkUserTenants();
+  }, [isAuthenticated, getAccessTokenSilently, userTenantApi]);
 
   const [tenantError, setTenantError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -384,6 +418,7 @@ export default function RegisterJoin() {
   return (
     <PageContainer className="light-theme">
       <MainContent maxWidth="md">
+        {hasNoTenants && isAuthenticated && !isCheckingTenants && <NoTenantsWarningMessage />}
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
         
         {isAuthenticated && (

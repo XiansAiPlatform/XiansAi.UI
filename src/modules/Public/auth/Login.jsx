@@ -21,7 +21,7 @@ function Login() {
   const navigate = useNavigate();
   
   // Use the account conflict handler
-  const { hasConflict, dialogProps } = useAccountConflictHandler({
+  const { dialogProps } = useAccountConflictHandler({
     onConflictDetected: (conflictError) => {
       console.log('Account conflict detected in Login component:', conflictError);
     },
@@ -53,12 +53,9 @@ function Login() {
       return;
     }
 
-    // Only attempt to login if not already loading, not authenticated, and no conflicts
-    if (!isLoading && !isAuthenticated && !attemptedLogin && !hasConflict) {
-      setAttemptedLogin(true);
-      login(); // Call the generic login function
-    }
-  }, [login, isLoading, isAuthenticated, attemptedLogin, hasConflict, navigate]);
+    // Don't auto-login - require explicit user action
+    // This prevents automatic re-authentication after logout
+  }, [isLoading, isAuthenticated, navigate]);
 
   const handleRetryLogin = () => {
     clearError();
@@ -66,10 +63,12 @@ function Login() {
   };
 
   const handleManualLogin = () => {
+    // Clear the logout flag since user is intentionally logging in
+    sessionStorage.removeItem('just_logged_out');
     clearError();
     setAttemptedLogin(true);
-    // Use select_account prompt to help with multiple account scenarios
-    login({ prompt: 'select_account' });
+    // Call login without options - the GitHubService already sets prompt: 'login'
+    login();
   };
 
   if (isLoading) {
@@ -156,23 +155,24 @@ function Login() {
 
         {/* Login actions */}
         <Box textAlign="center">
-          {!attemptedLogin ? (
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<LoginIcon />}
-              onClick={handleManualLogin}
-              sx={{ minWidth: 200 }}
-            >
-              Sign In
-            </Button>
-          ) : (
+          {attemptedLogin ? (
             <Box>
               <CircularProgress size={24} sx={{ mr: 2 }} />
               <Typography variant="body2" color="text.secondary">
                 Redirecting to sign in...
               </Typography>
             </Box>
+          ) : (
+            <Button
+              variant="contained"
+              size="large"
+              startIcon={<LoginIcon />}
+              onClick={handleManualLogin}
+              sx={{ minWidth: 200 }}
+              disabled={isLoading}
+            >
+              Sign In
+            </Button>
           )}
         </Box>
 

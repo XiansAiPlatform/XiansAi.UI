@@ -464,7 +464,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
               }}
             >
               <GroupAddIcon fontSize="small" sx={{ color: 'var(--primary)' }} />
-              Join a Tenant
+              Join or Create a Tenant
             </MenuItem>
             <MenuItem
               className="user-menu-item logout"

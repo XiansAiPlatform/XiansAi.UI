@@ -314,3 +314,159 @@ export function UnauthenticatedMessage() {
     </WarningMessage>
   );
 }
+
+// Enhanced styled components for NoTenantsWarningMessage
+const NoTenantsContainer = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(2.5, 3),
+  marginBottom: theme.spacing(3),
+  background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.03) 100%)',
+  border: '2px solid rgba(251, 191, 36, 0.25)',
+  borderRadius: theme.spacing(2),
+  backdropFilter: 'blur(15px)',
+  position: 'relative',
+  boxShadow: '0 4px 16px rgba(251, 191, 36, 0.12)',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.8), transparent)',
+    borderRadius: theme.spacing(2, 2, 0, 0),
+  },
+}));
+
+const IconBadge = styled(Box)(({ theme }) => ({
+  width: '36px',
+  height: '36px',
+  borderRadius: '50%',
+  background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0.05) 100%)',
+  border: '2px solid rgba(251, 191, 36, 0.3)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '1.25rem',
+  marginBottom: theme.spacing(1),
+  boxShadow: '0 2px 8px rgba(251, 191, 36, 0.15)',
+  position: 'relative',
+  zIndex: 1,
+}));
+
+const OptionCard = styled(Box)(({ theme }) => ({
+  padding: theme.spacing(1.5, 2),
+  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
+  border: '1.5px solid rgba(251, 191, 36, 0.2)',
+  borderRadius: theme.spacing(1.25),
+  display: 'flex',
+  gap: theme.spacing(1.5),
+  alignItems: 'flex-start',
+  backdropFilter: 'blur(10px)',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+  transition: 'all 0.2s ease',
+  position: 'relative',
+  zIndex: 1,
+  '&:hover': {
+    transform: 'translateX(4px)',
+    borderColor: 'rgba(251, 191, 36, 0.4)',
+    boxShadow: '0 4px 12px rgba(251, 191, 36, 0.15)',
+  },
+}));
+
+const OptionNumber = styled(Box)(({ theme }) => ({
+  width: '20px',
+  height: '20px',
+  minWidth: '20px',
+  borderRadius: '50%',
+  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+  color: 'white',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '0.7rem',
+  fontWeight: 700,
+  boxShadow: '0 2px 4px rgba(251, 191, 36, 0.3)',
+  marginTop: '1px',
+}));
+
+// Warning message for users with no enabled tenants
+export function NoTenantsWarningMessage() {
+  return (
+    <NoTenantsContainer>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, position: 'relative', zIndex: 1 }}>
+        <IconBadge>
+          🏢
+        </IconBadge>
+        
+        <Box sx={{ flex: 1 }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: '#92400e',
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              letterSpacing: '-0.01em',
+              marginBottom: 0.75,
+            }}
+          >
+            No Enabled Tenant Found
+          </Typography>
+          
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: '#78716c',
+              fontSize: '0.875rem',
+              lineHeight: 1.6,
+              marginBottom: 1.5,
+              fontWeight: 400
+            }}
+          >
+            You don't currently belong to an enabled tenant. Please choose one of the following options:
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: 1.25,
+          }}>
+            <OptionCard>
+              <OptionNumber>1</OptionNumber>
+              <Box sx={{ flex: 1 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#1f2937',
+                    fontSize: '0.875rem',
+                    lineHeight: 1.6,
+                    fontWeight: 400
+                  }}
+                >
+                  Contact your <strong style={{ color: '#92400e', fontWeight: 600 }}>existing tenant's administrator</strong> and request to be added to the tenant
+                </Typography>
+              </Box>
+            </OptionCard>
+            
+            <OptionCard>
+              <OptionNumber>2</OptionNumber>
+              <Box sx={{ flex: 1 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#1f2937',
+                    fontSize: '0.875rem',
+                    lineHeight: 1.6,
+                    fontWeight: 400
+                  }}
+                >
+                  <strong style={{ color: '#92400e', fontWeight: 600 }}>If you have created a new tenant,</strong> contact the system administrator to enable it
+                </Typography>
+              </Box>
+            </OptionCard>
+          </Box>
+        </Box>
+      </Box>
+    </NoTenantsContainer>
+  );
+}
