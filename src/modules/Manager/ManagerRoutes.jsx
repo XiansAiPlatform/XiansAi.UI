@@ -41,7 +41,7 @@ function ManagerRoutes() {
   }
 
   const handleLogout = () => {
-    logout({ returnTo: window.location.origin + '/manager/login' });
+    logout({ returnTo: window.location.origin + '/login' });
   };
   return (
     <NotificationProvider>

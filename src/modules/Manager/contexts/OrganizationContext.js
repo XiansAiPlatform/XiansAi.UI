@@ -1,4 +1,4 @@
-import { createContext, use, useState, useEffect, useCallback } from 'react';
+import { createContext, use, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../auth/AuthContext'; // New import
 import { useNotification } from './NotificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -20,6 +20,7 @@ export function OrganizationProvider({ children }) {
   const location = useLocation();
   const userTenantApi = useUserTenantApi();
   const { getParam, setParam } = useUrlParams();
+  const prevOrgRef = useRef(null);
   
   // Sync organization from URL to state
   useEffect(() => {
@@ -134,6 +135,39 @@ export function OrganizationProvider({ children }) {
     // Update URL parameter when org changes
     setParam(URL_PARAM_KEY, newOrg, true);
   }, [setParam]);
+
+  // Clear messaging-related storage when organization changes
+  useEffect(() => {
+    // Only clear if the organization has actually changed (not on initial load)
+    if (selectedOrg && prevOrgRef.current !== null && prevOrgRef.current !== selectedOrg) {
+      try {
+        // Clear messaging-related session storage
+        sessionStorage.removeItem('messaging_selected_agent');
+        sessionStorage.removeItem('messaging_selected_thread_id');
+        sessionStorage.removeItem('messaging_selected_thread_details');
+        
+        // Clear messaging-related local storage
+        localStorage.removeItem('sendMessageForm_metadata');
+        localStorage.removeItem('sendMessageForm_showMetadata');
+        
+        // Clear message drafts (they start with 'message_draft_')
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('message_draft_')) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        console.log('Cleared messaging storage due to organization change');
+      } catch (error) {
+        console.warn('Failed to clear messaging storage:', error);
+      }
+    }
+    // Update the previous org ref
+    prevOrgRef.current = selectedOrg;
+  }, [selectedOrg]);
 
   return (
     (<OrganizationContext

@@ -178,8 +178,8 @@ function Login() {
 
         {/* Help text */}
         <Typography variant="caption" color="text.secondary" textAlign="center" display="block" sx={{ mt: 3 }}>
-          If you're having trouble signing in with multiple Microsoft accounts, 
-          try using an incognito/private browser window.
+          If you're having trouble signing in with different SSO accounts, 
+          try using a different browser or an incognito/private browser window.
         </Typography>
       </Paper>
 

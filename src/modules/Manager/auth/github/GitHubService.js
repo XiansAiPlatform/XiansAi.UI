@@ -304,7 +304,7 @@ class GitHubService {
 
     // Check if token is expired
     if (!this.isTokenValid(token)) {
-      console.log('GitHubService: Token expired, clearing and requiring re-authentication');
+      console.log('GitHubService: Token expired, clearing and redirecting to login');
       // Token expired, need to re-authenticate
       localStorage.removeItem('github_access_token');
       this.authState = {
@@ -313,6 +313,12 @@ class GitHubService {
         accessToken: null
       };
       this._notifyStateChange();
+      
+      // Set flag to prevent auto-login in ProtectedRoute and redirect to login
+      sessionStorage.setItem('just_logged_out', 'true');
+      window.location.replace('/login');
+      
+      // Still throw error for any code that might be waiting for a token
       throw new Error('Token expired');
     }
 

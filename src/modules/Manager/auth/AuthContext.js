@@ -193,6 +193,24 @@ export const AuthProvider = ({ children, provider: AuthProviderInstance }) => {
     } catch (e) {
       console.warn("AuthContext: getAccessTokenSilently failed:", e);
       
+      // Check if this is a token expired error (GitHub auth)
+      if (e.message === 'Token expired') {
+        console.log("AuthContext: Token expired, redirecting to login");
+        
+        // Clear the current auth state since the token is expired
+        setUser(null);
+        setIsAuthenticated(false);
+        setAccessToken(null);
+        setError(null);
+        
+        // Set flag to prevent auto-login in ProtectedRoute
+        sessionStorage.setItem('just_logged_out', 'true');
+        
+        // Redirect to login page
+        window.location.replace('/login');
+        return null;
+      }
+      
       // Check if this is an interaction required error that we can handle gracefully
       if (AuthProviderInstance.handleAuthenticationError) {
         const errorInfo = await AuthProviderInstance.handleAuthenticationError(e, 'getAccessTokenSilently');

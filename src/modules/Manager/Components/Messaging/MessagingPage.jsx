@@ -9,6 +9,7 @@ import { useAgentsApi } from '../../services/agents-api';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
 import WorkflowActions from './WorkflowActions';
@@ -65,6 +66,8 @@ const MessagingPage = () => {
     const isProcessingHandoverRef = useRef(false);
     // Ref for ChatConversation component to trigger polling
     const chatConversationRef = useRef(null);
+    // Track the previous organization to detect changes
+    const prevOrgRef = useRef(null);
 
     // --- Hooks ---
     // Using the existing API hook from services/messaging-api.js
@@ -73,6 +76,7 @@ const MessagingPage = () => {
     const { openSlider, closeSlider } = useSlider();
     const { setLoading } = useLoading();
     const { showError } = useNotification();
+    const { selectedOrg } = useSelectedOrg();
 
     // Persist selected agent to sessionStorage
     useEffect(() => {
@@ -116,13 +120,43 @@ const MessagingPage = () => {
     // Utility function to clear persisted selections (can be called when needed)
     const clearPersistedSelections = useCallback(() => {
         try {
+            // Clear session storage
             sessionStorage.removeItem(STORAGE_KEYS.SELECTED_AGENT);
             sessionStorage.removeItem(STORAGE_KEYS.SELECTED_THREAD_ID);
             sessionStorage.removeItem(STORAGE_KEYS.SELECTED_THREAD_DETAILS);
+            
+            // Clear local storage items related to messaging
+            localStorage.removeItem('sendMessageForm_metadata');
+            localStorage.removeItem('sendMessageForm_showMetadata');
+            
+            // Clear message drafts (they start with 'message_draft_')
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('message_draft_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
         } catch (error) {
             console.warn('Failed to clear persisted selections:', error);
         }
     }, [STORAGE_KEYS.SELECTED_AGENT, STORAGE_KEYS.SELECTED_THREAD_ID, STORAGE_KEYS.SELECTED_THREAD_DETAILS]);
+
+    // Clear component state when organization/tenant changes
+    // Note: Storage is cleared globally by OrganizationContext
+    useEffect(() => {
+        // Only clear selections if the organization has actually changed (not on initial load)
+        if (selectedOrg && prevOrgRef.current !== null && prevOrgRef.current !== selectedOrg) {
+            // Clear all component state when organization changes
+            // Storage is already cleared by OrganizationContext
+            setSelectedAgentName(null);
+            setSelectedThreadId(null);
+            setSelectedThreadDetails(null);
+        }
+        // Update the previous org ref
+        prevOrgRef.current = selectedOrg;
+    }, [selectedOrg]);
 
     // --- Callbacks --- 
 
