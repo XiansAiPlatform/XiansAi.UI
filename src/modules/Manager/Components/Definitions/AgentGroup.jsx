@@ -45,7 +45,7 @@ const AgentGroup = ({
   const { setLoading } = useLoading();
   const { selectedOrg } = useSelectedOrg();
   const { showSuccess, showError } = useNotification();
-  const { isSysAdmin } = useTenant();
+  const { isSysAdmin, isTenantAdmin } = useTenant();
   const [anchorEl, setAnchorEl] = useState(null);
   
   const handleMenuClick = (event) => {
@@ -93,8 +93,8 @@ const AgentGroup = ({
       return null;
     }
 
-    if (isSysAdmin) {
-      return { level: 'SysAdmin', color: 'error' };
+    if (isSysAdmin || isTenantAdmin) {
+      return { level: 'Owner (Admin)', color: 'primary' };
     }
 
     // Support both new structure (agent.ownerAccess) and legacy structure (agent.permissions.ownerAccess)

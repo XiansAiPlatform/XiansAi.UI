@@ -146,6 +146,12 @@ export const TenantProvider = ({ children }) => {
           return;
         }
 
+        // Skip if tenant data is already loaded for this organization
+        if (tenant && tenant.tenantId === selectedOrg) {
+          setIsLoading(false);
+          return;
+        }
+
         setIsLoading(true);
         
         const tenantData = await fetchCurrentTenant();
@@ -179,7 +185,7 @@ export const TenantProvider = ({ children }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated, isAuthLoading, isOrgLoading, selectedOrg, location.pathname, fetchCurrentTenant, fetchUserRoles, user, showDetailedError]);
+  }, [isAuthenticated, isAuthLoading, isOrgLoading, selectedOrg, tenant, fetchCurrentTenant, fetchUserRoles, user, showDetailedError, location.pathname]);
 
   // Memoize role-based computed values for performance
   const roleChecks = useMemo(() => ({
