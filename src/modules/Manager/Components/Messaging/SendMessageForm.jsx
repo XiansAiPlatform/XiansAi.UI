@@ -397,20 +397,23 @@ const SendMessageForm = ({
                 value={workflowType}
                 onChange={handleWorkflowTypeChange}
                 disablePortal
-                renderOption={(props, option) => (
-                    <li {...props}>
-                        <Box sx={{ 
-                            display: 'flex', 
-                            flexDirection: 'column',
-                            width: '100%',
-                            py: 0.5
-                        }}>
-                            <Typography variant="body1" fontWeight="medium">
-                                {option}
-                            </Typography>
-                        </Box>
-                    </li>
-                )}
+                renderOption={(props, option) => {
+                    const { key, ...otherProps } = props;
+                    return (
+                        <li key={key} {...otherProps}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                width: '100%',
+                                py: 0.5
+                            }}>
+                                <Typography variant="body1" fontWeight="medium">
+                                    {option}
+                                </Typography>
+                            </Box>
+                        </li>
+                    );
+                }}
                 renderInput={(params) => (
                     <TextField 
                         {...params} 
@@ -497,54 +500,57 @@ const SendMessageForm = ({
                     getOptionLabel={(option) => option?.workflowId || ''}
                     filterOptions={filterWorkflowIds}
                     disablePortal
-                    renderOption={(props, option) => (
-                        <li {...props} style={{ padding: '8px 16px' }}>
-                            <Box sx={{ 
-                                display: 'flex', 
-                                flexDirection: 'column', 
-                                width: '100%',
-                                borderLeft: '4px solid',
-                                borderColor: 'primary.main',
-                                pl: 1,
-                                py: 0.5
-                            }}>
-                                <Typography variant="subtitle1" fontWeight="bold">
-                                    {option.workflowId || 'Unnamed Agent'}
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                    {option.agent || 'Unknown Type'} • {option.workflowType || 'N/A'}
-                                </Typography>
+                    renderOption={(props, option) => {
+                        const { key, ...otherProps } = props;
+                        return (
+                            <li key={key} {...otherProps} style={{ padding: '8px 16px' }}>
                                 <Box sx={{ 
                                     display: 'flex', 
-                                    justifyContent: 'space-between', 
-                                    mt: 0.5,
-                                    alignItems: 'center'
+                                    flexDirection: 'column', 
+                                    width: '100%',
+                                    borderLeft: '4px solid',
+                                    borderColor: 'primary.main',
+                                    pl: 1,
+                                    py: 0.5
                                 }}>
-                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Box component="span" sx={{ 
-                                            width: 8, 
-                                            height: 8, 
-                                            borderRadius: '50%', 
-                                            bgcolor: 'success.main',
-                                            display: 'inline-block',
-                                            mr: 0.5
-                                        }}/>
-                                        Started: {option.startTime ? new Date(option.startTime).toLocaleString() : 'Unknown'}
+                                    <Typography variant="subtitle1" fontWeight="bold">
+                                        {option.workflowId || 'Unnamed Agent'}
                                     </Typography>
-                                    <Typography variant="caption" sx={{ 
-                                        color: 'grey.700',
-                                        bgcolor: 'grey.100',
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        fontFamily: 'monospace'
+                                    <Typography variant="body2" color="text.secondary">
+                                        {option.agent || 'Unknown Type'} • {option.workflowType || 'N/A'}
+                                    </Typography>
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        justifyContent: 'space-between', 
+                                        mt: 0.5,
+                                        alignItems: 'center'
                                     }}>
-                                        {option.runId?.substring(0, 8) || 'N/A'}
-                                    </Typography>
+                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Box component="span" sx={{ 
+                                                width: 8, 
+                                                height: 8, 
+                                                borderRadius: '50%', 
+                                                bgcolor: 'success.main',
+                                                display: 'inline-block',
+                                                mr: 0.5
+                                            }}/>
+                                            Started: {option.startTime ? new Date(option.startTime).toLocaleString() : 'Unknown'}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ 
+                                            color: 'grey.700',
+                                            bgcolor: 'grey.100',
+                                            px: 1,
+                                            py: 0.5,
+                                            borderRadius: 1,
+                                            fontFamily: 'monospace'
+                                        }}>
+                                            {option.runId?.substring(0, 8) || 'N/A'}
+                                        </Typography>
+                                    </Box>
                                 </Box>
-                            </Box>
-                        </li>
-                    )}
+                            </li>
+                        );
+                    }}
                     renderInput={(params) => (
                         <TextField 
                             {...params} 

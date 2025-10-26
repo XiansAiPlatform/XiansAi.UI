@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState, useRef } from 'react';
 import {
     Box,
     Typography,
@@ -45,10 +45,11 @@ const ConversationThreads = ({
     const [error, setError] = useState(null);
     const { openSlider, closeSlider } = useSlider();
     const { setLoading } = useLoading();
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(1); // 1-based pagination
     const [pageSize] = useState(20);
     const [hasMore, setHasMore] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
+    const previousAgentRef = useRef(null);
 
     // Function to handle opening the form in the slider
     const handleOpenForm = () => {
@@ -70,10 +71,10 @@ const ConversationThreads = ({
         if (!selectedAgentName) return;
         
         closeSlider();
-        setPage(0); // Reset to first page
+        setPage(1); // Reset to first page (1-based)
         setLoading(true);
         try {
-            const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 0, pageSize);
+            const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 1, pageSize);
             setThreads(fetchedThreads || []);
             setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
             
@@ -102,12 +103,26 @@ const ConversationThreads = ({
         setLoadingMore(true);
         try {
             const nextPage = page + 1;
+            console.log(`Loading more threads: current page=${page}, fetching page=${nextPage}`);
             const moreThreads = await messagingApi.getThreads(selectedAgentName, nextPage, pageSize);
             
             if (moreThreads && moreThreads.length > 0) {
-                setThreads(prevThreads => [...prevThreads, ...moreThreads]);
-                setPage(nextPage);
-                setHasMore(moreThreads.length === pageSize);
+                // Filter out duplicates by checking existing thread IDs
+                const existingIds = new Set(threads.map(t => t.id));
+                const uniqueNewThreads = moreThreads.filter(t => !existingIds.has(t.id));
+                
+                if (uniqueNewThreads.length > 0) {
+                    // We have new unique threads, append them
+                    console.log(`Added ${uniqueNewThreads.length} new threads from page ${nextPage}`);
+                    setThreads(prevThreads => [...prevThreads, ...uniqueNewThreads]);
+                    setPage(nextPage);
+                    setHasMore(moreThreads.length === pageSize);
+                } else {
+                    // All threads were duplicates - likely a backend pagination issue
+                    // Disable "Load More" to prevent infinite duplicates
+                    console.warn('Load more returned only duplicate threads - disabling pagination');
+                    setHasMore(false);
+                }
             } else {
                 setHasMore(false);
             }
@@ -119,29 +134,36 @@ const ConversationThreads = ({
     };
 
     useEffect(() => {
+        // Check if agent has actually changed
+        const agentChanged = previousAgentRef.current !== selectedAgentName;
+        previousAgentRef.current = selectedAgentName;
+
         // Don't fetch if no agent is selected
         if (!selectedAgentName) {
             setThreads([]);
             setError(null);
             setIsLoading(false);
             setHasMore(false);
-            setPage(0);
+            setPage(1);
+            return;
+        }
+
+        // Only fetch if agent changed (not on every re-render)
+        if (!agentChanged) {
             return;
         }
 
         const fetchConversationThreads = async () => {
             setLoading(true);
             setError(null);
-            setPage(0); // Reset to first page when agent changes
+            setPage(1); // Reset to first page when agent changes (1-based)
             try {
-                const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 0, pageSize);
+                const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 1, pageSize);
                 setThreads(fetchedThreads || []);
                 setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
 
-                // Check if the currently selected thread still exists
-                // If not, or if no thread was selected, select the first one if available
-                const currentSelectionExists = fetchedThreads.some(t => t.id === selectedThreadId);
-                if ((!selectedThreadId || !currentSelectionExists) && fetchedThreads.length > 0) {
+                // Select the first thread if available
+                if (fetchedThreads.length > 0) {
                      // Pass both the ID and the full thread object
                      onThreadSelect(fetchedThreads[0].id, fetchedThreads[0]); 
                 }
@@ -160,8 +182,9 @@ const ConversationThreads = ({
         };
 
         fetchConversationThreads();
-        // Dependency array ensures refetch when agent name, api, or notification changes
-    }, [selectedAgentName, messagingApi, showError, onThreadSelect, selectedThreadId, pageSize, setLoading]);
+        // Only re-run when selectedAgentName changes
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedAgentName]);
 
     if (isLoading) {
         return (
