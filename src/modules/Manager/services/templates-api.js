@@ -31,34 +31,15 @@ export const useTemplatesApi = () => {
 
     /**
      * Deploy an agent template (create a new agent instance from template)
-     * Note: This endpoint is not yet implemented on the server side.
-     * For now, this returns a simulated success response.
-     * @param {string} templateName - Name of the template to deploy
-     * @param {Object} deploymentConfig - Configuration for the deployment
+     * @param {string} agentName - Name of the template agent to deploy
      * @returns {Promise<Object>} Deployment result
      */
-    deployTemplate: async (templateName, deploymentConfig = {}) => {
+    deployTemplate: async (agentName) => {
       try {
-        // TODO: Implement actual deployment endpoint on server
-        // For now, simulate a successful deployment
-        console.log('Simulating template deployment:', { templateName, deploymentConfig });
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        return {
-          success: true,
-          message: `Template "${templateName}" deployed successfully`,
-          agentName: deploymentConfig.agentName,
-          deployedAt: new Date().toISOString()
-        };
-        
-        // When the actual endpoint is implemented, use this:
-        // const response = await apiClient.post('/api/client/templates/deploy', {
-        //   templateName,
-        //   ...deploymentConfig
-        // });
-        // return response;
+        const response = await apiClient.post('/api/client/templates/deploy', {
+          agentName
+        });
+        return response;
       } catch (error) {
         console.error('Error deploying template:', error);
         throw error;

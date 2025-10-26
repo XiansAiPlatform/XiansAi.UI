@@ -22,22 +22,6 @@ export const useRolesApi = () => {
           throw error;
         }
       },
-      getRoles: async () => {
-        try {
-          return await apiClient.get('/api/roles');
-        } catch (error) {
-          console.log('Failed to fetch roles:', error);
-          throw error;
-        }
-      },
-      deleteRole: async (roleId) => {
-        try {
-          return await apiClient.delete(`/api/roles/${roleId}`);
-        } catch (error) {
-          console.log('Failed to delete role:', error);
-          throw error;
-        }
-      },
       addTenantAdmin: async (tenantId, userId) => {
         try {
           return await apiClient.post(`/api/roles/tenant/${tenantId}/admins`, { userId });

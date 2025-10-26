@@ -38,15 +38,6 @@ export const useKnowledgeApi = () => {
         }
       },
 
-      getAllKnowledge: async () => {
-        try {
-          return await apiClient.get('/api/client/knowledge');
-        } catch (error) {
-          console.error('Error fetching all knowledge:', error);
-          throw error;
-        }
-      },
-
       getLatestKnowledge: async () => {
         try {
           return await apiClient.get('/api/client/knowledge/latest/all');

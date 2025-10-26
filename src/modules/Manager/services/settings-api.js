@@ -13,24 +13,6 @@ export const useSettingsApi = () => {
           console.error('Failed to generate API key:', error);
           throw error;
         }
-      },
-
-      getFlowServerSettings: async () => {
-        try {
-          return await apiClient.get('/api/client/settings/flowserver');
-        } catch (error) {
-          console.error('Failed to fetch Flow Server settings:', error);
-          throw error;
-        }
-      },
-
-      getFlowServerApiKey: async () => {
-        try {
-          return await apiClient.get('/api/client/settings/flowserver/base64cert');
-        } catch (error) {
-          console.error('Failed to fetch Flow Server API key:', error);
-          throw error;
-        }
       }
     };
   }, [apiClient]);
