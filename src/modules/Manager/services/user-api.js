@@ -54,53 +54,6 @@ const extractErrorMessage = async (response) => {
 export const useUserApi = () => {
   return useMemo(() => {
     return {
-      getCurrentInvitation: async (token) => {
-        try {
-          const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants/currentUserInvitation`;
-          const response = await fetch(url, {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          
-          if (!response.ok) {
-            const errorMessage = await extractErrorMessage(response);
-            throw new Error(errorMessage);
-          }
-          
-          const json = await response.json();
-          return json;
-        } catch (error) {
-          console.error('Failed to fetch user tenants:', error);
-          throw error;
-        }
-      },
-      postAcceptInvitation: async (token, invitationId) => {
-        try {
-          const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants/accept-invitation`;
-          const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ token: invitationId }),
-          });
-          
-          if (!response.ok) {
-            const errorMessage = await extractErrorMessage(response);
-            throw new Error(errorMessage);
-          }
-          
-          return true;
-        } catch (error) {
-          console.error('Failed to accept invitation:', error);
-          throw error;
-        }
-      },
       inviteUser: async (token, email, tenantId) => {
         try {
           const { apiBaseUrl } = getConfig();
@@ -235,7 +188,7 @@ export const useUserApi = () => {
       getInvitations: async (token, tenantId) => {
         try {
           const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants/invitations/${tenantId}`;
+          const url = `${apiBaseUrl}/api/user-tenants/invitations`;
           const response = await fetch(url, {
             headers: {
               "Content-Type": "application/json",

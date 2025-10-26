@@ -24,7 +24,7 @@ export const useUserTenantApi = () => {
       getPendingUserTenantRequests: async (token, tenantId) => {
         try {
           const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants/unapprovedUsers?tenantId=${tenantId}`;
+          const url = `${apiBaseUrl}/api/user-tenants/unapprovedUsers`;
           const response = await fetch(url, {
             headers: {
               'Content-Type': 'application/json',
