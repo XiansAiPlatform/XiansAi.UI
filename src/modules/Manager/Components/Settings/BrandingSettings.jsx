@@ -44,14 +44,13 @@ const BrandingSettings = () => {
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [logoInfo, setLogoInfo] = useState({ width: 0, height: 0 });
     const [selectedTheme, setSelectedTheme] = useState('default');
-    const { tenant, fetchTenant } = useTenant();
-    const { userRoles } = useTenant();
+    const { tenant, fetchTenant, isAdmin } = useTenant();
     
     // Add a state variable to hold the tenantId
     const [tenantId, setTenantId] = useState(null);
 
-      // Only allow sysAdmin or tenantAdmin
-  const hasAccess = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
+    // Only allow sysAdmin or tenantAdmin
+    const hasAccess = isAdmin;
     
     // Helper function to detect image type from base64 data
     const detectImageType = (base64String) => {

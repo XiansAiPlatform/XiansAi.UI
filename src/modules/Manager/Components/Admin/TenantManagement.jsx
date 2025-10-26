@@ -23,6 +23,8 @@ import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinne
 import TenantInfoForm from "./TenantInfoForm";
 import TenantAdminManager from "./TenantAdminManager";
 import { useSlider } from "../../contexts/SliderContext";
+import ConfirmationDialog from "../Common/ConfirmationDialog";
+import { useConfirmation } from "../Common/useConfirmation";
 
 export default function TenantManagement() {
   const [tenants, setTenants] = useState([]);
@@ -42,6 +44,7 @@ export default function TenantManagement() {
     tenantId: "",
     domain: "",
   });
+  const { confirmationState, showConfirmation, hideConfirmation } = useConfirmation();
 
   const fetchTenants = useCallback(async () => {
     setLoading(true);
@@ -60,17 +63,26 @@ export default function TenantManagement() {
     fetchTenants();
   }, [fetchTenants]);
 
-  const handleDelete = async (tenantId) => {
-    if (!window.confirm("Delete this tenant? This action cannot be undone."))
-      return;
-    try {
-      await tenantsApi.deleteTenant(tenantId);
-      setSuccess("Tenant deleted successfully");
-      fetchTenants();
-    } catch (e) {
-      setError("Failed to delete tenant");
-      console.error("Error deleting tenant:", e);
-    }
+  const handleDelete = async (tenantId, tenantName) => {
+    showConfirmation({
+      title: 'Delete Tenant',
+      message: `Are you sure you want to permanently delete the tenant "${tenantName}"? All data, users, and configurations associated with this tenant will be permanently removed.`,
+      confirmLabel: 'Delete Tenant',
+      dangerLevel: 'critical',
+      entityName: tenantName,
+      onConfirm: async () => {
+        try {
+          await tenantsApi.deleteTenant(tenantId);
+          setSuccess("Tenant deleted successfully");
+          hideConfirmation();
+          fetchTenants();
+        } catch (e) {
+          setError("Failed to delete tenant");
+          console.error("Error deleting tenant:", e);
+          hideConfirmation();
+        }
+      },
+    });
   };
 
   const filteredTenants = tenants.filter(
@@ -91,8 +103,28 @@ export default function TenantManagement() {
     );
   };
 
-  const handleToggleEnabled = async (tenantId, currentlyEnabled) => {
+  const handleToggleEnabled = async (tenantId, currentlyEnabled, tenantName) => {
     if (!tenantId) return;
+    
+    // Show confirmation for disabling tenant (dangerous action)
+    if (currentlyEnabled) {
+      showConfirmation({
+        title: 'Disable Tenant',
+        message: `Are you sure you want to disable the tenant "${tenantName}"? Users will not be able to access this tenant until it is re-enabled.`,
+        confirmLabel: 'Disable Tenant',
+        dangerLevel: 'high',
+        onConfirm: async () => {
+          await performToggle(tenantId, currentlyEnabled);
+          hideConfirmation();
+        },
+      });
+    } else {
+      // Enabling is less dangerous, just do it
+      await performToggle(tenantId, currentlyEnabled);
+    }
+  };
+
+  const performToggle = async (tenantId, currentlyEnabled) => {
     setSwitchLoading((prev) => ({ ...prev, [tenantId]: true }));
     try {
       await tenantsApi.updateTenant(tenantId, { enabled: !currentlyEnabled });
@@ -109,6 +141,7 @@ export default function TenantManagement() {
             : tenant;
         })
       );
+      setSuccess(`Tenant ${currentlyEnabled ? 'disabled' : 'enabled'} successfully`);
     } catch (err) {
       setError(
         `Failed to ${
@@ -264,7 +297,7 @@ export default function TenantManagement() {
                       <Switch
                         checked={isEnabled}
                         onChange={() =>
-                          handleToggleEnabled(tenantId, isEnabled)
+                          handleToggleEnabled(tenantId, isEnabled, tenant.name || tenant.tenantName)
                         }
                         disabled={isToggleLoading || !tenantId}
                         color="primary"
@@ -312,7 +345,7 @@ export default function TenantManagement() {
                     <Tooltip title="Delete Tenant">
                       <IconButton
                         color="error"
-                        onClick={() => handleDelete(tenantId)}
+                        onClick={() => handleDelete(tenantId, tenant.name || tenant.tenantName)}
                         size="small"
                       >
                         <DeleteIcon />
@@ -426,6 +459,12 @@ export default function TenantManagement() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        {...confirmationState}
+        onCancel={hideConfirmation}
+      />
     </Box>
   );
 }

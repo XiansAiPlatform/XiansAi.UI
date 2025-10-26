@@ -13,6 +13,7 @@ import { useWorkflowApi } from '../../services/workflow-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useTenant } from '../../contexts/TenantContext';
 import { useState } from 'react';
 
 // Define a keyframe animation for the pulsing effect
@@ -44,6 +45,7 @@ const AgentGroup = ({
   const { setLoading } = useLoading();
   const { selectedOrg } = useSelectedOrg();
   const { showSuccess, showError } = useNotification();
+  const { isSysAdmin } = useTenant();
   const [anchorEl, setAnchorEl] = useState(null);
   
   const handleMenuClick = (event) => {
@@ -89,6 +91,10 @@ const AgentGroup = ({
   const getUserPermissionLevel = () => {
     if (!user?.id || !agent || agentName === 'Ungrouped') {
       return null;
+    }
+
+    if (isSysAdmin) {
+      return { level: 'SysAdmin', color: 'error' };
     }
 
     // Support both new structure (agent.ownerAccess) and legacy structure (agent.permissions.ownerAccess)

@@ -196,6 +196,29 @@ export const useUserTenantApi = () => {
           throw error;
         }
       },
+      removeUserFromTenant: async (token, userId, tenantId) => {
+        try {
+          const { apiBaseUrl } = getConfig();
+          const url = `${apiBaseUrl}/api/user-tenants/`;
+          const response = await fetch(url, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "X-Tenant-Id": tenantId,
+            },
+            body: JSON.stringify({ userId, tenantId }),
+          });
+          if (!response.ok) {
+            throw new Error("Failed to remove user from tenant");
+          }
+          const json = await response.json();
+          return json;
+        } catch (error) {
+          console.log("Failed to remove user from tenant:", error);
+          throw error;
+        }
+      },
     };
   }, []);
 };

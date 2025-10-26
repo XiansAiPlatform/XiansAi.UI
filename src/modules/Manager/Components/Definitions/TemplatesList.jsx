@@ -35,12 +35,7 @@ const TemplatesList = () => {
 
   const templatesApi = useTemplatesApi();
   const { showSuccess, showError } = useNotification();
-  const { userRoles } = useTenant();
-  
-  // Check if user is a system admin
-  const isSysAdmin = userRoles && userRoles.some(
-    (role) => role.toLowerCase() === 'sysadmin'
-  );
+  const { isSysAdmin } = useTenant();
 
   const loadTemplates = useCallback(async () => {
     try {

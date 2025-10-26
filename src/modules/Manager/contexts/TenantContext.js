@@ -1,4 +1,4 @@
-import { useCallback, createContext, use, useState, useEffect } from 'react';
+import { useCallback, createContext, use, useState, useEffect, useMemo } from 'react';
 import { useTenantsApi } from "../services/tenants-api";
 import { useUserTenantApi } from "../services/user-tenant-api";
 import { useAuth } from '../auth/AuthContext';
@@ -7,6 +7,7 @@ import { useRolesApi } from "../services/roles-api.js";
 import { useNotification } from './NotificationContext';
 import { handleApiError } from '../utils/errorHandler';
 import { useSelectedOrg } from './OrganizationContext';
+import { isSysAdmin, isTenantAdmin, isAdmin } from '../utils/roleUtils';
 
 const TenantContext = createContext();
 
@@ -180,6 +181,13 @@ export const TenantProvider = ({ children }) => {
     return () => clearTimeout(timer);
   }, [isAuthenticated, isAuthLoading, isOrgLoading, selectedOrg, location.pathname, fetchCurrentTenant, fetchUserRoles, user, showDetailedError]);
 
+  // Memoize role-based computed values for performance
+  const roleChecks = useMemo(() => ({
+    isSysAdmin: isSysAdmin(userRoles),
+    isTenantAdmin: isTenantAdmin(userRoles),
+    isAdmin: isAdmin(userRoles),
+  }), [userRoles]);
+
   return (
     (<TenantContext
       value={{
@@ -188,6 +196,7 @@ export const TenantProvider = ({ children }) => {
         error,
         fetchTenant: fetchCurrentTenant,
         userRoles,
+        ...roleChecks,
       }}
     >
       {children}

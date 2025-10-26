@@ -23,8 +23,8 @@ const Settings = () => {
     setCurrentUserSubTab(newValue);
   };
 
-  const { userRoles } = useTenant();
-  const showTenantTab = userRoles.includes('SysAdmin') || userRoles.includes('TenantAdmin');
+  const { isAdmin } = useTenant();
+  const showTenantTab = isAdmin;
 
   // Build main tabs
   const tabs = [

@@ -156,12 +156,12 @@ const LeftNav = ({ isOpen, onClose, isCollapsed, onToggleCollapse }) => {
   const { pathname, search } = useLocation();
   const isMobile = window.innerWidth <= 768;
   const { navErrorCount, resetNavErrorCount } = useAuditContext();
-  const { userRoles } = useTenant();
+  const { isSysAdmin } = useTenant();
 
   // Filter navigation items based on user permissions
   const filteredNavItems = NAV_ITEMS.filter(item => {
     if (item.to === '/manager/admin') {
-      return userRoles.includes('SysAdmin');
+      return isSysAdmin;
     }
     return true;
   });

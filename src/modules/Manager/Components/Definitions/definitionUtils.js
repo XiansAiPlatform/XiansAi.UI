@@ -1,4 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
+import { isSysAdmin as checkIsSysAdmin } from '../../utils/roleUtils';
 
 /**
  * Filters agent groups based on search query
@@ -137,10 +138,14 @@ export const sortDefinitionsByDate = (definitions) => {
  * Checks if user is owner of all workflows for a specific agent
  * @param {Object} agent - The agent object containing permissions
  * @param {Object} user - Current user object
- * @returns {boolean} True if user owns all workflows for the agent
+ * @param {Array} userRoles - Array of user roles (optional)
+ * @returns {boolean} True if user owns all workflows for the agent or is a sys admin
  */
-export const isUserOwnerOfAllWorkflows = (agent, user) => {
+export const isUserOwnerOfAllWorkflows = (agent, user, userRoles = []) => {
   if (!user?.id || !agent) return false;
+  
+  // Check if user is a sys admin using centralized utility
+  if (checkIsSysAdmin(userRoles)) return true;
   
   // Check if user is in the owner access list for the agent
   // Support both new structure (agent.ownerAccess) and legacy structure (agent.permissions.ownerAccess)

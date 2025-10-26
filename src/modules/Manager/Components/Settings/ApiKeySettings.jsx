@@ -26,7 +26,7 @@ import { useTenant } from "../../contexts/TenantContext";
 
 const ApiKeySettings = () => {
   const api = useApiKeyApi();
-  const { userRoles, isLoading: tenantLoading } = useTenant();
+  const { isAdmin, isLoading: tenantLoading } = useTenant();
   const [apiKeys, setApiKeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -41,7 +41,7 @@ const ApiKeySettings = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [keyToRevoke, setKeyToRevoke] = useState(null);
 
-  const hasAccess = userRoles.includes("SysAdmin") || userRoles.includes("TenantAdmin");
+  const hasAccess = isAdmin;
 
   const fetchApiKeys = async () => {
     setLoading(true);

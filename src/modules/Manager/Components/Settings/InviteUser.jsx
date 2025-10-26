@@ -15,6 +15,8 @@ import { useUserApi } from "../../services/user-api";
 import { useTenant } from "../../contexts/TenantContext";
 import { useAuth } from "../../auth/AuthContext";
 import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
+import ConfirmationDialog from "../Common/ConfirmationDialog";
+import { useConfirmation } from "../Common/useConfirmation";
 
 export default function InviteUser() {
   const [email, setEmail] = useState("");
@@ -27,6 +29,7 @@ export default function InviteUser() {
   const [invitations, setInvitations] = useState([]);
   const [invLoading, setInvLoading] = useState(false);
   const [invError, setInvError] = useState("");
+  const { confirmationState, showConfirmation, hideConfirmation } = useConfirmation();
 
   const fetchInvitations = async () => {
     if (!tenant?.tenantId) return;
@@ -79,22 +82,31 @@ export default function InviteUser() {
     setSending(false);
   };
 
-  const handleDeleteInvitation = async (inviteToken) => {
-    if (!window.confirm("Delete this invitation?")) return;
-    
-    if (!tenant?.tenantId) {
-      setError("Tenant information not available");
-      return;
-    }
+  const handleDeleteInvitation = async (invitation) => {
+    showConfirmation({
+      title: 'Delete Invitation',
+      message: `Are you sure you want to delete the invitation for "${invitation.email}"? They will no longer be able to use this invitation link.`,
+      confirmLabel: 'Delete Invitation',
+      dangerLevel: 'warning',
+      onConfirm: async () => {
+        if (!tenant?.tenantId) {
+          setError("Tenant information not available");
+          hideConfirmation();
+          return;
+        }
 
-    try {
-      const token = await getAccessTokenSilently();
-      await userApi.deleteInvitation(token, inviteToken, tenant.tenantId);
-      setSuccess("Invitation deleted successfully");
-      await fetchInvitations();
-    } catch (e) {
-      setError("Failed to delete invitation");
-    }
+        try {
+          const token = await getAccessTokenSilently();
+          await userApi.deleteInvitation(token, invitation.token, tenant.tenantId);
+          setSuccess("Invitation deleted successfully");
+          hideConfirmation();
+          await fetchInvitations();
+        } catch (e) {
+          setError("Failed to delete invitation");
+          hideConfirmation();
+        }
+      },
+    });
   };
 
   const validateEmail = (email) => {
@@ -242,7 +254,7 @@ export default function InviteUser() {
                           color="error"
                           size="small"
                           startIcon={<DeleteIcon />}
-                          onClick={() => handleDeleteInvitation(inv.token)}
+                          onClick={() => handleDeleteInvitation(inv)}
                         >
                           Delete
                         </Button>
@@ -260,6 +272,12 @@ export default function InviteUser() {
           </Alert>
         )}
       </Box>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        {...confirmationState}
+        onCancel={hideConfirmation}
+      />
     </Paper>
   );
 }

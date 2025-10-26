@@ -5,19 +5,11 @@ import Landing from "../Landing/Landing";
 import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 
 export default function AdminDashboardRoute() {
-  const { userRoles, isLoading } = useTenant();
+  const { isSysAdmin, isLoading } = useTenant();
 
   if (isLoading) {
     return <EnhancedLoadingSpinner />;
   }
-
-  // Check if user has sysadmin role
-  const isSysAdmin =
-    userRoles &&
-    userRoles.some(
-      (role) =>
-        role.toLowerCase() === "sysadmin" 
-    );
 
   if (isSysAdmin) {
     return <AdminDashboard />;

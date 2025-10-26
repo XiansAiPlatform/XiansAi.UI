@@ -4,6 +4,7 @@ import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../auth/AuthContext';
+import { useTenant } from '../../contexts/TenantContext';
 import { 
   filterAgentGroups, 
   sortAgentGroupsByDate,
@@ -29,6 +30,7 @@ export const useDefinitions = () => {
   const { setLoading } = useLoading();
   const { showSuccess, showError } = useNotification();
   const { user } = useAuth();
+  const { userRoles } = useTenant();
 
   // Computed values
   const filteredAndSortedAgentGroups = sortAgentGroupsByDate(
@@ -153,7 +155,7 @@ export const useDefinitions = () => {
     const agentGroup = agentGroups.find(group => group.agent.name === agentName);
     if (!agentGroup) return false;
     
-    return isUserOwnerOfAllWorkflows(agentGroup.agent, user);
+    return isUserOwnerOfAllWorkflows(agentGroup.agent, user, userRoles);
   };
 
   return {

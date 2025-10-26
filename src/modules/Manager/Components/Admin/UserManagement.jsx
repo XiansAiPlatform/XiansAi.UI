@@ -28,6 +28,8 @@ import { useAuth } from "../../auth/AuthContext";
 import { useTenantsApi } from "../../services/tenants-api";
 import { useSlider } from "../../contexts/SliderContext";
 import UserForm from "./UserForm";
+import ConfirmationDialog from "../Common/ConfirmationDialog";
+import { useConfirmation } from "../Common/useConfirmation";
 
 export default function UserManagement() {
   const { getAccessTokenSilently } = useAuth();
@@ -58,6 +60,7 @@ export default function UserManagement() {
   const tenantsApi = useTenantsApi();
   const { openSlider, closeSlider } = useSlider();
   const [formLoading, setFormLoading] = useState(false);
+  const { confirmationState, showConfirmation, hideConfirmation } = useConfirmation();
 
   useEffect(() => {
     async function fetchTenants() {
@@ -118,17 +121,27 @@ export default function UserManagement() {
     setPage(1);
   };
 
-  const handleDelete = async (userId) => {
-    if (!window.confirm("Delete this user?")) return;
-    try {
-      const token = await getAccessTokenSilently();
-      await userApi.deleteUser(token, userId);
-      setSuccess("User deleted successfully");
-      fetchUsers();
-    } catch (e) {
-      setError("Failed to delete user");
-      console.error("Error deleting user:", e);
-    }
+  const handleDelete = async (user) => {
+    showConfirmation({
+      title: 'Delete User',
+      message: `Are you sure you want to permanently delete the user "${user.name}" (${user.email})? This will remove the user from all tenants and cannot be undone.`,
+      confirmLabel: 'Delete User',
+      dangerLevel: 'high',
+      entityName: user.name,
+      onConfirm: async () => {
+        try {
+          const token = await getAccessTokenSilently();
+          await userApi.deleteUser(token, user.userId);
+          setSuccess("User deleted successfully");
+          hideConfirmation();
+          fetchUsers();
+        } catch (e) {
+          setError("Failed to delete user");
+          console.error("Error deleting user:", e);
+          hideConfirmation();
+        }
+      },
+    });
   };
 
   const formatDate = (dateString) => {
@@ -324,7 +337,7 @@ export default function UserManagement() {
                         </Tooltip>
                         <Tooltip title="Delete User">
                           <IconButton
-                            onClick={() => handleDelete(user.userId)}
+                            onClick={() => handleDelete(user)}
                             color="error"
                             size="small"
                           >
@@ -383,6 +396,12 @@ export default function UserManagement() {
       >
         <Alert severity="success">{success}</Alert>
       </Snackbar>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        {...confirmationState}
+        onCancel={hideConfirmation}
+      />
     </Box>
   );
 }

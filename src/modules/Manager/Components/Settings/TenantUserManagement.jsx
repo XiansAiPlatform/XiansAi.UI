@@ -32,13 +32,15 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
-import { useUserApi } from "../../services/user-api";
+import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import { useUserTenantApi } from "../../services/user-tenant-api";
 import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useAuth } from "../../auth/AuthContext";
 import { useTenant } from "../../contexts/TenantContext";
 import { useSlider } from "../../contexts/SliderContext";
 import UserFormSettings from "./UserFormSettings";
+import ConfirmationDialog from "../Common/ConfirmationDialog";
+import { useConfirmation } from "../Common/useConfirmation";
 
 export default function TenantUserManagement() {
   const { getAccessTokenSilently } = useAuth();
@@ -61,10 +63,10 @@ export default function TenantUserManagement() {
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
   const [addLoading, setAddLoading] = useState(false);
-  const userApi = useUserApi();
   const userTenantApi = useUserTenantApi();
   const { openSlider, closeSlider } = useSlider();
   const [formLoading, setFormLoading] = useState(false);
+  const { confirmationState, showConfirmation, hideConfirmation } = useConfirmation();
 
   const fetchUsers = useCallback(async () => {
     console.log("Fetching users for tenant:", tenant);
@@ -130,17 +132,27 @@ export default function TenantUserManagement() {
     setPage(1);
   };
 
-  const handleDelete = async (userId) => {
-    if (!window.confirm("Delete this user?")) return;
-    try {
-      const token = await getAccessTokenSilently();
-      await userApi.deleteUser(token, userId);
-      setSuccess("User deleted successfully");
-      fetchUsers();
-    } catch (e) {
-      setError("Failed to delete user");
-      console.error("Error deleting user:", e);
-    }
+  const handleDelete = async (user) => {
+    showConfirmation({
+      title: 'Remove User from Tenant',
+      message: `Are you sure you want to remove "${user.name}" (${user.email}) from this tenant? The user will no longer have access to this tenant, but their account will remain in the system.`,
+      confirmLabel: 'Remove from Tenant',
+      dangerLevel: 'medium',
+      entityName: user.name,
+      onConfirm: async () => {
+        try {
+          const token = await getAccessTokenSilently();
+          await userTenantApi.removeUserFromTenant(token, user.userId, tenant.tenantId);
+          setSuccess("User removed from tenant successfully");
+          hideConfirmation();
+          fetchUsers();
+        } catch (e) {
+          setError("Failed to remove user from tenant");
+          console.error("Error removing user from tenant:", e);
+          hideConfirmation();
+        }
+      },
+    });
   };
 
   const formatDate = (dateString) => {
@@ -269,7 +281,7 @@ export default function TenantUserManagement() {
 
   return (
     <Paper className="ca-certificates-paper">
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
         Tenant User Management
       </Typography>
       <Box
@@ -323,6 +335,33 @@ export default function TenantUserManagement() {
 
       {loading ? (
         <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
+      ) : users && users.length === 0 ? (
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          py={8}
+          px={2}
+        >
+          <PeopleOutlineIcon
+            sx={{ fontSize: 80, color: "text.secondary", mb: 2 }}
+          />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No Users Found
+          </Typography>
+          <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 3, maxWidth: 400 }}>
+            There are no users in this tenant yet. Click the "Add User by Email" button above to add existing users to this tenant.
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<PersonAddIcon />}
+            onClick={handleOpenAddUserDialog}
+          >
+            Add User by Email
+          </Button>
+        </Box>
       ) : (
         <>
           <Table>
@@ -376,9 +415,9 @@ export default function TenantUserManagement() {
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete User">
+                    <Tooltip title="Remove User from Tenant">
                       <IconButton
-                        onClick={() => handleDelete(user.userId)}
+                        onClick={() => handleDelete(user)}
                         color="error"
                       >
                         <DeleteIcon />
@@ -519,6 +558,12 @@ export default function TenantUserManagement() {
           {success}
         </Alert>
       </Snackbar>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        {...confirmationState}
+        onCancel={hideConfirmation}
+      />
     </Paper>
   );
 }
