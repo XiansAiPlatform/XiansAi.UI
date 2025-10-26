@@ -83,10 +83,10 @@ export const useUserTenantApi = () => {
           throw error;
         }
       },
-      getUserTenants: async (token) => {
+      getUserTenants: async (token, userId) => {
         try {
           const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants`;
+          const url = `${apiBaseUrl}/api/user-tenants/${userId}`;
           const response = await fetch(url, {
             headers: {
               'Content-Type': 'application/json',
@@ -146,26 +146,6 @@ export const useUserTenantApi = () => {
           return true;
         } catch (error) {
           console.log("Failed to update user:", error);
-          throw error;
-        }
-      },
-      deleteUserTenant: async (userTenantId, token) => {
-        try {
-          const { apiBaseUrl } = getConfig();
-          const url = `${apiBaseUrl}/api/user-tenants/${userTenantId}`;
-          const response = await fetch(url, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-          });
-          if (!response.ok) {
-            throw new Error('Failed to delete user tenant');
-          }
-          return true;
-        } catch (error) {
-          console.log('Failed to delete user tenant:', error);
           throw error;
         }
       },

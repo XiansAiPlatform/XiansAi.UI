@@ -182,12 +182,18 @@ export default function UserManagement() {
         tenantOptions={tenantOptions}
         onSave={async (formData) => {
           setFormLoading(true);
-          const token = await getAccessTokenSilently();
-          await userApi.updateUser(token, formData);
-          setSuccess("Invitation sent successfully");
-          closeSlider();
-          fetchUsers();
-          setFormLoading(false);
+          try {
+            const token = await getAccessTokenSilently();
+            await userApi.updateUser(token, formData);
+            setSuccess("User updated successfully");
+            closeSlider();
+            fetchUsers();
+          } catch (error) {
+            setError(error.message || "Failed to update user");
+            throw error; // Re-throw so UserForm can also display the error
+          } finally {
+            setFormLoading(false);
+          }
         }}
         onClose={closeSlider}
       />,

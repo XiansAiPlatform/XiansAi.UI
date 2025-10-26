@@ -123,11 +123,6 @@ export default function UserForm({
       <Typography variant="h6" mb={2}>
         {isEdit ? "Edit User" : "Add User"}
       </Typography>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
       {isEdit && (
         <TextField
           label="ID"
@@ -326,6 +321,25 @@ export default function UserForm({
           </Typography>
         )}
       </Box>
+      {error && (
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mt: 2, 
+            mb: 2,
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            '& .MuiAlert-message': {
+              color: '#d32f2f',
+              fontWeight: 600
+            },
+            backgroundColor: '#ffebee',
+            border: '1px solid #ef5350'
+          }}
+        >
+          {error}
+        </Alert>
+      )}
       <Box mt={2} display="flex" gap={2}>
         <Button
           type="submit"

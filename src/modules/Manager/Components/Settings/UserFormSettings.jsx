@@ -90,11 +90,6 @@ export default function UserFormSettings({
       <Typography variant="h6" mb={2}>
         {isEdit ? "Edit User" : "Add User"}
       </Typography>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
       <TextField
         label="Name"
         name="name"
@@ -151,6 +146,25 @@ export default function UserFormSettings({
           ))}
         </Select>
       </FormControl>
+      {error && (
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mt: 2, 
+            mb: 2,
+            fontWeight: 600,
+            fontSize: '0.95rem',
+            '& .MuiAlert-message': {
+              color: '#d32f2f',
+              fontWeight: 600
+            },
+            backgroundColor: '#ffebee',
+            border: '1px solid #ef5350'
+          }}
+        >
+          {error}
+        </Alert>
+      )}
       <Box mt={3} display="flex" justifyContent="flex-end" gap={2}>
         <Button onClick={onClose} disabled={loading} variant="outlined">
           Cancel
