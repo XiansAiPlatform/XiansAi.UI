@@ -34,10 +34,10 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import { useUserTenantApi } from "../../services/user-tenant-api";
-import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useAuth } from "../../auth/AuthContext";
 import { useTenant } from "../../contexts/TenantContext";
 import { useSlider } from "../../contexts/SliderContext";
+import { useLoading } from "../../contexts/LoadingContext";
 import UserFormSettings from "./UserFormSettings";
 import ConfirmationDialog from "../Common/ConfirmationDialog";
 import { useConfirmation } from "../Common/useConfirmation";
@@ -45,8 +45,9 @@ import { useConfirmation } from "../Common/useConfirmation";
 export default function TenantUserManagement() {
   const { getAccessTokenSilently } = useAuth();
   const { tenant, isLoading: tenantLoading } = useTenant();
+  const { setLoading } = useLoading();
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLocalLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [pendingFilters, setPendingFilters] = useState({
@@ -75,6 +76,7 @@ export default function TenantUserManagement() {
       return;
     }
     
+    setLocalLoading(true);
     setLoading(true);
     setError("");
     try {
@@ -99,8 +101,10 @@ export default function TenantUserManagement() {
     } catch (e) {
       console.error("Error fetching users:", e);
       setError("Failed to fetch users: " + (e.message || "Unknown error"));
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
     }
-    setLoading(false);
   }, [
     userTenantApi,
     getAccessTokenSilently,
@@ -108,6 +112,7 @@ export default function TenantUserManagement() {
     pageSize,
     filters,
     tenant,
+    setLoading,
   ]);
 
   useEffect(() => {
@@ -268,8 +273,8 @@ export default function TenantUserManagement() {
     setAddLoading(false);
   };
 
-  if (tenantLoading) {
-    return <EnhancedLoadingSpinner showRefreshOption={false} height="400px" />;
+  if (tenantLoading || loading) {
+    return null; // LoadingContext will show the top progress bar
   }
 
   if (!tenant?.tenantId) {
@@ -339,9 +344,7 @@ export default function TenantUserManagement() {
       {/* Divider for separation */}
       <Divider sx={{ my: 2 }} />
 
-      {loading ? (
-        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
-      ) : users && users.length === 0 ? (
+      {users && users.length === 0 ? (
         <Box
           display="flex"
           flexDirection="column"

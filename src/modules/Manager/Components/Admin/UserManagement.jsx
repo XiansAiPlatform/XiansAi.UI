@@ -23,18 +23,19 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useUserApi } from "../../services/user-api";
-import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useAuth } from "../../auth/AuthContext";
 import { useTenantsApi } from "../../services/tenants-api";
 import { useSlider } from "../../contexts/SliderContext";
+import { useLoading } from "../../contexts/LoadingContext";
 import UserForm from "./UserForm";
 import ConfirmationDialog from "../Common/ConfirmationDialog";
 import { useConfirmation } from "../Common/useConfirmation";
 
 export default function UserManagement() {
   const { getAccessTokenSilently } = useAuth();
+  const { setLoading } = useLoading();
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLocalLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -81,6 +82,7 @@ export default function UserManagement() {
   }, [tenantsApi]);
 
   const fetchUsers = useCallback(async () => {
+    setLocalLoading(true);
     setLoading(true);
     setError("");
     try {
@@ -95,9 +97,11 @@ export default function UserManagement() {
     } catch (e) {
       setError("Failed to fetch users");
       console.error("Error fetching users:", e);
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
     }
-    setLoading(false);
-  }, [userApi, getAccessTokenSilently, page, pageSize, filters]);
+  }, [userApi, getAccessTokenSilently, page, pageSize, filters, setLoading]);
 
   useEffect(() => {
     fetchUsers();
@@ -250,9 +254,7 @@ export default function UserManagement() {
         <Typography variant="h6">User Management</Typography>
       </Box>
 
-      {loading ? (
-        <EnhancedLoadingSpinner showRefreshOption={false} height="400px" />
-      ) : (
+      {loading ? null : (
         <>
           <Stack spacing={2}>
             {users.map((user) => (

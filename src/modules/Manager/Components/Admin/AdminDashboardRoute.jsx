@@ -2,13 +2,12 @@ import React from "react";
 import { useTenant } from "../../contexts/TenantContext";
 import AdminDashboard from "./AdminDashboard";
 import Landing from "../Landing/Landing";
-import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 
 export default function AdminDashboardRoute() {
   const { isSysAdmin, isLoading } = useTenant();
 
   if (isLoading) {
-    return <EnhancedLoadingSpinner />;
+    return null; // LoadingContext will show the top progress bar
   }
 
   if (isSysAdmin) {

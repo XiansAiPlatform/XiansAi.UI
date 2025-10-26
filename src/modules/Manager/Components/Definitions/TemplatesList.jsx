@@ -2,10 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
-  Paper, 
-  Grid, 
+  Grid,
   Alert, 
-  Skeleton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -18,6 +16,7 @@ import {
 import PageLayout from '../Common/PageLayout';
 import TemplateCard from './TemplateCard';
 import EmptyState from '../Common/EmptyState';
+import { CardSkeleton } from '../../../../components/SkeletonLoaders';
 import { useTemplatesApi } from '../../services';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useTenant } from '../../contexts/TenantContext';
@@ -109,29 +108,7 @@ const TemplatesList = () => {
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <Grid container spacing={3}>
-          {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Grid item xs={12} sm={6} md={4} key={item}>
-              <Paper sx={{ p: 2, height: 280 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Skeleton variant="circular" width={48} height={48} sx={{ mr: 2 }} />
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Skeleton variant="text" width="80%" height={28} />
-                    <Skeleton variant="text" width="60%" height={20} />
-                  </Box>
-                </Box>
-                <Skeleton variant="text" width="100%" height={20} />
-                <Skeleton variant="text" width="90%" height={20} />
-                <Skeleton variant="text" width="70%" height={20} />
-                <Box sx={{ mt: 2 }}>
-                  <Skeleton variant="rectangular" width="100%" height={36} />
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-      );
+      return <CardSkeleton count={6} gridProps={{ xs: 12, sm: 6, md: 4 }} />;
     }
 
     if (error) {

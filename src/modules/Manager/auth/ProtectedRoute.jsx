@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Typography, Button, CircularProgress, Container, Paper } from '@mui/material';
+import { Typography, Button, Container, Paper } from '@mui/material';
 import { ErrorOutline, Login as LoginIcon } from '@mui/icons-material';
 import { useNotification } from '../contexts/NotificationContext';
 import { useSelectedOrg } from '../contexts/OrganizationContext';
@@ -67,19 +67,9 @@ const ProtectedRoute = ({ children }) => {
   };
 
   if (isLoading || isProcessingCallback || isOrgLoading) {
-    return (
-      <Container maxWidth="sm" sx={{ mt: 8 }}>
-        <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-          <CircularProgress size={40} sx={{ mb: 2 }} />
-          <Typography variant="h6">Loading...</Typography>
-          {isProcessingCallback && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Processing authentication...
-            </Typography>
-          )}
-        </Paper>
-      </Container>
-    );
+    // Return null to show only the top progress bar during navigation
+    // This provides a cleaner, less intrusive loading experience
+    return null;
   }
 
   if (error) {

@@ -15,13 +15,14 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { useUserTenantApi } from "../../services/user-tenant-api";
-import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
 import { useTenant } from "../../contexts/TenantContext";
 import { useAuth } from "../../auth/AuthContext";
+import { useLoading } from "../../contexts/LoadingContext";
 
 export default function ApproveUserRequests() {
   const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { setLoading } = useLoading();
+  const [loading, setLocalLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const { tenant, isLoading: tenantLoading } = useTenant();
@@ -34,6 +35,7 @@ export default function ApproveUserRequests() {
       return;
     }
 
+    setLocalLoading(true);
     setLoading(true);
     setError("");
     try {
@@ -43,9 +45,11 @@ export default function ApproveUserRequests() {
     } catch (e) {
       setError("Failed to fetch requests");
       console.error("Error fetching requests:", e);
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
     }
-    setLoading(false);
-  }, [userTenantsApi, tenant?.tenantId, getAccessTokenSilently]);
+  }, [userTenantsApi, tenant?.tenantId, getAccessTokenSilently, setLoading]);
 
   useEffect(() => {
     // Only fetch when tenant is loaded and has tenantId
@@ -89,15 +93,8 @@ export default function ApproveUserRequests() {
   };
 
   // Show loading while tenant data is being loaded
-  if (tenantLoading) {
-    return (
-      <Paper className="ca-certificates-paper">
-        <Typography variant="h6" gutterBottom>
-          Approve User Requests
-        </Typography>
-        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
-      </Paper>
-    );
+  if (tenantLoading || loading) {
+    return null; // LoadingContext will show the top progress bar
   }
 
   // Show error if tenant data is not available
@@ -120,11 +117,7 @@ export default function ApproveUserRequests() {
         Approve User Requests
       </Typography>
 
-      {loading ? (
-        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
-      ) : (
-        <>
-          {requests.length === 0 ? (
+      {requests.length === 0 ? (
             <Box textAlign="center" py={4}>
               <Typography variant="body1" color="textSecondary">
                 No pending user requests found.
@@ -166,8 +159,6 @@ export default function ApproveUserRequests() {
               </TableBody>
             </Table>
           )}
-        </>
-      )}
 
       <Snackbar
         open={!!error}

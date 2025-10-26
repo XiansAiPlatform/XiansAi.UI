@@ -14,7 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useUserApi } from "../../services/user-api";
 import { useTenant } from "../../contexts/TenantContext";
 import { useAuth } from "../../auth/AuthContext";
-import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
+import { useLoading } from "../../contexts/LoadingContext";
 import ConfirmationDialog from "../Common/ConfirmationDialog";
 import { useConfirmation } from "../Common/useConfirmation";
 
@@ -25,15 +25,17 @@ export default function InviteUser() {
   const [success, setSuccess] = useState("");
   const { tenant, isLoading: tenantLoading } = useTenant();
   const { getAccessTokenSilently } = useAuth();
+  const { setLoading } = useLoading();
   const userApi = useUserApi();
   const [invitations, setInvitations] = useState([]);
-  const [invLoading, setInvLoading] = useState(false);
+  const [invLoading, setLocalInvLoading] = useState(false);
   const [invError, setInvError] = useState("");
   const { confirmationState, showConfirmation, hideConfirmation } = useConfirmation();
 
   const fetchInvitations = async () => {
     if (!tenant?.tenantId) return;
-    setInvLoading(true);
+    setLocalInvLoading(true);
+    setLoading(true);
     setInvError("");
     try {
       const token = await getAccessTokenSilently();
@@ -43,8 +45,10 @@ export default function InviteUser() {
     } catch (e) {
       setInvError("Failed to fetch invitations");
       setInvitations([]);
+    } finally {
+      setLocalInvLoading(false);
+      setLoading(false);
     }
-    setInvLoading(false);
   };
 
   React.useEffect(() => {
@@ -115,15 +119,8 @@ export default function InviteUser() {
   };
 
   // Show loading while tenant data is being loaded
-  if (tenantLoading) {
-    return (
-      <Paper className="ca-certificates-paper">
-        <Typography variant="h6" gutterBottom>
-          Invite New User
-        </Typography>
-        <EnhancedLoadingSpinner showRefreshOption={false} height="300px" />
-      </Paper>
-    );
+  if (tenantLoading || invLoading) {
+    return null; // LoadingContext will show the top progress bar
   }
 
   // Show error if tenant data is not available

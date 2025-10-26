@@ -19,7 +19,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { useTenantsApi } from "../../services/tenants-api";
-import EnhancedLoadingSpinner from "../../../../components/EnhancedLoadingSpinner";
+import { useLoading } from "../../contexts/LoadingContext";
 import TenantInfoForm from "./TenantInfoForm";
 import TenantAdminManager from "./TenantAdminManager";
 import { useSlider } from "../../contexts/SliderContext";
@@ -28,7 +28,8 @@ import { useConfirmation } from "../Common/useConfirmation";
 
 export default function TenantManagement() {
   const [tenants, setTenants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { setLoading } = useLoading();
+  const [loading, setLocalLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [filter, setFilter] = useState("");
@@ -47,6 +48,7 @@ export default function TenantManagement() {
   const { confirmationState, showConfirmation, hideConfirmation } = useConfirmation();
 
   const fetchTenants = useCallback(async () => {
+    setLocalLoading(true);
     setLoading(true);
     setError("");
     try {
@@ -55,9 +57,11 @@ export default function TenantManagement() {
     } catch (e) {
       setError("Failed to fetch tenants");
       console.error("Error fetching tenants:", e);
+    } finally {
+      setLocalLoading(false);
+      setLoading(false);
     }
-    setLoading(false);
-  }, [tenantsApi]);
+  }, [tenantsApi, setLoading]);
 
   useEffect(() => {
     fetchTenants();
@@ -252,9 +256,7 @@ export default function TenantManagement() {
         <Typography variant="h6">Tenant Management</Typography>
       </Box>
       <Box>
-        {loading ? (
-          <EnhancedLoadingSpinner showRefreshOption={false} height="400px" />
-        ) : (
+        {loading ? null : (
           filteredTenants.map((tenant) => {
             const tenantId = tenant.id || tenant.tenantId;
             const isEnabled = tenant.enabled ?? tenant.isEnabled ?? true;

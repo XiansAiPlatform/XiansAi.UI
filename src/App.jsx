@@ -10,7 +10,7 @@ import KeycloakProviderWrapper from './modules/Manager/auth/keycloak/KeycloakPro
 import OidcProviderWrapper from './modules/Manager/auth/oidc/OidcProviderWrapper';
 import GitHubProviderWrapper from './modules/Manager/auth/github/GitHubProviderWrapper';
 import GlobalAccountConflictProvider from './modules/Manager/Components/Common/GlobalAccountConflictProvider';
-import EnhancedLoadingSpinner from './components/EnhancedLoadingSpinner';
+import { PageSkeleton } from './components/SkeletonLoaders';
 import ErrorBoundary from './components/ErrorBoundary';
 import lazyLoad from './utils/lazyLoad';
 
@@ -43,7 +43,7 @@ function App() {
       <AppAuthProvider>
         <GlobalAccountConflictProvider>
           <ErrorBoundary>
-            <Suspense fallback={<EnhancedLoadingSpinner message="Loading application..." />}>
+            <Suspense fallback={<PageSkeleton variant="simple" />}>
               <AppRoutes />
             </Suspense>
           </ErrorBoundary>

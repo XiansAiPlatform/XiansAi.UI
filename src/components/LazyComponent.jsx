@@ -1,31 +1,24 @@
 import { Suspense } from 'react';
 import ErrorBoundary from './ErrorBoundary';
-import EnhancedLoadingSpinner from './EnhancedLoadingSpinner';
 
 /**
  * LazyComponent - A wrapper component for lazy-loaded components with error handling
+ * Uses the LoadingContext to show a top progress bar during loading instead of a full-page spinner
  * 
  * @param {Object} props - Component props
  * @param {React.LazyExoticComponent} props.component - The lazy-loaded component
- * @param {string} props.loadingMessage - Message to display while loading
  * @param {React.ReactNode} props.fallback - Custom fallback component (optional)
- * @param {number} props.refreshTimeout - Time in ms before showing refresh link (default: 10000)
  * @param {Object} props.componentProps - Props to pass to the lazy-loaded component
  * @returns {React.ReactElement} - The wrapped component
  */
 const LazyComponent = ({
   component: Component,
-  loadingMessage = 'Loading...',
   fallback = null,
-  refreshTimeout = 10000,
   ...componentProps
 }) => {
-  const LoadingFallback = fallback || (
-    <EnhancedLoadingSpinner 
-      message={loadingMessage} 
-      refreshTimeout={refreshTimeout} 
-    />
-  );
+  // Default fallback is null - the LoadingContext will show the top progress bar
+  // This prevents the full-page loading popup from appearing during navigation
+  const LoadingFallback = fallback || null;
 
   return (
     <ErrorBoundary>
