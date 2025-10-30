@@ -32,7 +32,76 @@ function ManagerRoutes() {
 
   if (error) {
     console.error(error);
-    return <div>Oops... {error.message}</div>;
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        padding: '20px',
+        backgroundColor: '#f5f5f5'
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          padding: '40px',
+          maxWidth: '500px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            fontSize: '48px',
+            marginBottom: '20px'
+          }}>⚠️</div>
+          <h2 style={{
+            margin: '0 0 16px 0',
+            fontSize: '24px',
+            color: '#333'
+          }}>Something Went Wrong</h2>
+          <p style={{
+            margin: '0 0 24px 0',
+            color: '#666',
+            fontSize: '16px',
+            lineHeight: '1.5'
+          }}>
+            We encountered an error while loading the application. Please try refreshing the page.
+          </p>
+          {error.message && (
+            <p style={{
+              margin: '0 0 24px 0',
+              padding: '12px',
+              backgroundColor: '#f8f8f8',
+              borderRadius: '4px',
+              color: '#999',
+              fontSize: '14px',
+              fontFamily: 'monospace',
+              wordBreak: 'break-word'
+            }}>
+              {error.message}
+            </p>
+          )}
+          <button
+            onClick={() => window.location.href = '/manager/'}
+            style={{
+              backgroundColor: '#1976d2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '12px 24px',
+              fontSize: '16px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.target.style.backgroundColor = '#1565c0'}
+            onMouseOut={(e) => e.target.style.backgroundColor = '#1976d2'}
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (isLoading) {

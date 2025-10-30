@@ -149,13 +149,44 @@ class KeycloakService {
   async getAccessTokenSilently(options) {
     try {
       if (!this.keycloakInstance || !this.keycloakInstance.token) {
+        console.warn("No Keycloak token available, redirecting to login");
+        // Clear auth state
+        this.authState = {
+          user: null,
+          isAuthenticated: false,
+          accessToken: null,
+        };
+        this._notifyStateChange();
+        
+        // Redirect to login page
+        setTimeout(() => {
+          window.location.replace('/login');
+        }, 100);
         throw new Error("Login required");
       }
 
       // Check if token is about to expire and refresh it
       if (this.keycloakInstance.isTokenExpired(30)) {
         // 30 seconds threshold
-        await this.keycloakInstance.updateToken(60);
+        try {
+          await this.keycloakInstance.updateToken(60);
+        } catch (refreshError) {
+          console.error("Failed to refresh token, session may be expired:", refreshError?.message || "Unknown refresh error");
+          
+          // Clear auth state
+          this.authState = {
+            user: null,
+            isAuthenticated: false,
+            accessToken: null,
+          };
+          this._notifyStateChange();
+          
+          // Redirect to login page
+          setTimeout(() => {
+            window.location.replace('/login');
+          }, 100);
+          throw new Error("Token expired");
+        }
       }
 
       this.authState.accessToken = this.keycloakInstance.token;
@@ -319,11 +350,23 @@ class KeycloakService {
         })
         .catch((error) => {
           console.error(
-            "Failed to refresh token",
+            "Failed to refresh token, session expired",
             error?.message || "Unknown refresh error"
           );
-          // Session might be expired, redirect to login
-          this.login();
+          
+          // Clear auth state
+          this.authState = {
+            user: null,
+            isAuthenticated: false,
+            accessToken: null,
+          };
+          this._notifyStateChange();
+          
+          // Session is expired, redirect to login page
+          console.log("Redirecting to login page due to expired session");
+          setTimeout(() => {
+            window.location.replace('/login');
+          }, 100);
         });
     };
   }
