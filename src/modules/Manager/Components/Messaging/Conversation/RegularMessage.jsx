@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { formatStatus } from '../utils/ConversationUtils';
+import MarkdownRenderer from './MarkdownRenderer';
 
 /**
  * Component for displaying regular incoming/outgoing messages
@@ -217,21 +218,28 @@ const RegularMessage = ({ message, isRecent = false }) => {
                         </Box>
                     </Box>
                     
-                    <Typography 
-                        variant="body2" 
-                        sx={{ 
-                            whiteSpace: 'pre-wrap', 
-                            lineHeight: 1.4,
-                            mt: 1,
-                            mb: 1,
-                            pr: 1,
-                            overflowWrap: 'break-word',
-                            wordBreak: 'break-word',
-                            wordWrap: 'break-word'
-                        }}
-                    >
-                        {messageContent}
-                    </Typography>
+                    {/* Render markdown for outgoing messages (from agent), plain text for incoming messages */}
+                    {!isIncoming ? (
+                        <Box sx={{ mt: 1, mb: 1, pr: 1 }}>
+                            <MarkdownRenderer content={messageContent} />
+                        </Box>
+                    ) : (
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                whiteSpace: 'pre-wrap', 
+                                lineHeight: 1.4,
+                                mt: 1,
+                                mb: 1,
+                                pr: 1,
+                                overflowWrap: 'break-word',
+                                wordBreak: 'break-word',
+                                wordWrap: 'break-word'
+                            }}
+                        >
+                            {messageContent}
+                        </Typography>
+                    )}
                     
                     <Collapse in={expanded} timeout="auto" unmountOnExit sx={{ mt: 2 }}>
                         <Divider sx={{ my: 1, borderColor: theme.palette.grey[300] }} />
