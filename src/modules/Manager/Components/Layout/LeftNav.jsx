@@ -3,6 +3,7 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import AirIcon from '@mui/icons-material/Air';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
@@ -24,7 +25,12 @@ const NAV_ITEMS = [
     label: 'Runs',
     isSelected: (pathname) => pathname === '/manager/runs' || pathname.startsWith('/manager/runs/') || pathname === '/manager',
   },
-
+  {
+    to: '/manager/schedules',
+    icon: <ScheduleIcon />,
+    label: 'Schedules',
+    isSelected: (pathname) => pathname === '/manager/schedules' || pathname.startsWith('/manager/schedules/'),
+  },
   {
     to: '/manager/knowledge',
     icon: <TextSnippetIcon />,
