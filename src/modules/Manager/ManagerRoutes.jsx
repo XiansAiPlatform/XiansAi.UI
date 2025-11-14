@@ -4,6 +4,7 @@ import { NotificationProvider } from './contexts/NotificationContext';
 import { AuditProvider } from './contexts/AuditContext';
 import WorkflowList from './Components/Runs/WorkflowList';
 import WorkflowDetails from './Components/Runs/WorkflowDetails/WorkflowDetails';
+import ScheduleList from './Components/Schedules/ScheduleList';
 import Layout from './Components/Layout/Layout';
 import { SliderProvider } from './contexts/SliderContext';
 import { LoadingProvider } from './contexts/LoadingContext';
@@ -127,6 +128,11 @@ function ManagerRoutes() {
                       <Route path="runs" element={
                         <ProtectedRoute>
                           <WorkflowList />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="schedules" element={
+                        <ProtectedRoute>
+                          <ScheduleList />
                         </ProtectedRoute>
                       } />
                       <Route path="definitions/deployed" element={

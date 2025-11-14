@@ -13,3 +13,4 @@ export { useUserTenantApi } from './user-tenant-api';
 export { useUserApi } from './user-api';
 export { useOidcConfigApi } from './oidc-config-api';
 export { useTemplatesApi } from './templates-api';
+export { useScheduleApi, scheduleService } from './schedule-api';
