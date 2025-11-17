@@ -183,7 +183,7 @@ export const scheduleService = {
       }
     });
     
-    const response = await fetch(`${apiBaseUrl}/api/user/rest/schedules?${queryParams}`, {
+    const response = await fetch(`${apiBaseUrl}/api/client/schedules?${queryParams}`, {
       headers: {
         'Content-Type': 'application/json',
         // Note: In a real implementation, you'd need to handle authentication
@@ -200,7 +200,7 @@ export const scheduleService = {
 
   async getUpcomingRuns(scheduleId, count = 10) {
     const apiBaseUrl = window.location.origin;
-    const response = await fetch(`${apiBaseUrl}/api/user/rest/schedules/${scheduleId}/upcoming-runs?count=${count}`, {
+    const response = await fetch(`${apiBaseUrl}/api/client/schedules/${scheduleId}/upcoming-runs?count=${count}`, {
       headers: {
         'Content-Type': 'application/json',
       }
@@ -215,7 +215,7 @@ export const scheduleService = {
 
   async getScheduleById(scheduleId) {
     const apiBaseUrl = window.location.origin;
-    const response = await fetch(`${apiBaseUrl}/api/user/rest/schedules/${scheduleId}`, {
+    const response = await fetch(`${apiBaseUrl}/api/client/schedules/${scheduleId}`, {
       headers: {
         'Content-Type': 'application/json',
       }
