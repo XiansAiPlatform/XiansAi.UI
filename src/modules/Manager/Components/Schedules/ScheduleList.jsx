@@ -31,7 +31,6 @@ import EmptyState from '../Common/EmptyState';
 
 const ScheduleList = () => {
   const [schedules, setSchedules] = useState([]);
-  const [filteredSchedules, setFilteredSchedules] = useState([]);
   const [error, setError] = useState(null);
   const isMobile = useMediaQuery('(max-width:768px)');
 
@@ -49,22 +48,24 @@ const ScheduleList = () => {
 
   useEffect(() => {
     loadSchedules();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [schedules, filters]);
+  }, [filters]); // React to filter changes
 
   const loadSchedules = async () => {
     try {
       setLoading(true);
       setError(null);
       
+      // Pass filters directly to API - server handles filtering
       const data = await api.getSchedules(filters);
       setSchedules(data);
       
       if (data.length === 0) {
-        showSuccess('No schedules found. Schedules will appear here when agents create them.');
+        const hasFilters = Object.values(filters).some(value => value !== '');
+        if (hasFilters) {
+          showSuccess('No schedules match your current filters.');
+        } else {
+          showSuccess('No schedules found. Schedules will appear here when agents create them.');
+        }
       }
     } catch (error) {
       console.error('Failed to load schedules:', error);
@@ -74,37 +75,6 @@ const ScheduleList = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const applyFilters = () => {
-    let filtered = [...schedules];
-
-    if (filters.agentName) {
-      filtered = filtered.filter(schedule =>
-        schedule.agentName.toLowerCase().includes(filters.agentName.toLowerCase())
-      );
-    }
-
-    if (filters.workflowType) {
-      filtered = filtered.filter(schedule =>
-        schedule.workflowType.toLowerCase().includes(filters.workflowType.toLowerCase())
-      );
-    }
-
-    if (filters.status) {
-      filtered = filtered.filter(schedule => schedule.status === filters.status);
-    }
-
-    if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
-      filtered = filtered.filter(schedule =>
-        schedule.id.toLowerCase().includes(searchLower) ||
-        schedule.description?.toLowerCase().includes(searchLower) ||
-        schedule.agentName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    setFilteredSchedules(filtered);
   };
 
   const handleFilterChange = (newFilters) => {
@@ -226,7 +196,7 @@ const ScheduleList = () => {
         )}
 
         <Box>
-            {filteredSchedules.length === 0 ? (
+            {schedules.length === 0 ? (
               <EmptyState
                 icon={<ScheduleIcon sx={{ fontSize: 64, color: 'text.secondary' }} />}
                 title="No schedules found"
@@ -248,7 +218,7 @@ const ScheduleList = () => {
               />
             ) : (
               <Grid container spacing={2}>
-                {filteredSchedules.map((schedule) => (
+                {schedules.map((schedule) => (
                   <Grid item xs={12} sm={6} lg={4} key={schedule.id}>
                     <Card
                       sx={{
