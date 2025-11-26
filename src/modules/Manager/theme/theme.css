@@ -36,6 +36,10 @@
   --status-continuedAsNew-color: #4a148c;
   --status-failed-bg: #ffecb3;
   --status-failed-color: #e65100;
+  --status-suspended-bg: #fff3e0;
+  --status-suspended-color: #f57c00;
+  --status-timedout-bg: #f3e5f5;
+  --status-timedout-color: #7b1fa2;
   
   /* Text colors - Nordic Dark */
   --text-primary: #26353F;

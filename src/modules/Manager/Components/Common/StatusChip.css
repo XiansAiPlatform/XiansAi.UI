@@ -47,4 +47,19 @@
 .status-chip.terminated {
   background-color: var(--status-terminated-bg) !important;
   color: var(--status-terminated-color) !important;
-} 
+}
+
+.status-chip.suspended {
+  background-color: var(--status-suspended-bg) !important;
+  color: var(--status-suspended-color) !important;
+}
+
+.status-chip.timedout {
+  background-color: var(--status-timedout-bg) !important;
+  color: var(--status-timedout-color) !important;
+}
+
+.status-chip.failed {
+  background-color: var(--status-failed-bg) !important;
+  color: var(--status-failed-color) !important;
+}
