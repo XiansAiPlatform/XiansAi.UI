@@ -106,8 +106,16 @@ export const handleApiError = async (error, customMessage = '', showErrorCallbac
       technicalDetails += ` | Method: ${error.method}`;
     }
     
-    // Add specific handling for common error types
-    if (error.message.includes('Failed to execute \'json\' on \'Response\'')) {
+    // Special handling for token usage exceeded
+    if (error.errorCode === 'TOKEN_USAGE_EXCEEDED' || error.message.includes('Token usage limit exceeded')) {
+      userMessage = 'Token usage limit exceeded. You have reached your token quota for this period.';
+      suggestedActions = [
+        'Wait for the usage window to reset',
+        'Contact your administrator to increase your token limit',
+        'Reduce the length or frequency of your requests'
+      ];
+      errorTitle = 'Token Limit Exceeded';
+    } else if (error.message.includes('Failed to execute \'json\' on \'Response\'')) {
       userMessage = 'Server returned invalid data. This might be a temporary issue.';
       suggestedActions = ['Try refreshing the page', 'Check if the server is running properly', 'Contact support if the issue persists'];
     } else if (error.message.includes('body stream already read')) {

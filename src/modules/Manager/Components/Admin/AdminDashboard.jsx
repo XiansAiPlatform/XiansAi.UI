@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import { Box, Tabs, Tab, Paper } from "@mui/material";
 import UserManagement from "./UserManagement";
 import TenantManagement from "./TenantManagement";
+import TokenUsageManagement from "./Usage/TokenUsageManagement";
 import PageLayout from '../Common/PageLayout';
 
 const tabLabels = [
   "Tenants",
   "Users",
+  "Usage Limits",
 ];
 
 export default function AdminDashboard() {
@@ -63,6 +65,7 @@ export default function AdminDashboard() {
             <Box>
               {tab === 0 && <TenantManagement />}
               {tab === 1 && <UserManagement />}
+              {tab === 2 && <TokenUsageManagement />}
             </Box>
           </Paper>
         </Box>

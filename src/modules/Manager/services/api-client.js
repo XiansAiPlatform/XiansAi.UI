@@ -114,16 +114,30 @@ export const useApiClient = () => {
         });
 
         if (!response.ok) {
-          // Handle 403 Forbidden error by redirecting to home page
-          // This prevents users from seeing permission-related errors and provides
-          // a clean user experience by redirecting them to a safe location
+          // Special-case 403: distinguish token limit violations from auth/permission errors
+          let parsedErrorBody = null;
           if (response.status === 403) {
+            try {
+              parsedErrorBody = await response.clone().json();
+            } catch {
+              // ignore parse errors here; fallback handling below
+            }
+
+            if (parsedErrorBody && parsedErrorBody.error === 'TOKEN_USAGE_EXCEEDED') {
+              const error = new Error('Token usage limit exceeded. Please wait for the usage window to reset or contact your administrator to increase the limit.');
+              error.status = response.status;
+              error.statusText = response.statusText;
+              error.url = url;
+              error.method = options.method || 'GET';
+              error.details = parsedErrorBody;
+              error.errorCode = 'TOKEN_USAGE_EXCEEDED';
+              throw error;
+            }
+
             console.error('Access forbidden (403). Redirecting to home page.');
-            // Mark that we're redirecting due to 403 to help detect loops
             sessionStorage.setItem('from403', 'true');
-            //navigate('/manager/unauthorized');
             navigate('/manager/landing');
-            return; // Exit early to prevent further error handling
+            return;
           }
 
           // Parse error response according to standard server format: { error: "message" }
@@ -131,7 +145,7 @@ export const useApiClient = () => {
           let errorDetails = null;
           
           try {
-            const errorData = await response.json();
+            const errorData = parsedErrorBody || await response.json();
             if (errorData && errorData.error) {
               errorMessage = errorData.error;
               errorDetails = errorData;
