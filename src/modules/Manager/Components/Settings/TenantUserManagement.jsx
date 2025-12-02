@@ -50,14 +50,14 @@ export default function TenantUserManagement() {
   const [loading, setLocalLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [pendingFilters, setPendingFilters] = useState({
+
+  const DEFAULT_FILTERS = {
     type: "ALL",
     search: "",
-  });
-  const [filters, setFilters] = useState({
-    type: "ALL",
-    search: "",
-  });
+  };
+
+  const [pendingFilters, setPendingFilters] = useState({ ...DEFAULT_FILTERS });
+  const [filters, setFilters] = useState({ ...DEFAULT_FILTERS });
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -129,6 +129,12 @@ export default function TenantUserManagement() {
   // Only apply filters and reset page when button is clicked
   const handleApplyFilters = () => {
     setFilters({ ...pendingFilters });
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setPendingFilters({ ...DEFAULT_FILTERS });
+    setFilters({ ...DEFAULT_FILTERS });
     setPage(1);
   };
 
@@ -320,6 +326,12 @@ export default function TenantUserManagement() {
             label="Name or Email"
             value={pendingFilters.search}
             onChange={handleFilterChange("search")}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleApplyFilters();
+              }
+            }}
           />
           <Button
             variant="outlined"
@@ -327,6 +339,13 @@ export default function TenantUserManagement() {
             sx={{ ml: 2 }}
           >
             Apply Filters
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={handleResetFilters}
+            sx={{ ml: 2 }}
+          >
+            Reset
           </Button>
         </Box>
 
