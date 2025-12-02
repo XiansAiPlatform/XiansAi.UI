@@ -150,11 +150,14 @@ const ScheduleFilters = ({ filters, onFilterChange, onRefresh, isLoading = false
               <MenuItem value="">
                 <em>All Status</em>
               </MenuItem>
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Paused">Paused</MenuItem>
+              <MenuItem value="Running">Running</MenuItem>
               <MenuItem value="Completed">Completed</MenuItem>
               <MenuItem value="Failed">Failed</MenuItem>
-              <MenuItem value="Deleted">Deleted</MenuItem>
+              <MenuItem value="Canceled">Canceled</MenuItem>
+              <MenuItem value="Terminated">Terminated</MenuItem>
+              <MenuItem value="TimedOut">Timed Out</MenuItem>
+              <MenuItem value="ContinuedAsNew">Continued As New</MenuItem>
+              <MenuItem value="Suspended">Suspended</MenuItem>
             </Select>
           </FormControl>
         </Grid>
