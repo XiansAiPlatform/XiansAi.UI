@@ -7,6 +7,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import { useAuditContext } from '../../contexts/AuditContext';
 import { useTenant } from '../../contexts/TenantContext';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -48,6 +49,12 @@ const NAV_ITEMS = [
     icon: <ChecklistOutlinedIcon />,
     label: 'Audits',
     isSelected: (pathname) => pathname === '/manager/auditing' || pathname.startsWith('/manager/auditing/'),
+  },
+  {
+    to: '/manager/usage-statistics',
+    icon: <BarChartIcon />,
+    label: 'Usage Statistics',
+    isSelected: (pathname) => pathname === '/manager/usage-statistics' || pathname.startsWith('/manager/usage-statistics/'),
   },
   {
     to: '/manager/settings',

@@ -27,6 +27,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import AuditingPage from './Components/Auditing/AuditingPage';
 import { useNavigate } from 'react-router-dom';
 import AdminDashboardRoute from './Components/Admin/AdminDashboardRoute';
+import UsageStatistics from './Components/UsageStatistics/UsageStatistics';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -178,6 +179,11 @@ function ManagerRoutes() {
                       <Route path="auditing" element={
                         <ProtectedRoute>
                           <AuditingPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="usage-statistics" element={
+                        <ProtectedRoute>
+                          <UsageStatistics />
                         </ProtectedRoute>
                       } />
                       <Route path="admin" element={
