@@ -2,9 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
-  List,
-  ListItem,
-  ListItemText,
   Chip,
   Alert,
   CircularProgress,
@@ -15,9 +12,8 @@ import {
   CardContent,
   Grid,
   Button,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails
+  Collapse,
+  IconButton
 } from '@mui/material';
 import { format, formatDistanceToNow, parseISO, isValid } from 'date-fns';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -30,7 +26,6 @@ import HistoryIcon from '@mui/icons-material/History';
 import AgentIcon from '@mui/icons-material/SmartToy';
 import WorkflowIcon from '@mui/icons-material/AccountTree';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import SettingsIcon from '@mui/icons-material/Settings';
 import { useScheduleApi } from '../../services';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
@@ -42,6 +37,7 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
+  const [headerExpanded, setHeaderExpanded] = useState(false);
 
   const { showError } = useNotification();
   const api = useScheduleApi();
@@ -134,49 +130,12 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
     }
   };
 
-  const formatScheduleSpec = (spec) => {
-    if (!spec) return 'Unknown';
-    
-    // Try to parse common patterns and make them more readable
-    const cleanSpec = spec.toString().toLowerCase();
-    
-    // Interval patterns
-    if (cleanSpec.includes('every')) {
-      return spec; // Already formatted
-    }
-    
-    // Common cron patterns
-    const cronPatterns = {
-      '* * * * *': 'Every minute',
-      '0 * * * *': 'Every hour',
-      '0 0 * * *': 'Every day at midnight',
-      '0 9 * * *': 'Every day at 9:00 AM',
-      '0 0 * * 0': 'Every Sunday at midnight',
-      '0 0 1 * *': 'First day of every month',
-      '0 0 * * 1-5': 'Every weekday at midnight'
-    };
-    
-    const matchedPattern = Object.entries(cronPatterns).find(([pattern]) => 
-      spec.includes(pattern)
-    );
-    
-    if (matchedPattern) {
-      return matchedPattern[1];
-    }
-    
-    // If no pattern matches, try to format it nicely
-    if (spec.length > 50) {
-      return spec.substring(0, 50) + '...';
-    }
-    
-    return spec;
-  };
 
   const renderRunsList = (runs, emptyMessage, emptyIcon) => {
     if (loading) {
       return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-          <CircularProgress size={32} />
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress size={40} thickness={4} />
         </Box>
       );
     }
@@ -185,14 +144,18 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
       return (
         <Box sx={{ 
           textAlign: 'center', 
-          py: 4, 
+          py: 8, 
           display: 'flex', 
           flexDirection: 'column', 
           alignItems: 'center', 
-          justifyContent: 'center' 
+          justifyContent: 'center',
+          bgcolor: 'grey.50',
+          borderRadius: 2,
+          border: '1px dashed',
+          borderColor: 'grey.300'
         }}>
           {emptyIcon}
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+          <Typography variant="body1" color="text.secondary" sx={{ fontWeight: 500 }}>
             {emptyMessage}
           </Typography>
         </Box>
@@ -200,55 +163,87 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
     }
 
     return (
-      <List sx={{ 
+      <Box sx={{ 
         bgcolor: 'background.paper', 
-        border: '1px solid', 
-        borderColor: 'divider', 
-        borderRadius: 1,
-        maxHeight: 400,
-        overflow: 'auto'
+        borderRadius: 2,
+        overflow: 'hidden'
       }}>
         {runs.map((run, index) => {
           const timeData = formatTimeForDisplay(run.scheduledTime || run.actualRunTime);
           if (!timeData) return null;
           
           return (
-            <ListItem 
-              key={run.runId} 
-              divider={index < runs.length - 1}
-              sx={{ py: 2 }}
+            <Box
+              key={run.runId}
+              sx={{
+                p: 2.5,
+                borderBottom: index < runs.length - 1 ? '1px solid' : 'none',
+                borderColor: 'divider',
+                transition: 'background-color 0.2s',
+                '&:hover': {
+                  bgcolor: 'grey.50'
+                }
+              }}
             >
-             
-              <ListItemText
-                primary={
-                  <Tooltip title={timeData.full} arrow>
-                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                      {timeData.formatted}
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1 }}>
+                <Tooltip title={timeData.full} arrow placement="top">
+                  <Typography variant="body1" sx={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                    {timeData.formatted}
+                  </Typography>
+                </Tooltip>
+                <Chip 
+                  label={timeData.relative} 
+                  size="small" 
+                  sx={{ 
+                    height: 24, 
+                    fontSize: '0.75rem',
+                    bgcolor: 'primary.50',
+                    color: 'primary.main',
+                    fontWeight: 500
+                  }} 
+                />
+              </Box>
+              
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                {run.workflowRunId && (
+                  <Box sx={{ 
+                    bgcolor: 'grey.100', 
+                    px: 1.5, 
+                    py: 0.5, 
+                    borderRadius: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                      ID:
                     </Typography>
-                  </Tooltip>
-                }
-                secondary={
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {timeData.relative}
+                    <Typography variant="caption" sx={{ fontFamily: 'monospace', fontSize: '0.7rem', fontWeight: 500 }}>
+                      {run.workflowRunId}
                     </Typography>
-                    {run.workflowRunId && (
-                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
-                        Run ID: {run.workflowRunId}
-                      </Typography>
-                    )}
-                    {run.duration && (
-                      <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
-                        Duration: {run.duration}
-                      </Typography>
-                    )}
                   </Box>
-                }
-              />
-            </ListItem>
+                )}
+                {run.duration && (
+                  <Box sx={{ 
+                    bgcolor: 'grey.100', 
+                    px: 1.5, 
+                    py: 0.5, 
+                    borderRadius: 1,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.5
+                  }}>
+                    <AccessTimeIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+                    <Typography variant="caption" sx={{ fontSize: '0.7rem', fontWeight: 500 }}>
+                      {run.duration}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
           );
         })}
-      </List>
+      </Box>
     );
   };
 
@@ -257,203 +252,311 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
       height: '100%',
       display: 'flex', 
       flexDirection: 'column',
+      p: 2,
+      bgcolor: 'grey.50'
     }}>
-
-      {/* Header with schedule info and actions */}
-      <Box sx={{ mb: 5, flexShrink: 0 }}>
-        
-
-        {/* Key schedule information cards */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent sx={{ p: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <AgentIcon color="primary" fontSize="small" />
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Agent
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                  <Typography variant="h6" sx={{ 
-                    fontWeight: 600,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    minWidth: 0
-                  }}>
-                    {scheduleDetails.agentName}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    minWidth: 0
-                  }}>
-                    ID: {scheduleDetails.agentId || scheduleDetails.id}
-                  </Typography>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Card variant="outlined" sx={{ height: '100%' }}>
-              <CardContent sx={{ p: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <WorkflowIcon color="primary" fontSize="small" />
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Workflow
-                  </Typography>
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {scheduleDetails.workflowType}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-        
-        {/* Tabs for upcoming runs and history */}
-        <Box sx={{ mb: 5 }}>
-          <Tabs 
-            value={activeTab} 
-            onChange={handleTabChange} 
-            sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
-          >
-            <Tab 
-              label={`Upcoming (${upcomingRuns.length})`}
-              icon={<AccessTimeIcon sx={{ color: 'inherit' }} />}
-              iconPosition="start"
-              sx={{ minHeight: 48 }}
-            />
-            <Tab 
-              label={`Recent (${recentRuns.length})`}
-              icon={<HistoryIcon sx={{ color: 'inherit' }} />}
-              iconPosition="start"
-              sx={{ minHeight: 48 }}
-            />
-          </Tabs>
-          
-          <Box sx={{ maxHeight: 300, overflow: 'hidden' }}>
-            {activeTab === 0 && renderRunsList(
-              upcomingRuns, 
-              'No upcoming runs scheduled',
-              <AccessTimeIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            )}
-            {activeTab === 1 && renderRunsList(
-              recentRuns,
-              'No execution history available',
-              <HistoryIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
-            )}
-          </Box>
-        </Box>
-        
-        {/* Schedule Configuration */}
-        <Accordion sx={{ mb: 5 }}>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SettingsIcon fontSize="small" />
-              <Typography variant="subtitle1">Schedule Configuration</Typography>
-            </Box>
-          </AccordionSummary>
-          <AccordionDetails>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Status
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <Chip 
-                    label={scheduleDetails.status} 
-                    {...getStatusChipProps(scheduleDetails.status)}
-                  />
-                  
-                </Box>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  Schedule Pattern
-                </Typography>
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    fontFamily: 'monospace', 
-                    fontSize: '0.875rem', 
-                    bgcolor: 'grey.50', 
-                    p: 1, 
-                    borderRadius: 1,
-                    border: '1px solid',
-                    borderColor: 'grey.300'
-                  }}
-                >
-                  {formatScheduleSpec(scheduleDetails.scheduleSpec)}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                  Raw: {scheduleDetails.scheduleSpec}
-                </Typography>
-              </Grid>
-              
-              {scheduleDetails.description && (
-                <Grid item xs={12}>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Description
-                  </Typography>
-                  <Typography variant="body1">
-                    {scheduleDetails.description}
-                  </Typography>
-                </Grid>
-              )}
-              
-              <Grid item xs={6} md={3}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Total Executions
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600, color: 'primary.main' }}>
-                  {scheduleDetails.executionCount?.toLocaleString() || 0}
-                </Typography>
-              </Grid>
-              <Grid item xs={6} md={3}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Created
-                </Typography>
-                <Typography variant="body1">
-                  {formatTimeForDisplay(scheduleDetails.createdAt)?.relative || 'Unknown'}
-                </Typography>
-              </Grid>
-              <Grid item xs={6} md={3}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Next Run
-                </Typography>
-                <Typography variant="body1" color="success.main" sx={{ fontWeight: 500 }}>
-                  {formatTimeForDisplay(scheduleDetails.nextRunTime)?.relative || 'Not scheduled'}
-                </Typography>
-              </Grid>
-              <Grid item xs={6} md={3}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Last Run
-                </Typography>
-                <Typography variant="body1">
-                  {scheduleDetails.lastRunTime 
-                    ? formatTimeForDisplay(scheduleDetails.lastRunTime)?.relative 
-                    : 'Never executed'
-                  }
-                </Typography>
-              </Grid>
-            </Grid>
-          </AccordionDetails>
-        </Accordion>
-      </Box>
-      
       {/* Error display */}
       {error && (
-        <Alert severity="error" sx={{ mb: 2, flexShrink: 0 }}>
+        <Alert 
+          severity="error" 
+          sx={{ 
+            mb: 2,
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(211, 47, 47, 0.15)'
+          }}
+        >
           <Typography variant="body2">{error}</Typography>
           <Button size="small" onClick={loadScheduleData} sx={{ mt: 1 }}>
             Retry
           </Button>
         </Alert>
       )}
+
+      {/* Header Section - Schedule Details and Configuration */}
+      <Card 
+        elevation={0}
+        sx={{ 
+          mb: 2,
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: headerExpanded ? 'primary.main' : 'divider',
+          bgcolor: 'background.paper',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            borderColor: 'primary.main',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+          }
+        }}
+      >
+        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+          {/* Compact Header Row - Always Visible */}
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              borderRadius: 1,
+              p: 0.5,
+              transition: 'background-color 0.2s',
+              '&:hover': {
+                bgcolor: 'grey.50'
+              }
+            }}
+            onClick={() => setHeaderExpanded(!headerExpanded)}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1, minWidth: 0 }}>
+              <Box sx={{ 
+                p: 0.75, 
+                bgcolor: headerExpanded ? 'primary.main' : 'primary.50',
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.3s ease'
+              }}>
+                <ScheduleIcon sx={{ fontSize: 20, color: headerExpanded ? 'white' : 'primary.main' }} />
+              </Box>
+              
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    fontWeight: 700, 
+                    color: 'text.primary', 
+                    lineHeight: 1.3,
+                    fontSize: '0.95rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {scheduleDetails.id}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                    {scheduleDetails.workflowType}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                    •
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                    {scheduleDetails.executionCount?.toLocaleString() || 0} runs
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Chip 
+                label={scheduleDetails.status} 
+                {...getStatusChipProps(scheduleDetails.status)}
+                sx={{ fontSize: '0.75rem', height: 24, fontWeight: 600 }}
+              />
+              <IconButton 
+                size="small"
+                sx={{ 
+                  transition: 'transform 0.3s ease',
+                  transform: headerExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
+                }}
+              >
+                <ExpandMoreIcon fontSize="small" />
+              </IconButton>
+            </Box>
+          </Box>
+
+          {/* Expandable Configuration Details */}
+          <Collapse in={headerExpanded} timeout={300}>
+            <Box sx={{ pt: 2, mt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+              <Grid container spacing={1.5}>
+                {/* Workflow Type */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box sx={{ 
+                    p: 1.5, 
+                    bgcolor: 'grey.50', 
+                    borderRadius: 1.5,
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    height: '100%'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                      <WorkflowIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        Workflow Type
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary', fontSize: '0.9rem' }}>
+                      {scheduleDetails.workflowType}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                {/* Agent Info */}
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box sx={{ 
+                    p: 1.5, 
+                    bgcolor: 'grey.50', 
+                    borderRadius: 1.5,
+                    border: '1px solid',
+                    borderColor: 'grey.200',
+                    height: '100%'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.75 }}>
+                      <AgentIcon sx={{ fontSize: 16, color: 'primary.main' }} />
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                        Agent
+                      </Typography>
+                    </Box>
+                    <Tooltip title={scheduleDetails.agentName} arrow>
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          fontWeight: 600, 
+                          color: 'text.primary', 
+                          fontSize: '0.9rem',
+                          mb: 0.5,
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis'
+                        }}
+                      >
+                        {scheduleDetails.agentName}
+                      </Typography>
+                    </Tooltip>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace', fontSize: '0.65rem' }}>
+                      {scheduleDetails.agentId}
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                {/* Total Runs */}
+                <Grid item xs={4} sm={4} md={2}>
+                  <Box sx={{ 
+                    p: 1.5, 
+                    bgcolor: 'primary.50', 
+                    borderRadius: 1.5,
+                    textAlign: 'center',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main', fontSize: '1.25rem', lineHeight: 1.2 }}>
+                      {scheduleDetails.executionCount?.toLocaleString() || 0}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                      Total Runs
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                {/* Next Run */}
+                <Grid item xs={4} sm={4} md={2}>
+                  <Box sx={{ 
+                    p: 1.5, 
+                    bgcolor: 'success.50', 
+                    borderRadius: 1.5,
+                    textAlign: 'center',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}>
+                    <Typography variant="body2" color="success.main" sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.3 }}>
+                      {formatTimeForDisplay(scheduleDetails.nextRunTime)?.relative || 'Not scheduled'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                      Next Run
+                    </Typography>
+                  </Box>
+                </Grid>
+
+                {/* Last Run */}
+                <Grid item xs={4} sm={4} md={2}>
+                  <Box sx={{ 
+                    p: 1.5, 
+                    bgcolor: 'grey.100', 
+                    borderRadius: 1.5,
+                    textAlign: 'center',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                  }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary', fontSize: '0.8rem', lineHeight: 1.3 }}>
+                      {scheduleDetails.lastRunTime 
+                        ? formatTimeForDisplay(scheduleDetails.lastRunTime)?.relative 
+                        : 'Never'
+                      }
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', fontWeight: 600 }}>
+                      Last Run
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Collapse>
+        </CardContent>
+      </Card>
+
+      {/* Runs Section */}
+      <Card 
+        elevation={0}
+        sx={{ 
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'divider',
+          bgcolor: 'background.paper',
+          overflow: 'hidden',
+          minHeight: 0
+        }}
+      >
+        <Tabs 
+          value={activeTab} 
+          onChange={handleTabChange} 
+          sx={{ 
+            px: 2,
+            pt: 1.5,
+            borderBottom: 1, 
+            borderColor: 'divider',
+            flexShrink: 0,
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              minHeight: 42
+            }
+          }}
+        >
+          <Tab 
+            label={`Upcoming (${upcomingRuns.length})`}
+            icon={<AccessTimeIcon />}
+            iconPosition="start"
+          />
+          <Tab 
+            label={`Past (${recentRuns.length})`}
+            icon={<HistoryIcon />}
+            iconPosition="start"
+          />
+        </Tabs>
+        
+        <Box sx={{ flex: 1, minHeight: 0, overflow: 'auto', p: 2 }}>
+          {activeTab === 0 && renderRunsList(
+            upcomingRuns, 
+            'No upcoming runs scheduled',
+            <AccessTimeIcon sx={{ fontSize: 56, color: 'grey.400', mb: 2 }} />
+          )}
+          {activeTab === 1 && renderRunsList(
+            recentRuns,
+            'No execution history available',
+            <HistoryIcon sx={{ fontSize: 56, color: 'grey.400', mb: 2 }} />
+          )}
+        </Box>
+      </Card>
     </Box>
   );
 };

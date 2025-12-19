@@ -6,13 +6,11 @@ import UsageChart from './UsageChart';
 import UserBreakdownTable from './UserBreakdownTable';
 import AgentBreakdownTable from './AgentBreakdownTable';
 import { useUsageStatisticsApi } from '../../services/usage-statistics-api';
-import { useAuth } from '../../auth/AuthContext';
 import { useTenant } from '../../contexts/TenantContext';
 import './UsageStatistics.css';
 
 const UsageStatistics = () => {
-  const { user } = useAuth();
-  const { selectedOrg, isAdmin } = useTenant();
+  const { isAdmin } = useTenant();
   const { getUsageStatistics, getUsersWithUsage } = useUsageStatisticsApi();
 
   // Filter state
