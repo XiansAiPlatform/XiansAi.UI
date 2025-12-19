@@ -16,7 +16,8 @@ import {
   Person,
   Schedule,
   Timeline,
-  WorkHistory
+  WorkHistory,
+  Air
 } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import StatusChip from '../Common/StatusChip';
@@ -107,6 +108,25 @@ const WorkflowRunCard = ({
               flexWrap: 'wrap'
             }}>
               
+              {/* Workflow Icon */}
+              <Box sx={{
+                mr: 0,
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                p: '5px',
+                boxShadow: '0 0 0 1px var(--border-light)',
+                flexShrink: 0
+              }}>
+                <Air sx={{ 
+                  width: 32, 
+                  height: 32,
+                  opacity: 0.85,
+                  color: 'var(--primary-color)'
+                }} />
+              </Box>
+
               {/* Status Chip */}
               <StatusChip 
                 label={workflow.status || 'Unknown'}

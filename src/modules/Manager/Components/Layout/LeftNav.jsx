@@ -47,13 +47,13 @@ const NAV_ITEMS = [
   {
     to: '/manager/auditing',
     icon: <ChecklistOutlinedIcon />,
-    label: 'Audits',
+    label: 'Logs',
     isSelected: (pathname) => pathname === '/manager/auditing' || pathname.startsWith('/manager/auditing/'),
   },
   {
     to: '/manager/usage-statistics',
     icon: <BarChartIcon />,
-    label: 'Usage Statistics',
+    label: 'Usage Stats',
     isSelected: (pathname) => pathname === '/manager/usage-statistics' || pathname.startsWith('/manager/usage-statistics/'),
   },
   {

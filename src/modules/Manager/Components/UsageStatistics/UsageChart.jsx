@@ -146,7 +146,6 @@ const UsageChart = ({ data, usageType, groupBy }) => {
   // Get value for a specific date from time series data
   const getValueForDate = (dateKey, dataArray) => {
     if (!dataArray) return null;
-    const date = new Date(dateKey);
     for (const d of dataArray) {
       const dDate = new Date(d.date);
       let dKey;
