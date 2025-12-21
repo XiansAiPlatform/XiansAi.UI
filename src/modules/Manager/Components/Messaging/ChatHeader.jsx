@@ -58,6 +58,26 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
         }
     }, [quickMessage, selectedThread?.id]);
 
+    // Helper function to get display name for workflow
+    const getWorkflowDisplayName = () => {
+        if (!selectedThread.workflowType) return 'Bot';
+        
+        const workflowTypeParts = selectedThread.workflowType.split(':');
+        const baseWorkflowName = workflowTypeParts[1]?.trim() || selectedThread.workflowType;
+        
+        // Check if name is available as a separate field
+        if (selectedThread.name && selectedThread.name.trim()) {
+            return `${baseWorkflowName} - ${selectedThread.name.trim()}`;
+        }
+        
+        // Otherwise, check if name is part of workflowType (3rd part after splitting by ':')
+        if (workflowTypeParts.length > 2 && workflowTypeParts[2]?.trim()) {
+            return `${baseWorkflowName} - ${workflowTypeParts[2].trim()}`;
+        }
+        
+        return baseWorkflowName;
+    };
+
     if (!selectedThread) return null;
 
     const handleMenuOpen = (event) => {
@@ -204,7 +224,7 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
                             </Typography>
                             <Tooltip title={selectedThread.workflowType || 'Bot'} arrow>
                                 <Chip 
-                                    label={selectedThread.workflowType || 'Bot'}
+                                    label={getWorkflowDisplayName()}
                                     size="small"
                                     color="secondary"
                                     variant="outlined"

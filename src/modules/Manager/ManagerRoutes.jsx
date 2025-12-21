@@ -28,6 +28,7 @@ import AuditingPage from './Components/Auditing/AuditingPage';
 import { useNavigate } from 'react-router-dom';
 import AdminDashboardRoute from './Components/Admin/AdminDashboardRoute';
 import UsageStatistics from './Components/UsageStatistics/UsageStatistics';
+import DataDocuments from './Components/DataDocuments/DataDocuments';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -134,6 +135,11 @@ function ManagerRoutes() {
                       <Route path="schedules" element={
                         <ProtectedRoute>
                           <ScheduleList />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="data-documents" element={
+                        <ProtectedRoute>
+                          <DataDocuments />
                         </ProtectedRoute>
                       } />
                       <Route path="definitions/deployed" element={
