@@ -80,6 +80,13 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
     }
   };
 
+  const getDisplayName = () => {
+    const workflowTypeParts = definition.workflowType?.split(':');
+    const baseWorkflowName = workflowTypeParts?.[1]?.trim() || definition.workflowType;
+
+    return baseWorkflowName;
+  };
+
   return (
     <>
       <TableRow 
@@ -92,7 +99,7 @@ const DefinitionRow = ({ definition, isOpen, previousRowOpen, onToggle }) => {
               <Typography 
                 className="definition-title"
               >
-                {definition.workflowType?.split(':')[1] || definition.workflowType}
+                {getDisplayName()}
               </Typography>
               <Typography variant="caption">
                 {definition.activityDefinitions?.length > 0 && (

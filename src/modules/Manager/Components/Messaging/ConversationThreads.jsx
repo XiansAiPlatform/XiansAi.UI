@@ -51,6 +51,26 @@ const ConversationThreads = ({
     const [loadingMore, setLoadingMore] = useState(false);
     const previousAgentRef = useRef(null);
 
+    // Helper function to get display name for workflow
+    const getWorkflowDisplayName = (thread) => {
+        if (!thread.workflowType) return '';
+        
+        const workflowTypeParts = thread.workflowType.split(':');
+        const baseWorkflowName = workflowTypeParts[1]?.trim() || thread.workflowType;
+        
+        // Check if name is available as a separate field
+        if (thread.name && thread.name.trim()) {
+            return `${baseWorkflowName} - ${thread.name.trim()}`;
+        }
+        
+        // Otherwise, check if name is part of workflowType (3rd part after splitting by ':')
+        if (workflowTypeParts.length > 2 && workflowTypeParts[2]?.trim()) {
+            return `${baseWorkflowName} - ${workflowTypeParts[2].trim()}`;
+        }
+        
+        return baseWorkflowName;
+    };
+
     // Function to handle opening the form in the slider
     const handleOpenForm = () => {
         openSlider(
@@ -371,10 +391,7 @@ const ConversationThreads = ({
                                                                     minWidth: 0
                                                                 }}
                                                             >
-                                                                {thread.workflowType 
-                                                                    ? thread.workflowType.split(':')[1] || thread.workflowType
-                                                                    : ''
-                                                                }
+                                                                {getWorkflowDisplayName(thread)}
                                                             </Typography>
                                                         </Tooltip>
                                                     </Box>

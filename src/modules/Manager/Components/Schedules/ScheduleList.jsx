@@ -17,7 +17,7 @@ import {
   IconButton,
   useMediaQuery
 } from '@mui/material';
-import { formatDistanceToNow, format, isBefore, addHours } from 'date-fns';
+import { formatDistanceToNow, isBefore, addHours } from 'date-fns';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';

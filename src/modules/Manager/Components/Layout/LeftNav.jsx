@@ -8,6 +8,7 @@ import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import StorageIcon from '@mui/icons-material/Storage';
 import { useAuditContext } from '../../contexts/AuditContext';
 import { useTenant } from '../../contexts/TenantContext';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -31,6 +32,12 @@ const NAV_ITEMS = [
     icon: <ScheduleIcon />,
     label: 'Schedules',
     isSelected: (pathname) => pathname === '/manager/schedules' || pathname.startsWith('/manager/schedules/'),
+  },
+  {
+    to: '/manager/data-documents',
+    icon: <StorageIcon />,
+    label: 'Documents DB',
+    isSelected: (pathname) => pathname === '/manager/data-documents' || pathname.startsWith('/manager/data-documents/'),
   },
   {
     to: '/manager/knowledge',
