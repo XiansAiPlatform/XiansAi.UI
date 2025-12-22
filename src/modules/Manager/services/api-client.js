@@ -272,13 +272,15 @@ export const useApiClient = () => {
       },
 
       // Add stream method for event streaming
-      stream: async (endpoint, onEventReceived) => {
+      stream: async (endpoint, onEventReceived, abortSignal = null) => {
+        let reader = null;
         try {
           const headers = await createAuthHeaders(endpoint);
           const url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
           
           const response = await fetch(url, {
             headers,
+            signal: abortSignal, // Support for aborting the request
           });
 
           if (!response.ok) {
@@ -365,42 +367,94 @@ export const useApiClient = () => {
             throw error;
           }
 
-          const reader = response.body.getReader();
+          reader = response.body.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
 
-          async function readStream() {
-            while (true) {
-              const { done, value } = await reader.read();
-
-              if (done) {
-                break;
+          // Handle abort signal to properly close the reader
+          if (abortSignal) {
+            abortSignal.addEventListener('abort', () => {
+              if (reader) {
+                reader.cancel().catch(() => {}); // Gracefully close the reader
               }
+            });
+          }
 
-              // Append new data to buffer
-              buffer += decoder.decode(value, { stream: true });
+          async function readStream() {
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
 
-              // Split by newlines and process each complete line
-              const lines = buffer.split('\n');
-              // Keep the last potentially incomplete line in the buffer
-              buffer = lines.pop() || '';
-
-              // Process complete lines
-              lines.filter(line => line.trim()).forEach(line => {
-                try {
-                  const event = JSON.parse(line);
-                  onEventReceived(event);
-                } catch (parseError) {
-                  console.warn('Failed to parse event:', parseError);
+                if (done) {
+                  break;
                 }
-              });
+
+                // Append new data to buffer
+                buffer += decoder.decode(value, { stream: true });
+
+                // Split by double newlines to get complete SSE events
+                const events = buffer.split('\n\n');
+                // Keep the last potentially incomplete event in the buffer
+                buffer = events.pop() || '';
+
+                // Process complete SSE events
+                events.forEach(eventText => {
+                  if (!eventText.trim()) return;
+                  
+                  try {
+                    // Parse SSE format: "event: type\ndata: jsonData"
+                    const lines = eventText.split('\n').filter(line => line.trim());
+                    let eventType = 'message'; // default event type
+                    let eventData = null;
+                    
+                    lines.forEach(line => {
+                      if (line.startsWith('event:')) {
+                        eventType = line.substring(6).trim();
+                      } else if (line.startsWith('data:')) {
+                        const dataStr = line.substring(5).trim();
+                        try {
+                          eventData = JSON.parse(dataStr);
+                        } catch (e) {
+                          eventData = dataStr; // If not JSON, use raw string
+                        }
+                      }
+                    });
+                    
+                    if (eventData !== null) {
+                      onEventReceived({ event: eventType, data: eventData });
+                    }
+                  } catch (parseError) {
+                    // Reduce console spam
+                    if (parseError.name !== 'AbortError') {
+                      console.warn('[SSE] Failed to parse event:', parseError.message);
+                    }
+                  }
+                });
+              }
+            } finally {
+              // Always close the reader when done
+              if (reader) {
+                reader.releaseLock();
+              }
             }
           }
 
-          readStream();
+          await readStream();
         } catch (error) {
-          console.error(`Stream request failed for ${endpoint}:`, error);
+          // Only log non-abort errors
+          if (error.name !== 'AbortError') {
+            console.error(`[SSE] Stream request failed for ${endpoint}:`, error);
+          }
           throw error;
+        } finally {
+          // Ensure reader is closed
+          if (reader) {
+            try {
+              reader.releaseLock();
+            } catch (e) {
+              // Reader already released
+            }
+          }
         }
       }
     };

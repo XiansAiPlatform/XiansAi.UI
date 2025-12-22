@@ -3,7 +3,7 @@ import { Paper, Box, useTheme } from '@mui/material';
 import ChatHeader from '../ChatHeader';
 import MessagesList from './MessagesList';
 import { useLoading } from '../../../contexts/LoadingContext';
-import useMessagePolling from '../hooks/useMessagePolling';
+import useMessageStreaming from '../hooks/useMessageStreaming';
 import { handleApiError } from '../../../utils/errorHandler';
 
 /**
@@ -46,8 +46,7 @@ const ChatConversation = (
     const { setLoading } = useLoading();
     const scrollContainerRef = useRef(null);
     const isInitialLoad = useRef(true);
-    const messagePollingRef = useRef(null);
-    const pollingStartTimeRef = useRef(null);
+    const messageStreamingRef = useRef(null);
     const lastHandoverIdRef = useRef(null); // Track last handover message to avoid duplicate events
     
     const pageSize = 15;
@@ -118,11 +117,9 @@ const ChatConversation = (
     }, [onHandover, selectedThreadId]);
     
     // Function to fetch thread messages
-    const fetchThreadMessages = useCallback(async (threadId, page = 1, isPolling = false) => {
-        if (!isPolling) {
-            setIsLoadingMessages(true);
-            setLoading(true);
-        }
+    const fetchThreadMessages = useCallback(async (threadId, page = 1) => {
+        setIsLoadingMessages(true);
+        setLoading(true);
         setError(null);
         
         try {
@@ -141,62 +138,78 @@ const ChatConversation = (
 
             // Check for handover messages
             checkForHandover(sorted);
-
-            // If polling, stop when a new Incoming message is detected since polling started
-            if (isPolling && pollingStartTimeRef.current && messagePollingRef.current) {
-                const startTs = pollingStartTimeRef.current;
-                const hasNewIncoming = sorted.some(msg => {
-                    if (msg.direction !== 'Incoming' || !msg.createdAt) return false;
-                    return new Date(msg.createdAt).getTime() > startTs;
-                });
-                if (hasNewIncoming) {
-                    messagePollingRef.current.stopPolling();
-                }
-            }
-            
-            // For initial load (not polling), check if we should start polling for new threads
-            if (!isPolling && page === 1 && sorted.length > 0) {
-                const hasRecentUserMessage = sorted.some(msg => 
-                    msg.direction === 'Incoming' && isMessageRecent(msg)
-                );
-                
-                if (hasRecentUserMessage && messagePollingRef.current) {
-                    messagePollingRef.current.triggerPolling(threadId);
-                }
-            }
             
         } catch (err) {
-            if (!isPolling) {
-                const errorMsg = 'Failed to fetch messages for the selected thread.';
-                setError(errorMsg);
-                await handleApiError(err, errorMsg, showError);
-                console.error(err);
-                setMessages([]);
-                setHasMoreMessages(false);
-            } else {
-                console.error('Error polling for messages:', err);
-            }
+            const errorMsg = 'Failed to fetch messages for the selected thread.';
+            setError(errorMsg);
+            await handleApiError(err, errorMsg, showError);
+            console.error(err);
+            setMessages([]);
+            setHasMoreMessages(false);
         } finally {
-            if (!isPolling) {
-                setIsLoadingMessages(false);
-                setLoading(false);
-            }
+            setIsLoadingMessages(false);
+            setLoading(false);
         }
-    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading, isMessageRecent]);
+    }, [messagingApi, pageSize, showError, updateLastUpdateTime, checkForHandover, setLoading]);
     
-    // Initialize the message polling hook with exponential backoff schedule
-    const messagePolling = useMessagePolling({
+    // Callback to handle new messages from SSE stream
+    const handleStreamMessage = useCallback((messageData) => {
+        // Reduced logging to improve performance
+        console.log('[SSE] New message received:', messageData.id);
+        
+        // Add the new message to the messages list
+        setMessages(prevMessages => {
+            // Check if message already exists by ID
+            const existsById = prevMessages.some(m => m.id === messageData.id);
+            if (existsById) {
+                return prevMessages;
+            }
+            
+            // Remove optimistic messages (temp IDs) for the same content
+            // This handles replacing optimistic updates with real messages
+            const withoutOptimistic = prevMessages.filter(m => {
+                // Keep message if it's not an optimistic one
+                if (!m.id.startsWith('temp-')) return true;
+                
+                // Remove optimistic message if it matches this real message
+                const isOptimisticDuplicate = 
+                    m.text === messageData.text &&
+                    m.direction === messageData.direction &&
+                    Math.abs(new Date(m.createdAt).getTime() - new Date(messageData.createdAt).getTime()) < 5000; // Within 5 seconds
+                
+                return !isOptimisticDuplicate;
+            });
+            
+            // Add new message and sort (newest first)
+            const updated = [messageData, ...withoutOptimistic].sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            
+            // Update last update time
+            updateLastUpdateTime(updated);
+            
+            // Check for handover
+            checkForHandover(updated);
+            
+            return updated;
+        });
+    }, [updateLastUpdateTime, checkForHandover]);
+    
+    // Initialize the message streaming hook using SSE
+    const messageStreaming = useMessageStreaming({
         threadId: selectedThreadId,
-        fetchMessages: fetchThreadMessages,
-        // several attempts with exponential backoff starting at 2s
-        scheduleDelays: [3000, 3000, 3000, 6000, 8000, 10000, 10000, 10000, 10000],
-        onStarted: () => { pollingStartTimeRef.current = Date.now(); }
+        onMessageReceived: handleStreamMessage,
+        messagingApi,
+        onError: (error) => {
+            console.error('Message streaming error:', error);
+            // Don't show error to user for streaming issues - they can still use manual refresh
+        }
     });
 
-    // Store the messagePolling in ref to break the circular dependency
+    // Store the messageStreaming in ref to break the circular dependency
     useEffect(() => {
-        messagePollingRef.current = messagePolling;
-    }, [messagePolling]);
+        messageStreamingRef.current = messageStreaming;
+    }, [messageStreaming]);
 
     // Unified message sending function - used by both Quick Send and Configure & Send
     const sendMessage = useCallback(async (messageData) => {
@@ -234,17 +247,31 @@ const ChatConversation = (
                     metadata,
                     type: 'chat'
                 });
+                
+                // Optimistically add the user's message to the UI immediately
+                const optimisticMessage = {
+                    id: `temp-${Date.now()}`, // Temporary ID
+                    threadId: selectedThreadId,
+                    text: content,
+                    direction: 'Incoming',
+                    messageType: 'Chat',
+                    participantId: selectedThread.participantId,
+                    workflowId: selectedThread.workflowId,
+                    createdAt: new Date().toISOString(),
+                    data: metadata
+                };
+                
+                setMessages(prevMessages => {
+                    // Add optimistic message and sort
+                    const updated = [optimisticMessage, ...prevMessages].sort((a, b) => 
+                        new Date(b.createdAt) - new Date(a.createdAt)
+                    );
+                    return updated;
+                });
             }
             
-            // Start polling for new messages
-            if (messagePollingRef.current && threadId) {
-                messagePollingRef.current.triggerPolling(threadId);
-            }
-            
-            // Refresh messages immediately to show the sent message
-            if (threadId) {
-                await fetchThreadMessages(threadId, 1);
-            }
+            // SSE will automatically deliver the response message in real-time
+            // The actual user message from DB will replace the optimistic one when it arrives
             
             return { 
                 success: true, 
@@ -261,25 +288,19 @@ const ChatConversation = (
         } finally {
             setIsTyping(false);
         }
-    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError, messagePollingRef, fetchThreadMessages]);
+    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError]);
 
-    // Expose both triggerPolling and sendMessage to parent component
+    // Expose sendMessage to parent component (streaming is automatic)
     useImperativeHandle(ref, () => ({
-        triggerPolling: () => {
-            if (messagePollingRef.current && selectedThreadId) {
-                messagePollingRef.current.triggerPolling(selectedThreadId);
-            }
-        },
         sendMessage: sendMessage
-    }), [selectedThreadId, sendMessage]);
+    }), [sendMessage]);
 
-    // Initial message fetch when thread ID changes
+    // Initial message fetch and streaming setup when thread ID changes
     useEffect(() => {
-        // Clean up polling when thread changes
-        if (messagePollingRef.current) {
-            messagePollingRef.current.stopPolling();
+        // Clean up streaming when thread changes
+        if (messageStreamingRef.current) {
+            messageStreamingRef.current.stopStreaming();
         }
-        pollingStartTimeRef.current = null;
         
         if (!selectedThreadId) {
             setMessages([]);
@@ -290,7 +311,13 @@ const ChatConversation = (
             return;
         }
         
+        // Fetch initial messages
         fetchThreadMessages(selectedThreadId, 1);
+        
+        // Start SSE streaming for real-time updates
+        if (messageStreamingRef.current) {
+            messageStreamingRef.current.startStreaming(selectedThreadId);
+        }
     }, [selectedThreadId, fetchThreadMessages]);
 
     // Function to load more messages

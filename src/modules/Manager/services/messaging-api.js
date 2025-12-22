@@ -92,6 +92,31 @@ export const useMessagingApi = () => {
           console.error('Error deleting thread:', error);
           throw error;
         }
+      },
+
+      /**
+       * Streams real-time message events for a specific thread using Server-Sent Events (SSE)
+       * @param {string} threadId - Thread ID to stream messages for
+       * @param {Function} onEventReceived - Callback function to handle received events
+       * @param {AbortSignal} abortSignal - Optional abort signal to cancel the stream
+       * @returns {Promise<void>}
+       */
+      streamThreadMessages: async (threadId, onEventReceived, abortSignal = null) => {
+        try {
+          if (!threadId) {
+            throw new Error('Thread ID is required');
+          }
+
+          // Use longer heartbeat interval to reduce server load and browser processing
+          await apiClient.stream(
+            `/api/client/messaging/threads/${threadId}/events?heartbeatSeconds=30`, 
+            onEventReceived,
+            abortSignal
+          );
+        } catch (error) {
+          console.error('Failed to establish message stream:', error);
+          throw error;
+        }
       }
 
     };

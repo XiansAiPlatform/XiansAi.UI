@@ -28,9 +28,12 @@ const SystemMessage = ({ message }) => {
     const [systemExpanded, setSystemExpanded] = useState(false);
     const formattedDate = message.createdAt ? format(new Date(message.createdAt), 'MMM d, yyyy h:mm a') : '';
 
+    // Check if message is incoming (from user) or outgoing (from agent)
+    const isIncoming = message.direction === 'Incoming';
+
     // Determine the system message text based on direction
     const getSystemMessageText = () => {
-        if (message.direction === 'Incoming') {
+        if (isIncoming) {
             return 'System message from user';
         } else {
             return 'System message from agent';
@@ -47,7 +50,7 @@ const SystemMessage = ({ message }) => {
             sx={{ 
                 display: 'flex', 
                 flexDirection: 'column',
-                alignItems: 'center',
+                alignItems: isIncoming ? 'flex-start' : 'flex-end',
                 justifyContent: 'center',
                 width: '100%',
                 my: 2,
@@ -56,25 +59,45 @@ const SystemMessage = ({ message }) => {
         >
             {/* Simple collapsed view - similar to handover message */}
             {!systemExpanded ? (
-                <Typography 
-                    variant="body1" 
+                <Box
                     onClick={handleSystemExpandClick}
-                    sx={{ 
-                        textAlign: 'center',
-                        fontStyle: 'italic',
-                        color: theme.palette.text.secondary,
-                        fontWeight: 500,
-                        fontSize: '0.8rem',
-                        padding: '6px 12px',
+                    sx={{
+                        textAlign: isIncoming ? 'left' : 'right',
                         cursor: 'pointer',
                         borderRadius: 1,
+                        padding: '6px 12px',
+                        maxWidth: '80%',
                         '&:hover': {
                             backgroundColor: theme.palette.action.hover
                         }
                     }}
                 >
-                    {getSystemMessageText()} • {formattedDate}
-                </Typography>
+                    <Typography 
+                        variant="body1" 
+                        sx={{ 
+                            fontStyle: 'italic',
+                            color: theme.palette.text.secondary,
+                            fontWeight: 500,
+                            fontSize: '0.8rem',
+                        }}
+                    >
+                        {getSystemMessageText()} • {formattedDate}
+                    </Typography>
+                    {message.text && (
+                        <Typography 
+                            variant="body2" 
+                            sx={{ 
+                                color: theme.palette.text.primary,
+                                mt: 0.5,
+                                fontSize: '0.85rem',
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word'
+                            }}
+                        >
+                            {message.text}
+                        </Typography>
+                    )}
+                </Box>
             ) : (
                 /* Detailed expanded view */
                 (<Paper 
@@ -144,6 +167,44 @@ const SystemMessage = ({ message }) => {
                         </IconButton>
                     </Box>
                     <Divider sx={{ my: 2, borderColor: theme.palette.warning.main + '30' }} />
+                    
+                    {/* Display message text if available */}
+                    {message.text && (
+                        <>
+                            <Typography 
+                                variant="subtitle2" 
+                                sx={{ 
+                                    fontWeight: 600,
+                                    mb: 1,
+                                    color: theme.palette.warning.dark
+                                }}
+                            >
+                                Message Text
+                            </Typography>
+                            <Box
+                                sx={{
+                                    backgroundColor: theme.palette.background.paper,
+                                    p: 1.5,
+                                    borderRadius: 1,
+                                    mb: 2,
+                                    border: '1px solid',
+                                    borderColor: theme.palette.grey[200]
+                                }}
+                            >
+                                <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                        color: theme.palette.text.primary,
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word'
+                                    }}
+                                >
+                                    {message.text}
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+                    
                     <Typography 
                         variant="subtitle2" 
                         sx={{ 
@@ -238,6 +299,20 @@ const SystemMessage = ({ message }) => {
                                         fontWeight: 'bold',
                                         color: theme.palette.text.secondary
                                     }}>
+                                        Request ID
+                                    </TableCell>
+                                    <TableCell sx={{ 
+                                        color: theme.palette.text.primary,
+                                        wordBreak: 'break-all'
+                                    }}>
+                                        {message.requestId || 'N/A'}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" sx={{ 
+                                        fontWeight: 'bold',
+                                        color: theme.palette.text.secondary
+                                    }}>
                                         Direction
                                     </TableCell>
                                     <TableCell sx={{ color: theme.palette.text.primary }}>
@@ -260,10 +335,10 @@ const SystemMessage = ({ message }) => {
                                         fontWeight: 'bold',
                                         color: theme.palette.text.secondary
                                     }}>
-                                        FlowType
+                                        Created By
                                     </TableCell>
                                     <TableCell sx={{ color: theme.palette.text.primary }}>
-                                        {message.workflowType || 'N/A'}
+                                        {message.createdBy || 'System'}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
@@ -271,10 +346,36 @@ const SystemMessage = ({ message }) => {
                                         fontWeight: 'bold',
                                         color: theme.palette.text.secondary
                                     }}>
-                                        Created By
+                                        Message Type
                                     </TableCell>
                                     <TableCell sx={{ color: theme.palette.text.primary }}>
-                                        {message.createdBy || 'System'}
+                                        {message.messageType || 'N/A'}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" sx={{ 
+                                        fontWeight: 'bold',
+                                        color: theme.palette.text.secondary
+                                    }}>
+                                        Scope
+                                    </TableCell>
+                                    <TableCell sx={{ color: theme.palette.text.primary }}>
+                                        {message.scope || 'N/A'}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" sx={{ 
+                                        fontWeight: 'bold',
+                                        color: theme.palette.text.secondary
+                                    }}>
+                                        Hint
+                                    </TableCell>
+                                    <TableCell sx={{ 
+                                        color: theme.palette.text.primary,
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word'
+                                    }}>
+                                        {message.hint || 'N/A'}
                                     </TableCell>
                                 </TableRow>
                             </TableBody>
