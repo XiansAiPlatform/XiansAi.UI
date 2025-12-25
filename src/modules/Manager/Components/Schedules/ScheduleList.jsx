@@ -92,10 +92,6 @@ const ScheduleList = () => {
       
       const data = await api.getSchedules();
       setSchedules(data);
-      
-      if (data.length === 0) {
-        showSuccess('No schedules found. Schedules will appear here when agents create them.');
-      }
     } catch (error) {
       console.error('Failed to load schedules:', error);
       const errorMessage = handleApiError(error, 'loading schedules');
@@ -104,7 +100,7 @@ const ScheduleList = () => {
     } finally {
       setLoading(false);
     }
-  }, [api, setLoading, showError, showSuccess]);
+  }, [api, setLoading, showError]);
 
   useEffect(() => {
     loadSchedules();
