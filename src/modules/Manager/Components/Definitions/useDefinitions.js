@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useDefinitionsApi } from '../../services/definitions-api';
 import { useAgentsApi } from '../../services/agents-api';
+import { useScheduleApi } from '../../services/schedule-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useAuth } from '../../auth/AuthContext';
@@ -27,6 +28,7 @@ export const useDefinitions = () => {
 
   const definitionsApi = useDefinitionsApi();
   const agentsApi = useAgentsApi();
+  const scheduleApi = useScheduleApi();
   const { setLoading } = useLoading();
   const { showSuccess, showError } = useNotification();
   const { user } = useAuth();
@@ -126,6 +128,16 @@ export const useDefinitions = () => {
     
     try {
       setLoading(true);
+      
+      // Delete all schedules for the agent first
+      try {
+        await scheduleApi.deleteSchedulesByAgent(selectedAgentName);
+      } catch (scheduleError) {
+        // Log the error but continue with agent deletion
+        // The backend might handle this, or there might be no schedules
+        console.warn('Failed to delete schedules for agent, continuing with agent deletion:', scheduleError);
+      }
+      
       // Use the new agents API to delete the entire agent and all its definitions
       await agentsApi.deleteAgent(selectedAgentName);
       
@@ -136,7 +148,7 @@ export const useDefinitions = () => {
           : []
       );
       
-      showSuccess(`Successfully deleted agent "${selectedAgentName}" and all its definitions`);
+      showSuccess(`Successfully deleted agent "${selectedAgentName}", all its definitions, and all its schedules`);
       setSelectedAgentName(null);
     } catch (error) {
       console.error('Failed to delete agent:', error);

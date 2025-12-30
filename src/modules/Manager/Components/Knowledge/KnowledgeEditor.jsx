@@ -40,12 +40,13 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
   }, []);
 
   const normalizeType = (type) => {
-    if (!type) return '';
+    if (!type) return 'text';
     const normalized = type.toLowerCase();
     if (['text', 'markdown', 'json'].includes(normalized)) {
       return normalized;
     }
-    return '';
+    // Default to text for any unrecognized types
+    return 'text';
   };
 
   useEffect(() => {

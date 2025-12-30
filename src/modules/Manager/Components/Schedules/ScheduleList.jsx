@@ -23,7 +23,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import HistoryIcon from '@mui/icons-material/History';
 import ScheduleDetails from './ScheduleDetails';
-import { useScheduleApi } from '../../services';
+import { useScheduleApi, useAgentsApi } from '../../services';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useSlider } from '../../contexts/SliderContext';
@@ -37,6 +37,8 @@ import { ReactComponent as AgentIcon } from '../../theme/agent.svg';
 
 const ScheduleList = () => {
   const [schedules, setSchedules] = useState([]);
+  const [agents, setAgents] = useState([]);
+  const [loadingAgents, setLoadingAgents] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgent, setSelectedAgent] = useState('');
@@ -47,11 +49,34 @@ const ScheduleList = () => {
 
   const isMobile = useMediaQuery('(max-width:768px)');
   const { setLoading, isLoading } = useLoading();
-  const { showError, showSuccess } = useNotification();
+  const { showError } = useNotification();
   const { openSlider, closeSlider } = useSlider();
   const api = useScheduleApi();
+  const agentsApi = useAgentsApi();
+
+  // Load agents separately
+  const loadAgents = useCallback(async () => {
+    try {
+      setLoadingAgents(true);
+      const response = await agentsApi.getAllAgents();
+      if (response && Array.isArray(response)) {
+        setAgents(response);
+      } else {
+        console.warn('Invalid agents response:', response);
+        setAgents([]);
+      }
+    } catch (error) {
+      console.error('Failed to load agents:', error);
+      // Don't show error notification for agents loading failure
+      // Just log it and continue
+      setAgents([]);
+    } finally {
+      setLoadingAgents(false);
+    }
+  }, [agentsApi]);
 
   // Filter schedules based on search and filters (memoized for performance)
+  // Note: Agent filtering is now done server-side, but we keep this for other filters
   const filteredSchedules = useMemo(() => {
     return schedules.filter(schedule => {
       const matchesSearch = !searchQuery || 
@@ -59,19 +84,23 @@ const ScheduleList = () => {
         schedule.workflowType.toLowerCase().includes(searchQuery.toLowerCase()) ||
         schedule.description?.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesAgent = !selectedAgent || schedule.agentName === selectedAgent;
       const matchesStatus = !selectedStatus || schedule.status === selectedStatus;
       const matchesWorkflow = !selectedWorkflow || schedule.workflowType === selectedWorkflow;
       
-      return matchesSearch && matchesAgent && matchesStatus && matchesWorkflow;
+      return matchesSearch && matchesStatus && matchesWorkflow;
     });
-  }, [schedules, searchQuery, selectedAgent, selectedStatus, selectedWorkflow]);
+  }, [schedules, searchQuery, selectedStatus, selectedWorkflow]);
 
   // Calculate pagination
   const totalPages = Math.ceil(filteredSchedules.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedSchedules = filteredSchedules.slice(startIndex, endIndex);
+
+  // Load agents on mount
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -90,12 +119,14 @@ const ScheduleList = () => {
       setLoading(true);
       setError(null);
       
-      const data = await api.getSchedules();
-      setSchedules(data);
-      
-      if (data.length === 0) {
-        showSuccess('No schedules found. Schedules will appear here when agents create them.');
+      // Build filters object
+      const filters = {};
+      if (selectedAgent) {
+        filters.agentName = selectedAgent;
       }
+      
+      const data = await api.getSchedules(filters);
+      setSchedules(data);
     } catch (error) {
       console.error('Failed to load schedules:', error);
       const errorMessage = handleApiError(error, 'loading schedules');
@@ -104,7 +135,7 @@ const ScheduleList = () => {
     } finally {
       setLoading(false);
     }
-  }, [api, setLoading, showError, showSuccess]);
+  }, [api, setLoading, showError, selectedAgent]);
 
   useEffect(() => {
     loadSchedules();
@@ -224,7 +255,7 @@ const ScheduleList = () => {
   };
 
   // Get unique values for filters (memoized for performance)
-  const uniqueAgents = useMemo(() => [...new Set(schedules.map(s => s.agentName))], [schedules]);
+  // Note: Agents are now loaded separately, not extracted from schedules
   const uniqueStatuses = useMemo(() => [...new Set(schedules.map(s => s.status))], [schedules]);
   const uniqueWorkflows = useMemo(() => [...new Set(schedules.map(s => s.workflowType))], [schedules]);
 
@@ -547,9 +578,10 @@ const ScheduleList = () => {
                   value={selectedAgent}
                   label="Agent"
                   onChange={(e) => setSelectedAgent(e.target.value)}
+                  disabled={loadingAgents}
                 >
                   <MenuItem value=""><em>All</em></MenuItem>
-                  {uniqueAgents.map(agent => (
+                  {agents.map(agent => (
                     <MenuItem key={agent} value={agent}>{agent}</MenuItem>
                   ))}
                 </Select>
