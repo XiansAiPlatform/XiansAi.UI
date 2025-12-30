@@ -161,6 +161,34 @@ export const useScheduleApi = () => {
           console.error('Failed to fetch schedule statistics:', error);
           throw error;
         }
+      },
+
+      /**
+       * Deletes a single schedule by ID
+       * @param {string} scheduleId - ID of the schedule to delete
+       * @returns {Promise<void>}
+       */
+      deleteSchedule: async (scheduleId) => {
+        try {
+          return await apiClient.delete(`/api/client/schedules/${encodeURIComponent(scheduleId)}`);
+        } catch (error) {
+          console.error(`Failed to delete schedule ${scheduleId}:`, error);
+          throw error;
+        }
+      },
+
+      /**
+       * Deletes all schedules for a specific agent
+       * @param {string} agentName - Name of the agent whose schedules should be deleted
+       * @returns {Promise<void>}
+       */
+      deleteSchedulesByAgent: async (agentName) => {
+        try {
+          return await apiClient.delete(`/api/client/schedules/agent/${encodeURIComponent(agentName)}`);
+        } catch (error) {
+          console.error(`Failed to delete schedules for agent ${agentName}:`, error);
+          throw error;
+        }
       }
     };
   }, [apiClient]);

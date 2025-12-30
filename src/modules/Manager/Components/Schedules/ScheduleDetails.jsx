@@ -13,7 +13,12 @@ import {
   Grid,
   Button,
   Collapse,
-  IconButton
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from '@mui/material';
 import { format, formatDistanceToNow, parseISO, isValid } from 'date-fns';
 import ScheduleIcon from '@mui/icons-material/Schedule';
@@ -26,11 +31,13 @@ import HistoryIcon from '@mui/icons-material/History';
 import AgentIcon from '@mui/icons-material/SmartToy';
 import WorkflowIcon from '@mui/icons-material/AccountTree';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useScheduleApi } from '../../services';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useSlider } from '../../contexts/SliderContext';
 import { handleApiError } from '../../utils/errorHandler';
 
-const ScheduleDetails = ({ schedule, onUpdate }) => {
+const ScheduleDetails = ({ schedule, onUpdate, onDelete }) => {
   const [scheduleDetails, setScheduleDetails] = useState(schedule);
   const [upcomingRuns, setUpcomingRuns] = useState([]);
   const [recentRuns, setRecentRuns] = useState([]);
@@ -38,8 +45,11 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [headerExpanded, setHeaderExpanded] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  const { showError } = useNotification();
+  const { showError, showSuccess } = useNotification();
+  const { closeSlider } = useSlider();
   const api = useScheduleApi();
 
   const loadScheduleData = useCallback(async () => {
@@ -76,6 +86,43 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+      await api.deleteSchedule(schedule.id);
+      showSuccess(`Schedule "${schedule.id}" deleted successfully`);
+      setDeleteDialogOpen(false);
+      
+      // Call the onDelete callback to update the parent list
+      if (onDelete) {
+        onDelete();
+      }
+      
+      // Close the slider
+      closeSlider();
+      
+      // Call onUpdate to refresh the list
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Failed to delete schedule:', error);
+      const errorMessage = handleApiError(error, 'deleting schedule');
+      showError(errorMessage);
+      setDeleteDialogOpen(false);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const getStatusIcon = (status) => {
@@ -353,6 +400,23 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
                 {...getStatusChipProps(scheduleDetails.status)}
                 sx={{ fontSize: '0.75rem', height: 24, fontWeight: 600 }}
               />
+              <Tooltip title="Delete schedule" arrow>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteClick();
+                  }}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'error.lighter'
+                    }
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
               <IconButton 
                 size="small"
                 sx={{ 
@@ -557,6 +621,49 @@ const ScheduleDetails = ({ schedule, onUpdate }) => {
           )}
         </Box>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Delete Schedule</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this schedule? This action cannot be undone.
+          </DialogContentText>
+          <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+              Schedule Details:
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>ID:</strong> {schedule.id}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Agent:</strong> {schedule.agentName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Workflow:</strong> {schedule.workflowType}
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleDeleteCancel} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress size={16} /> : <DeleteIcon />}
+          >
+            {deleting ? 'Deleting...' : 'Delete'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

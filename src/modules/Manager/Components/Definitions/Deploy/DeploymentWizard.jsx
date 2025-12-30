@@ -16,6 +16,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApiClient } from '../../../services/api-client';
+import { useScheduleApi } from '../../../services/schedule-api';
 import KnowledgeStep from './KnowledgeStep';
 import DeployStep from './DeployStep';
 import ActivateStep from './ActivateStep';
@@ -32,6 +33,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
 
   const { agent } = template;
   const apiClient = useApiClient();
+  const scheduleApi = useScheduleApi();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -91,6 +93,14 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
     setDeploymentError(null);
     
     try {
+      // Delete all schedules for the agent first
+      try {
+        await scheduleApi.deleteSchedulesByAgent(agent.name);
+      } catch (scheduleError) {
+        // Log the error but continue with agent deletion
+        console.warn('Failed to delete schedules for agent, continuing with agent deletion:', scheduleError);
+      }
+      
       // Delete the existing agent
       await apiClient.delete(`/api/client/agents/${encodeURIComponent(agent.name)}`);
       
