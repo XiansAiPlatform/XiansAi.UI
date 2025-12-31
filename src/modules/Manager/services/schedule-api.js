@@ -45,8 +45,8 @@ export const useScheduleApi = () => {
        */
       getUpcomingRuns: async (scheduleId, count = 10) => {
         try {
-          const queryParams = { count };
-          return await apiClient.get(`/api/client/schedules/${scheduleId}/upcoming-runs`, queryParams);
+          const queryParams = { scheduleId, count };
+          return await apiClient.get('/api/client/schedules/upcoming-runs', queryParams);
         } catch (error) {
           console.error(`Failed to fetch upcoming runs for schedule ${scheduleId}:`, error);
           throw error;
@@ -61,8 +61,8 @@ export const useScheduleApi = () => {
        */
       getScheduleHistory: async (scheduleId, count = 50) => {
         try {
-          const queryParams = { count };
-          return await apiClient.get(`/api/client/schedules/${scheduleId}/history`, queryParams);
+          const queryParams = { scheduleId, count };
+          return await apiClient.get('/api/client/schedules/history', queryParams);
         } catch (error) {
           console.error(`Failed to fetch schedule history for ${scheduleId}:`, error);
           throw error;
@@ -76,7 +76,8 @@ export const useScheduleApi = () => {
        */
       getScheduleById: async (scheduleId) => {
         try {
-          return await apiClient.get(`/api/client/schedules/${scheduleId}`);
+          const queryParams = { scheduleId };
+          return await apiClient.get('/api/client/schedules/by-id', queryParams);
         } catch (error) {
           console.error(`Failed to fetch schedule ${scheduleId}:`, error);
           throw error;
@@ -170,7 +171,8 @@ export const useScheduleApi = () => {
        */
       deleteSchedule: async (scheduleId) => {
         try {
-          return await apiClient.delete(`/api/client/schedules/${encodeURIComponent(scheduleId)}`);
+          const queryParams = { scheduleId };
+          return await apiClient.delete('/api/client/schedules/by-id', queryParams);
         } catch (error) {
           console.error(`Failed to delete schedule ${scheduleId}:`, error);
           throw error;

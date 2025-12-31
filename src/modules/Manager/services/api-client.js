@@ -252,13 +252,36 @@ export const useApiClient = () => {
         });
       },
       
-      delete: (endpoint, data) => {
+      delete: (endpoint, queryParamsOrData) => {
+        // If queryParamsOrData is provided and endpoint doesn't already have query params,
+        // treat it as query parameters and build the URL
+        if (queryParamsOrData && typeof queryParamsOrData === 'object' && !Array.isArray(queryParamsOrData)) {
+          // Check if this looks like query params (not a complex body object)
+          const hasSimpleValues = Object.values(queryParamsOrData).every(
+            val => typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || val === null || val === undefined
+          );
+          
+          if (hasSimpleValues) {
+            // Treat as query parameters
+            const url = new URL(endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`);
+            
+            Object.entries(queryParamsOrData)
+              .filter(([_, value]) => value !== null && value !== undefined)
+              .forEach(([key, value]) => {
+                url.searchParams.append(key, value);
+              });
+            
+            return request(url.toString(), { method: 'DELETE' });
+          }
+        }
+        
+        // Otherwise treat as request body (original behavior)
         const options = {
           method: 'DELETE'
         };
         
-        if (data) {
-          options.body = JSON.stringify(data);
+        if (queryParamsOrData) {
+          options.body = JSON.stringify(queryParamsOrData);
         }
         
         return request(endpoint, options);
