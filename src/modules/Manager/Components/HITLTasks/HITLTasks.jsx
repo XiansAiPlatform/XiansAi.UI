@@ -10,7 +10,10 @@ import {
   IconButton,
   Divider,
   Chip,
-  Tooltip
+  Tooltip,
+  FormControl,
+  Select,
+  MenuItem
 } from '@mui/material';
 import { useTasksApi } from '../../services/tasks-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -19,6 +22,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useSlider } from '../../contexts/SliderContext';
@@ -219,6 +223,7 @@ const HITLTasks = () => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [participantFilter, setParticipantFilter] = useState('');
   const [debouncedParticipant, setDebouncedParticipant] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -251,6 +256,7 @@ const HITLTasks = () => {
       const options = {
         agent: selectedAgent,
         participantId: debouncedParticipant || null,
+        status: selectedStatus || null,
         pageSize: pageSize,
         pageToken: pageToken
       };
@@ -272,13 +278,13 @@ const HITLTasks = () => {
     } finally {
       setLoading(false);
     }
-  }, [api, selectedAgent, debouncedParticipant, pageSize, setLoading, showError]);
+  }, [api, selectedAgent, debouncedParticipant, selectedStatus, pageSize, setLoading, showError]);
 
   // Reload when filters change
   useEffect(() => {
     setCurrentPage(1);
     loadTasks(null, true);
-  }, [selectedAgent, debouncedParticipant, pageSize, loadTasks]);
+  }, [selectedAgent, debouncedParticipant, selectedStatus, pageSize, loadTasks]);
 
   const hasTasks = useMemo(() => {
     return tasks.length > 0;
@@ -291,6 +297,11 @@ const HITLTasks = () => {
 
   const handleParticipantChange = (event) => {
     setParticipantFilter(event.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleStatusChange = (event) => {
+    setSelectedStatus(event.target.value);
     setCurrentPage(1);
   };
 
@@ -402,6 +413,65 @@ const HITLTasks = () => {
                 />
               </Box>
 
+              {/* Status Filter */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                gap: 1.5,
+                backgroundColor: 'var(--bg-main)',
+                px: 2,
+                py: 1,
+                borderRadius: 'var(--radius-md)',
+                minWidth: isMobile ? 'auto' : '180px'
+              }}>
+                <FilterListIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                <FormControl 
+                  size="small" 
+                  fullWidth
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'transparent',
+                      fontFamily: 'var(--font-family)',
+                      fontSize: '0.875rem',
+                      border: 'none',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        border: 'none'
+                      },
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        border: 'none'
+                      },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        border: 'none'
+                      }
+                    }
+                  }}
+                >
+                  <Select
+                    value={selectedStatus}
+                    onChange={handleStatusChange}
+                    disabled={isLoading}
+                    displayEmpty
+                    sx={{
+                      fontFamily: 'var(--font-family)',
+                      '& .MuiSelect-select': {
+                        py: 0.5,
+                        color: selectedStatus ? 'var(--text-primary)' : 'var(--text-light)'
+                      }
+                    }}
+                  >
+                    <MenuItem value="">All Statuses</MenuItem>
+                    <MenuItem value="Running">Running</MenuItem>
+                    <MenuItem value="Completed">Completed</MenuItem>
+                    <MenuItem value="Failed">Failed</MenuItem>
+                    <MenuItem value="Terminated">Terminated</MenuItem>
+                    <MenuItem value="Canceled">Canceled</MenuItem>
+                    <MenuItem value="TimedOut">Timed Out</MenuItem>
+                    <MenuItem value="ContinuedAsNew">Continued As New</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+
               {/* Participant Filter */}
               <TextField
                 size="small"
@@ -450,7 +520,7 @@ const HITLTasks = () => {
               />
 
               {/* Active filters indicator */}
-              {(selectedAgent || debouncedParticipant) && (
+              {(selectedAgent || debouncedParticipant || selectedStatus) && (
                 <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {selectedAgent && (
                     <Chip 
@@ -460,6 +530,18 @@ const HITLTasks = () => {
                       sx={{
                         backgroundColor: 'var(--primary-light)',
                         color: 'var(--primary-color)',
+                        fontWeight: 500
+                      }}
+                    />
+                  )}
+                  {selectedStatus && (
+                    <Chip 
+                      label={`Status: ${selectedStatus}`}
+                      size="small"
+                      onDelete={() => setSelectedStatus('')}
+                      sx={{
+                        backgroundColor: 'var(--info-light)',
+                        color: 'var(--info-dark)',
                         fontWeight: 500
                       }}
                     />
@@ -509,11 +591,16 @@ const HITLTasks = () => {
               alignItems: 'center'
             }}>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                {selectedAgent 
-                  ? `Showing tasks for "${selectedAgent}"` 
-                  : debouncedParticipant 
-                    ? `Showing tasks for participant "${debouncedParticipant}"`
-                    : 'Showing all HITL tasks'}
+                {(() => {
+                  const filters = [];
+                  if (selectedAgent) filters.push(`agent "${selectedAgent}"`);
+                  if (selectedStatus) filters.push(`status "${selectedStatus}"`);
+                  if (debouncedParticipant) filters.push(`participant "${debouncedParticipant}"`);
+                  
+                  return filters.length > 0 
+                    ? `Showing tasks for ${filters.join(', ')}`
+                    : 'Showing all HITL tasks';
+                })()}
               </Typography>
             </Box>
 
@@ -564,7 +651,7 @@ const HITLTasks = () => {
           <EmptyState
             title={isLoading ? 'Loading Tasks...' : 'No HITL Tasks Found'}
             description={
-              selectedAgent || debouncedParticipant
+              selectedAgent || debouncedParticipant || selectedStatus
                 ? 'Try changing the filters or check if there are any tasks matching your criteria.'
                 : 'Human-In-The-Loop tasks will appear here when workflows require human intervention.'
             }

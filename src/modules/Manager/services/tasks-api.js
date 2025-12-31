@@ -17,6 +17,7 @@ export const useTasksApi = () => {
        * @param {string} [options.pageToken] - Pagination token for continuation
        * @param {string} [options.agent] - Filter by agent name
        * @param {string} [options.participantId] - Filter by participant/user ID
+       * @param {string} [options.status] - Filter by workflow execution status
        * @returns {Promise<Object>} Paginated response with tasks array
        */
       fetchTasks: async (options = {}) => {
@@ -25,7 +26,8 @@ export const useTasksApi = () => {
             pageSize = 20, 
             pageToken = null,
             agent = null,
-            participantId = null
+            participantId = null,
+            status = null
           } = options;
 
           const queryParams = {};
@@ -44,6 +46,10 @@ export const useTasksApi = () => {
 
           if (participantId) {
             queryParams.participantId = participantId;
+          }
+
+          if (status) {
+            queryParams.status = status;
           }
 
           return await apiClient.get('/api/client/tasks/list', queryParams);
