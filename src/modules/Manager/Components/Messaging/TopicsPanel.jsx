@@ -258,8 +258,8 @@ const TopicsPanel = ({
                         <List sx={{ p: 1 }}>
                             {/* "All Messages" option */}
                             <ListItemButton
-                                selected={selectedTopic === null}
-                                onClick={() => onTopicSelect?.(null)}
+                                selected={selectedTopic === undefined}
+                                onClick={() => onTopicSelect?.(undefined)}
                                 sx={{
                                     borderRadius: 1,
                                     mb: 0.5,
@@ -285,7 +285,7 @@ const TopicsPanel = ({
                                     primary="All Messages"
                                     primaryTypographyProps={{
                                         variant: 'body2',
-                                        fontWeight: selectedTopic === null ? 600 : 400
+                                        fontWeight: selectedTopic === undefined ? 600 : 400
                                     }}
                                 />
                                 {totalMessageCount > 0 && (
