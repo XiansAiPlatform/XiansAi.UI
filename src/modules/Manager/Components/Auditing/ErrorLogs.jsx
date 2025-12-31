@@ -368,7 +368,7 @@ const CriticalLogs = () => {
                                                             <span>
                                                                 <IconButton
                                                                     size="small"
-                                                                    onClick={() => navigate(`/manager/runs/${workflowGroup.workflowId}/${workflowGroup.workflowRuns[0].workflowRunId}`)}
+                                                                    onClick={() => navigate(`/manager/runs/details?workflowId=${encodeURIComponent(workflowGroup.workflowId)}&runId=${encodeURIComponent(workflowGroup.workflowRuns[0].workflowRunId)}`)}
                                                                     disabled={workflowGroup.workflowId === 'defaultWorkflowId'}
                                                                 >
                                                                     <LinkIcon fontSize="small" />
@@ -415,7 +415,7 @@ const CriticalLogs = () => {
                                         <span>
                                             <IconButton
                                                 size="small"
-                                                onClick={() => navigate(`/manager/runs/${selectedWorkflowId}/${selectedRun.workflowRunId}`)}
+                                                onClick={() => navigate(`/manager/runs/details?workflowId=${encodeURIComponent(selectedWorkflowId)}&runId=${encodeURIComponent(selectedRun.workflowRunId)}`)}
                                                 disabled={selectedWorkflowId === 'defaultWorkflowId'}
                                             >
                                                 <LinkIcon fontSize="small" />

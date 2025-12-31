@@ -4,6 +4,7 @@ import AirIcon from '@mui/icons-material/Air';
 import CodeOutlinedIcon from '@mui/icons-material/CodeOutlined';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import ScheduleIcon from '@mui/icons-material/Schedule';
+import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import { Link, useLocation } from 'react-router-dom';
 import ForumOutlinedIcon from '@mui/icons-material/ForumOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
@@ -25,7 +26,7 @@ const NAV_ITEMS = [
     to: '/manager/runs',
     icon: <AirIcon />,
     label: 'Runs',
-    isSelected: (pathname) => pathname === '/manager/runs' || pathname.startsWith('/manager/runs/') || pathname === '/manager',
+    isSelected: (pathname) => pathname === '/manager/runs' || pathname.startsWith('/manager/runs/') || pathname === '/manager' || pathname === '/manager/',
   },
   {
     to: '/manager/schedules',
@@ -50,6 +51,12 @@ const NAV_ITEMS = [
     icon: <ForumOutlinedIcon />,
     label: 'Conversations',
     isSelected: (pathname) => pathname === '/manager/messaging' || pathname.startsWith('/manager/messaging/'),
+  },
+  {
+    to: '/manager/hitl-tasks',
+    icon: <AssignmentTurnedInIcon />,
+    label: 'HITL Tasks',
+    isSelected: (pathname) => pathname === '/manager/hitl-tasks' || pathname.startsWith('/manager/hitl-tasks/'),
   },
   {
     to: '/manager/auditing',

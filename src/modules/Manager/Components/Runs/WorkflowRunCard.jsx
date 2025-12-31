@@ -136,7 +136,7 @@ const WorkflowRunCard = ({
               <Typography 
                 variant="h6" 
                 component={Link}
-                to={`/manager/runs/${workflow.workflowId}/${workflow.runId}`}
+                to={`/manager/runs/details?workflowId=${encodeURIComponent(workflow.workflowId)}&runId=${encodeURIComponent(workflow.runId)}`}
                 sx={{ 
                   fontWeight: 600,
                   color: 'var(--primary-color)',
@@ -231,7 +231,7 @@ const WorkflowRunCard = ({
             {/* Action Buttons */}
             <Button
               component={Link}
-              to={`/manager/runs/${workflow.workflowId}/${workflow.runId}`}
+              to={`/manager/runs/details?workflowId=${encodeURIComponent(workflow.workflowId)}&runId=${encodeURIComponent(workflow.runId)}`}
               size="small"
               variant="outlined"
               sx={{

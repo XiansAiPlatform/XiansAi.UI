@@ -13,7 +13,7 @@ export const ROUTES = {
   MANAGER: {
     ROOT: '/manager',
     RUNS: '/manager/runs',
-    RUNS_DETAIL: '/manager/runs/:id/:runId',
+    RUNS_DETAIL: '/manager/runs',
     DEFINITIONS: '/manager/definitions',
     DEFINITIONS_DEPLOYED: '/manager/definitions/deployed',
     DEFINITIONS_TEMPLATES: '/manager/definitions/templates',
@@ -21,6 +21,7 @@ export const ROUTES = {
     SETTINGS: '/manager/settings',
     MESSAGING: '/manager/messaging',
     AUDITING: '/manager/auditing',
+    HITL_TASKS: '/manager/hitl-tasks',
     LANDING: '/manager/landing',
     LOGOUT: '/manager/logout',
   },

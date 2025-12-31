@@ -144,6 +144,7 @@ export const useMessagingApi = () => {
           await apiClient.stream(
             `/api/client/messaging/threads/${threadId}/events?heartbeatSeconds=30`, 
             onEventReceived,
+            {}, // queryParams
             abortSignal
           );
         } catch (error) {
