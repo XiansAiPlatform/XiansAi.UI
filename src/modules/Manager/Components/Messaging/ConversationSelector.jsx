@@ -6,8 +6,7 @@ import {
     Box,
     Typography,
     IconButton,
-    Tooltip,
-    Button
+    Tooltip
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { format } from 'date-fns';
@@ -23,13 +22,13 @@ const ConversationSelector = ({
     messagingApi,
     showError,
     selectedThreadId,
+    selectedThreadDetails, // Accept selected thread details from parent
     onThreadSelect,
     onNewConversation,
     refreshCounter = 0 // Accept refresh counter from parent
 }) => {
     const [threads, setThreads] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
     const { setLoading } = useLoading();
     const [page, setPage] = useState(1);
     const [pageSize] = useState(50); // Initial load - reasonable for dropdown performance
@@ -75,7 +74,6 @@ const ConversationSelector = ({
         // Don't fetch if no agent is selected
         if (!selectedAgentName) {
             setThreads([]);
-            setError(null);
             setIsLoading(false);
             setHasMore(false);
             setPage(1);
@@ -86,20 +84,21 @@ const ConversationSelector = ({
         const fetchConversationThreads = async () => {
             setIsLoading(true);
             setLoading(true);
-            setError(null);
             setPage(1);
             try {
                 const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 1, pageSize);
                 setThreads(fetchedThreads || []);
                 setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
                 
-                // If there are threads but none selected, select the first one
+                // Handle thread selection after fetch
+                // Only auto-select when agent changes and no thread is selected
                 if (fetchedThreads && fetchedThreads.length > 0 && !selectedThreadId && agentChanged) {
                     onThreadSelect(fetchedThreads[0].id, fetchedThreads[0]);
                 }
+                // Note: We don't call onThreadSelect for already-selected threads during refresh
+                // to avoid overwriting parent state (like selectedTopic) that was just set
             } catch (err) {
                 const errorMsg = 'Failed to fetch conversation threads.';
-                setError(errorMsg);
                 await handleApiError(err, errorMsg, showError);
                 console.error(err);
                 setThreads([]);
@@ -146,7 +145,20 @@ const ConversationSelector = ({
     };
 
     // Get the currently selected thread object
-    const selectedThread = threads.find(t => t.id === selectedThreadId) || null;
+    // First try to find it in the threads array, otherwise use the selectedThreadDetails from parent
+    // This handles the case where a new thread was just created and isn't in the list yet
+    const selectedThread = threads.find(t => t.id === selectedThreadId) || 
+                          (selectedThreadDetails?.id === selectedThreadId ? selectedThreadDetails : null);
+    
+    // Debug logging
+    useEffect(() => {
+        if (selectedThreadId) {
+            console.log('[ConversationSelector] Selected thread ID:', selectedThreadId);
+            console.log('[ConversationSelector] Selected thread object:', selectedThread);
+            console.log('[ConversationSelector] Threads count:', threads.length);
+            console.log('[ConversationSelector] Thread in list?', threads.some(t => t.id === selectedThreadId));
+        }
+    }, [selectedThreadId, selectedThread, threads]);
 
     const handleThreadChange = (newValue) => {
         if (newValue) {
@@ -162,6 +174,7 @@ const ConversationSelector = ({
                 value={selectedThread}
                 onChange={(event, newValue) => handleThreadChange(newValue)}
                 getOptionLabel={(option) => getThreadDisplayName(option)}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 filterOptions={(options, state) => {
                     // Built-in filtering by participant ID, workflow ID, and title
                     const inputValue = state.inputValue.toLowerCase();
