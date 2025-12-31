@@ -12,10 +12,11 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
+import ConversationSelector from './ConversationSelector';
+import TopicsPanel from './TopicsPanel';
 import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
-import ConversationThreads from './ConversationThreads';
 import ChatConversation from './Conversation/ChatConversation';
 import PageLayout from '../Common/PageLayout';
 import EmptyState from '../Common/EmptyState';
@@ -324,8 +325,15 @@ const MessagingPage = () => {
         <PageLayout 
             title="Messaging Playground"
             headerActions={
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', minWidth: '400px' }}>
-                    <Box sx={{ minWidth: '300px', flex: 1 }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    alignItems: 'flex-start', 
+                    width: '100%',
+                    flexWrap: 'wrap'
+                }}>
+                    {/* Agent Selector */}
+                    <Box sx={{ minWidth: '280px', maxWidth: '320px', flex: '0 0 auto' }}>
                         <AgentSelector
                             agentsApi={agentsApi}
                             showError={showError}
@@ -333,11 +341,28 @@ const MessagingPage = () => {
                             selectedAgent={selectedAgentName}
                         />
                     </Box>
-                    <WorkflowActions
-                        selectedAgentName={selectedAgentName}
-                        onRegisterWebhook={handleRegisterWebhook}
-                        onRefresh={handleRefresh}
-                    />
+                    
+                    {/* Conversation Selector - takes more space */}
+                    <Box sx={{ minWidth: '400px', flex: '1 1 auto', maxWidth: '600px' }}>
+                        <ConversationSelector
+                            selectedAgentName={selectedAgentName}
+                            messagingApi={messagingApi}
+                            showError={showError}
+                            selectedThreadId={selectedThreadId}
+                            onThreadSelect={handleThreadSelected}
+                            onNewConversation={handleSendMessage}
+                            refreshCounter={threadsRefreshCounter}
+                        />
+                    </Box>
+                    
+                    {/* Workflow Actions */}
+                    <Box sx={{ flex: '0 0 auto', alignSelf: 'center' }}>
+                        <WorkflowActions
+                            selectedAgentName={selectedAgentName}
+                            onRegisterWebhook={handleRegisterWebhook}
+                            onRefresh={handleRefresh}
+                        />
+                    </Box>
                 </Box>
             }
         >
@@ -351,14 +376,9 @@ const MessagingPage = () => {
                             xs: 12,
                             md: 3
                         }}>
-                        {/* Threads list */}
-                        <ConversationThreads
-                            key={`threads-${threadsRefreshCounter}`}
+                        {/* Topics panel */}
+                        <TopicsPanel
                             selectedAgentName={selectedAgentName}
-                            messagingApi={messagingApi}
-                            showError={showError}
-                            selectedThreadId={selectedThreadId}
-                            onThreadSelect={handleThreadSelected}
                         />
                     </Grid>
                     <Grid
