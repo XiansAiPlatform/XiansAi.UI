@@ -13,7 +13,15 @@ import {
   Tooltip,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
+  Menu,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress,
+  LinearProgress
 } from '@mui/material';
 import { useTasksApi } from '../../services/tasks-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -23,6 +31,9 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useSlider } from '../../contexts/SliderContext';
@@ -228,11 +239,26 @@ const HITLTasks = () => {
   const [pageSize, setPageSize] = useState(10);
   const [hasNextPage, setHasNextPage] = useState(false);
   
+  // Bulk actions menu state
+  const [anchorEl, setAnchorEl] = useState(null);
+  const menuOpen = Boolean(anchorEl);
+  
+  // Bulk actions dialog state
+  const [bulkActionDialog, setBulkActionDialog] = useState({
+    open: false,
+    action: null, // 'approve' or 'reject'
+    rejectionReason: '',
+    isProcessing: false,
+    progress: 0,
+    total: 0,
+    errors: []
+  });
+  
   const isMobile = useMediaQuery('(max-width:768px)');
 
   const { setLoading, isLoading } = useLoading();
   const api = useTasksApi();
-  const { showError } = useNotification();
+  const { showError, showSuccess } = useNotification();
   const { openSlider, closeSlider } = useSlider();
 
   // Debounce participant filter input
@@ -335,6 +361,157 @@ const HITLTasks = () => {
     );
   };
 
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleBulkApprove = () => {
+    handleMenuClose();
+    setBulkActionDialog({
+      open: true,
+      action: 'approve',
+      rejectionReason: '',
+      isProcessing: false,
+      progress: 0,
+      total: 0,
+      errors: []
+    });
+  };
+
+  const handleBulkReject = () => {
+    handleMenuClose();
+    setBulkActionDialog({
+      open: true,
+      action: 'reject',
+      rejectionReason: '',
+      isProcessing: false,
+      progress: 0,
+      total: 0,
+      errors: []
+    });
+  };
+
+  const handleCloseBulkActionDialog = () => {
+    if (!bulkActionDialog.isProcessing) {
+      setBulkActionDialog({
+        open: false,
+        action: null,
+        rejectionReason: '',
+        isProcessing: false,
+        progress: 0,
+        total: 0,
+        errors: []
+      });
+    }
+  };
+
+  // Fetch all pending tasks (across all pages)
+  const fetchAllPendingTasks = async () => {
+    const allTasks = [];
+    let pageToken = null;
+    let hasMore = true;
+
+    try {
+      while (hasMore) {
+        const options = {
+          agent: selectedAgent,
+          participantId: debouncedParticipant || null,
+          status: 'Running', // Only get running/pending tasks
+          pageSize: 100, // Maximum page size
+          pageToken: pageToken
+        };
+
+        const response = await api.fetchTasks(options);
+        
+        if (response && response.tasks && response.tasks.length > 0) {
+          // Filter out completed tasks
+          const pendingTasks = response.tasks.filter(task => !task.isCompleted);
+          allTasks.push(...pendingTasks);
+          
+          hasMore = response.hasNextPage;
+          if (hasMore && response.nextPageToken) {
+            pageToken = response.nextPageToken;
+          } else {
+            hasMore = false;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allTasks;
+    } catch (error) {
+      console.error('Error fetching pending tasks:', error);
+      throw error;
+    }
+  };
+
+  const processBulkAction = async () => {
+    setBulkActionDialog(prev => ({ ...prev, isProcessing: true, progress: 0, errors: [] }));
+
+    try {
+      // Fetch all pending tasks
+      const pendingTasks = await fetchAllPendingTasks();
+
+      if (pendingTasks.length === 0) {
+        showError('No pending tasks found to process');
+        handleCloseBulkActionDialog();
+        return;
+      }
+
+      setBulkActionDialog(prev => ({ ...prev, total: pendingTasks.length }));
+
+      const errors = [];
+      let successCount = 0;
+
+      // Process each task
+      for (let i = 0; i < pendingTasks.length; i++) {
+        const task = pendingTasks[i];
+        
+        try {
+          if (bulkActionDialog.action === 'approve') {
+            await api.completeTask(task.workflowId);
+            successCount++;
+          } else if (bulkActionDialog.action === 'reject') {
+            await api.rejectTask(task.workflowId, bulkActionDialog.rejectionReason || 'Bulk rejection');
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error processing task ${task.workflowId}:`, error);
+          errors.push({
+            taskId: task.workflowId,
+            title: task.title || 'Untitled Task',
+            error: error.message || 'Unknown error'
+          });
+        }
+
+        // Update progress
+        setBulkActionDialog(prev => ({ ...prev, progress: i + 1, errors }));
+      }
+
+      // Show results
+      if (errors.length === 0) {
+        showSuccess(`Successfully ${bulkActionDialog.action === 'approve' ? 'approved' : 'rejected'} ${successCount} task(s)`);
+        handleCloseBulkActionDialog();
+      } else {
+        showError(`Processed ${successCount} task(s), ${errors.length} error(s) occurred`);
+      }
+
+      // Refresh the task list
+      loadTasks(currentPage > 1 ? String(currentPage) : null, false);
+
+    } catch (error) {
+      console.error('Error in bulk action:', error);
+      showError('Failed to process bulk action: ' + (error.message || 'Unknown error'));
+    } finally {
+      setBulkActionDialog(prev => ({ ...prev, isProcessing: false }));
+    }
+  };
+
   return (
     <PageLayout 
       title="HITL Tasks"
@@ -390,7 +567,8 @@ const HITLTasks = () => {
               flexDirection: isMobile ? 'column' : 'row',
               gap: 2,
               width: '100%',
-              alignItems: isMobile ? 'stretch' : 'center'
+              alignItems: isMobile ? 'stretch' : 'center',
+              position: 'relative'
             }}>
               {/* Agent Filter */}
               <Box sx={{ 
@@ -563,6 +741,51 @@ const HITLTasks = () => {
                   )}
                 </Box>
               )}
+
+              {/* Bulk Actions Menu */}
+              <Tooltip title="Bulk Actions">
+                <IconButton
+                  onClick={handleMenuOpen}
+                  disabled={isLoading}
+                  size="small"
+                  sx={{
+                    backgroundColor: 'var(--bg-paper)',
+                    border: '1px solid var(--border-color)',
+                    boxShadow: 'var(--shadow-sm)',
+                    color: 'var(--text-secondary)',
+                    '&:hover': {
+                      backgroundColor: 'var(--bg-hover)',
+                    },
+                    ml: 'auto'
+                  }}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </Tooltip>
+
+              {/* Bulk Actions Menu */}
+              <Menu
+                anchorEl={anchorEl}
+                open={menuOpen}
+                onClose={handleMenuClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+              >
+                <MenuItem onClick={handleBulkApprove}>
+                  <CheckCircleIcon sx={{ mr: 1, color: 'var(--success-color)' }} />
+                  Approve All Pending
+                </MenuItem>
+                <MenuItem onClick={handleBulkReject}>
+                  <CancelIcon sx={{ mr: 1, color: 'var(--error-color)' }} />
+                  Reject All Pending
+                </MenuItem>
+              </Menu>
             </Box>
           }
         />
@@ -668,6 +891,107 @@ const HITLTasks = () => {
           />  
         )}
       </Box>
+
+      {/* Bulk Action Dialog */}
+      <Dialog
+        open={bulkActionDialog.open}
+        onClose={handleCloseBulkActionDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {bulkActionDialog.action === 'approve' ? 'Approve All Pending Tasks' : 'Reject All Pending Tasks'}
+        </DialogTitle>
+        <DialogContent>
+          {bulkActionDialog.isProcessing ? (
+            <Box sx={{ py: 2 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Processing {bulkActionDialog.progress} of {bulkActionDialog.total} tasks...
+              </Typography>
+              <LinearProgress 
+                variant="determinate" 
+                value={bulkActionDialog.total > 0 ? (bulkActionDialog.progress / bulkActionDialog.total) * 100 : 0}
+                sx={{ mb: 2 }}
+              />
+              {bulkActionDialog.errors.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" color="error" sx={{ mb: 1, fontWeight: 600 }}>
+                    Errors ({bulkActionDialog.errors.length}):
+                  </Typography>
+                  <Box sx={{ maxHeight: 150, overflow: 'auto' }}>
+                    {bulkActionDialog.errors.map((err, index) => (
+                      <Typography key={index} variant="caption" color="error" sx={{ display: 'block', mb: 0.5 }}>
+                        • {err.title}: {err.error}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          ) : (
+            <>
+              <DialogContentText sx={{ mb: 2 }}>
+                {bulkActionDialog.action === 'approve' 
+                  ? 'This will approve all pending tasks that match the current filters. Are you sure you want to continue?'
+                  : 'This will reject all pending tasks that match the current filters. Are you sure you want to continue?'
+                }
+              </DialogContentText>
+              
+              {bulkActionDialog.action === 'reject' && (
+                <TextField
+                  autoFocus
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Rejection Reason (Optional)"
+                  value={bulkActionDialog.rejectionReason}
+                  onChange={(e) => setBulkActionDialog(prev => ({ ...prev, rejectionReason: e.target.value }))}
+                  placeholder="Enter a reason for bulk rejection..."
+                  sx={{ mt: 2 }}
+                />
+              )}
+
+              {(selectedAgent || debouncedParticipant) && (
+                <Box sx={{ mt: 2, p: 2, backgroundColor: 'var(--bg-muted)', borderRadius: 1 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    <strong>Active Filters:</strong>
+                  </Typography>
+                  {selectedAgent && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      • Agent: {selectedAgent}
+                    </Typography>
+                  )}
+                  {debouncedParticipant && (
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                      • Participant: {debouncedParticipant}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={handleCloseBulkActionDialog}
+            disabled={bulkActionDialog.isProcessing}
+            sx={{ textTransform: 'none' }}
+          >
+            {bulkActionDialog.isProcessing && bulkActionDialog.progress === bulkActionDialog.total ? 'Close' : 'Cancel'}
+          </Button>
+          {!bulkActionDialog.isProcessing && (
+            <Button
+              variant="contained"
+              color={bulkActionDialog.action === 'approve' ? 'success' : 'error'}
+              onClick={processBulkAction}
+              startIcon={bulkActionDialog.action === 'approve' ? <CheckCircleIcon /> : <CancelIcon />}
+              sx={{ textTransform: 'none' }}
+            >
+              {bulkActionDialog.action === 'approve' ? 'Approve All' : 'Reject All'}
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </PageLayout>
   );
 };
