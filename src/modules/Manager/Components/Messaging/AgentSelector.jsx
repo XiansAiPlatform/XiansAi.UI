@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-    Grid,
     TextField,
     Autocomplete,
     CircularProgress,
@@ -71,52 +70,49 @@ const AgentSelector = ({
 
     return (
         <>
-            <Grid container spacing={2} sx={{ mb: 3 }} alignItems="center">
-                <Grid size={12}>
-                    <Autocomplete
-                        id="agent-select"
-                        options={agentNames}
-                        value={selectedAgentName}
-                        onChange={(event, newValue) => handleAgentChange(newValue)}
-                        getOptionLabel={(option) => option || ''}
-                        renderOption={(props, option) => {
-                            const { key, ...otherProps } = props;
-                            return (
-                                <li key={key} {...otherProps}>
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column',
-                                        width: '100%',
-                                        py: 0.5
-                                    }}>
-                                        <Typography variant="body1" fontWeight="medium">
-                                            {option}
-                                        </Typography>
-                                    </Box>
-                                </li>
-                            );
+            <Autocomplete
+                id="agent-select"
+                options={agentNames}
+                value={selectedAgentName}
+                onChange={(event, newValue) => handleAgentChange(newValue)}
+                getOptionLabel={(option) => option || ''}
+                renderOption={(props, option) => {
+                    const { key, ...otherProps } = props;
+                    return (
+                        <li key={key} {...otherProps}>
+                            <Box sx={{ 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                width: '100%',
+                                py: 0.5
+                            }}>
+                                <Typography variant="body2" fontWeight="medium">
+                                    {option}
+                                </Typography>
+                            </Box>
+                        </li>
+                    );
+                }}
+                renderInput={(params) => (
+                    <TextField 
+                        {...params} 
+                        label="Agent Name" 
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                            ...params.InputProps,
+                            endAdornment: (
+                                <>
+                                    {isLoadingAgents && <CircularProgress size={20} />}
+                                    {params.InputProps.endAdornment}
+                                </>
+                            ),
                         }}
-                        renderInput={(params) => (
-                            <TextField 
-                                {...params} 
-                                label="Agent Name" 
-                                variant="outlined"
-                                InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                        <>
-                                            {isLoadingAgents && <CircularProgress size={20} />}
-                                            {params.InputProps.endAdornment}
-                                        </>
-                                    ),
-                                }}
-                            />
-                        )}
-                        disabled={isLoadingAgents || agentNames.length === 0}
-                        fullWidth
                     />
-                </Grid>
-            </Grid>
+                )}
+                disabled={isLoadingAgents || agentNames.length === 0}
+                fullWidth
+            />
             {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
                     {error} - Please check the console for details.

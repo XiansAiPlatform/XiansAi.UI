@@ -14,7 +14,7 @@ const WorkflowActions = ({
                 onClick={onRefresh}
                 disabled={!selectedAgentName}
             >
-                Refresh Agent
+                Refresh
             </Button>
         </Box>
     );

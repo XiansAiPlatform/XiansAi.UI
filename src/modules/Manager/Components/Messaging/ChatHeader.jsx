@@ -21,8 +21,9 @@ import { handleApiError } from '../../utils/errorHandler';
  * @param {Function} props.onThreadDeleted - Callback when thread is deleted
  * @param {Function} props.onRefresh - Callback to refresh conversations list
  * @param {string} props.agentName - Name of the current agent
+ * @param {string|null} props.selectedScope - Currently selected topic/scope for messages
  */
-const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage, onThreadDeleted, onRefresh, agentName }) => {
+const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage, onThreadDeleted, onRefresh, agentName, selectedScope }) => {
     const theme = useTheme();
     const messagingApi = useMessagingApi();
     const { showSuccess, showError } = useNotification();
@@ -118,11 +119,12 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
                 }
             }
 
-            // Use the unified sendMessage function
+            // Use the unified sendMessage function with the currently selected scope
             const result = await sendMessage({
                 content: quickMessage.trim(),
                 metadata: parsedMetadata,
-                isNewThread: false
+                isNewThread: false,
+                scope: selectedScope // Use the currently selected scope from Topics panel
             });
             
             if (result.success) {
@@ -321,9 +323,44 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
                         pt: 2,
                         mt: 2
                     }}>
+                        {/* Show selected topic indicator */}
+                        {selectedScope !== undefined && selectedScope !== null && (
+                            <Box sx={{ mb: 1 }}>
+                                <Chip 
+                                    label={selectedScope === '' ? 'Topic: Default (Empty String Topic)' : `Topic: ${selectedScope}`}
+                                    size="small"
+                                    color={selectedScope === '' ? 'default' : 'primary'}
+                                    variant="outlined"
+                                    sx={{ 
+                                        fontSize: '0.75rem',
+                                        fontStyle: selectedScope === '' ? 'italic' : 'normal'
+                                    }}
+                                />
+                            </Box>
+                        )}
+                        {selectedScope === null && (
+                            <Box sx={{ mb: 1 }}>
+                                <Chip 
+                                    label="Topic: Default (No Topic)"
+                                    size="small"
+                                    color="default"
+                                    variant="outlined"
+                                    sx={{ 
+                                        fontSize: '0.75rem',
+                                        fontStyle: 'italic'
+                                    }}
+                                />
+                            </Box>
+                        )}
                         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
                             <TextField
-                                placeholder="Type your message here and press Enter to send..."
+                                placeholder={
+                                    selectedScope === null 
+                                        ? "Type message for Default (No Topic)..." 
+                                        : selectedScope === '' 
+                                        ? 'Type message for Default (Empty String Topic)...' 
+                                        : `Type message for "${selectedScope}" topic...`
+                                }
                                 multiline
                                 maxRows={3}
                                 value={quickMessage}
@@ -359,10 +396,10 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
                 open={deleteDialogOpen}
                 onClose={handleDeleteDialogClose}
             >
-                <DialogTitle>Delete Conversation</DialogTitle>
+                <DialogTitle>Delete All Topics in Conversation</DialogTitle>
                 <DialogContent>
                     <Typography>
-                        Are you sure you want to delete this conversation? This action cannot be undone.
+                        Are you sure you want to delete this conversation including all topics and messages? This action cannot be undone.
                     </Typography>
                 </DialogContent>
                 <DialogActions>

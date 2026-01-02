@@ -9,7 +9,11 @@ export const useWorkflowApi = () => {
     return {
       getWorkflow: async (workflowId, runId) => {
         try {
-          return await apiClient.get(`/api/client/workflows/${workflowId}/${runId}`);
+          const queryParams = { workflowId };
+          if (runId) {
+            queryParams.runId = runId;
+          }
+          return await apiClient.get('/api/client/workflows/', queryParams);
         } catch (error) {
           console.error('Failed to fetch workflow:', error);
           throw error;
@@ -24,7 +28,7 @@ export const useWorkflowApi = () => {
             queryParams.status = statusFilter;
           }
 
-          return await apiClient.get('/api/client/workflows', queryParams);
+          return await apiClient.get('/api/client/workflows/list', queryParams);
         } catch (error) {
           console.error('Failed to fetch workflows:', error);
           throw error;
@@ -58,7 +62,7 @@ export const useWorkflowApi = () => {
             queryParams.pageToken = pageToken;
           }
 
-          return await apiClient.get('/api/client/workflows', queryParams);
+          return await apiClient.get('/api/client/workflows/list', queryParams);
         } catch (error) {
           console.error('Failed to fetch paginated workflows:', error);
           throw error;
@@ -71,7 +75,7 @@ export const useWorkflowApi = () => {
             throw new Error('Workflow ID is required');
           }
 
-          return await apiClient.get(`/api/client/workflows/${workflowId}/events`);
+          return await apiClient.get('/api/client/workflows/events', { workflowId });
         } catch (error) {
           console.error('Failed to fetch workflow events:', error);
           throw error;
@@ -97,7 +101,7 @@ export const useWorkflowApi = () => {
 
       executeWorkflowCancelAction: async (workflowId, force = false) => {
         try {
-          return await apiClient.post(`/api/client/workflows/${workflowId}/cancel?force=${force}`);
+          return await apiClient.post('/api/client/workflows/cancel', null, { workflowId, force });
         } catch (error) {
           console.error('Failed to execute workflow cancel action:', error);
           throw error;
@@ -125,15 +129,17 @@ export const useWorkflowApi = () => {
         }
       },
 
-      streamActivityEvents: async (workflowId, onEventReceived) => {
+      streamActivityEvents: async (workflowId, onEventReceived, abortSignal = null) => {
         try {
           if (!workflowId) {
             throw new Error('Workflow ID is required');
           }
 
-          await apiClient.stream(`/api/client/workflows/${workflowId}/events/stream`, onEventReceived);
+          console.log('[WorkflowAPI] Starting activity event stream for:', workflowId);
+          await apiClient.stream('/api/client/workflows/events/stream', onEventReceived, { workflowId }, abortSignal);
+          console.log('[WorkflowAPI] Activity event stream completed');
         } catch (error) {
-          console.error('Failed to establish event stream:', error);
+          console.error('[WorkflowAPI] Failed to establish event stream:', error);
           throw error;
         }
       }

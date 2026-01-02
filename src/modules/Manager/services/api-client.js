@@ -232,11 +232,29 @@ export const useApiClient = () => {
         return request(url.toString(), { method: 'GET' });
       },
       
-      post: (endpoint, data) => {
-        return request(endpoint, {
-          method: 'POST',
-          body: JSON.stringify(data)
-        });
+      post: (endpoint, data, queryParams = {}) => {
+        let url = endpoint;
+        
+        // Add query parameters if provided
+        if (queryParams && Object.keys(queryParams).length > 0) {
+          const urlObj = new URL(endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`);
+          Object.entries(queryParams)
+            .filter(([_, value]) => value !== null && value !== undefined)
+            .forEach(([key, value]) => {
+              urlObj.searchParams.append(key, value);
+            });
+          url = urlObj.toString();
+        }
+        
+        const options = {
+          method: 'POST'
+        };
+        
+        if (data !== null && data !== undefined) {
+          options.body = JSON.stringify(data);
+        }
+        
+        return request(url, options);
       },
       
       put: (endpoint, data) => {
@@ -252,13 +270,36 @@ export const useApiClient = () => {
         });
       },
       
-      delete: (endpoint, data) => {
+      delete: (endpoint, queryParamsOrData) => {
+        // If queryParamsOrData is provided and endpoint doesn't already have query params,
+        // treat it as query parameters and build the URL
+        if (queryParamsOrData && typeof queryParamsOrData === 'object' && !Array.isArray(queryParamsOrData)) {
+          // Check if this looks like query params (not a complex body object)
+          const hasSimpleValues = Object.values(queryParamsOrData).every(
+            val => typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean' || val === null || val === undefined
+          );
+          
+          if (hasSimpleValues) {
+            // Treat as query parameters
+            const url = new URL(endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`);
+            
+            Object.entries(queryParamsOrData)
+              .filter(([_, value]) => value !== null && value !== undefined)
+              .forEach(([key, value]) => {
+                url.searchParams.append(key, value);
+              });
+            
+            return request(url.toString(), { method: 'DELETE' });
+          }
+        }
+        
+        // Otherwise treat as request body (original behavior)
         const options = {
           method: 'DELETE'
         };
         
-        if (data) {
-          options.body = JSON.stringify(data);
+        if (queryParamsOrData) {
+          options.body = JSON.stringify(queryParamsOrData);
         }
         
         return request(endpoint, options);
@@ -272,11 +313,22 @@ export const useApiClient = () => {
       },
 
       // Add stream method for event streaming
-      stream: async (endpoint, onEventReceived, abortSignal = null) => {
+      stream: async (endpoint, onEventReceived, queryParams = {}, abortSignal = null) => {
         let reader = null;
         try {
           const headers = await createAuthHeaders(endpoint);
-          const url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
+          let url = endpoint.startsWith('http') ? endpoint : `${apiBaseUrl}${endpoint}`;
+          
+          // Add query parameters if provided
+          if (queryParams && Object.keys(queryParams).length > 0) {
+            const urlObj = new URL(url);
+            Object.entries(queryParams)
+              .filter(([_, value]) => value !== null && value !== undefined)
+              .forEach(([key, value]) => {
+                urlObj.searchParams.append(key, value);
+              });
+            url = urlObj.toString();
+          }
           
           const response = await fetch(url, {
             headers,
@@ -382,54 +434,91 @@ export const useApiClient = () => {
 
           async function readStream() {
             try {
+              console.log('[SSE] Starting to read stream for:', endpoint);
+              let chunkCount = 0;
               while (true) {
                 const { done, value } = await reader.read();
 
                 if (done) {
+                  console.log('[SSE] Stream ended after', chunkCount, 'chunks');
                   break;
                 }
 
+                chunkCount++;
+                const chunk = decoder.decode(value, { stream: true });
+                console.log('[SSE] Received chunk', chunkCount, '- length:', chunk.length, 'bytes');
+                console.log('[SSE] Chunk content:', chunk.substring(0, 200)); // Log first 200 chars
+
                 // Append new data to buffer
-                buffer += decoder.decode(value, { stream: true });
+                buffer += chunk;
 
-                // Split by double newlines to get complete SSE events
-                const events = buffer.split('\n\n');
-                // Keep the last potentially incomplete event in the buffer
-                buffer = events.pop() || '';
-
-                // Process complete SSE events
-                events.forEach(eventText => {
-                  if (!eventText.trim()) return;
+                // Check if this looks like SSE format or newline-separated JSON
+                const isSSEFormat = buffer.includes('data:') || buffer.includes('event:');
+                
+                if (isSSEFormat) {
+                  // SSE format: split by double newlines
+                  const events = buffer.split('\n\n');
+                  buffer = events.pop() || '';
                   
-                  try {
-                    // Parse SSE format: "event: type\ndata: jsonData"
-                    const lines = eventText.split('\n').filter(line => line.trim());
-                    let eventType = 'message'; // default event type
-                    let eventData = null;
+                  console.log('[SSE] Found', events.length, 'complete SSE events in chunk');
+
+                  events.forEach((eventText, idx) => {
+                    if (!eventText.trim()) return;
                     
-                    lines.forEach(line => {
-                      if (line.startsWith('event:')) {
-                        eventType = line.substring(6).trim();
-                      } else if (line.startsWith('data:')) {
-                        const dataStr = line.substring(5).trim();
-                        try {
-                          eventData = JSON.parse(dataStr);
-                        } catch (e) {
-                          eventData = dataStr; // If not JSON, use raw string
+                    console.log('[SSE] Processing SSE event', idx + 1, ':', eventText.substring(0, 100));
+                    
+                    try {
+                      const lines = eventText.split('\n').filter(line => line.trim());
+                      let eventType = 'message';
+                      let eventData = null;
+                      
+                      lines.forEach(line => {
+                        if (line.startsWith('event:')) {
+                          eventType = line.substring(6).trim();
+                        } else if (line.startsWith('data:')) {
+                          const dataStr = line.substring(5).trim();
+                          try {
+                            eventData = JSON.parse(dataStr);
+                          } catch (e) {
+                            eventData = dataStr;
+                          }
                         }
+                      });
+                      
+                      if (eventData !== null) {
+                        console.log('[SSE] Calling onEventReceived with event:', eventType);
+                        onEventReceived({ event: eventType, data: eventData });
                       }
-                    });
+                    } catch (parseError) {
+                      if (parseError.name !== 'AbortError') {
+                        console.warn('[SSE] Failed to parse SSE event:', parseError.message);
+                      }
+                    }
+                  });
+                } else {
+                  // Newline-separated JSON format
+                  const lines = buffer.split('\n');
+                  buffer = lines.pop() || ''; // Keep last incomplete line in buffer
+                  
+                  console.log('[SSE] Found', lines.length, 'JSON lines in chunk');
+
+                  lines.forEach((line, idx) => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return;
                     
-                    if (eventData !== null) {
-                      onEventReceived({ event: eventType, data: eventData });
+                    console.log('[SSE] Processing JSON line', idx + 1, ':', trimmedLine.substring(0, 100));
+                    
+                    try {
+                      const eventData = JSON.parse(trimmedLine);
+                      console.log('[SSE] Parsed JSON data, calling onEventReceived');
+                      onEventReceived({ event: 'message', data: eventData });
+                    } catch (parseError) {
+                      if (parseError.name !== 'AbortError') {
+                        console.warn('[SSE] Failed to parse JSON line:', parseError.message, trimmedLine.substring(0, 50));
+                      }
                     }
-                  } catch (parseError) {
-                    // Reduce console spam
-                    if (parseError.name !== 'AbortError') {
-                      console.warn('[SSE] Failed to parse event:', parseError.message);
-                    }
-                  }
-                });
+                  });
+                }
               }
             } finally {
               // Always close the reader when done

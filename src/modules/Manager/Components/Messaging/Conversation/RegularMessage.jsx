@@ -283,6 +283,23 @@ const RegularMessage = ({ message, isRecent = false }) => {
                                             {message.id}
                                         </TableCell>
                                     </TableRow>
+                                    {message.requestId && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold', 
+                                            width: '30%',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Request ID
+                                        </TableCell>
+                                        <TableCell sx={{ 
+                                            color: theme.palette.text.primary,
+                                            wordBreak: 'break-all'
+                                        }}>
+                                            {message.requestId}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
                                             fontWeight: 'bold', 
@@ -372,19 +389,114 @@ const RegularMessage = ({ message, isRecent = false }) => {
                                             fontWeight: 'bold',
                                             color: theme.palette.text.secondary
                                         }}>
+                                            Created At
+                                        </TableCell>
+                                        <TableCell sx={{ color: theme.palette.text.primary }}>
+                                            {formattedDate}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
                                             Created By
                                         </TableCell>
                                         <TableCell sx={{ color: theme.palette.text.primary }}>
                                             {message.createdBy}
                                         </TableCell>
                                     </TableRow>
+                                    {message.updatedAt && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Updated At
+                                        </TableCell>
+                                        <TableCell sx={{ color: theme.palette.text.primary }}>
+                                            {format(new Date(message.updatedAt), 'MMM d, yyyy h:mm a')}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
+                                    {message.participantChannelId && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Channel ID
+                                        </TableCell>
+                                        <TableCell sx={{ color: theme.palette.text.primary }}>
+                                            {message.participantChannelId}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
+                                    {message.participantId && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Participant ID
+                                        </TableCell>
+                                        <TableCell sx={{ color: theme.palette.text.primary }}>
+                                            {message.participantId}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
+                                    {message.origin && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Origin
+                                        </TableCell>
+                                        <TableCell sx={{ color: theme.palette.text.primary }}>
+                                            {message.origin}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
+                                    {message.scope && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Scope
+                                        </TableCell>
+                                        <TableCell sx={{ 
+                                            color: theme.palette.text.primary,
+                                            wordBreak: 'break-all'
+                                        }}>
+                                            {message.scope}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
+                                    {message.hint && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Hint
+                                        </TableCell>
+                                        <TableCell sx={{ 
+                                            color: theme.palette.text.primary,
+                                            wordBreak: 'break-all'
+                                        }}>
+                                            {message.hint}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
                                     {message.data && (
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
                                             fontWeight: 'bold',
                                             color: theme.palette.text.secondary
                                         }}>
-                                            Metadata
+                                            Data
                                         </TableCell>
                                         <TableCell sx={{ 
                                             color: theme.palette.text.primary,

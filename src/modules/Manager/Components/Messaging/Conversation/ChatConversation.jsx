@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useImperativeHandle } from 'react';
+import { useEffect, useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Paper, Box, useTheme } from '@mui/material';
 import ChatHeader from '../ChatHeader';
 import MessagesList from './MessagesList';
@@ -19,10 +19,10 @@ import { handleApiError } from '../../../utils/errorHandler';
  * @param {Function} [props.onRefresh] - Optional callback to refresh conversations list
  * @param {Function} [props.onThreadDeleted] - Optional callback when thread is deleted
  * @param {string} props.agentName - Name of the current agent
+ * @param {string|null} [props.selectedScope] - Optional scope filter for messages (null = no scope/default, undefined = all)
  */
-const ChatConversation = (
+const ChatConversation = forwardRef((
     {
-        ref,
         selectedThreadId,
         messagingApi,
         showError,
@@ -31,8 +31,10 @@ const ChatConversation = (
         onHandover,
         onRefresh,
         onThreadDeleted,
-        agentName
-    }
+        agentName,
+        selectedScope = undefined
+    },
+    ref
 ) => {
     const theme = useTheme();
     const [messages, setMessages] = useState([]);
@@ -117,13 +119,13 @@ const ChatConversation = (
     }, [onHandover, selectedThreadId]);
     
     // Function to fetch thread messages
-    const fetchThreadMessages = useCallback(async (threadId, page = 1) => {
+    const fetchThreadMessages = useCallback(async (threadId, page = 1, scope = undefined) => {
         setIsLoadingMessages(true);
         setLoading(true);
         setError(null);
         
         try {
-            const threadMessages = await messagingApi.getThreadMessages(threadId, page, pageSize);
+            const threadMessages = await messagingApi.getThreadMessages(threadId, page, pageSize, scope);
             
             // Sort messages on fetch (newest first)
             const sorted = threadMessages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -157,11 +159,23 @@ const ChatConversation = (
         // Reduced logging to improve performance
         console.log('[SSE] New message received:', messageData.id);
         
+        // Filter message by scope if a scope is selected
+        // If selectedScope is null, only show messages with null/undefined scope
+        // If selectedScope is undefined (all messages), show everything
+        // If selectedScope has a value, only show messages with that exact scope
+        const messageMatchesScope = selectedScope === undefined || 
+            (selectedScope === null ? (!messageData.scope || messageData.scope === null) : messageData.scope === selectedScope);
+        
         // Add the new message to the messages list
         setMessages(prevMessages => {
             // Check if message already exists by ID
             const existsById = prevMessages.some(m => m.id === messageData.id);
             if (existsById) {
+                return prevMessages;
+            }
+            
+            // Skip message if it doesn't match the selected scope
+            if (!messageMatchesScope) {
                 return prevMessages;
             }
             
@@ -193,7 +207,7 @@ const ChatConversation = (
             
             return updated;
         });
-    }, [updateLastUpdateTime, checkForHandover]);
+    }, [updateLastUpdateTime, checkForHandover, selectedScope]);
     
     // Initialize the message streaming hook using SSE
     const messageStreaming = useMessageStreaming({
@@ -213,7 +227,7 @@ const ChatConversation = (
 
     // Unified message sending function - used by both Quick Send and Configure & Send
     const sendMessage = useCallback(async (messageData) => {
-        const { content, metadata, isNewThread = false } = messageData;
+        const { content, metadata, isNewThread = false, scope } = messageData;
         
         if (!selectedThread && !isNewThread) {
             showError('No thread selected');
@@ -237,6 +251,9 @@ const ChatConversation = (
                     throw new Error('Thread is missing required configuration');
                 }
                 
+                // Use the scope from messageData if provided, otherwise use the currently selected scope
+                const messageScope = scope !== undefined ? scope : selectedScope;
+                
                 response = await messagingApi.sendMessage({
                     threadId: selectedThreadId,
                     agent: agentName,
@@ -245,7 +262,8 @@ const ChatConversation = (
                     participantId: selectedThread.participantId,
                     content,
                     metadata,
-                    type: 'chat'
+                    type: 'chat',
+                    scope: messageScope
                 });
                 
                 // Optimistically add the user's message to the UI immediately
@@ -258,7 +276,8 @@ const ChatConversation = (
                     participantId: selectedThread.participantId,
                     workflowId: selectedThread.workflowId,
                     createdAt: new Date().toISOString(),
-                    data: metadata
+                    data: metadata,
+                    scope: messageScope
                 };
                 
                 setMessages(prevMessages => {
@@ -288,14 +307,14 @@ const ChatConversation = (
         } finally {
             setIsTyping(false);
         }
-    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError]);
+    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError, selectedScope]);
 
     // Expose sendMessage to parent component (streaming is automatic)
     useImperativeHandle(ref, () => ({
         sendMessage: sendMessage
     }), [sendMessage]);
 
-    // Initial message fetch and streaming setup when thread ID changes
+    // Initial message fetch and streaming setup when thread ID or scope changes
     useEffect(() => {
         // Clean up streaming when thread changes
         if (messageStreamingRef.current) {
@@ -311,14 +330,15 @@ const ChatConversation = (
             return;
         }
         
-        // Fetch initial messages
-        fetchThreadMessages(selectedThreadId, 1);
+        // Fetch initial messages with scope filter
+        fetchThreadMessages(selectedThreadId, 1, selectedScope);
         
         // Start SSE streaming for real-time updates
+        // Note: SSE receives all messages, but we filter them in handleStreamMessage
         if (messageStreamingRef.current) {
             messageStreamingRef.current.startStreaming(selectedThreadId);
         }
-    }, [selectedThreadId, fetchThreadMessages]);
+    }, [selectedThreadId, selectedScope, fetchThreadMessages]);
 
     // Function to load more messages
     const loadMoreMessages = useCallback(async () => {
@@ -330,7 +350,7 @@ const ChatConversation = (
         setError(null);
         try {
             const nextPage = messagesPage + 1;
-            const olderMessages = await messagingApi.getThreadMessages(selectedThreadId, nextPage, pageSize);
+            const olderMessages = await messagingApi.getThreadMessages(selectedThreadId, nextPage, pageSize, selectedScope);
             
             if (olderMessages.length > 0) {
                 // Sort new messages before appending
@@ -353,7 +373,7 @@ const ChatConversation = (
         } finally {
             setIsLoadingMore(false);
         }
-    }, [selectedThreadId, messagesPage, hasMoreMessages, isLoadingMore, isLoadingMessages, messagingApi, showError, pageSize]);
+    }, [selectedThreadId, messagesPage, hasMoreMessages, isLoadingMore, isLoadingMessages, messagingApi, showError, pageSize, selectedScope]);
 
     return (
         <Paper 
@@ -378,6 +398,7 @@ const ChatConversation = (
                 onRefresh={onRefresh}
                 agentName={agentName}
                 sendMessage={sendMessage}
+                selectedScope={selectedScope}
             />
             
             {/* Messages Container - Scrollable area */}
@@ -403,6 +424,8 @@ const ChatConversation = (
             </Box>
         </Paper>
     );
-};
+});
+
+ChatConversation.displayName = 'ChatConversation';
 
 export default ChatConversation; 

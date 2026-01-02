@@ -12,10 +12,11 @@ import { useNotification } from '../../contexts/NotificationContext';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
+import ConversationSelector from './ConversationSelector';
+import TopicsPanel from './TopicsPanel';
 import WorkflowActions from './WorkflowActions';
 import SendMessageForm from './SendMessageForm';
 import RegisterWebhookForm from './RegisterWebhookForm';
-import ConversationThreads from './ConversationThreads';
 import ChatConversation from './Conversation/ChatConversation';
 import PageLayout from '../Common/PageLayout';
 import EmptyState from '../Common/EmptyState';
@@ -56,9 +57,11 @@ const MessagingPage = () => {
             return null;
         }
     }); // Store full thread object
+    const [selectedTopic, setSelectedTopic] = useState(undefined); // Track selected topic/scope (undefined = auto-select first, null = all messages, string = specific topic)
     const [error, setError] = useState(null); // Keep top-level error state if needed
     const [refreshCounter, setRefreshCounter] = useState(0); // Add counter for refreshing conversation
     const [threadsRefreshCounter, setThreadsRefreshCounter] = useState(0); // Separate counter for threads refresh
+    const [topicsRefreshCounter, setTopicsRefreshCounter] = useState(0); // Counter for topics refresh
     
     // Use a ref to track the last handover refresh time to prevent rapid refreshes
     const lastHandoverRefreshRef = useRef(0);
@@ -153,6 +156,7 @@ const MessagingPage = () => {
             setSelectedAgentName(null);
             setSelectedThreadId(null);
             setSelectedThreadDetails(null);
+            setSelectedTopic(undefined);
         }
         // Update the previous org ref
         prevOrgRef.current = selectedOrg;
@@ -177,7 +181,13 @@ const MessagingPage = () => {
     const handleThreadSelected = useCallback((threadId, threadDetails) => {
         setSelectedThreadId(threadId);
         setSelectedThreadDetails(threadDetails); // Store the full thread object
+        setSelectedTopic(undefined); // Reset topic to auto-select most recent when thread changes
         setError(null); // Clear errors when selection changes
+    }, []);
+
+    // Callback for topic selection
+    const handleTopicSelected = useCallback((scope) => {
+        setSelectedTopic(scope);
     }, []);
 
     // Handler for refreshing threads and messages (for manual refresh)
@@ -187,9 +197,10 @@ const MessagingPage = () => {
             return;
         }
         
-        // Increment both refresh counters to force children to reload
+        // Increment all refresh counters to force children to reload
         setRefreshCounter(prev => prev + 1);
         setThreadsRefreshCounter(prev => prev + 1);
+        setTopicsRefreshCounter(prev => prev + 1);
         
         // If a new thread was created, select it
         if (newThread) {
@@ -197,8 +208,10 @@ const MessagingPage = () => {
             setSelectedThreadDetails({
                 id: newThread.id,
                 participantId: newThread.participantId,
-                // Add other necessary properties
+                workflowType: newThread.workflowType,
+                workflowId: newThread.workflowId,
             });
+            setSelectedTopic(null); // Reset topic to "All Messages" for new thread
         }
         // Otherwise, if thread is selected, refresh it
         else if (selectedThreadId) {
@@ -208,7 +221,7 @@ const MessagingPage = () => {
     }, [selectedAgentName, selectedThreadId, showError]);
 
     // Handler for when a message is sent - now simplified since ChatConversation handles polling
-    const handleMessageSent = useCallback((newThread) => {
+    const handleMessageSent = useCallback((newThread, messageScope = null) => {
         if (!selectedAgentName) {
             showError('Please select an agent first.');
             return;
@@ -216,21 +229,48 @@ const MessagingPage = () => {
         
         // If a new thread was created, select it and refresh
         if (newThread) {
-            setSelectedThreadId(newThread.id);
-            setSelectedThreadDetails({
+            console.log('[MessagingPage] New thread created:', newThread.id);
+            console.log('[MessagingPage] Setting selectedThreadId to:', newThread.id);
+            console.log('[MessagingPage] Setting selectedTopic to:', messageScope);
+            console.log('[MessagingPage] Thread details:', newThread);
+            
+            // Normalize the scope value (empty string should be null for "All Messages")
+            const normalizedScope = messageScope && messageScope.trim() !== '' ? messageScope : null;
+            
+            // Set all state updates together
+            const newThreadDetails = {
                 id: newThread.id,
                 participantId: newThread.participantId,
-                // Add other necessary properties
+                workflowType: newThread.workflowType,
+                workflowId: newThread.workflowId,
+            };
+            
+            setSelectedThreadId(newThread.id);
+            setSelectedThreadDetails(newThreadDetails);
+            setSelectedTopic(normalizedScope);
+            
+            // Log what we just set
+            console.log('[MessagingPage] Set selectedThreadDetails:', newThreadDetails);
+            
+            // Increment all refresh counters for new threads
+            // These will trigger fetches which should include the new thread
+            setThreadsRefreshCounter(prev => {
+                console.log('[MessagingPage] Incrementing threadsRefreshCounter:', prev + 1);
+                return prev + 1;
             });
-            // Increment both refresh counters for new threads
-            setThreadsRefreshCounter(prev => prev + 1);
             setRefreshCounter(prev => prev + 1);
+            setTopicsRefreshCounter(prev => prev + 1);
         } else {
             // For existing threads, ChatConversation.sendMessage handles polling and refresh
-            // Just refresh the threads list to update metadata
+            // If a scope was specified and it's different from current, switch to it
+            if (messageScope !== undefined && messageScope !== selectedTopic) {
+                setSelectedTopic(messageScope);
+            }
+            // Refresh the threads and topics lists to update metadata
             setThreadsRefreshCounter(prev => prev + 1);
+            setTopicsRefreshCounter(prev => prev + 1);
         }
-    }, [selectedAgentName, showError]);
+    }, [selectedAgentName, selectedTopic, showError]);
 
     // Handler for thread handover events
     const handleThreadHandover = useCallback(async (threadId) => {
@@ -267,9 +307,10 @@ const MessagingPage = () => {
             if (updatedThreadDetails) {
                 // Update thread details with fresh data
                 setSelectedThreadDetails(updatedThreadDetails);
-                // Force refresh of components
+                // Force refresh of components including topics
                 setRefreshCounter(prev => prev + 1);
                 setThreadsRefreshCounter(prev => prev + 1);
+                setTopicsRefreshCounter(prev => prev + 1);
             }
         } catch (err) {
             await handleApiError(err, 'Failed to refresh thread', showError);
@@ -283,11 +324,14 @@ const MessagingPage = () => {
     }, [selectedAgentName, messagingApi, showError, setSelectedThreadDetails, setRefreshCounter, setThreadsRefreshCounter, setLoading]);
 
     // Handler for opening the send message slider
-    const handleSendMessage = useCallback(() => {
+    // @param {boolean} isNewConversation - If true, don't pass threadId (create new conversation)
+    const handleSendMessage = useCallback((isNewConversation = false) => {
         if (!selectedAgentName) {
             showError('Please select an agent first.');
             return;
         }
+        
+        console.log('[MessagingPage] Opening send message form, isNewConversation:', isNewConversation);
         
         // Get the sendMessage function from ChatConversation if available
         const unifiedSendMessage = chatConversationRef.current?.sendMessage;
@@ -296,18 +340,21 @@ const MessagingPage = () => {
         openSlider(
             <SendMessageForm 
                 agentName={selectedAgentName}
-                threadId={selectedThreadId}
+                // Only pass threadId if this is NOT a new conversation
+                threadId={isNewConversation ? null : selectedThreadId}
                 onClose={closeSlider} 
-                // Use details from the stored selectedThreadDetails object
-                initialParticipantId={selectedThreadDetails?.participantId || ''}
-                initialWorkflowType={selectedThreadDetails?.workflowType || ''}
-                initialWorkflowId={selectedThreadDetails?.workflowId || ''}
+                // Use details from the stored selectedThreadDetails object (only if not new conversation)
+                initialParticipantId={isNewConversation ? '' : (selectedThreadDetails?.participantId || '')}
+                initialWorkflowType={isNewConversation ? '' : (selectedThreadDetails?.workflowType || '')}
+                initialWorkflowId={isNewConversation ? '' : (selectedThreadDetails?.workflowId || '')}
+                // Pre-fill scope with currently selected topic (if not "All Messages" and not new conversation)
+                initialScope={isNewConversation ? '' : (selectedTopic && selectedTopic !== null ? selectedTopic : '')}
                 onMessageSent={handleMessageSent}
                 sendMessage={unifiedSendMessage}
             />,
             `Send Message` // Simplified title
         );
-    }, [selectedAgentName, selectedThreadId, selectedThreadDetails, openSlider, closeSlider, showError, handleMessageSent]);
+    }, [selectedAgentName, selectedThreadId, selectedThreadDetails, selectedTopic, openSlider, closeSlider, showError, handleMessageSent]);
 
     // Handler for opening the webhook registration slider
     const handleRegisterWebhook = useCallback(() => {
@@ -324,8 +371,15 @@ const MessagingPage = () => {
         <PageLayout 
             title="Messaging Playground"
             headerActions={
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', minWidth: '400px' }}>
-                    <Box sx={{ minWidth: '300px', flex: 1 }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    gap: 2, 
+                    alignItems: 'flex-start', 
+                    width: '100%',
+                    flexWrap: 'wrap'
+                }}>
+                    {/* Agent Selector */}
+                    <Box sx={{ minWidth: '280px', maxWidth: '320px', flex: '0 0 auto' }}>
                         <AgentSelector
                             agentsApi={agentsApi}
                             showError={showError}
@@ -333,11 +387,29 @@ const MessagingPage = () => {
                             selectedAgent={selectedAgentName}
                         />
                     </Box>
-                    <WorkflowActions
-                        selectedAgentName={selectedAgentName}
-                        onRegisterWebhook={handleRegisterWebhook}
-                        onRefresh={handleRefresh}
-                    />
+                    
+                    {/* Conversation Selector - takes more space */}
+                    <Box sx={{ minWidth: '400px', flex: '1 1 auto', maxWidth: '600px' }}>
+                        <ConversationSelector
+                            selectedAgentName={selectedAgentName}
+                            messagingApi={messagingApi}
+                            showError={showError}
+                            selectedThreadId={selectedThreadId}
+                            selectedThreadDetails={selectedThreadDetails}
+                            onThreadSelect={handleThreadSelected}
+                            onNewConversation={() => handleSendMessage(true)}
+                            refreshCounter={threadsRefreshCounter}
+                        />
+                    </Box>
+                    
+                    {/* Workflow Actions */}
+                    <Box sx={{ flex: '0 0 auto', alignSelf: 'center' }}>
+                        <WorkflowActions
+                            selectedAgentName={selectedAgentName}
+                            onRegisterWebhook={handleRegisterWebhook}
+                            onRefresh={handleRefresh}
+                        />
+                    </Box>
                 </Box>
             }
         >
@@ -351,14 +423,15 @@ const MessagingPage = () => {
                             xs: 12,
                             md: 3
                         }}>
-                        {/* Threads list */}
-                        <ConversationThreads
-                            key={`threads-${threadsRefreshCounter}`}
+                        {/* Topics panel */}
+                        <TopicsPanel
                             selectedAgentName={selectedAgentName}
+                            selectedThreadId={selectedThreadId}
                             messagingApi={messagingApi}
                             showError={showError}
-                            selectedThreadId={selectedThreadId}
-                            onThreadSelect={handleThreadSelected}
+                            onTopicSelect={handleTopicSelected}
+                            selectedTopic={selectedTopic}
+                            refreshCounter={topicsRefreshCounter}
                         />
                     </Grid>
                     <Grid
@@ -368,7 +441,7 @@ const MessagingPage = () => {
                         }}>
                         {/* Messages display */}
                         <ChatConversation 
-                            key={`conversation-${refreshCounter}-${selectedThreadId}`}
+                            key={`conversation-${refreshCounter}-${selectedThreadId}-${selectedTopic}`}
                             selectedThreadId={selectedThreadId}
                             messagingApi={messagingApi}
                             showError={showError}
@@ -377,15 +450,18 @@ const MessagingPage = () => {
                             onHandover={handleThreadHandover}
                             onRefresh={handleRefresh}
                             agentName={selectedAgentName}
+                            selectedScope={selectedTopic}
                             onThreadDeleted={(threadId) => {
                                 // Clear the selected thread when it's deleted
                                 if (threadId === selectedThreadId) {
                                     setSelectedThreadId(null);
                                     setSelectedThreadDetails(null);
+                                    setSelectedTopic(null);
                                 }
-                                // Refresh both lists
+                                // Refresh all lists
                                 setRefreshCounter(prev => prev + 1);
                                 setThreadsRefreshCounter(prev => prev + 1);
+                                setTopicsRefreshCounter(prev => prev + 1);
                             }}
                             ref={chatConversationRef}
                         />

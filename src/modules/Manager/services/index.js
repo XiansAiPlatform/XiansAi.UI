@@ -15,3 +15,4 @@ export { useOidcConfigApi } from './oidc-config-api';
 export { useTemplatesApi } from './templates-api';
 export { useScheduleApi, scheduleService } from './schedule-api';
 export { useDocumentsApi } from './documents-api';
+export { useTasksApi } from './tasks-api';

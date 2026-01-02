@@ -27,13 +27,26 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
     try {
       
       const abortController = new AbortController();
-      console.log('workflowId', workflowId);
+      console.log('[ActivityTimeline] Starting stream for workflowId:', workflowId);
       
-      await api.streamActivityEvents(workflowId, (newEvent) => {
+      await api.streamActivityEvents(workflowId, (eventWrapper) => {
+        console.log('[ActivityTimeline] Received event:', eventWrapper);
+        
+        // SSE events are wrapped in { event: eventType, data: eventData } structure
+        // Extract the actual activity data from the wrapper
+        const newEvent = eventWrapper.data || eventWrapper;
+        
+        // Skip heartbeat and connection events
+        if (eventWrapper.event === 'heartbeat' || eventWrapper.event === 'connected') {
+          console.log('[ActivityTimeline] Skipping system event:', eventWrapper.event);
+          return;
+        }
+        
+        console.log('[ActivityTimeline] Processing activity event:', newEvent);
         
         setEvents(currentEvents => {
           if (!newEvent.ID) {
-            console.warn('Event missing ID:', newEvent);
+            console.warn('[ActivityTimeline] Event missing ID:', newEvent);
             return currentEvents;
           }
 
@@ -43,6 +56,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
 
           // Check if event already exists
           if (currentEvents.some(e => e.ID === newEvent.ID)) {
+            console.log('[ActivityTimeline] Event already exists, skipping:', newEvent.ID);
             return currentEvents;
           }
 
@@ -54,6 +68,7 @@ const ActivityTimeline = ({ workflowId, openSlider, onWorkflowComplete, isMobile
             setLatestEventId(null);
           }, 5000);
 
+          console.log('[ActivityTimeline] Adding new event to timeline:', newEvent.ActivityName);
           return [...currentEvents, newEvent];
         });
       }, abortController.signal);

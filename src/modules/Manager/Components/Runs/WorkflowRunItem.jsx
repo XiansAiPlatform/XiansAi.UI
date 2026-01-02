@@ -59,7 +59,7 @@ const WorkflowRunItem = ({ run, isMobile }) => {
 
   return (
     <Link 
-      to={`/manager/runs/${safeRun.workflowId}/${safeRun.runId}`} 
+      to={`/manager/runs/details?workflowId=${encodeURIComponent(safeRun.workflowId)}&runId=${encodeURIComponent(safeRun.runId)}`} 
       className="workflow-run-item"
       style={{
         padding: isMobile ? '12px' : '16px',

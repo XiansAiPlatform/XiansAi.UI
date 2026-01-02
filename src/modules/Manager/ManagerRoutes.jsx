@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminDashboardRoute from './Components/Admin/AdminDashboardRoute';
 import UsageStatistics from './Components/UsageStatistics/UsageStatistics';
 import DataDocuments from './Components/DataDocuments/DataDocuments';
+import HITLTasks from './Components/HITLTasks/HITLTasks';
 
 function ManagerRoutes() {
   const { logout, isLoading, error } = useAuth();
@@ -157,7 +158,7 @@ function ManagerRoutes() {
                         </ProtectedRoute>
                       } />
                       <Route path="definitions" element={<Navigate to="/manager/definitions/deployed" replace />} />
-                      <Route path="runs/:id/:runId" element={
+                      <Route path="runs/details" element={
                         <ProtectedRoute>
                           <WorkflowDetails />
                         </ProtectedRoute>
@@ -185,6 +186,11 @@ function ManagerRoutes() {
                       <Route path="auditing" element={
                         <ProtectedRoute>
                           <AuditingPage />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="hitl-tasks" element={
+                        <ProtectedRoute>
+                          <HITLTasks />
                         </ProtectedRoute>
                       } />
                       <Route path="usage-statistics" element={

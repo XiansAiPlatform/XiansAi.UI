@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { Container, Box, useMediaQuery, useTheme } from '@mui/material';
 import { useSlider } from '../../../contexts/SliderContext';
 import { useNotification } from '../../../contexts/NotificationContext';
@@ -11,6 +11,7 @@ import ActivityTimeline from './ActivityTimeline';
 
 const WorkflowDetails = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [workflow, setWorkflow] = useState(location.state?.workflow);
   const [loading, setLoading] = useState(!location.state?.workflow);
   const [error, setError] = useState(null);
@@ -19,7 +20,8 @@ const WorkflowDetails = () => {
   const containerRef = useRef(null);
   const [onActionComplete, setOnActionComplete] = useState(false);
   const api = useWorkflowApi();
-  const { id, runId } = useParams();
+  const id = searchParams.get('workflowId');
+  const runId = searchParams.get('runId');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 

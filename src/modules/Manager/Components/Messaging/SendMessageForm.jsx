@@ -68,9 +68,10 @@ const prepareMessageData = ({
     metadata, 
     messageType, 
     threadId, 
-    toSingletonInstance 
+    toSingletonInstance,
+    scope
 }) => {
-    return {
+    const data = {
         agent: agentName,
         workflowType,
         workflowId: toSingletonInstance ? null : workflowId,
@@ -80,6 +81,13 @@ const prepareMessageData = ({
         type: messageType.toLowerCase(),
         threadId
     };
+    
+    // Only include scope if it has a value (empty string means no scope/default)
+    if (scope) {
+        data.scope = scope;
+    }
+    
+    return data;
 };
 
 const SendMessageForm = ({ 
@@ -89,15 +97,18 @@ const SendMessageForm = ({
     initialParticipantId = '', 
     initialWorkflowType = '',
     initialWorkflowId = '',
+    initialScope = '',
     onMessageSent,
     sendMessage
 }) => {
     const [workflowType, setWorkflowType] = useState(initialWorkflowType);
     const [workflowId, setWorkflowId] = useState(initialWorkflowId);
     const [participantId, setParticipantId] = useState(initialParticipantId);
+    const [scope, setScope] = useState(initialScope);
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
     const [showMetadata, setShowMetadata] = useState(false);
+    const [showScope, setShowScope] = useState(false);
     const [messageType, setMessageType] = useState('Chat');
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
@@ -132,14 +143,20 @@ const SendMessageForm = ({
         if (savedShowMetadata === 'true') {
             setShowMetadata(true);
         }
-    }, []);
+        
+        // Auto-show scope field if initialScope is provided
+        if (initialScope) {
+            setShowScope(true);
+        }
+    }, [initialScope]);
 
     // Update the state if the props change (e.g., when switching threads)
     useEffect(() => {
         setParticipantId(initialParticipantId);
         setWorkflowType(initialWorkflowType);
         setWorkflowId(initialWorkflowId);
-    }, [initialParticipantId, initialWorkflowType, initialWorkflowId]);
+        setScope(initialScope);
+    }, [initialParticipantId, initialWorkflowType, initialWorkflowId, initialScope]);
 
     // Fetch workflow types when agent name changes
     useEffect(() => {
@@ -317,10 +334,14 @@ const SendMessageForm = ({
                 metadata: metadataValidation.data,
                 messageType,
                 threadId,
-                toSingletonInstance
+                toSingletonInstance,
+                scope
             });
             
             response = await messagingApi.sendMessage(messageData);
+            
+            console.log('[SendMessageForm] API response:', response);
+            console.log('[SendMessageForm] Response type:', typeof response);
             
             showSuccess('Message sent successfully!');
             setContent(''); // Clear only the content, keep metadata for next message
@@ -330,8 +351,16 @@ const SendMessageForm = ({
                 const newThread = threadId ? null : {
                     id: response,
                     participantId,
+                    workflowType,
+                    workflowId: toSingletonInstance ? null : workflowId,
                 };
-                onMessageSent(newThread);
+                console.log('[SendMessageForm] Calling onMessageSent');
+                console.log('[SendMessageForm] - threadId:', threadId);
+                console.log('[SendMessageForm] - newThread:', newThread);
+                console.log('[SendMessageForm] - scope:', scope || null);
+                console.log('[SendMessageForm] - Is new conversation?', !threadId);
+                // Pass the scope that was used for this message
+                onMessageSent(newThread, scope || null);
             }
             
             // Close the form
@@ -598,34 +627,35 @@ const SendMessageForm = ({
                 onClick={(e) => e.stopPropagation()}
             />
             
-            <Box sx={{ mt: 1, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <FormLabel id="message-type-label" sx={{ mr: 2 }}>Message Type</FormLabel>
-                    <RadioGroup
-                        row
-                        aria-labelledby="message-type-label"
-                        name="message-type"
-                        value={messageType}
-                        onChange={(e) => {
-                            e.stopPropagation();
-                            setMessageType(e.target.value);
-                        }}
-                    >
-                        <FormControlLabel value="Chat" control={<Radio />} label="Chat" />
-                        <FormControlLabel value="Data" control={<Radio />} label="Data" />
-                    </RadioGroup>
-                </Box>
-                <Button 
-                    onClick={(e) => {
+            {showScope && (
+                <TextField
+                    label="Topic/Scope (Optional)"
+                    value={scope}
+                    onChange={(e) => setScope(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                    helperText="Assign this message to a topic/scope for organization (leave empty for default)"
+                    disabled={loading}
+                    onClick={(e) => e.stopPropagation()}
+                    placeholder="e.g., billing-inquiry, customer-support"
+                />
+            )}
+            
+            <Box sx={{ mt: 1, mb: 2, display: 'flex', alignItems: 'center' }}>
+                <FormLabel id="message-type-label" sx={{ mr: 2 }}>Message Type</FormLabel>
+                <RadioGroup
+                    row
+                    aria-labelledby="message-type-label"
+                    name="message-type"
+                    value={messageType}
+                    onChange={(e) => {
                         e.stopPropagation();
-                        setShowMetadata(!showMetadata);
-                    }} 
-                    color="primary" 
-                    size="small"
-                    sx={{ textTransform: 'none' }}
+                        setMessageType(e.target.value);
+                    }}
                 >
-                    {showMetadata ? 'Hide Data' : 'Add Data'}
-                </Button>
+                    <FormControlLabel value="Chat" control={<Radio />} label="Chat" />
+                    <FormControlLabel value="Data" control={<Radio />} label="Data" />
+                </RadioGroup>
             </Box>
             
             <TextField
@@ -676,9 +706,35 @@ const SendMessageForm = ({
                 }}
                 disabled={isSendDisabled}
                 sx={{ mt: 2 }}
+                fullWidth
             >
                 {loading ? <CircularProgress size={24} /> : 'Send Message'}
             </Button>
+            
+            <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
+                <Button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowScope(!showScope);
+                    }} 
+                    color="primary" 
+                    size="small"
+                    sx={{ textTransform: 'none' }}
+                >
+                    {showScope ? 'Hide Topic' : 'Add Topic'}
+                </Button>
+                <Button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMetadata(!showMetadata);
+                    }} 
+                    color="primary" 
+                    size="small"
+                    sx={{ textTransform: 'none' }}
+                >
+                    {showMetadata ? 'Hide Data' : 'Add Data'}
+                </Button>
+            </Box>
         </Box>
     );
 };
