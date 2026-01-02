@@ -20,7 +20,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  CircularProgress,
   LinearProgress
 } from '@mui/material';
 import { useTasksApi } from '../../services/tasks-api';
