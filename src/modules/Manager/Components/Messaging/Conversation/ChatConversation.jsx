@@ -247,7 +247,8 @@ const ChatConversation = forwardRef((
                 threadId = response;
             } else {
                 // For existing threads, send the message
-                if (!selectedThread.participantId || !selectedThread.workflowType || !selectedThread.workflowId) {
+                // workflowId can be null for singleton instances
+                if (!selectedThread.participantId || !selectedThread.workflowType) {
                     throw new Error('Thread is missing required configuration');
                 }
                 
