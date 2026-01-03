@@ -95,7 +95,9 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
             return;
         }
 
-        if (!selectedThread.participantId || !selectedThread.workflowType || !selectedThread.workflowId) {
+        // workflowId can be null for singleton instances
+        if (!selectedThread.participantId || !selectedThread.workflowType) {
+            console.error('Thread is missing required configuration:participantId:', selectedThread.participantId, 'workflowType:', selectedThread.workflowType, 'workflowId:', selectedThread.workflowId);
             showError('Thread is missing required configuration. Please use "Configure & Send" instead.');
             return;
         }
