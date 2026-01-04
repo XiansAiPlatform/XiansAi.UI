@@ -25,6 +25,7 @@ export const useDefinitions = () => {
   const [timeFilter, setTimeFilter] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedAgentName, setSelectedAgentName] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const definitionsApi = useDefinitionsApi();
   const agentsApi = useAgentsApi();
@@ -72,6 +73,7 @@ export const useDefinitions = () => {
   const fetchDefinitions = async () => {
     try {
       setLoading(true);
+      setIsLoading(true);
       const data = await definitionsApi.getDefinitions(timeFilter);
       setAgentGroups(data);
       setError(null);
@@ -81,6 +83,7 @@ export const useDefinitions = () => {
       await handleApiError(err, 'Failed to load definitions. Please try again', showError);
     } finally {
       setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -174,6 +177,7 @@ export const useDefinitions = () => {
     // State
     definitions,
     error,
+    isLoading,
     openDefinitionId,
     searchQuery,
     timeFilter,

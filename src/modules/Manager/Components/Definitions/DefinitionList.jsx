@@ -8,12 +8,14 @@ import EmptyState from './EmptyState';
 import PermissionsManager from './PermissionsManager';
 import { tableStyles } from './styles';
 import PageLayout from '../Common/PageLayout';
+import { ListSkeleton } from '../../../../components/SkeletonLoaders';
 
 const DefinitionList = () => {
   const {
     // State
     definitions,
     error,
+    isLoading,
     openDefinitionId,
     searchQuery,
     timeFilter,
@@ -53,6 +55,26 @@ const DefinitionList = () => {
     setSelectedAgent(agentName);
     handleDeleteAllClick();
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <PageLayout
+        title="Deployed Agents"
+        subtitle="Loading agents..."
+        headerActions={getHeaderActions({
+          searchQuery,
+          onSearchChange: handleSearchChange,
+          timeFilter,
+          onTimeFilterChange: handleTimeFilterChange
+        })}
+      >
+        <Box sx={tableStyles.container}>
+          <ListSkeleton rows={5} height={120} />
+        </Box>
+      </PageLayout>
+    );
+  }
 
   // Error state
   if (error) {

@@ -11,8 +11,10 @@ import {
   Button,
   TextField,
   FormControlLabel,
-  Checkbox
+  Checkbox,
+  InputAdornment
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import PageLayout from '../Common/PageLayout';
 import TemplateCard from './TemplateCard';
 import EmptyState from '../Common/EmptyState';
@@ -25,6 +27,7 @@ const TemplatesList = () => {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [deployDialog, setDeployDialog] = useState({ open: false, template: null });
   const [deployConfig, setDeployConfig] = useState({
     agentName: '',
@@ -41,7 +44,15 @@ const TemplatesList = () => {
       setLoading(true);
       setError(null);
       const data = await templatesApi.getAgentTemplates(false);
-      setTemplates(data);
+      
+      // Sort templates by creation date, newest first
+      const sortedData = [...data].sort((a, b) => {
+        const dateA = new Date(a.agent?.created_at || a.agent?.createdAt || 0);
+        const dateB = new Date(b.agent?.created_at || b.agent?.createdAt || 0);
+        return dateB - dateA; // Descending order (newest first)
+      });
+      
+      setTemplates(sortedData);
     } catch (err) {
       console.error('Error loading templates:', err);
       setError(err.message || 'Failed to load agent templates');
@@ -106,6 +117,18 @@ const TemplatesList = () => {
     }
   };
 
+  // Filter templates based on search query
+  const filteredTemplates = templates.filter(template => {
+    if (!searchQuery.trim()) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const name = template.name?.toLowerCase() || '';
+    const description = template.agent?.description?.toLowerCase() || '';
+    const agentName = template.agent?.name?.toLowerCase() || '';
+    
+    return name.includes(query) || description.includes(query) || agentName.includes(query);
+  });
+
   const renderContent = () => {
     if (loading) {
       return <CardSkeleton count={6} gridProps={{ xs: 12, sm: 6, md: 4 }} />;
@@ -137,9 +160,19 @@ const TemplatesList = () => {
       );
     }
 
+    if (filteredTemplates.length === 0) {
+      return (
+        <EmptyState
+          title="No Templates Found"
+          description={`No templates match your search "${searchQuery}". Try adjusting your search criteria.`}
+          context="search"
+        />
+      );
+    }
+
     return (
       <Grid container spacing={3}>
-        {templates.map((template) => (
+        {filteredTemplates.map((template) => (
           <Grid item xs={12} sm={6} md={4} key={template.agent.id}>
             <TemplateCard
               template={template}
@@ -155,11 +188,41 @@ const TemplatesList = () => {
     );
   };
 
+  const getSubtitle = () => {
+    const baseText = "Deploy pre-configured agent templates to quickly set up new workflows";
+    if (loading) return baseText;
+    if (templates.length === 0) return baseText;
+    const count = templates.length;
+    const showing = filteredTemplates.length;
+    if (searchQuery && showing !== count) {
+      return `${baseText} • Showing ${showing} of ${count} template${count !== 1 ? 's' : ''}`;
+    }
+    return `${baseText} • ${count} template${count !== 1 ? 's' : ''} available`;
+  };
+
   return (
     <PageLayout
       title="Agent Templates"
-      subtitle="Deploy pre-configured agent templates to quickly set up new workflows"
+      subtitle={getSubtitle()}
     >
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          placeholder="Search templates by name or description..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          variant="outlined"
+          size="medium"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Box>
+      
       {renderContent()}
 
       {/* Deploy Dialog */}
