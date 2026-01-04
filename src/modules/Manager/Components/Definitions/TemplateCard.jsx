@@ -17,11 +17,19 @@ import {
   Tooltip
 } from '@mui/material';
 import {
-  SmartToy as AgentIcon,
+  SmartToy as SmartToyIcon,
   Launch as LaunchIcon,
   Info as InfoIcon,
   Rocket as DeployIcon,
-  Delete as DeleteIcon
+  Delete as DeleteIcon,
+  AutoAwesome as AutoAwesomeIcon,
+  Psychology as PsychologyIcon,
+  Biotech as BiotechIcon,
+  Engineering as EngineeringIcon,
+  Science as ScienceIcon,
+  FlashOn as FlashOnIcon,
+  Stars as StarsIcon,
+  AutoFixHigh as AutoFixHighIcon
 } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
 import DeploymentWizard from './Deploy/DeploymentWizard';
@@ -32,6 +40,30 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
   const [isDeleting, setIsDeleting] = useState(false);
   
   const { agent, definitions } = template;
+
+  // Array of different agent icons for variety
+  const agentIcons = [
+    SmartToyIcon,
+    AutoAwesomeIcon,
+    PsychologyIcon,
+    BiotechIcon,
+    EngineeringIcon,
+    ScienceIcon,
+    FlashOnIcon,
+    StarsIcon,
+    AutoFixHighIcon
+  ];
+
+  // Get a consistent random icon based on agent ID
+  const getRandomIconComponent = () => {
+    if (!agent?.id) return SmartToyIcon;
+    // Use agent ID to generate a consistent index
+    const hash = agent.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const index = hash % agentIcons.length;
+    return agentIcons[index];
+  };
+
+  const IconComponent = getRandomIconComponent();
   
   // Parse onboardingJson safely
   const parseOnboardingJson = () => {
@@ -251,13 +283,13 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
           aspectRatio: '1 / 1',
           height: '100%',
           minWidth: 280,
-          bgcolor: getIcon() ? 'transparent' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          bgcolor: getIcon() ? 'transparent' : 'primary.main',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
           overflow: 'hidden',
-          backgroundImage: getIcon() ? `url(${getIcon()})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          backgroundImage: getIcon() ? `url(${getIcon()})` : 'none',
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat'
@@ -273,12 +305,12 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
               height: '100%'
             }}
           >
-            <AgentIcon 
+            <IconComponent 
               sx={{ 
-                fontSize: 56, 
+                fontSize: 120, 
                 color: 'white',
-                opacity: 0.95,
-                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))'
+                opacity: 0.9,
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
               }} 
             />
           </Box>
