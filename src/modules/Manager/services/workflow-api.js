@@ -40,6 +40,7 @@ export const useWorkflowApi = () => {
           const { 
             status = 'all', 
             agent = null, 
+            workflowType = null,
             pageSize = 20, 
             pageToken = null 
           } = options;
@@ -54,6 +55,10 @@ export const useWorkflowApi = () => {
             queryParams.agent = agent;
           }
 
+          if (workflowType) {
+            queryParams.workflowType = workflowType;
+          }
+
           if (pageSize) {
             queryParams.pageSize = pageSize;
           }
@@ -65,6 +70,19 @@ export const useWorkflowApi = () => {
           return await apiClient.get('/api/client/workflows/list', queryParams);
         } catch (error) {
           console.error('Failed to fetch paginated workflows:', error);
+          throw error;
+        }
+      },
+
+      getWorkflowTypes: async (agent) => {
+        try {
+          if (!agent) {
+            throw new Error('Agent is required to fetch workflow types');
+          }
+
+          return await apiClient.get(`/api/client/workflows/types`, { agent });
+        } catch (error) {
+          console.error('Failed to fetch workflow types:', error);
           throw error;
         }
       },

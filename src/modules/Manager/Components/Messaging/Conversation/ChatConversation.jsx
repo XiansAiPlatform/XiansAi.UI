@@ -5,6 +5,7 @@ import MessagesList from './MessagesList';
 import { useLoading } from '../../../contexts/LoadingContext';
 import useMessageStreaming from '../hooks/useMessageStreaming';
 import { handleApiError } from '../../../utils/errorHandler';
+import { useTenant } from '../../../contexts/TenantContext';
 
 /**
  * Chat conversation component that displays messages for a selected thread
@@ -37,6 +38,7 @@ const ChatConversation = forwardRef((
     ref
 ) => {
     const theme = useTheme();
+    const { tenant } = useTenant();
     const [messages, setMessages] = useState([]);
     const [isLoadingMessages, setIsLoadingMessages] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -271,6 +273,7 @@ const ChatConversation = forwardRef((
                 const optimisticMessage = {
                     id: `temp-${Date.now()}`, // Temporary ID
                     threadId: selectedThreadId,
+                    tenantId: tenant?.tenantId || tenant?.id,
                     text: content,
                     direction: 'Incoming',
                     messageType: 'Chat',
@@ -308,7 +311,7 @@ const ChatConversation = forwardRef((
         } finally {
             setIsTyping(false);
         }
-    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError, selectedScope]);
+    }, [selectedThread, selectedThreadId, agentName, messagingApi, showError, selectedScope, tenant]);
 
     // Expose sendMessage to parent component (streaming is automatic)
     useImperativeHandle(ref, () => ({

@@ -481,7 +481,7 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
               disabled={isCompleting || isRejecting || isSavingDraft}
               sx={{ textTransform: 'none' }}
             >
-              {isCompleting ? 'Completing...' : 'Mark Complete'}
+              {isCompleting ? 'Approving...' : 'Mark Approved'}
             </Button>
           </Box>
         </>

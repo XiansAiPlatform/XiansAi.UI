@@ -13,6 +13,36 @@ import { format } from 'date-fns';
 import { useLoading } from '../../contexts/LoadingContext';
 import { handleApiError } from '../../utils/errorHandler';
 
+// Helper function to get simplified workflow name
+const getSimplifiedWorkflowName = (workflowId) => {
+    if (!workflowId) return '';
+    
+    // Split by ':' and remove first 2 parts
+    const parts = workflowId.split(':');
+    if (parts.length > 2) {
+        return parts.slice(2).join(':').trim();
+    }
+    
+    return workflowId;
+};
+
+// Helper function to get display name for a thread
+const getThreadDisplayName = (thread) => {
+    if (!thread) return '';
+    
+    // Build display name: participantId + simplified workflowId
+    let displayName = thread.participantId 
+        ? thread.participantId.substring(0, 20) + (thread.participantId.length > 20 ? '...' : '')
+        : 'Unknown Participant';
+    
+    if (thread.workflowId) {
+        const simplifiedWorkflow = getSimplifiedWorkflowName(thread.workflowId);
+        displayName += ` | ${simplifiedWorkflow}`;
+    }
+    
+    return displayName;
+};
+
 /**
  * Dropdown selector for conversation threads
  * Replaces the left panel ConversationThreads component
@@ -24,6 +54,7 @@ const ConversationSelector = ({
     selectedThreadId,
     selectedThreadDetails, // Accept selected thread details from parent
     onThreadSelect,
+    onThreadDetailsUpdate, // Callback to update thread details without changing selection
     onNewConversation,
     refreshCounter = 0 // Accept refresh counter from parent
 }) => {
@@ -35,36 +66,6 @@ const ConversationSelector = ({
     const [hasMore, setHasMore] = useState(false);
     const [loadingMore, setLoadingMore] = useState(false);
     const previousAgentRef = useRef(null);
-
-    // Helper function to get simplified workflow name
-    const getSimplifiedWorkflowName = (workflowId) => {
-        if (!workflowId) return '';
-        
-        // Split by ':' and remove first 2 parts
-        const parts = workflowId.split(':');
-        if (parts.length > 2) {
-            return parts.slice(2).join(':').trim();
-        }
-        
-        return workflowId;
-    };
-
-    // Helper function to get display name for a thread
-    const getThreadDisplayName = (thread) => {
-        if (!thread) return '';
-        
-        // Build display name: participantId + simplified workflowId
-        let displayName = thread.participantId 
-            ? thread.participantId.substring(0, 20) + (thread.participantId.length > 20 ? '...' : '')
-            : 'Unknown Participant';
-        
-        if (thread.workflowId) {
-            const simplifiedWorkflow = getSimplifiedWorkflowName(thread.workflowId);
-            displayName += ` | ${simplifiedWorkflow}`;
-        }
-        
-        return displayName;
-    };
 
     useEffect(() => {
         // Check if agent has actually changed
@@ -87,7 +88,27 @@ const ConversationSelector = ({
             setPage(1);
             try {
                 const fetchedThreads = await messagingApi.getThreads(selectedAgentName, 1, pageSize);
-                setThreads(fetchedThreads || []);
+                
+                // If we have a selected thread during refresh (not agent change), 
+                // update the parent with fresh thread details from the fetched data
+                let updatedThreads = fetchedThreads || [];
+                if (selectedThreadId && !agentChanged && updatedThreads.length > 0) {
+                    const freshThreadDetails = updatedThreads.find(t => t.id === selectedThreadId);
+                    if (freshThreadDetails) {
+                        // Update parent with fresh thread details without resetting topic/other state
+                        if (onThreadDetailsUpdate) {
+                            onThreadDetailsUpdate(freshThreadDetails);
+                        }
+                    } else {
+                        // Thread not in current page, keep using selectedThreadDetails
+                        // and add it to the list to prevent dropdown from clearing
+                        if (selectedThreadDetails) {
+                            updatedThreads = [selectedThreadDetails, ...updatedThreads];
+                        }
+                    }
+                }
+                
+                setThreads(updatedThreads);
                 setHasMore(fetchedThreads && fetchedThreads.length === pageSize);
                 
                 // Handle thread selection after fetch
@@ -95,8 +116,6 @@ const ConversationSelector = ({
                 if (fetchedThreads && fetchedThreads.length > 0 && !selectedThreadId && agentChanged) {
                     onThreadSelect(fetchedThreads[0].id, fetchedThreads[0]);
                 }
-                // Note: We don't call onThreadSelect for already-selected threads during refresh
-                // to avoid overwriting parent state (like selectedTopic) that was just set
             } catch (err) {
                 const errorMsg = 'Failed to fetch conversation threads.';
                 await handleApiError(err, errorMsg, showError);
@@ -250,12 +269,8 @@ const ConversationSelector = ({
                         label="Conversation" 
                         variant="outlined"
                         size="small"
-                        placeholder="Search by participant, workflow, or title..."
-                        helperText={
-                            threads.length > 0 
-                                ? `Showing ${threads.length} conversation${threads.length !== 1 ? 's' : ''}${hasMore ? '. Scroll to load more.' : ''}`
-                                : null
-                        }
+                        placeholder="Select Conversation"
+
                         InputProps={{
                             ...params.InputProps,
                             endAdornment: (

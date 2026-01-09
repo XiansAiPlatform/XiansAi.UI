@@ -28,13 +28,13 @@ const Settings = () => {
 
   // Build main tabs
   const tabs = [
-    { label: 'Agent2Server Settings', component: <CACertificates /> },
+    { label: 'Agent Settings', component: <CACertificates /> },
   ];
   
   if (showTenantTab) {
 
-    tabs.push({ label: "Machine2Agent API Keys", component: <ApiKeySettings /> });
-    tabs.push({ label: "User2Agent OIDC", component: <TenantAuthSettings /> });
+    tabs.push({ label: "API Keys", component: <ApiKeySettings /> });
+    tabs.push({ label: "Open ID Connect", component: <TenantAuthSettings /> });
     tabs.push({ label: "Users", component: null }); // Will be handled by sub-tabs
     tabs.push({ label: "Branding", component: <BrandingSettings /> });
   }
@@ -122,9 +122,9 @@ const Settings = () => {
       <PageLayout title="Tenant Settings">
         <Box className="settings-container">
           <Alert severity="info" className="info-alert" sx={{ mb: 3 }}>
-            These settings are required for your app server to run.
+            These settings are required for your agent to run.
             <br />
-            Configure the certificate and key paths in the App Server settings.
+            Configure the certificate and server url in the Agent Settings.
           </Alert>
 
           <Box role="tabpanel">

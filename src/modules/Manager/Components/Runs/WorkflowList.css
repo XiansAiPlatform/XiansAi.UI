@@ -678,7 +678,6 @@
   border: 1px solid var(--border-color) !important;
   border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
-  background: var(--bg-paper) !important;
 
   position: relative;
   z-index: 1;

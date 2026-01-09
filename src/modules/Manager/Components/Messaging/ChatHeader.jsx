@@ -203,192 +203,116 @@ const ChatHeader = ({ selectedThread, lastUpdateTime, onSendMessage, sendMessage
             }}
         >
             {/* Main Header Content */}
-            <Box sx={{ p: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1, gap: 2 }}>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
-                            <Tooltip title={selectedThread.participantId || 'User'} arrow>
-                                <Chip 
-                                    label={selectedThread.participantId || 'User'}
-                                    size="small"
-                                    color={selectedThread.isInternalThread ? "default" : "primary"}
-                                    variant="outlined"
-                                    sx={{ 
-                                        maxWidth: '200px',
-                                        '& .MuiChip-label': {
-                                            overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            whiteSpace: 'nowrap'
-                                        }
-                                    }}
-                                />
-                            </Tooltip>
-                            <Typography variant="body2" color="text.secondary">
-                                ↔
-                            </Typography>
-                            <Tooltip title={selectedThread.workflowType || 'Bot'} arrow>
-                                <Chip 
-                                    label={getWorkflowDisplayName()}
-                                    size="small"
-                                    color="secondary"
-                                    variant="outlined"
-                                />
-                            </Tooltip>
-                        </Box>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, gap: 1 }}>
-                        <IconButton 
-                            size="small" 
-                            onClick={handleMenuOpen}
-                            aria-label="thread options"
-                        >
-                            <MoreVertIcon />
-                        </IconButton>
-                        <Menu
-                            anchorEl={anchorEl}
-                            open={Boolean(anchorEl)}
-                            onClose={handleMenuClose}
-                        >
-                            {!selectedThread.isInternalThread && (
-                                <MenuItem onClick={handleConfigureSend}>
-                                    <SettingsIcon sx={{ mr: 1, fontSize: 20 }} />
-                                    Configure & Send
-                                </MenuItem>
-                            )}
-                            <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
-                                <DeleteIcon sx={{ mr: 1, fontSize: 20 }} />
-                                Delete Conversation
-                            </MenuItem>
-                        </Menu>
-                    </Box>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-                    {selectedThread.id && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                Thread ID:
-                            </Typography>
-                            <Tooltip title={selectedThread.id} arrow>
-                                <Typography 
-                                    variant="body2" 
-                                    color="text.secondary"
-                                    sx={{ 
-                                        maxWidth: '150px',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                >
-                                    {selectedThread.id}
-                                </Typography>
-                            </Tooltip>
-                        </Box>
-                    )}
-                    {selectedThread.title && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                Topic:
-                            </Typography>
-                            <Tooltip title={selectedThread.title} arrow>
-                                <Typography 
-                                    variant="body2" 
-                                    color="text.secondary"
-                                    sx={{ 
-                                        maxWidth: '200px',
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                >
-                                    {selectedThread.title}
-                                </Typography>
-                            </Tooltip>
-                        </Box>
-                    )}
-                    {lastUpdateTime && (
-                        <Typography variant="body2" color="text.secondary">
-                            <strong>Updated:</strong> {getRelativeTimeString(lastUpdateTime)}
-                        </Typography>
-                    )}
-                    {selectedThread.createdAt && (
-                        <Typography variant="body2" color="text.secondary">
-                            <strong>Started:</strong> {getRelativeTimeString(selectedThread.createdAt)}
-                        </Typography>
-                    )}
-                </Box>
-
-                {/* Quick Send Area - Always Visible */}
-                {!selectedThread.isInternalThread && (
-                    <Box sx={{ 
-                        borderTop: '1px solid',
-                        borderColor: theme.palette.divider,
-                        pt: 2,
-                        mt: 2
-                    }}>
-                        {/* Show selected topic indicator */}
-                        {selectedScope !== undefined && selectedScope !== null && (
-                            <Box sx={{ mb: 1 }}>
-                                <Chip 
-                                    label={selectedScope === '' ? 'Topic: Default (Empty String Topic)' : `Topic: ${selectedScope}`}
-                                    size="small"
-                                    color={selectedScope === '' ? 'default' : 'primary'}
-                                    variant="outlined"
-                                    sx={{ 
-                                        fontSize: '0.75rem',
-                                        fontStyle: selectedScope === '' ? 'italic' : 'normal'
-                                    }}
-                                />
-                            </Box>
-                        )}
-                        {selectedScope === null && (
-                            <Box sx={{ mb: 1 }}>
-                                <Chip 
-                                    label="Topic: Default (No Topic)"
-                                    size="small"
-                                    color="default"
-                                    variant="outlined"
-                                    sx={{ 
-                                        fontSize: '0.75rem',
-                                        fontStyle: 'italic'
-                                    }}
-                                />
-                            </Box>
-                        )}
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                            <TextField
-                                placeholder={
-                                    selectedScope === null 
-                                        ? "Type message for Default (No Topic)..." 
-                                        : selectedScope === '' 
-                                        ? 'Type message for Default (Empty String Topic)...' 
-                                        : `Type message for "${selectedScope}" topic...`
-                                }
-                                multiline
-                                maxRows={3}
-                                value={quickMessage}
-                                onChange={(e) => setQuickMessage(e.target.value)}
-                                onKeyDown={handleQuickSendKeyDown}
-                                fullWidth
-                                disabled={isSending}
-                                variant="outlined"
+            <Box sx={{ p: 1.5 }}>
+                {/* Compact header row */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, gap: 2 }}>
+                    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Tooltip title={selectedThread.participantId || 'User'} arrow>
+                            <Chip 
+                                label={selectedThread.participantId || 'User'}
                                 size="small"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                        backgroundColor: theme.palette.background.default,
+                                color={selectedThread.isInternalThread ? "default" : "primary"}
+                                variant="outlined"
+                                sx={{ 
+                                    maxWidth: '180px',
+                                    '& .MuiChip-label': {
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
                                     }
                                 }}
                             />
-                            <Button 
-                                onClick={handleQuickSendSubmit} 
-                                disabled={isSending || !quickMessage.trim()}
-                                variant="contained"
+                        </Tooltip>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.875rem' }}>
+                            ↔
+                        </Typography>
+                        <Tooltip title={selectedThread.workflowType || 'Bot'} arrow>
+                            <Chip 
+                                label={getWorkflowDisplayName()}
                                 size="small"
-                                startIcon={isSending ? <CircularProgress size={16} /> : <SendIcon />}
-                                sx={{ flexShrink: 0, minWidth: 70, height: 40 }}
-                            >
-                                {isSending ? '' : 'Send'}
-                            </Button>
-                        </Box>
+                                color="secondary"
+                                variant="outlined"
+                                sx={{ 
+                                    maxWidth: '180px',
+                                    '& .MuiChip-label': {
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                    }
+                                }}
+                            />
+                        </Tooltip>
+                        {lastUpdateTime && (
+                            <Typography variant="caption" color="text.secondary" sx={{ ml: 1, fontSize: '0.7rem' }}>
+                                {getRelativeTimeString(lastUpdateTime)}
+                            </Typography>
+                        )}
+                    </Box>
+                    <IconButton 
+                        size="small" 
+                        onClick={handleMenuOpen}
+                        aria-label="thread options"
+                        sx={{ flexShrink: 0 }}
+                    >
+                        <MoreVertIcon fontSize="small" />
+                    </IconButton>
+                    <Menu
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={handleMenuClose}
+                    >
+                        {!selectedThread.isInternalThread && (
+                            <MenuItem onClick={handleConfigureSend}>
+                                <SettingsIcon sx={{ mr: 1, fontSize: 20 }} />
+                                Configure & Send
+                            </MenuItem>
+                        )}
+                        <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+                            <DeleteIcon sx={{ mr: 1, fontSize: 20 }} />
+                            Delete Conversation
+                        </MenuItem>
+                    </Menu>
+                </Box>
+
+                {/* Quick Send Area - Compact */}
+                {!selectedThread.isInternalThread && (
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                        <TextField
+                            placeholder={
+                                selectedScope === null 
+                                    ? "Type message (No Topic)..." 
+                                    : selectedScope === '' 
+                                    ? 'Type message (Empty Topic)...' 
+                                    : selectedScope 
+                                    ? `Message for "${selectedScope}"...`
+                                    : "Type your message..."
+                            }
+                            multiline
+                            maxRows={2}
+                            value={quickMessage}
+                            onChange={(e) => setQuickMessage(e.target.value)}
+                            onKeyDown={handleQuickSendKeyDown}
+                            fullWidth
+                            disabled={isSending}
+                            variant="outlined"
+                            size="small"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    backgroundColor: theme.palette.background.default,
+                                    fontSize: '0.875rem'
+                                }
+                            }}
+                        />
+                        <Button 
+                            onClick={handleQuickSendSubmit} 
+                            disabled={isSending || !quickMessage.trim()}
+                            variant="contained"
+                            size="small"
+                            startIcon={isSending ? <CircularProgress size={14} /> : <SendIcon fontSize="small" />}
+                            sx={{ flexShrink: 0, minWidth: 65, height: 36, fontSize: '0.813rem' }}
+                        >
+                            {isSending ? '' : 'Send'}
+                        </Button>
                     </Box>
                 )}
             </Box>

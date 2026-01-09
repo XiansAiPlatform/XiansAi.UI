@@ -141,7 +141,7 @@ const WorkflowRunCard = ({
                   fontWeight: 600,
                   color: 'var(--primary-color)',
                   textDecoration: 'none',
-                  fontSize: isMobile ? '1rem' : '1.1rem',
+                  fontSize: isMobile ? '0.85rem' : '0.95rem',
                   '&:hover': {
                     textDecoration: 'underline'
                   }

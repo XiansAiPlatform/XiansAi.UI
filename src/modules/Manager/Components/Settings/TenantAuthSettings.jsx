@@ -136,10 +136,10 @@ const TenantAuthSettings = () => {
   return (
     <Paper className="ca-certificates-paper">
       <Typography variant="h6" gutterBottom>
-        OIDC Configuration on User2Agent Interactions
+        OIDC Configuration on User API Interactions
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Manages the tenant-scoped OIDC token acceptance for User2Agent interactions.
+        Manages the tenant-scoped OIDC token acceptance for User API interactions.
       </Typography>
       <Stack spacing={3}>
 

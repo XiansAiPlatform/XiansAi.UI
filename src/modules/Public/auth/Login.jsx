@@ -10,14 +10,25 @@ import {
   Button, 
   CircularProgress,
   Paper,
-  Container
+  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
-import { Login as LoginIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { 
+  Login as LoginIcon, 
+  Refresh as RefreshIcon, 
+  DeleteSweep as DeleteSweepIcon 
+} from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 
 function Login() {
   const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
   const [attemptedLogin, setAttemptedLogin] = useState(false);
+  const [clearStorageDialogOpen, setClearStorageDialogOpen] = useState(false);
+  const [storageCleared, setStorageCleared] = useState(false);
   const navigate = useNavigate();
   
   // Use the account conflict handler
@@ -71,6 +82,61 @@ function Login() {
     login();
   };
 
+  const handleClearStorageClick = () => {
+    setClearStorageDialogOpen(true);
+  };
+
+  const handleClearStorageCancel = () => {
+    setClearStorageDialogOpen(false);
+  };
+
+  const handleClearStorageConfirm = () => {
+    try {
+      // Clear localStorage
+      localStorage.clear();
+      
+      // Clear sessionStorage
+      sessionStorage.clear();
+      
+      // Clear all cookies
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const eqPos = cookie.indexOf('=');
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        // Clear cookie for all possible paths
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${window.location.hostname};`;
+      }
+      
+      // Clear IndexedDB if available
+      if (window.indexedDB && window.indexedDB.databases) {
+        window.indexedDB.databases().then((databases) => {
+          databases.forEach((db) => {
+            if (db.name) {
+              window.indexedDB.deleteDatabase(db.name);
+            }
+          });
+        }).catch((err) => {
+          console.warn('Error clearing IndexedDB:', err);
+        });
+      }
+      
+      setClearStorageDialogOpen(false);
+      setStorageCleared(true);
+      
+      // Optional: reload the page after a short delay to ensure clean state
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (err) {
+      console.error('Error clearing storage:', err);
+      setClearStorageDialogOpen(false);
+      // Still show success message as most storage was likely cleared
+      setStorageCleared(true);
+    }
+  };
+
   if (isLoading) {
     return (
       <Container maxWidth="sm" sx={{ mt: 8 }}>
@@ -110,6 +176,13 @@ function Login() {
         {clearedParam && (
           <Alert severity="success" sx={{ mb: 3 }}>
             All cached accounts have been cleared. You can now sign in with a fresh session.
+          </Alert>
+        )}
+
+        {/* Show success message if storage was cleared */}
+        {storageCleared && (
+          <Alert severity="success" sx={{ mb: 3 }}>
+            All browser storage has been cleared successfully. The page will reload shortly for a fresh session.
           </Alert>
         )}
 
@@ -177,14 +250,69 @@ function Login() {
         </Box>
 
         {/* Help text */}
-        <Typography variant="caption" color="text.secondary" textAlign="center" display="block" sx={{ mt: 3 }}>
-          If you're having trouble signing in with different SSO accounts, 
-          try using a different browser or an incognito/private browser window.
-        </Typography>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="caption" color="text.secondary" textAlign="center" display="block">
+            If you're having trouble signing in with different SSO accounts, 
+            try using a different browser or an incognito/private browser window.
+          </Typography>
+          <Box textAlign="center" sx={{ mt: 2 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              color="warning"
+              startIcon={<DeleteSweepIcon />}
+              onClick={handleClearStorageClick}
+              sx={{ textTransform: 'none' }}
+            >
+              Clear All Browser Storage
+            </Button>
+          </Box>
+        </Box>
       </Paper>
 
       {/* Account Conflict Handler Dialog */}
       <AccountConflictHandler {...dialogProps} />
+
+      {/* Clear Storage Confirmation Dialog */}
+      <Dialog
+        open={clearStorageDialogOpen}
+        onClose={handleClearStorageCancel}
+        aria-labelledby="clear-storage-dialog-title"
+        aria-describedby="clear-storage-dialog-description"
+      >
+        <DialogTitle id="clear-storage-dialog-title">
+          Clear All Browser Storage?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="clear-storage-dialog-description">
+            This will clear all browser storage including:
+            <ul style={{ marginTop: '8px', marginBottom: '8px' }}>
+              <li>Local Storage</li>
+              <li>Session Storage</li>
+              <li>Cookies</li>
+              <li>Cached data</li>
+            </ul>
+            This can help resolve SSO authentication issues, but you will be signed out of all applications 
+            in this browser and may need to sign in again to other services.
+            <br /><br />
+            <strong>Do you want to continue?</strong>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClearStorageCancel} color="primary">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleClearStorageConfirm} 
+            color="warning" 
+            variant="contained"
+            startIcon={<DeleteSweepIcon />}
+            autoFocus
+          >
+            Clear Storage
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }
