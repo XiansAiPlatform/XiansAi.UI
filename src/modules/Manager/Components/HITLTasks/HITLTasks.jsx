@@ -563,151 +563,215 @@ const HITLTasks = () => {
           additionalFilters={
             <Box sx={{ 
               display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row',
+              flexDirection: 'column',
               gap: 2,
-              width: '100%',
-              alignItems: isMobile ? 'stretch' : 'center',
-              position: 'relative'
+              width: '100%'
             }}>
-              {/* Agent Filter */}
+              {/* First Row - Filter Controls */}
               <Box sx={{ 
                 display: 'flex', 
-                alignItems: 'center',
-                gap: 1.5,
-                backgroundColor: 'var(--bg-main)',
-                px: 2,
-                py: 1,
-                borderRadius: 'var(--radius-md)',
-                minWidth: isMobile ? 'auto' : '200px'
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: 2,
+                alignItems: isMobile ? 'stretch' : 'center',
+                position: 'relative'
               }}>
-                <PersonIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
-                <AgentSelector
-                  selectedAgent={selectedAgent}
-                  onAgentChange={handleAgentChange}
-                  disabled={isLoading}
-                  size="small"
-                  showAllOption={true}
-                />
-              </Box>
-
-              {/* Status Filter */}
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center',
-                gap: 1.5,
-                backgroundColor: 'var(--bg-main)',
-                px: 2,
-                py: 1,
-                borderRadius: 'var(--radius-md)',
-                minWidth: isMobile ? 'auto' : '180px'
-              }}>
-                <FilterListIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
-                <FormControl 
-                  size="small" 
-                  fullWidth
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      borderRadius: 'var(--radius-md)',
-                      backgroundColor: 'transparent',
-                      fontFamily: 'var(--font-family)',
-                      fontSize: '0.875rem',
-                      border: 'none',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        border: 'none'
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        border: 'none'
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        border: 'none'
-                      }
-                    }
-                  }}
-                >
-                  <Select
-                    value={selectedStatus}
-                    onChange={handleStatusChange}
+                {/* Agent Filter */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: 1.5,
+                  backgroundColor: 'var(--bg-main)',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 'var(--radius-md)',
+                  minWidth: isMobile ? 'auto' : '200px'
+                }}>
+                  <PersonIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                  <AgentSelector
+                    selectedAgent={selectedAgent}
+                    onAgentChange={handleAgentChange}
                     disabled={isLoading}
-                    displayEmpty
+                    size="small"
+                    showAllOption={true}
+                  />
+                </Box>
+
+                {/* Status Filter */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: 1.5,
+                  backgroundColor: 'var(--bg-main)',
+                  px: 2,
+                  py: 1,
+                  borderRadius: 'var(--radius-md)',
+                  minWidth: isMobile ? 'auto' : '180px'
+                }}>
+                  <FilterListIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                  <FormControl 
+                    size="small" 
+                    fullWidth
                     sx={{
-                      fontFamily: 'var(--font-family)',
-                      '& .MuiSelect-select': {
-                        py: 0.5,
-                        color: selectedStatus ? 'var(--text-primary)' : 'var(--text-light)'
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 'var(--radius-md)',
+                        backgroundColor: 'transparent',
+                        fontFamily: 'var(--font-family)',
+                        fontSize: '0.875rem',
+                        border: 'none',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          border: 'none'
+                        },
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                          border: 'none'
+                        },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          border: 'none'
+                        }
                       }
                     }}
                   >
-                    <MenuItem value="">All Statuses</MenuItem>
-                    <MenuItem value="Running">Running</MenuItem>
-                    <MenuItem value="Completed">Completed</MenuItem>
-                    <MenuItem value="Failed">Failed</MenuItem>
-                    <MenuItem value="Terminated">Terminated</MenuItem>
-                    <MenuItem value="Canceled">Canceled</MenuItem>
-                    <MenuItem value="TimedOut">Timed Out</MenuItem>
-                    <MenuItem value="ContinuedAsNew">Continued As New</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
+                    <Select
+                      value={selectedStatus}
+                      onChange={handleStatusChange}
+                      disabled={isLoading}
+                      displayEmpty
+                      sx={{
+                        fontFamily: 'var(--font-family)',
+                        '& .MuiSelect-select': {
+                          py: 0.5,
+                          color: selectedStatus ? 'var(--text-primary)' : 'var(--text-light)'
+                        }
+                      }}
+                    >
+                      <MenuItem value="">All Statuses</MenuItem>
+                      <MenuItem value="Running">Running</MenuItem>
+                      <MenuItem value="Completed">Completed</MenuItem>
+                      <MenuItem value="Failed">Failed</MenuItem>
+                      <MenuItem value="Terminated">Terminated</MenuItem>
+                      <MenuItem value="Canceled">Canceled</MenuItem>
+                      <MenuItem value="TimedOut">Timed Out</MenuItem>
+                      <MenuItem value="ContinuedAsNew">Continued As New</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
 
-              {/* Participant Filter */}
-              <TextField
-                size="small"
-                placeholder="Filter by participant..."
-                value={participantFilter}
-                onChange={handleParticipantChange}
-                disabled={isLoading}
-                sx={{
-                  minWidth: isMobile ? 'auto' : '220px',
-                  flex: isMobile ? 1 : 'none',
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: 'var(--bg-main)',
-                    fontFamily: 'var(--font-family)',
-                    fontSize: '0.875rem',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      backgroundColor: 'var(--bg-paper)',
+                {/* Participant Filter */}
+                <TextField
+                  size="small"
+                  placeholder="Filter by participant..."
+                  value={participantFilter}
+                  onChange={handleParticipantChange}
+                  disabled={isLoading}
+                  sx={{
+                    minWidth: isMobile ? 'auto' : '220px',
+                    flex: isMobile ? 1 : 'none',
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'var(--bg-main)',
+                      fontFamily: 'var(--font-family)',
+                      fontSize: '0.875rem',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: 'var(--bg-paper)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'var(--bg-paper)',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'var(--primary)',
+                          borderWidth: '2px'
+                        }
+                      }
                     },
-                    '&.Mui-focused': {
-                      backgroundColor: 'var(--bg-paper)',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'var(--primary)',
-                        borderWidth: '2px'
+                    '& .MuiInputBase-input': {
+                      fontFamily: 'var(--font-family)',
+                      '&::placeholder': {
+                        color: 'var(--text-light)',
+                        opacity: 0.8
                       }
                     }
-                  },
-                  '& .MuiInputBase-input': {
-                    fontFamily: 'var(--font-family)',
-                    '&::placeholder': {
-                      color: 'var(--text-light)',
-                      opacity: 0.8
-                    }
-                  }
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon sx={{ 
-                        color: 'var(--text-light)', 
-                        fontSize: '1.25rem'
-                      }} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ 
+                          color: 'var(--text-light)', 
+                          fontSize: '1.25rem'
+                        }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
-              {/* Active filters indicator */}
+                {/* Bulk Actions Menu */}
+                <Tooltip title="Bulk Actions">
+                  <IconButton
+                    onClick={handleMenuOpen}
+                    disabled={isLoading}
+                    size="small"
+                    sx={{
+                      backgroundColor: 'var(--bg-paper)',
+                      border: '1px solid var(--border-color)',
+                      boxShadow: 'var(--shadow-sm)',
+                      color: 'var(--text-secondary)',
+                      '&:hover': {
+                        backgroundColor: 'var(--bg-hover)',
+                      },
+                      ml: 'auto'
+                    }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </Tooltip>
+
+                {/* Bulk Actions Menu */}
+                <Menu
+                  anchorEl={anchorEl}
+                  open={menuOpen}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                  }}
+                  transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'right',
+                  }}
+                >
+                  <MenuItem onClick={handleBulkApprove}>
+                    <CheckCircleIcon sx={{ mr: 1, color: 'var(--success-color)' }} />
+                    Approve All Pending
+                  </MenuItem>
+                  <MenuItem onClick={handleBulkReject}>
+                    <CancelIcon sx={{ mr: 1, color: 'var(--error-color)' }} />
+                    Reject All Pending
+                  </MenuItem>
+                </Menu>
+              </Box>
+
+              {/* Second Row - Active Filters Display */}
               {(selectedAgent || debouncedParticipant || selectedStatus) && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 1, 
+                  flexWrap: 'wrap',
+                  mt: 1 
+                }}>
                   {selectedAgent && (
                     <Chip 
                       label={`Agent: ${selectedAgent}`}
                       size="small"
                       onDelete={() => setSelectedAgent(null)}
                       sx={{
-                        backgroundColor: 'var(--primary-light)',
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
                         color: 'var(--primary-color)',
-                        fontWeight: 500
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
                       }}
                     />
                   )}
@@ -717,9 +781,16 @@ const HITLTasks = () => {
                       size="small"
                       onDelete={() => setSelectedStatus('')}
                       sx={{
-                        backgroundColor: 'var(--info-light)',
-                        color: 'var(--info-dark)',
-                        fontWeight: 500
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
                       }}
                     />
                   )}
@@ -732,59 +803,21 @@ const HITLTasks = () => {
                         setDebouncedParticipant('');
                       }}
                       sx={{
-                        backgroundColor: 'var(--success-light)',
-                        color: 'var(--success-dark)',
-                        fontWeight: 500
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
                       }}
                     />
                   )}
                 </Box>
               )}
-
-              {/* Bulk Actions Menu */}
-              <Tooltip title="Bulk Actions">
-                <IconButton
-                  onClick={handleMenuOpen}
-                  disabled={isLoading}
-                  size="small"
-                  sx={{
-                    backgroundColor: 'var(--bg-paper)',
-                    border: '1px solid var(--border-color)',
-                    boxShadow: 'var(--shadow-sm)',
-                    color: 'var(--text-secondary)',
-                    '&:hover': {
-                      backgroundColor: 'var(--bg-hover)',
-                    },
-                    ml: 'auto'
-                  }}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-              </Tooltip>
-
-              {/* Bulk Actions Menu */}
-              <Menu
-                anchorEl={anchorEl}
-                open={menuOpen}
-                onClose={handleMenuClose}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-              >
-                <MenuItem onClick={handleBulkApprove}>
-                  <CheckCircleIcon sx={{ mr: 1, color: 'var(--success-color)' }} />
-                  Approve All Pending
-                </MenuItem>
-                <MenuItem onClick={handleBulkReject}>
-                  <CancelIcon sx={{ mr: 1, color: 'var(--error-color)' }} />
-                  Reject All Pending
-                </MenuItem>
-              </Menu>
             </Box>
           }
         />

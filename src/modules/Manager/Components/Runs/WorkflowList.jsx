@@ -10,16 +10,19 @@ import {
   IconButton,
   Alert,
   Collapse,
-  Divider
+  Divider,
+  Chip
 } from '@mui/material';
 import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PersonIcon from '@mui/icons-material/Person';
+import ViewListIcon from '@mui/icons-material/ViewList';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
+import WorkflowTypeSelector from './WorkflowTypeSelector';
 import PaginationControls from './PaginationControls';
 import WorkflowRunCard from './WorkflowRunCard';
 import './WorkflowList.css';
@@ -34,6 +37,7 @@ const WorkflowList = () => {
   // New pagination state
   const [workflows, setWorkflows] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectedWorkflowType, setSelectedWorkflowType] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -69,6 +73,7 @@ const WorkflowList = () => {
       const options = {
         status: statusFilter,
         agent: selectedAgent,
+        workflowType: selectedWorkflowType,
         pageSize: pageSize,
         pageToken: pageToken
       };
@@ -103,7 +108,7 @@ const WorkflowList = () => {
     setCurrentPage(1);
     loadPaginatedWorkflows(null, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, selectedAgent, pageSize]);
+  }, [statusFilter, selectedAgent, selectedWorkflowType, pageSize]);
 
   // Show hint when navigated from NewWorkflowForm
   useEffect(() => {
@@ -134,6 +139,12 @@ const WorkflowList = () => {
 
   const handleAgentChange = (agent) => {
     setSelectedAgent(agent);
+    setSelectedWorkflowType(null); // Reset workflow type when agent changes
+    setCurrentPage(1);
+  };
+
+  const handleWorkflowTypeChange = (workflowType) => {
+    setSelectedWorkflowType(workflowType);
     setCurrentPage(1);
   };
 
@@ -171,6 +182,7 @@ const WorkflowList = () => {
         const response = await api.fetchPaginatedWorkflowRuns({
           status: 'running',
           agent: selectedAgent,
+          workflowType: selectedWorkflowType,
           pageSize: pageSizeForBulk,
           pageToken: page > 1 ? String(page) : null,
         });
@@ -225,7 +237,7 @@ const WorkflowList = () => {
 
   return (
     <PageLayout 
-      title="Agent Runs"
+      title="Workflow Runs"
       headerActions={
         <Box sx={{ display: 'flex', gap: 1 }}>
           {isMobile ? (
@@ -355,98 +367,197 @@ const WorkflowList = () => {
           additionalFilters={
             <Box sx={{ 
               display: 'flex', 
-              flexDirection: isMobile ? 'column' : 'row',
+              flexDirection: 'column',
               gap: 2,
-              width: '100%',
-              alignItems: isMobile ? 'stretch' : 'center'
+              width: '100%'
             }}>
-              {/* Agent Filter */}
+              {/* First Row - Agent and Workflow Type Filters */}
               <Box sx={{ 
                 display: 'flex', 
-                alignItems: 'center',
-                gap: 1.5,
-                backgroundColor: 'var(--bg-main)',
-                px: 2,
-                py: 1,
-                borderRadius: 'var(--radius-md)',
-                minWidth: isMobile ? 'auto' : '200px'
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: 2,
+                alignItems: isMobile ? 'stretch' : 'center'
               }}>
-                <PersonIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
-                <AgentSelector
-                  selectedAgent={selectedAgent}
-                  onAgentChange={handleAgentChange}
-                  disabled={isLoading}
-                  size="small"
-                  showAllOption={true}
-                />
+                {/* Agent Filter */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 2,
+                  py: 1,
+                  minWidth: isMobile ? 'auto' : '200px'
+                }}>
+                  <PersonIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                  <AgentSelector
+                    selectedAgent={selectedAgent}
+                    onAgentChange={handleAgentChange}
+                    disabled={isLoading}
+                    size="small"
+                    showAllOption={true}
+                  />
+                </Box>
+
+                {/* Workflow Type Filter */}
+                {selectedAgent && (
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    gap: 1.5,
+                    px: 2,
+                    py: 1,
+                    minWidth: isMobile ? 'auto' : '200px'
+                  }}>
+                    <ViewListIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                    <WorkflowTypeSelector
+                      selectedAgent={selectedAgent}
+                      selectedWorkflowType={selectedWorkflowType}
+                      onWorkflowTypeChange={handleWorkflowTypeChange}
+                      disabled={isLoading}
+                      size="small"
+                      showAllOption={true}
+                    />
+                  </Box>
+                )}
               </Box>
 
-              {/* Status Filter */}
-              <ToggleButtonGroup
-                value={statusFilter}
-                exclusive
-                onChange={handleStatusFilterChange}
-                size="small"
-                className="filter-toggle-group status-filter"
-                sx={{ 
-                  backgroundColor: 'var(--bg-main)',
-                  borderRadius: 'var(--radius-md)',
-                  width: isMobile ? '100%' : 'auto',
-                  '& .MuiToggleButton-root': {
-                    border: 'none',
+              {/* Second Row - Status Filter */}
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: isMobile ? 'stretch' : 'flex-start'
+              }}>
+                <ToggleButtonGroup
+                  value={statusFilter}
+                  exclusive
+                  onChange={handleStatusFilterChange}
+                  size="small"
+                  className="filter-toggle-group status-filter"
+                  sx={{ 
                     borderRadius: 'var(--radius-md)',
-                    px: isMobile ? 1.5 : 2,
-                    py: 0.75,
-                    flex: isMobile ? 1 : 'none',
-                    fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    color: 'var(--text-secondary)',
-                    fontFamily: 'var(--font-family)',
-                    fontWeight: 500,
-                    textTransform: 'none',
-                    transition: 'all 0.2s ease',
-                    '&:hover': {
-                      backgroundColor: 'var(--bg-hover)',
-                      color: 'var(--text-primary)'
-                    },
-                    '&.Mui-selected': {
-                      backgroundColor: 'var(--primary)',
-                      color: 'white',
-                      fontWeight: 600,
+                    width: isMobile ? '100%' : 'auto',
+                    '& .MuiToggleButton-root': {
+                      border: 'none',
+                      borderRadius: 'var(--radius-md)',
+                      px: isMobile ? 1.5 : 2,
+                      py: 0.75,
+                      flex: isMobile ? 1 : 'none',
+                      fontSize: isMobile ? '0.75rem' : '0.875rem',
+                      color: 'var(--text-secondary)',
+                      fontFamily: 'var(--font-family)',
+                      fontWeight: 500,
+                      textTransform: 'none',
+                      transition: 'all 0.2s ease',
                       '&:hover': {
-                        backgroundColor: 'var(--primary-dark)'
+                        backgroundColor: 'var(--bg-hover)',
+                        color: 'var(--text-primary)'
+                      },
+                      '&.Mui-selected': {
+                        backgroundColor: 'var(--primary)',
+                        color: 'white',
+                        fontWeight: 600,
+                        '&:hover': {
+                          backgroundColor: 'var(--primary-dark)'
+                        }
+                      },
+                      '&:first-of-type': {
+                        borderTopLeftRadius: 'var(--radius-md)',
+                        borderBottomLeftRadius: 'var(--radius-md)'
+                      },
+                      '&:last-of-type': {
+                        borderTopRightRadius: 'var(--radius-md)',
+                        borderBottomRightRadius: 'var(--radius-md)'
                       }
                     },
-                    '&:first-of-type': {
-                      borderTopLeftRadius: 'var(--radius-md)',
-                      borderBottomLeftRadius: 'var(--radius-md)'
-                    },
-                    '&:last-of-type': {
-                      borderTopRightRadius: 'var(--radius-md)',
-                      borderBottomRightRadius: 'var(--radius-md)'
-                    }
-                  },
-                  flexWrap: isSmallMobile ? 'wrap' : 'nowrap'
-                }}
-              >
-                <ToggleButton value="all" className="total">
-                  All
-                </ToggleButton>
-                <ToggleButton value="running" className="running">
-                  Running
-                </ToggleButton>
-                <ToggleButton value="completed" className="completed">
-                  Completed
-                </ToggleButton>
-                <ToggleButton value="continuedAsNew" className="continuedAsNew">
-                  {isMobile ? 'Continued' : 'Continued As New'}
-                </ToggleButton>
-                <ToggleButton value="terminated" className="terminated">
-                  Terminated
-                </ToggleButton>
-                <ToggleButton value="failed" className="failed">
-                  Failed
-                </ToggleButton>
-              </ToggleButtonGroup>
+                    flexWrap: isSmallMobile ? 'wrap' : 'nowrap'
+                  }}
+                >
+                  <ToggleButton value="all" className="total">
+                    All
+                  </ToggleButton>
+                  <ToggleButton value="running" className="running">
+                    Running
+                  </ToggleButton>
+                  <ToggleButton value="completed" className="completed">
+                    Completed
+                  </ToggleButton>
+                  <ToggleButton value="continuedAsNew" className="continuedAsNew">
+                    {isMobile ? 'Continued' : 'Continued As New'}
+                  </ToggleButton>
+                  <ToggleButton value="terminated" className="terminated">
+                    Terminated
+                  </ToggleButton>
+                  <ToggleButton value="failed" className="failed">
+                    Failed
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+
+              {/* Third Row - Active Filters Display */}
+              {(selectedAgent || selectedWorkflowType || (statusFilter && statusFilter !== 'all')) && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 1, 
+                  flexWrap: 'wrap',
+                  mt: 1 
+                }}>
+                  {selectedAgent && (
+                    <Chip 
+                      label={`Agent: ${selectedAgent}`}
+                      size="small"
+                      onDelete={() => handleAgentChange(null)}
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                  {selectedWorkflowType && (
+                    <Chip 
+                      label={`Type: ${selectedWorkflowType}`}
+                      size="small"
+                      onDelete={() => handleWorkflowTypeChange(null)}
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                  {statusFilter && statusFilter !== 'all' && (
+                    <Chip 
+                      label={`Status: ${statusFilter === 'continuedAsNew' ? 'Continued As New' : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}`}
+                      size="small"
+                      onDelete={() => handleStatusFilterChange(null, 'all')}
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                </Box>
+              )}
             </Box>
           }
         />
@@ -474,7 +585,11 @@ const WorkflowList = () => {
               alignItems: 'center'
             }}>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                {selectedAgent ? `Showing runs for "${selectedAgent}"` : 'Showing all workflow runs'}
+                {selectedAgent && selectedWorkflowType 
+                  ? `Showing runs for "${selectedAgent}" - Type: "${selectedWorkflowType}"`
+                  : selectedAgent 
+                    ? `Showing runs for "${selectedAgent}"`
+                    : 'Showing all workflow runs'}
               </Typography>
             </Box>
 
@@ -577,10 +692,16 @@ const WorkflowList = () => {
       {/* Confirm bulk terminate */}
       <ConfirmationDialog
         open={confirmTerminateOpen}
-        title={selectedAgent ? `Terminate all running for "${selectedAgent}"?` : 'Terminate all running workflows?'}
-        message={selectedAgent
-          ? 'This will send terminate requests for all currently running workflows for the selected agent. This action cannot be undone.'
-          : 'This will send terminate requests for all currently running workflows you have access to. This action cannot be undone.'}
+        title={selectedAgent && selectedWorkflowType 
+          ? `Terminate all running for "${selectedAgent}" - Type: "${selectedWorkflowType}"?`
+          : selectedAgent 
+            ? `Terminate all running for "${selectedAgent}"?` 
+            : 'Terminate all running workflows?'}
+        message={selectedAgent && selectedWorkflowType
+          ? `This will send terminate requests for all currently running workflows for the selected agent and workflow type. This action cannot be undone.`
+          : selectedAgent
+            ? 'This will send terminate requests for all currently running workflows for the selected agent. This action cannot be undone.'
+            : 'This will send terminate requests for all currently running workflows you have access to. This action cannot be undone.'}
         confirmLabel="Terminate all"
         cancelLabel="Cancel"
         severity="error"

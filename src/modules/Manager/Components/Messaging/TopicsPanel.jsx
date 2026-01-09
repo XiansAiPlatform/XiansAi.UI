@@ -206,13 +206,13 @@ const TopicsPanel = ({
         >
             {/* Header */}
             <Box sx={{ 
-                p: 2, 
+                p: 1.5, 
                 borderBottom: '1px solid', 
                 borderColor: theme.palette.divider,
                 backgroundColor: theme.palette.background.paper,
             }}>
-                <Typography variant="subtitle1" fontWeight="bold">
-                    Topics
+                <Typography variant="subtitle2" fontWeight="600" sx={{ fontSize: '0.875rem' }}>
+                    Topics {totalTopics > 0 && <Typography component="span" variant="caption" color="text.secondary">({totalTopics})</Typography>}
                 </Typography>
             </Box>
 
@@ -255,16 +255,18 @@ const TopicsPanel = ({
                     </Box>
                 ) : (
                     <>
-                        <List sx={{ p: 1 }}>
+                        <List sx={{ p: 0.75 }}>
                             {/* "All Messages" option */}
                             <ListItemButton
                                 selected={selectedTopic === undefined}
                                 onClick={() => onTopicSelect?.(undefined)}
                                 sx={{
                                     borderRadius: 1,
-                                    mb: 0.5,
-                                    alignItems: 'flex-start',
-                                    py: 1.5,
+                                    mb: 0.25,
+                                    alignItems: 'center',
+                                    py: 1,
+                                    px: 1.5,
+                                    minHeight: 'auto',
                                     '&.Mui-selected': {
                                         bgcolor: theme.palette.action.selected,
                                         '&:hover': {
@@ -274,17 +276,16 @@ const TopicsPanel = ({
                                 }}
                             >
                                 <AllInboxIcon sx={{ 
-                                    mr: 1.5, 
+                                    mr: 1.25, 
                                     color: theme.palette.text.secondary, 
-                                    fontSize: 20,
-                                    flexShrink: 0,
-                                    alignSelf: 'flex-start',
-                                    mt: 0.5
+                                    fontSize: 18,
+                                    flexShrink: 0
                                 }} />
                                 <ListItemText 
                                     primary="All Messages"
                                     primaryTypographyProps={{
                                         variant: 'body2',
+                                        fontSize: '0.875rem',
                                         fontWeight: selectedTopic === undefined ? 600 : 400
                                     }}
                                 />
@@ -293,12 +294,10 @@ const TopicsPanel = ({
                                         label={totalMessageCount} 
                                         size="small" 
                                         sx={{ 
-                                            height: 20,
-                                            minWidth: 20,
-                                            fontSize: '0.7rem',
-                                            flexShrink: 0,
-                                            alignSelf: 'flex-start',
-                                            mt: 0.5
+                                            height: 18,
+                                            minWidth: 18,
+                                            fontSize: '0.65rem',
+                                            flexShrink: 0
                                         }}
                                     />
                                 )}
@@ -311,10 +310,10 @@ const TopicsPanel = ({
                                 let hasSpecialScope = false;
                                 
                                 if (topic.scope === null) {
-                                    topicLabel = 'Default (No Topic)';
+                                    topicLabel = 'No Topic';
                                     hasSpecialScope = true;
                                 } else if (topic.scope === '') {
-                                    topicLabel = 'Default (Empty String Topic)';
+                                    topicLabel = 'Empty Topic';
                                     hasSpecialScope = true;
                                 } else {
                                     topicLabel = topic.scope;
@@ -329,9 +328,11 @@ const TopicsPanel = ({
                                         onClick={() => onTopicSelect?.(topic.scope)}
                                         sx={{
                                             borderRadius: 1,
-                                            mb: 0.5,
-                                            alignItems: 'flex-start',
-                                            py: 1.5,
+                                            mb: 0.25,
+                                            alignItems: 'center',
+                                            py: 1,
+                                            px: 1.5,
+                                            minHeight: 'auto',
                                             '&.Mui-selected': {
                                                 bgcolor: theme.palette.action.selected,
                                                 '&:hover': {
@@ -341,30 +342,26 @@ const TopicsPanel = ({
                                         }}
                                     >
                                         <TopicIcon sx={{ 
-                                            mr: 1.5, 
+                                            mr: 1.25, 
                                             color: hasSpecialScope ? theme.palette.text.disabled : theme.palette.primary.main, 
-                                            fontSize: 20,
-                                            flexShrink: 0,
-                                            alignSelf: 'flex-start',
-                                            mt: 0.5
+                                            fontSize: 18,
+                                            flexShrink: 0
                                         }} />
                                         <ListItemText 
                                             primary={topicLabel}
-                                            secondary={topic.lastMessageAt ? new Date(topic.lastMessageAt).toLocaleString() : null}
                                             primaryTypographyProps={{
                                                 variant: 'body2',
+                                                fontSize: '0.875rem',
                                                 fontWeight: isSelected ? 600 : 400,
                                                 fontStyle: hasSpecialScope ? 'italic' : 'normal',
                                                 color: hasSpecialScope ? 'text.secondary' : 'text.primary',
                                                 sx: {
                                                     wordBreak: 'break-word',
-                                                    whiteSpace: 'normal',
-                                                    lineHeight: 1.4
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    lineHeight: 1.3
                                                 }
-                                            }}
-                                            secondaryTypographyProps={{
-                                                variant: 'caption',
-                                                noWrap: true
                                             }}
                                         />
                                         {topic.messageCount > 0 && (
@@ -373,12 +370,10 @@ const TopicsPanel = ({
                                                 size="small" 
                                                 color={isSelected ? 'primary' : 'default'}
                                                 sx={{ 
-                                                    height: 20,
-                                                    minWidth: 20,
-                                                    fontSize: '0.7rem',
-                                                    flexShrink: 0,
-                                                    alignSelf: 'flex-start',
-                                                    mt: 0.5
+                                                    height: 18,
+                                                    minWidth: 18,
+                                                    fontSize: '0.65rem',
+                                                    flexShrink: 0
                                                 }}
                                             />
                                         )}
@@ -389,15 +384,15 @@ const TopicsPanel = ({
                         
                         {/* Load More Button */}
                         {hasMore && !isLoading && (
-                            <Box sx={{ p: 2, textAlign: 'center', borderTop: '1px solid', borderColor: theme.palette.divider }}>
+                            <Box sx={{ p: 1, textAlign: 'center', borderTop: '1px solid', borderColor: theme.palette.divider }}>
                                 <Button
                                     onClick={loadMoreTopics}
                                     disabled={isLoadingMore}
                                     size="small"
-                                    endIcon={isLoadingMore ? <CircularProgress size={16} /> : <ExpandMoreIcon />}
-                                    sx={{ textTransform: 'none' }}
+                                    endIcon={isLoadingMore ? <CircularProgress size={14} /> : <ExpandMoreIcon fontSize="small" />}
+                                    sx={{ textTransform: 'none', fontSize: '0.75rem' }}
                                 >
-                                    {isLoadingMore ? 'Loading...' : `Load More (${totalTopics - topics.length} remaining)`}
+                                    {isLoadingMore ? 'Loading...' : `Load More (${totalTopics - topics.length})`}
                                 </Button>
                             </Box>
                         )}

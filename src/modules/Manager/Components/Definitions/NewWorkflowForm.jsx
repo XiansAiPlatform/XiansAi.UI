@@ -8,31 +8,22 @@ import {
   Alert,
   CircularProgress,
   Paper,
-  IconButton,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-  FormControl,
-  InputAdornment
+  IconButton
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { useWorkflowApi } from '../../services/workflow-api';
 import './Definitions.css';
-import { useSelectedOrg } from '../../contexts/OrganizationContext';
 
 const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { selectedOrg } = useSelectedOrg();
-  const tenantPrefix = `${selectedOrg}:`;
   
   const [parameters, setParameters] = useState(
     definition && definition.parameterDefinitions ? 
       Object.fromEntries(definition.parameterDefinitions.map(param => [param.name, ''])) : 
       {}
   );
-  const [runType, setRunType] = useState('singleton'); // 'unique' or 'singleton'
-  const [flowId, setFlowId] = useState(definition.workflowType.trim());
+  const [workflowId, setWorkflowId] = useState('');
   const [queueType] = useState('default'); // 'default' or 'named'
   const [queueName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,7 +41,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         ? definition.parameterDefinitions.map(param => parameters[param.name])
         : [];
       
-      const flowIdToSend = runType === 'singleton' ? `${tenantPrefix}${flowId}` : null;
+      const flowIdToSend = workflowId || null;
       const queueNameToSend = queueType === 'named' ? queueName : null;
       
       await api.startNewWorkflow(
@@ -77,16 +68,8 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
     }));
   };
 
-  const handleRunTypeChange = (event) => {
-    setRunType(event.target.value);
-  };
-
-  // const handleQueueTypeChange = (event) => {
-  //   setQueueType(event.target.value);
-  // };
-
-  const handleFlowIdChange = (e) => {
-    setFlowId(e.target.value);
+  const handleWorkflowIdChange = (e) => {
+    setWorkflowId(e.target.value);
   };
 
   return (
@@ -167,79 +150,31 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
 
       <Box sx={{ mb: 2 }}>
         <Typography variant={isMobile ? "h7" : "h6"} sx={{ mb: 1 }}>
-          Flow Identity
+          Workflow Identity
         </Typography>
-        <FormControl component="fieldset" sx={{ width: '100%' }}>
-          <RadioGroup
-            row
-            value={runType}
-            onChange={handleRunTypeChange}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, mr: 2 }}>
-              <FormControlLabel 
-                value="singleton" 
-                control={<Radio />} 
-                label="Named Singleton Run" 
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
-                Using a custom Flow ID. Only one run with this ID can exist at a time.
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-              <FormControlLabel 
-                value="unique" 
-                control={<Radio />} 
-                label="New Unique Run" 
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 4 }}>
-                A unique flow ID will be generated for this run. Multiple runs can co-exist.
-              </Typography>
-            </Box>
-          </RadioGroup>
-        </FormControl>
         
-        {runType === 'singleton' && (
-          <Paper
-            elevation={0}
-            className="parameter-paper"
-            sx={{
-              p: isMobile ? 1.5 : 2,
-              mt: 2
-            }}
-          >
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                Flow ID
-              </Typography>
-              <TextField
-                fullWidth
-                value={flowId}
-                onChange={handleFlowIdChange}
-                placeholder="Enter custom Flow ID (no spaces allowed)"
-                size={isMobile ? "small" : "medium"}
-                helperText="Tenant prefix will be automatically added"
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ 
-                      color: 'text.secondary',
-                      bgcolor: 'action.hover',
-                      px: 1,
-                      py: 0.5,
-                      borderRadius: '4px',
-                      mr: 1
-                    }}>
-                      {tenantPrefix}
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                This ID will be used to identify and manage the workflow instance
-              </Typography>
-            </Box>
-          </Paper>
-        )}
+        <Paper
+          elevation={0}
+          className="parameter-paper"
+          sx={{
+            p: isMobile ? 1.5 : 2,
+            mt: 2
+          }}
+        >
+          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Workflow ID Postfix (Optional)
+            </Typography>
+            <TextField
+              fullWidth
+              value={workflowId}
+              onChange={handleWorkflowIdChange}
+              placeholder="Optional postfix"
+              size={isMobile ? "small" : "medium"}
+              helperText="Leave empty for singleton run, or provide a custom identifier postfix"
+            />
+          </Box>
+        </Paper>
       </Box>
 
       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
@@ -255,7 +190,7 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
           type="submit"
           variant="contained"
           color="primary"
-          disabled={loading || (runType === 'singleton' && !flowId) || (queueType === 'named' && !queueName)}
+          disabled={loading || (queueType === 'named' && !queueName)}
           startIcon={loading && <CircularProgress size={20} />}
         >
           Start Workflow

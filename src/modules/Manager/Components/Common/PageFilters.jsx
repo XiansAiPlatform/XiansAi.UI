@@ -30,50 +30,52 @@ const PageFilters = ({
         }
       }}
     >
-      <TextField
-        size="small"
-        placeholder={searchPlaceholder}
-        value={searchValue}
-        onChange={onSearchChange}
-        sx={{
-          minWidth: { xs: '100%', sm: '300px' },
-          flex: fullWidth ? 1 : 'none',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 'var(--radius-md)',
-            backgroundColor: 'var(--bg-main)',
-            fontFamily: 'var(--font-family)',
-            fontSize: '0.875rem',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              backgroundColor: 'var(--bg-paper)',
+      {onSearchChange && (
+        <TextField
+          size="small"
+          placeholder={searchPlaceholder}
+          value={searchValue}
+          onChange={onSearchChange}
+          sx={{
+            minWidth: { xs: '100%', sm: '300px' },
+            flex: fullWidth ? 1 : 'none',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--bg-main)',
+              fontFamily: 'var(--font-family)',
+              fontSize: '0.875rem',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'var(--bg-paper)',
+              },
+              '&.Mui-focused': {
+                backgroundColor: 'var(--bg-paper)',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--primary)',
+                  borderWidth: '2px'
+                }
+              }
             },
-            '&.Mui-focused': {
-              backgroundColor: 'var(--bg-paper)',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'var(--primary)',
-                borderWidth: '2px'
+            '& .MuiInputBase-input': {
+              fontFamily: 'var(--font-family)',
+              '&::placeholder': {
+                color: 'var(--text-light)',
+                opacity: 0.8
               }
             }
-          },
-          '& .MuiInputBase-input': {
-            fontFamily: 'var(--font-family)',
-            '&::placeholder': {
-              color: 'var(--text-light)',
-              opacity: 0.8
-            }
-          }
-        }}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ 
-                color: 'var(--text-light)', 
-                fontSize: '1.25rem'
-              }} />
-            </InputAdornment>
-          ),
-        }}
-      />
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ 
+                  color: 'var(--text-light)', 
+                  fontSize: '1.25rem'
+                }} />
+              </InputAdornment>
+            ),
+          }}
+        />
+      )}
       
       {additionalFilters}
     </Box>

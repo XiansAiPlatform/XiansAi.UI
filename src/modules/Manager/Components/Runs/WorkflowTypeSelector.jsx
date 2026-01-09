@@ -10,48 +10,61 @@ import {
   Typography,
   Chip
 } from '@mui/material';
-import { useAgentsApi } from '../../services/agents-api';
+import { useWorkflowApi } from '../../services/workflow-api';
 
-const AgentSelector = ({ 
-  selectedAgent, 
-  onAgentChange, 
+const WorkflowTypeSelector = ({ 
+  selectedAgent,
+  selectedWorkflowType, 
+  onWorkflowTypeChange, 
   disabled = false, 
   showAllOption = true,
   size = "small" 
 }) => {
-  const [agents, setAgents] = useState([]);
+  const [workflowTypes, setWorkflowTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const isMobile = useMediaQuery('(max-width:768px)');
-  const agentsApi = useAgentsApi();
+  const workflowApi = useWorkflowApi();
 
-  const loadAgents = useCallback(async () => {
+  const loadWorkflowTypes = useCallback(async () => {
+    if (!selectedAgent) {
+      setWorkflowTypes([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await agentsApi.getAllAgents();
+      const response = await workflowApi.getWorkflowTypes(selectedAgent);
       if (response && Array.isArray(response)) {
-        setAgents(response);
+        setWorkflowTypes(response);
       } else {
-        console.warn('Invalid agents response:', response);
-        setAgents([]);
+        console.warn('Invalid workflow types response:', response);
+        setWorkflowTypes([]);
       }
     } catch (err) {
-      console.error('Failed to load agents:', err);
-      setError('Failed to load agents');
-      setAgents([]);
+      console.error('Failed to load workflow types:', err);
+      setError('Failed to load workflow types');
+      setWorkflowTypes([]);
     } finally {
       setLoading(false);
     }
-  }, [agentsApi]);
+  }, [selectedAgent, workflowApi]);
 
   useEffect(() => {
-    loadAgents();
-  }, [loadAgents]);
+    loadWorkflowTypes();
+  }, [loadWorkflowTypes]);
+
+  // Reset selected workflow type when agent changes
+  useEffect(() => {
+    if (!selectedAgent) {
+      onWorkflowTypeChange(null);
+    }
+  }, [selectedAgent, onWorkflowTypeChange]);
 
   const handleChange = (event) => {
     const value = event.target.value;
-    onAgentChange(value === 'all' ? null : value);
+    onWorkflowTypeChange(value === 'all' ? null : value);
   };
 
   if (loading) {
@@ -64,7 +77,7 @@ const AgentSelector = ({
       }}>
         <CircularProgress size={16} />
         <Typography variant="body2" color="text.secondary">
-          Loading agents...
+          Loading types...
         </Typography>
       </Box>
     );
@@ -78,6 +91,10 @@ const AgentSelector = ({
         </Typography>
       </Box>
     );
+  }
+
+  if (!selectedAgent) {
+    return null;
   }
 
   return (
@@ -114,23 +131,23 @@ const AgentSelector = ({
           fontWeight: 500,
         }
       }}
-      disabled={disabled}
+      disabled={disabled || !selectedAgent}
     >
-      <InputLabel id="agent-selector-label">
-        {selectedAgent ? 'Agent' : (isMobile ? 'Select' : 'Choose Agent')}
+      <InputLabel id="workflow-type-selector-label">
+        {selectedWorkflowType ? 'Type' : (isMobile ? 'Select' : 'Choose Type')}
       </InputLabel>
       <Select
-        labelId="agent-selector-label"
-        id="agent-selector"
-        value={selectedAgent || 'all'}
-        label={selectedAgent ? 'Agent' : (isMobile ? 'Select' : 'Choose Agent')}
+        labelId="workflow-type-selector-label"
+        id="workflow-type-selector"
+        value={selectedWorkflowType || 'all'}
+        label={selectedWorkflowType ? 'Type' : (isMobile ? 'Select' : 'Choose Type')}
         onChange={handleChange}
         displayEmpty
         renderValue={(selected) => {
           if (selected === 'all') {
             return (
               <Chip 
-                label="All Agents" 
+                label="All Types" 
                 size="small" 
                 sx={{ 
                   backgroundColor: 'rgba(25, 118, 210, 0.08)',
@@ -199,13 +216,13 @@ const AgentSelector = ({
                 backgroundColor: 'var(--primary-color)' 
               }} />
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                All Agents
+                All Types
               </Typography>
             </Box>
           </MenuItem>
         )}
-        {agents.map((agent) => (
-          <MenuItem key={agent} value={agent}>
+        {workflowTypes.map((type) => (
+          <MenuItem key={type} value={type}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box sx={{ 
                 width: 8, 
@@ -214,7 +231,7 @@ const AgentSelector = ({
                 backgroundColor: 'var(--success-color)' 
               }} />
               <Typography variant="body2">
-                {agent}
+                {type}
               </Typography>
             </Box>
           </MenuItem>
@@ -224,4 +241,4 @@ const AgentSelector = ({
   );
 };
 
-export default AgentSelector;
+export default WorkflowTypeSelector;

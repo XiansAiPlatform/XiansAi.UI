@@ -33,9 +33,9 @@ const AppServerSettings = () => {
       const response = await api.generateApiKey(revokeOldKeys);
       console.log(response);
       setApiKey(response.certificate);
-      showSuccess('Agent API Key generated successfully');
+      showSuccess('Agent Certificate generated successfully');
     } catch (error) {
-      await handleApiError(error, 'Failed to generate Agent API key', showError);
+      await handleApiError(error, 'Failed to generate Agent Certificate', showError);
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +100,7 @@ const AppServerSettings = () => {
       <Box className="form-container">
         <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1.5 }}>
           <TextField
-            label="Agent API Key"
+            label="Agent Certificate"
             value={apiKey}
             fullWidth
             multiline
@@ -109,10 +109,10 @@ const AppServerSettings = () => {
             className="input-field"
             size="small"
           />
-          <Tooltip title="Copy Agent API Key">
+          <Tooltip title="Copy Agent Certificate">
             <span>
               <IconButton 
-                onClick={() => handleCopy(apiKey, 'Agent API Key')}
+                onClick={() => handleCopy(apiKey, 'Agent Certificate')}
                 size="small"
                 sx={{ mt: 0.5 }}
                 disabled={!apiKey}
@@ -130,7 +130,7 @@ const AppServerSettings = () => {
             className="submit-button"
             size="small"
           >
-            {isLoading ? 'Generating...' : 'Generate New Agent API Key'}
+            {isLoading ? 'Generating...' : 'Generate New Agent Certificate'}
           </Button>
           <FormControlLabel sx={{ mt: 2 }}
             control={
@@ -145,9 +145,9 @@ const AppServerSettings = () => {
         </Box>
         <ConfirmationDialog
           open={confirmDialogOpen}
-          title="Generate New Agent API Key?"
+          title="Generate New Agent Certificate?"
           message={
-            'Generating a new Agent API Key will invalidate all previously generated keys. Are you sure you want to continue?'
+            'Generating a new Agent Certificate will invalidate all previously generated certificates. Are you sure you want to continue?'
           }
           confirmLabel="Generate"
           cancelLabel="Cancel"

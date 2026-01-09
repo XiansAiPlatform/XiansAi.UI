@@ -8,10 +8,11 @@ const WorkflowActions = ({
     onRefresh,
 }) => {
     return (
-        <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: 1.5 }}>
             <Button
                 variant="outlined"
-                onClick={onRefresh}
+                size="small"
+                onClick={() => onRefresh()}
                 disabled={!selectedAgentName}
             >
                 Refresh

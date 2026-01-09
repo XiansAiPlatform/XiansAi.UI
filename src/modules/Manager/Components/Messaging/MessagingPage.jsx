@@ -185,6 +185,13 @@ const MessagingPage = () => {
         setError(null); // Clear errors when selection changes
     }, []);
 
+    // Callback to update thread details without changing selection or topic (used during refresh)
+    const handleThreadDetailsUpdate = useCallback((threadDetails) => {
+        if (threadDetails && threadDetails.id === selectedThreadId) {
+            setSelectedThreadDetails(threadDetails);
+        }
+    }, [selectedThreadId]);
+
     // Callback for topic selection
     const handleTopicSelected = useCallback((scope) => {
         setSelectedTopic(scope);
@@ -213,12 +220,9 @@ const MessagingPage = () => {
             });
             setSelectedTopic(null); // Reset topic to "All Messages" for new thread
         }
-        // Otherwise, if thread is selected, refresh it
-        else if (selectedThreadId) {
-            // Clear thread data to force reload
-            setSelectedThreadDetails(prev => ({...prev}));
-        }
-    }, [selectedAgentName, selectedThreadId, showError]);
+        // For manual refresh, selectedThreadDetails is already preserved in state
+        // No need to modify it - the ConversationSelector will use it during the refresh
+    }, [selectedAgentName, showError]);
 
     // Handler for when a message is sent - now simplified since ChatConversation handles polling
     const handleMessageSent = useCallback((newThread, messageScope = null) => {
@@ -369,17 +373,17 @@ const MessagingPage = () => {
 
     return (
         <PageLayout 
-            title="Messaging Playground"
+            title="Messaging"
             headerActions={
                 <Box sx={{ 
                     display: 'flex', 
-                    gap: 2, 
-                    alignItems: 'flex-start', 
+                    gap: 1.5, 
+                    alignItems: 'center', 
                     width: '100%',
                     flexWrap: 'wrap'
                 }}>
                     {/* Agent Selector */}
-                    <Box sx={{ minWidth: '280px', maxWidth: '320px', flex: '0 0 auto' }}>
+                    <Box sx={{ minWidth: '250px', maxWidth: '280px', flex: '0 0 auto' }}>
                         <AgentSelector
                             agentsApi={agentsApi}
                             showError={showError}
@@ -389,7 +393,7 @@ const MessagingPage = () => {
                     </Box>
                     
                     {/* Conversation Selector - takes more space */}
-                    <Box sx={{ minWidth: '400px', flex: '1 1 auto', maxWidth: '600px' }}>
+                    <Box sx={{ minWidth: '350px', flex: '1 1 auto', maxWidth: '550px' }}>
                         <ConversationSelector
                             selectedAgentName={selectedAgentName}
                             messagingApi={messagingApi}
@@ -397,6 +401,7 @@ const MessagingPage = () => {
                             selectedThreadId={selectedThreadId}
                             selectedThreadDetails={selectedThreadDetails}
                             onThreadSelect={handleThreadSelected}
+                            onThreadDetailsUpdate={handleThreadDetailsUpdate}
                             onNewConversation={() => handleSendMessage(true)}
                             refreshCounter={threadsRefreshCounter}
                         />
@@ -417,11 +422,11 @@ const MessagingPage = () => {
             {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 'var(--radius-lg)' }}>{error}</Alert>}
             {/* Conditionally render Thread/Conversation area */}
             {selectedAgentName ? (
-                <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid container spacing={1.5} sx={{ mt: 0.5 }}>
                     <Grid
                         size={{
                             xs: 12,
-                            md: 3
+                            md: 2.5
                         }}>
                         {/* Topics panel */}
                         <TopicsPanel
@@ -437,7 +442,7 @@ const MessagingPage = () => {
                     <Grid
                         size={{
                             xs: 12,
-                            md: 9
+                            md: 9.5
                         }}>
                         {/* Messages display */}
                         <ChatConversation 
