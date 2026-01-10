@@ -20,7 +20,7 @@ import {
   SmartToy as SmartToyIcon,
   Launch as LaunchIcon,
   Info as InfoIcon,
-  Rocket as DeployIcon,
+  CloudUpload as DeployIcon,
   Delete as DeleteIcon,
   AutoAwesome as AutoAwesomeIcon,
   Psychology as PsychologyIcon,
@@ -84,8 +84,13 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
     return onboardingData?.['display-name'] || agent.name;
   };
 
-  // Generate a description based on onboardingJson or available data
+  // Generate a description based on agent object, onboardingJson, or available data
   const getDescription = () => {
+    // First check the agent object directly (from server response)
+    if (agent.description) {
+      return agent.description;
+    }
+    // Fallback to onboardingJson
     if (onboardingData?.description) {
       return onboardingData.description;
     }
@@ -101,13 +106,23 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
     return onboardingData?.tags || [];
   };
 
-  // Get version from onboardingJson
+  // Get version from agent object or onboardingJson
   const getVersion = () => {
+    // First check the agent object directly (from server response)
+    if (agent.version) {
+      return agent.version;
+    }
+    // Fallback to onboardingJson
     return onboardingData?.version;
   };
 
-  // Get author from onboardingJson
+  // Get author from agent object or onboardingJson
   const getAuthor = () => {
+    // First check the agent object directly (from server response)
+    if (agent.author) {
+      return agent.author;
+    }
+    // Fallback to onboardingJson
     return onboardingData?.author;
   };
 
@@ -152,14 +167,235 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
   };
 
   const handleViewDetails = () => {
-    const url = getUrl();
-    if (url) {
-      // Open URL in new tab if available in onboardingJson
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } else if (onViewDetails) {
-      // Fallback to existing view details handler
-      onViewDetails(agent);
-    }
+    openSlider(
+      <Box sx={{ p: 3 }}>
+        {/* Header */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h5" sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}>
+            {getDisplayName()}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+            <Chip
+              label="System Template"
+              size="small"
+              sx={{ 
+                bgcolor: 'success.50',
+                color: 'success.700',
+                border: 'none'
+              }}
+            />
+            {getVersion() && (
+              <Chip
+                label={`Version ${getVersion()}`}
+                size="small"
+                sx={{ 
+                  bgcolor: 'primary.50',
+                  color: 'primary.700',
+                  border: 'none'
+                }}
+              />
+            )}
+          </Box>
+        </Box>
+
+        {/* Agent Information */}
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+            Agent Information
+          </Typography>
+          <Box sx={{ bgcolor: 'grey.50', borderRadius: 2, p: 2 }}>
+            {agent.name && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Agent Name
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {agent.name}
+                </Typography>
+              </Box>
+            )}
+            
+            {getDescription() && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Description
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5, lineHeight: 1.6 }}>
+                  {getDescription()}
+                </Typography>
+              </Box>
+            )}
+
+            {getAuthor() && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Author
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {getAuthor()}
+                </Typography>
+              </Box>
+            )}
+
+            {agent.createdBy && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Created By
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {agent.createdBy}
+                </Typography>
+              </Box>
+            )}
+
+            {agent.createdAt && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Created Date
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                  {new Date(agent.createdAt).toLocaleString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </Typography>
+              </Box>
+            )}
+
+            {agent.id && (
+              <Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                  Agent ID
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 0.5, fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                  {agent.id}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Tags */}
+        {getTags().length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              Tags
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              {getTags().map((tag, index) => (
+                <Chip
+                  key={index}
+                  label={tag}
+                  size="small"
+                  variant="outlined"
+                  sx={{ 
+                    borderColor: 'grey.300',
+                    color: 'text.secondary'
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* Associated Workflows */}
+        {definitions && definitions.length > 0 && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}>
+              Associated Workflows ({definitions.length})
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {definitions.map((definition, index) => (
+                <Box 
+                  key={index}
+                  sx={{ 
+                    bgcolor: 'grey.50', 
+                    borderRadius: 2, 
+                    p: 2,
+                    border: '1px solid',
+                    borderColor: 'grey.200'
+                  }}
+                >
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    {definition.name || `Workflow ${index + 1}`}
+                  </Typography>
+                  
+                  {definition.workflowType && (
+                    <Box sx={{ mb: 1 }}>
+                      <Chip
+                        label={definition.workflowType}
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'primary.50',
+                          color: 'primary.700',
+                          fontSize: '0.75rem',
+                          height: '24px'
+                        }}
+                      />
+                    </Box>
+                  )}
+
+                  {definition.description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, lineHeight: 1.5 }}>
+                      {definition.description}
+                    </Typography>
+                  )}
+
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
+                    {definition.id && (
+                      <Typography variant="caption" color="text.secondary">
+                        ID: <span style={{ fontFamily: 'monospace' }}>{definition.id}</span>
+                      </Typography>
+                    )}
+                    {definition.version && (
+                      <Typography variant="caption" color="text.secondary">
+                        Version: {definition.version}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        )}
+
+        {/* External URL */}
+        {getUrl() && (
+          <Box sx={{ mb: 2 }}>
+            <Button
+              variant="outlined"
+              startIcon={<LaunchIcon />}
+              onClick={() => window.open(getUrl(), '_blank', 'noopener,noreferrer')}
+              sx={{
+                textTransform: 'none',
+                borderRadius: 2
+              }}
+            >
+              Visit External Documentation
+            </Button>
+          </Box>
+        )}
+
+        {/* Close Button */}
+        <Box sx={{ mt: 4, pt: 3, borderTop: '1px solid', borderColor: 'grey.200' }}>
+          <Button
+            variant="contained"
+            onClick={closeSlider}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 2,
+              px: 3
+            }}
+          >
+            Close
+          </Button>
+        </Box>
+      </Box>,
+      `${getDisplayName()} - Details`
+    );
   };
 
   const handleDeleteClick = () => {
@@ -403,11 +639,7 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
             sx={{ 
               mb: 2,
               lineHeight: 1.5,
-              fontSize: '0.875rem',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
+              fontSize: '0.875rem'
             }}
           >
             {getDescription()}

@@ -41,6 +41,7 @@ export const useWorkflowApi = () => {
             status = 'all', 
             agent = null, 
             workflowType = null,
+            user = null,
             pageSize = 20, 
             pageToken = null 
           } = options;
@@ -57,6 +58,10 @@ export const useWorkflowApi = () => {
 
           if (workflowType) {
             queryParams.workflowType = workflowType;
+          }
+
+          if (user) {
+            queryParams.user = user;
           }
 
           if (pageSize) {

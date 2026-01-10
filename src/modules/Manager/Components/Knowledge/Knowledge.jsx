@@ -8,10 +8,13 @@ import {
   Select,
   FormControl,
   InputLabel,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
+import { useTenant } from '../../contexts/TenantContext';
 import KnowledgeEditor from './KnowledgeEditor';
 import KnowledgeItem from './KnowledgeItem';
 import { useKnowledgeApi } from '../../services/knowledge-api';
@@ -28,6 +31,7 @@ const Knowledge = () => {
   const [isLoadingItem, setIsLoadingItem] = useState(false);
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
+  const { isSysAdmin } = useTenant();
   const knowledgeApi = useKnowledgeApi();
   const agentsApi = useAgentsApi();
   const [expandedId, setExpandedId] = useState(null);
@@ -40,6 +44,7 @@ const Knowledge = () => {
   const [contentSearchTimeout, setContentSearchTimeout] = useState(null);
   const [isSearchingContent, setIsSearchingContent] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [showTemplateAgents, setShowTemplateAgents] = useState(false);
 
   const filteredKnowledgeItems = searchQuery && searchResults.length > 0 && isSearchingContent
     ? searchResults
@@ -59,7 +64,8 @@ const Knowledge = () => {
         setIsSearchingContent(true);
         try {
           // Get all knowledge items with full content if search query is substantial
-          const fullKnowledgeItems = await knowledgeApi.getLatestKnowledge();
+          const scope = showTemplateAgents ? 'System' : 'Tenant';
+          const fullKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
           // Handle case where API client redirects on 403 and returns undefined
           if (fullKnowledgeItems !== undefined) {
             const results = fullKnowledgeItems.filter(item => 
@@ -88,13 +94,14 @@ const Knowledge = () => {
         clearTimeout(contentSearchTimeout);
       }
     };
-  }, [searchQuery, selectedAgent, knowledgeApi, contentSearchTimeout]);
+  }, [searchQuery, selectedAgent, knowledgeApi, contentSearchTimeout, showTemplateAgents]);
 
   useEffect(() => {
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
       try {
-        const response = await agentsApi.getAllAgents();
+        const scope = showTemplateAgents ? 'System' : 'Tenant';
+        const response = await agentsApi.getAllAgents(scope);
         // Handle case where API client redirects on 403 and returns undefined
         if (response !== undefined) {
           setAgents(response.data || response || []);
@@ -108,13 +115,14 @@ const Knowledge = () => {
     };
 
     fetchAgents();
-  }, [agentsApi, showDetailedError]);
+  }, [agentsApi, showDetailedError, showTemplateAgents]);
 
   useEffect(() => {
     const fetchKnowledge = async () => {
       setLoading(true);
       try {
-        const data = await knowledgeApi.getLatestKnowledge();
+        const scope = showTemplateAgents ? 'System' : 'Tenant';
+        const data = await knowledgeApi.getLatestKnowledge(scope);
         // Handle case where API client redirects on 403 and returns undefined
         if (data !== undefined) {
           // Sort knowledge by createdAt in descending order
@@ -131,7 +139,7 @@ const Knowledge = () => {
     };
 
     fetchKnowledge();
-  }, [knowledgeApi, showDetailedError, setLoading]);
+  }, [knowledgeApi, showDetailedError, setLoading, showTemplateAgents]);
 
   const fetchKnowledgeById = async (id) => {
     setIsLoadingItem(true);
@@ -162,7 +170,8 @@ const Knowledge = () => {
           try {
             await knowledgeApi.createKnowledge(newKnowledge);
             // Fetch fresh data after creating
-            const updatedKnowledge = await knowledgeApi.getLatestKnowledge();
+            const scope = showTemplateAgents ? 'System' : 'Tenant';
+            const updatedKnowledge = await knowledgeApi.getLatestKnowledge(scope);
             // Handle case where API client redirects on 403 and returns undefined
             if (updatedKnowledge !== undefined) {
               const sortedKnowledge = updatedKnowledge.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -188,7 +197,8 @@ const Knowledge = () => {
     try {
       await knowledgeApi.createKnowledge(updatedKnowledge);
       // Fetch fresh data after updating
-      const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge();
+      const scope = showTemplateAgents ? 'System' : 'Tenant';
+      const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
       // Handle case where API client redirects on 403 and returns undefined
       if (updatedKnowledgeItems !== undefined) {
         const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -210,7 +220,8 @@ const Knowledge = () => {
       const success = await knowledgeApi.deleteAllVersions(knowledge.name, knowledge.agent);
       if (success) {
         // Fetch fresh data after deletion
-        const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge();
+        const scope = showTemplateAgents ? 'System' : 'Tenant';
+        const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
         // Handle case where API client redirects on 403 and returns undefined
         if (updatedKnowledgeItems !== undefined) {
           const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -237,7 +248,8 @@ const Knowledge = () => {
       const success = await knowledgeApi.deleteKnowledge(knowledge.id);
       if (success) {
         // Fetch fresh data after creating
-        const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge();
+        const scope = showTemplateAgents ? 'System' : 'Tenant';
+        const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
         // Handle case where API client redirects on 403 and returns undefined
         if (updatedKnowledgeItems !== undefined) {
           const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -277,6 +289,38 @@ const Knowledge = () => {
       searchPlaceholder="Search knowledge..."
       additionalFilters={
         <>
+          {isSysAdmin && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showTemplateAgents}
+                  onChange={(e) => {
+                    setShowTemplateAgents(e.target.checked);
+                    setSelectedAgent(''); // Clear selected agent when switching scope
+                  }}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: 'var(--primary)',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: 'var(--primary)',
+                    },
+                  }}
+                />
+              }
+              label={
+                <Typography sx={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                  {showTemplateAgents ? 'Templates' : 'Deployed'}
+                </Typography>
+              }
+              sx={{ 
+                mr: 1,
+                '& .MuiFormControlLabel-label': {
+                  fontFamily: 'var(--font-family)',
+                }
+              }}
+            />
+          )}
           <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel id="agent-select-label">Agent</InputLabel>
             <Select

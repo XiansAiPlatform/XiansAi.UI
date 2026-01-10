@@ -6,9 +6,10 @@ export const useAgentsApi = () => {
 
   return useMemo(() => {
     return {
-      getAllAgents: async () => {
+      getAllAgents: async (scope = null) => {
         try {
-          return await apiClient.get('/api/client/agents/names');
+          const queryParams = scope ? { scope } : {};
+          return await apiClient.get('/api/client/agents/names', queryParams);
         } catch (error) {
           console.error('Error fetching agents:', error);
           throw error;
