@@ -37,7 +37,7 @@ Built with React 19, Material-UI, React Router, Auth0/Entra ID authentication, C
    npm start                        # Default environment
    npm run start:env development    # loads .env.development
    npm run start:env staging        # loads .env.staging
-   npm run start:env project-a     # loads .env.project-a
+   npm run start:env docker    # loads .env.project-a
    ```
 
 ### Docker Releases

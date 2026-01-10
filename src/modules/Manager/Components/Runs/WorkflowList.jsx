@@ -11,13 +11,16 @@ import {
   Alert,
   Collapse,
   Divider,
-  Chip
+  Chip,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PersonIcon from '@mui/icons-material/Person';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
+import SearchIcon from '@mui/icons-material/Search';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
@@ -39,6 +42,8 @@ const WorkflowList = () => {
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [selectedWorkflowType, setSelectedWorkflowType] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [userFilter, setUserFilter] = useState('');
+  const [debouncedUser, setDebouncedUser] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [hasNextPage, setHasNextPage] = useState(false);
@@ -57,6 +62,14 @@ const WorkflowList = () => {
   const [isTerminatingAll, setIsTerminatingAll] = useState(false);
   const [terminateProgress, setTerminateProgress] = useState({ total: 0, completed: 0 });
 
+  // Debounce user filter input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedUser(userFilter.trim());
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [userFilter]);
+
   // New paginated workflow loading
   const loadPaginatedWorkflows = async (pageToken = null, reset = false) => {
     setLoading(true);
@@ -74,6 +87,7 @@ const WorkflowList = () => {
         status: statusFilter,
         agent: selectedAgent,
         workflowType: selectedWorkflowType,
+        user: debouncedUser || null,
         pageSize: pageSize,
         pageToken: pageToken
       };
@@ -108,7 +122,7 @@ const WorkflowList = () => {
     setCurrentPage(1);
     loadPaginatedWorkflows(null, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, selectedAgent, selectedWorkflowType, pageSize]);
+  }, [statusFilter, selectedAgent, selectedWorkflowType, debouncedUser, pageSize]);
 
   // Show hint when navigated from NewWorkflowForm
   useEffect(() => {
@@ -148,6 +162,11 @@ const WorkflowList = () => {
     setCurrentPage(1);
   };
 
+  const handleUserChange = (event) => {
+    setUserFilter(event.target.value);
+    setCurrentPage(1);
+  };
+
   const handlePageChange = (newPage) => {
     // Update current page first
     setCurrentPage(newPage);
@@ -183,6 +202,7 @@ const WorkflowList = () => {
           status: 'running',
           agent: selectedAgent,
           workflowType: selectedWorkflowType,
+          user: debouncedUser || null,
           pageSize: pageSizeForBulk,
           pageToken: page > 1 ? String(page) : null,
         });
@@ -418,6 +438,53 @@ const WorkflowList = () => {
                     />
                   </Box>
                 )}
+
+                {/* User Filter */}
+                <TextField
+                  size="small"
+                  placeholder="Filter by user..."
+                  value={userFilter}
+                  onChange={handleUserChange}
+                  disabled={isLoading}
+                  sx={{
+                    minWidth: isMobile ? 'auto' : '220px',
+                    flex: isMobile ? 1 : 'none',
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: 'var(--bg-main)',
+                      fontFamily: 'var(--font-family)',
+                      fontSize: '0.875rem',
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: 'var(--bg-paper)',
+                      },
+                      '&.Mui-focused': {
+                        backgroundColor: 'var(--bg-paper)',
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'var(--primary)',
+                          borderWidth: '2px'
+                        }
+                      }
+                    },
+                    '& .MuiInputBase-input': {
+                      fontFamily: 'var(--font-family)',
+                      '&::placeholder': {
+                        color: 'var(--text-light)',
+                        opacity: 0.8
+                      }
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon sx={{ 
+                          color: 'var(--text-light)', 
+                          fontSize: '1.25rem'
+                        }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
               </Box>
 
               {/* Second Row - Status Filter */}
@@ -492,7 +559,7 @@ const WorkflowList = () => {
               </Box>
 
               {/* Third Row - Active Filters Display */}
-              {(selectedAgent || selectedWorkflowType || (statusFilter && statusFilter !== 'all')) && (
+              {(selectedAgent || selectedWorkflowType || debouncedUser || (statusFilter && statusFilter !== 'all')) && (
                 <Box sx={{ 
                   display: 'flex', 
                   gap: 1, 
@@ -523,6 +590,28 @@ const WorkflowList = () => {
                       label={`Type: ${selectedWorkflowType}`}
                       size="small"
                       onDelete={() => handleWorkflowTypeChange(null)}
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                  {debouncedUser && (
+                    <Chip 
+                      label={`User: ${debouncedUser}`}
+                      size="small"
+                      onDelete={() => {
+                        setUserFilter('');
+                        setDebouncedUser('');
+                      }}
                       sx={{
                         backgroundColor: 'rgba(25, 118, 210, 0.08)',
                         color: 'var(--primary-color)',
@@ -585,11 +674,16 @@ const WorkflowList = () => {
               alignItems: 'center'
             }}>
               <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                {selectedAgent && selectedWorkflowType 
-                  ? `Showing runs for "${selectedAgent}" - Type: "${selectedWorkflowType}"`
-                  : selectedAgent 
-                    ? `Showing runs for "${selectedAgent}"`
-                    : 'Showing all workflow runs'}
+                {(() => {
+                  const filters = [];
+                  if (selectedAgent) filters.push(`agent "${selectedAgent}"`);
+                  if (selectedWorkflowType) filters.push(`type "${selectedWorkflowType}"`);
+                  if (debouncedUser) filters.push(`user "${debouncedUser}"`);
+                  
+                  return filters.length > 0 
+                    ? `Showing runs for ${filters.join(', ')}`
+                    : 'Showing all workflow runs';
+                })()}
               </Typography>
             </Box>
 
@@ -666,9 +760,9 @@ const WorkflowList = () => {
           </Paper>
         ) : (
           <EmptyState
-            title={isLoading ? 'Loading Workflow Runs...' : selectedAgent ? `No Workflow Runs Found for "${selectedAgent}"` : 'No Workflow Runs Found'}
-            description={selectedAgent ? 
-              'Try changing the status filter, selecting a different agent, or check if workflows have been started for this agent.' :
+            title={isLoading ? 'Loading Workflow Runs...' : (selectedAgent || debouncedUser) ? 'No Workflow Runs Found' : 'No Workflow Runs Found'}
+            description={(selectedAgent || debouncedUser) ? 
+              'Try changing the filters or check if workflows have been started matching your criteria.' :
               'To get started, navigate to Flow Definitions to create and activate new workflow definitions.'}
             context="runs"
             actions={[
@@ -692,16 +786,26 @@ const WorkflowList = () => {
       {/* Confirm bulk terminate */}
       <ConfirmationDialog
         open={confirmTerminateOpen}
-        title={selectedAgent && selectedWorkflowType 
-          ? `Terminate all running for "${selectedAgent}" - Type: "${selectedWorkflowType}"?`
-          : selectedAgent 
-            ? `Terminate all running for "${selectedAgent}"?` 
-            : 'Terminate all running workflows?'}
-        message={selectedAgent && selectedWorkflowType
-          ? `This will send terminate requests for all currently running workflows for the selected agent and workflow type. This action cannot be undone.`
-          : selectedAgent
-            ? 'This will send terminate requests for all currently running workflows for the selected agent. This action cannot be undone.'
-            : 'This will send terminate requests for all currently running workflows you have access to. This action cannot be undone.'}
+        title={(() => {
+          const filters = [];
+          if (selectedAgent) filters.push(`"${selectedAgent}"`);
+          if (selectedWorkflowType) filters.push(`Type: "${selectedWorkflowType}"`);
+          if (debouncedUser) filters.push(`User: "${debouncedUser}"`);
+          
+          return filters.length > 0 
+            ? `Terminate all running for ${filters.join(', ')}?`
+            : 'Terminate all running workflows?';
+        })()}
+        message={(() => {
+          const filters = [];
+          if (selectedAgent) filters.push('agent');
+          if (selectedWorkflowType) filters.push('workflow type');
+          if (debouncedUser) filters.push('user');
+          
+          return filters.length > 0
+            ? `This will send terminate requests for all currently running workflows for the selected ${filters.join(', ')}. This action cannot be undone.`
+            : 'This will send terminate requests for all currently running workflows you have access to. This action cannot be undone.';
+        })()}
         confirmLabel="Terminate all"
         cancelLabel="Cancel"
         severity="error"
