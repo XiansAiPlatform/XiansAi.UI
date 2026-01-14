@@ -59,6 +59,22 @@ const WorkflowLogs = ({
     const { setLoading } = useLoading();
     const { showError } = useNotification();
 
+    // Convert numeric log level to string for API (backend expects string format)
+    const convertLogLevelToString = useCallback((level) => {
+        if (level === '' || level === null) return null;
+        
+        switch (level) {
+            case 0: return 'Trace';
+            case 1: return 'Debug';
+            case 2: return 'Information';
+            case 3: return 'Warning';
+            case 4: return 'Error';
+            case 5: return 'Critical';
+            case 6: return 'None';
+            default: return null;
+        }
+    }, []);
+
     const getTimeRange = useCallback(() => {
         const now = new Date();
         let startTime = new Date();
@@ -104,16 +120,26 @@ const WorkflowLogs = ({
         setError(null);
         try {
             const { startTime, endTime } = getTimeRange();
+            // Convert numeric log level to string for backend
+            const logLevelString = convertLogLevelToString(selectedLogLevel);
+            
             const options = {
                 participantId: selectedUserId || null,
                 workflowType: selectedWorkflowTypeId || null,
                 workflowId: selectedWorkflowId || null,
-                logLevel: selectedLogLevel,
+                logLevel: logLevelString,
                 startTime,
                 endTime,
                 page,
                 pageSize: PAGE_SIZE
             };
+            
+            console.log('Fetching logs with options:', {
+                agent: selectedAgentName,
+                logLevel: logLevelString,
+                selectedLogLevel: selectedLogLevel,
+                ...options
+            });
             
             const result = await auditingApi.getWorkflowLogs(selectedAgentName, options);
     
@@ -132,7 +158,7 @@ const WorkflowLogs = ({
             setIsLoading(false);
             setLoading(false);
         }
-    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError, getTimeRange, setLoading]);
+    }, [selectedAgentName, selectedUserId, selectedWorkflowTypeId, selectedWorkflowId, selectedLogLevel, page, PAGE_SIZE, auditingApi, showError, getTimeRange, setLoading, convertLogLevelToString]);
 
     useEffect(() => {
         fetchLogs();
@@ -177,9 +203,34 @@ const WorkflowLogs = ({
         );
     }
 
+    // Helper function to normalize log level to numeric value
+    const normalizeLogLevel = (level) => {
+        // If already a number, return it
+        if (typeof level === 'number') {
+            return level;
+        }
+        
+        // Convert string log level to numeric
+        const levelStr = String(level).toLowerCase();
+        switch (levelStr) {
+            case 'trace': return 0;
+            case 'debug': return 1;
+            case 'information':
+            case 'info': return 2;
+            case 'warning':
+            case 'warn': return 3;
+            case 'error': return 4;
+            case 'critical':
+            case 'fatal': return 5;
+            case 'none': return 6;
+            default: return -1; // Unknown
+        }
+    };
+
     // Helper functions for log level display
     const getLogLevelLabel = (level) => {
-        switch (level) {
+        const normalizedLevel = normalizeLogLevel(level);
+        switch (normalizedLevel) {
             case 0: return 'TRACE';
             case 1: return 'DEBUG';
             case 2: return 'INFO';
@@ -192,7 +243,8 @@ const WorkflowLogs = ({
     };
 
     const getLogLevelColor = (level) => {
-        switch (level) {
+        const normalizedLevel = normalizeLogLevel(level);
+        switch (normalizedLevel) {
             case 5: return '#9c27b0'; // Critical - purple
             case 4: return '#d32f2f'; // Error - red
             case 3: return '#ff9800'; // Warning - orange
@@ -204,7 +256,8 @@ const WorkflowLogs = ({
     };
 
     const getLogLevelClass = (level) => {
-        switch (level) {
+        const normalizedLevel = normalizeLogLevel(level);
+        switch (normalizedLevel) {
             case 4: return 'error';
             case 3: return 'warning';
             case 2: return 'info';
