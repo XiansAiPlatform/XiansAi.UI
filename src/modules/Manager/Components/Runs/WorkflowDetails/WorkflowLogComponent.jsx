@@ -52,25 +52,55 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     { value: 6, label: 'None' }
   ];
 
+  // Helper function to normalize log level (same as in other components)
+  const normalizeLogLevel = useCallback((level) => {
+    if (typeof level === 'number') {
+      return level;
+    }
+    
+    const levelStr = String(level).toLowerCase();
+    switch (levelStr) {
+      case 'trace': return 0;
+      case 'debug': return 1;
+      case 'information':
+      case 'info': return 2;
+      case 'warning':
+      case 'warn': return 3;
+      case 'error': return 4;
+      case 'critical':
+      case 'fatal': return 5;
+      case 'none': return 6;
+      default: return -1;
+    }
+  }, []);
+
   // Helper function to detect errors in log messages
   const hasErrorInLogs = useCallback(() => {
     if (!workflowLogs.length) return false;
     
-    // Check by log level
-    return workflowLogs[0]?.level === 4;
-  }, [workflowLogs]);
+    // Check by log level (normalize for comparison)
+    return normalizeLogLevel(workflowLogs[0]?.level) === 4;
+  }, [workflowLogs, normalizeLogLevel]);
 
   // Helper function to convert UI value to API value
-  const getApiLogLevel = useCallback((level) => level === '' ? null : level, []);
+  // This API expects numeric log levels, not strings
+  const getApiLogLevel = useCallback((level) => {
+    if (level === '' || level === null || level === undefined) return null;
+    // Already numeric, just return it
+    return level;
+  }, []);
 
   // Update filtered logs when logs or level change
   useEffect(() => {
     if (selectedLogLevel === '') {
       setFilteredLogs(workflowLogs);
     } else {
-      setFilteredLogs(workflowLogs.filter(log => log.level === selectedLogLevel));
+      // Compare normalized log levels for filtering
+      setFilteredLogs(workflowLogs.filter(log => 
+        normalizeLogLevel(log.level) === selectedLogLevel
+      ));
     }
-  }, [workflowLogs, selectedLogLevel]);
+  }, [workflowLogs, selectedLogLevel, normalizeLogLevel]);
 
   // Reset skip and fetch logs when log level changes
   useEffect(() => {
@@ -80,7 +110,16 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
         setIsLoading(true);
         setSkip(0);
         setHasMore(true);
-        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit, getApiLogLevel(selectedLogLevel));
+        const logLevelString = getApiLogLevel(selectedLogLevel);
+        console.log('Fetching workflow run logs:', {
+          runId,
+          selectedLogLevel,
+          logLevelString,
+          skip: 0,
+          limit
+        });
+        const logs = await api.fetchWorkflowRunLogs(runId, 0, limit, logLevelString);
+        console.log('Fetched logs:', { count: logs?.length, logs });
         setWorkflowLogs(logs);
         setSkip(logs.length);
         if (logs.length < limit) setHasMore(false);
@@ -93,7 +132,7 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
     };
 
     fetchLogsWithNewLevel();
-  }, [selectedLogLevel, runId, workflow, api, showError, getApiLogLevel]);
+  }, [selectedLogLevel, runId, workflow, api, showError, getApiLogLevel, limit]);
 
   const fetchInitialLogs = useCallback(async () => {
     if (!runId || !workflow) return;
@@ -365,8 +404,33 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                 }
               }}>
                 {filteredLogs.map((log, index) => {
+                  // Helper function to normalize log level to numeric value
+                  const normalizeLogLevel = (level) => {
+                    // If already a number, return it
+                    if (typeof level === 'number') {
+                      return level;
+                    }
+                    
+                    // Convert string log level to numeric
+                    const levelStr = String(level).toLowerCase();
+                    switch (levelStr) {
+                      case 'trace': return 0;
+                      case 'debug': return 1;
+                      case 'information':
+                      case 'info': return 2;
+                      case 'warning':
+                      case 'warn': return 3;
+                      case 'error': return 4;
+                      case 'critical':
+                      case 'fatal': return 5;
+                      case 'none': return 6;
+                      default: return -1; // Unknown
+                    }
+                  };
+
                   const getLogLevelClass = (level) => {
-                    switch (level) {
+                    const normalizedLevel = normalizeLogLevel(level);
+                    switch (normalizedLevel) {
                       case 4: return 'error';
                       case 3: return 'warning';
                       case 2: return 'info';
@@ -375,7 +439,8 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                   };
 
                   const getLogLevelLabel = (level) => {
-                    switch (level) {
+                    const normalizedLevel = normalizeLogLevel(level);
+                    switch (normalizedLevel) {
                       case 0: return 'TRACE';
                       case 1: return 'DEBUG';
                       case 2: return 'INFO';
@@ -388,7 +453,8 @@ const WorkflowLogComponent = ({ workflow, runId, onActionComplete, isMobile }) =
                   };
 
                   const getLogLevelColor = (level) => {
-                    switch (level) {
+                    const normalizedLevel = normalizeLogLevel(level);
+                    switch (normalizedLevel) {
                       case 5: return '#9c27b0'; // Critical - purple
                       case 4: return '#d32f2f'; // Error - red
                       case 3: return '#ff9800'; // Warning - orange
