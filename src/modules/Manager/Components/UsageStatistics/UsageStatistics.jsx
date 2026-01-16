@@ -69,43 +69,23 @@ const UsageStatistics = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
-  // Fetch agents list (without filters) to populate dropdown
+  // Extract agents from statistics data (no separate API call needed)
   useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const { startDate, endDate } = getDateRange();
-        const params = {
-          type: usageType,
-          startDate,
-          endDate,
-          groupBy,
-        };
-        // Don't apply agent filter when fetching the list
-        const data = await getUsageStatistics(params);
-        if (data?.agentBreakdown) {
-          const agents = data.agentBreakdown.map(agent => ({
-            agentName: agent.agentName?.trim() || agent.agentName,
-          }));
-          setAgentsData(agents);
-          
-          // If selected agent is not in the list but was previously selected, keep it
-          // This handles the case where filtering by agent makes it disappear from breakdown
-          if (selectedAgent !== 'all' && !agents.find(a => a.agentName === selectedAgent)) {
-            // Agent might have been trimmed, try to find a match
-            const trimmedSelected = selectedAgent.trim();
-            if (!agents.find(a => a.agentName === trimmedSelected)) {
-              // Add the selected agent to the list if it's not there
-              setAgentsData([...agents, { agentName: trimmedSelected }]);
-            }
-          }
+    if (statisticsData?.agentBreakdown) {
+      const agents = statisticsData.agentBreakdown.map(agent => ({
+        agentName: agent.agentName?.trim() || agent.agentName,
+      }));
+      setAgentsData(agents);
+      
+      // If selected agent is not in the list but was previously selected, keep it
+      if (selectedAgent !== 'all' && !agents.find(a => a.agentName === selectedAgent)) {
+        const trimmedSelected = selectedAgent.trim();
+        if (!agents.find(a => a.agentName === trimmedSelected)) {
+          setAgentsData([...agents, { agentName: trimmedSelected }]);
         }
-      } catch (err) {
-        console.error('Failed to fetch agents:', err);
       }
-    };
-    fetchAgents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageType, dateRange, groupBy]);
+    }
+  }, [statisticsData, selectedAgent]);
 
   // Fetch statistics
   useEffect(() => {

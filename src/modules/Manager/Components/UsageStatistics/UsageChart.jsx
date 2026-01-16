@@ -5,6 +5,12 @@ import { format } from 'date-fns';
 const UsageChart = ({ data, usageType, groupBy }) => {
   const { timeSeriesData, totalMetrics, agentTimeSeriesData, agentBreakdown } = data || {};
 
+  // Simple helper: use the date string from API as the key directly
+  const getDateKey = (dateString) => dateString;
+
+  // Simple helper: parse date string to Date object
+  const parseDateKey = (dateKey) => new Date(dateKey);
+
   // Get unique agents and assign colors
   const agents = useMemo(() => {
     if (!agentBreakdown || agentBreakdown.length === 0) return [];
@@ -22,13 +28,8 @@ const UsageChart = ({ data, usageType, groupBy }) => {
     const dateMap = new Map();
     
     agentTimeSeriesData.forEach((point) => {
+      const dateKey = getDateKey(point.date);
       const date = new Date(point.date);
-      let dateKey;
-      if (groupBy === 'hour') {
-        dateKey = date.toISOString();
-      } else {
-        dateKey = format(date, 'yyyy-MM-dd');
-      }
       
       if (!grouped[dateKey]) {
         grouped[dateKey] = {};
@@ -56,13 +57,8 @@ const UsageChart = ({ data, usageType, groupBy }) => {
     // Add dates from total time series (only for non-response-time)
     if (usageType !== 'responsetime' && timeSeriesData) {
       timeSeriesData.forEach((d) => {
+        const dateKey = getDateKey(d.date);
         const date = new Date(d.date);
-        let dateKey;
-        if (groupBy === 'hour') {
-          dateKey = date.toISOString();
-        } else {
-          dateKey = format(date, 'yyyy-MM-dd');
-        }
         dateSet.add(dateKey);
         dateMap.set(dateKey, date);
       });
@@ -78,10 +74,10 @@ const UsageChart = ({ data, usageType, groupBy }) => {
       });
     }
 
-    return Array.from(dateSet)
+      return Array.from(dateSet)
       .sort((a, b) => {
-        const dateA = dateMap.get(a) || new Date(a);
-        const dateB = dateMap.get(b) || new Date(b);
+        const dateA = dateMap.get(a) || parseDateKey(a);
+        const dateB = dateMap.get(b) || parseDateKey(b);
         return dateA.getTime() - dateB.getTime();
       });
   }, [timeSeriesData, agentChartData, groupBy, usageType]);
@@ -147,14 +143,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
   const getValueForDate = (dateKey, dataArray) => {
     if (!dataArray) return null;
     for (const d of dataArray) {
-      const dDate = new Date(d.date);
-      let dKey;
-      if (groupBy === 'hour') {
-        dKey = dDate.toISOString();
-      } else {
-        dKey = format(dDate, 'yyyy-MM-dd');
-      }
-      if (dKey === dateKey) {
+      if (d.date === dateKey) {
         return d.metrics.primaryCount;
       }
     }
@@ -336,7 +325,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
                   if (value === null) return null;
                   const x = xScale(i);
                   const y = yScale(value);
-                  const date = new Date(dateKey);
+                  const date = parseDateKey(dateKey);
                   return (
                     <g key={`total-${i}`}>
                       <circle
@@ -377,7 +366,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
                     if (value === 0) return null;
                     const x = xScale(i);
                     const y = yScale(value);
-                    const date = agentChartData.dateMap.get(dateKey) || new Date(dateKey);
+                    const date = agentChartData.dateMap.get(dateKey) || parseDateKey(dateKey);
                     return (
                       <g key={`${agent.name}-${i}`}>
                         <circle
@@ -407,7 +396,8 @@ const UsageChart = ({ data, usageType, groupBy }) => {
               
               if (!showLabel) return null;
 
-              const date = new Date(dateKey);
+              const date = parseDateKey(dateKey);
+              
               // Format label based on grouping
               const labelFormat = groupBy === 'hour' ? 'HH:mm' : 
                                   groupBy === 'week' ? 'MMM d' :
