@@ -161,6 +161,13 @@ module.exports = {
                 );
             }
 
+            // Suppress source map warnings from specific packages
+            webpackConfig.ignoreWarnings = [
+                // Ignore source map warnings from @auth0/auth0-spa-js and its dependencies
+                /Failed to parse source map.*@auth0\/auth0-spa-js/,
+                /Failed to parse source map.*dpop/,
+            ];
+
             return webpackConfig;
         },
     },

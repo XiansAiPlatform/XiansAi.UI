@@ -141,12 +141,12 @@ export const useWorkflowApi = () => {
             workflowType,
             agentName: agentName,
             parameters,
-            workflowId: flowId,
+            WorkflowIdPostfix: flowId,
             queueName
           };
 
           // Only include optional fields if they have values
-          if (!flowId) delete payload.id;
+          if (!flowId) delete payload.WorkflowIdPostfix;
           if (!queueName) delete payload.queueName;
 
           return await apiClient.post('/api/client/workflows', payload);
