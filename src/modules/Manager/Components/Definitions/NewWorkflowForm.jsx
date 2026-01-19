@@ -8,9 +8,11 @@ import {
   Alert,
   CircularProgress,
   Paper,
-  IconButton
+  IconButton,
+  Chip
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useWorkflowApi } from '../../services/workflow-api';
 import './Definitions.css';
 
@@ -110,6 +112,32 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
         </Alert>
       )}
 
+      {/* Workflow Summary */}
+      {definition.summary && (
+        <Box sx={{ mb: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: isMobile ? 1.5 : 2,
+              backgroundColor: '#f5f9ff',
+              border: '1px solid #d1e3ff'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+              <InfoOutlinedIcon sx={{ color: 'primary.main', mt: 0.5, fontSize: '20px' }} />
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'primary.main' }}>
+                  Workflow Summary
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {definition.summary}
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+      )}
+
       <Box sx={{ mb: 3 }}>
         <Typography variant={isMobile ? "h7" : "h6"} sx={{ mb: 2 }}>
           Input Parameters
@@ -126,17 +154,54 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
               }}
             >
               <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  {param.name} ({param.type})
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
+                    {param.name}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                    ({param.type})
+                  </Typography>
+                  {param.optional && (
+                    <Chip 
+                      label="Optional" 
+                      size="small" 
+                      variant="outlined"
+                      color="default"
+                      sx={{ 
+                        height: '20px',
+                        fontSize: '0.7rem',
+                        borderColor: '#9e9e9e',
+                        color: '#666'
+                      }}
+                    />
+                  )}
+                  {!param.optional && (
+                    <Chip 
+                      label="Required" 
+                      size="small" 
+                      color="error"
+                      variant="outlined"
+                      sx={{ 
+                        height: '20px',
+                        fontSize: '0.7rem'
+                      }}
+                    />
+                  )}
+                </Box>
+                {param.description && (
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                    {param.description}
+                  </Typography>
+                )}
                 <TextField
                   fullWidth
                   multiline
                   rows={isMobile ? 3 : 2}
                   value={parameters[param.name] || ''}
                   onChange={(e) => handleParameterChange(param.name, e.target.value)}
-                  placeholder={`Enter ${param.name.toLowerCase()}`}
+                  placeholder={`Enter ${param.name.toLowerCase()}${param.optional ? ' (optional)' : ''}`}
                   size={isMobile ? "small" : "medium"}
+                  required={!param.optional}
                 />
               </Box>
             </Paper>

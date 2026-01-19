@@ -183,6 +183,16 @@ const TaskCard = ({ task, isFirst, isLast, isMobile, onClick }) => {
             alignItems: 'center',
             mt: 1
           }}>
+            {/* Workflow Status */}
+            <Tooltip title="Workflow Status">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <AssignmentIcon sx={{ fontSize: 14, color: 'var(--primary)' }} />
+                <Typography variant="caption" color="text.secondary">
+                  Workflow: <strong>{task.status || 'Unknown'}</strong>
+                </Typography>
+              </Box>
+            </Tooltip>
+
             {/* Participant */}
             {task.participantId && (
               <Tooltip title="Assigned To">
@@ -246,7 +256,7 @@ const HITLTasks = () => {
   const [bulkActionDialog, setBulkActionDialog] = useState({
     open: false,
     action: null, // 'approve' or 'reject'
-    rejectionReason: '',
+    comment: '',
     isProcessing: false,
     progress: 0,
     total: 0,
@@ -373,7 +383,7 @@ const HITLTasks = () => {
     setBulkActionDialog({
       open: true,
       action: 'approve',
-      rejectionReason: '',
+      comment: '',
       isProcessing: false,
       progress: 0,
       total: 0,
@@ -386,7 +396,7 @@ const HITLTasks = () => {
     setBulkActionDialog({
       open: true,
       action: 'reject',
-      rejectionReason: '',
+      comment: '',
       isProcessing: false,
       progress: 0,
       total: 0,
@@ -399,7 +409,7 @@ const HITLTasks = () => {
       setBulkActionDialog({
         open: false,
         action: null,
-        rejectionReason: '',
+        comment: '',
         isProcessing: false,
         progress: 0,
         total: 0,
@@ -472,13 +482,15 @@ const HITLTasks = () => {
         const task = pendingTasks[i];
         
         try {
-          if (bulkActionDialog.action === 'approve') {
-            await api.completeTask(task.workflowId);
-            successCount++;
-          } else if (bulkActionDialog.action === 'reject') {
-            await api.rejectTask(task.workflowId, bulkActionDialog.rejectionReason || 'Bulk rejection');
-            successCount++;
-          }
+          const comment = bulkActionDialog.comment?.trim() || 
+            (bulkActionDialog.action === 'reject' ? 'Bulk rejection' : null);
+          
+          await api.performAction(
+            task.workflowId, 
+            bulkActionDialog.action,
+            comment
+          );
+          successCount++;
         } catch (error) {
           console.error(`Error processing task ${task.workflowId}:`, error);
           errors.push({
@@ -969,19 +981,19 @@ const HITLTasks = () => {
                 }
               </DialogContentText>
               
-              {bulkActionDialog.action === 'reject' && (
-                <TextField
-                  autoFocus
-                  fullWidth
-                  multiline
-                  rows={3}
-                  label="Rejection Reason (Optional)"
-                  value={bulkActionDialog.rejectionReason}
-                  onChange={(e) => setBulkActionDialog(prev => ({ ...prev, rejectionReason: e.target.value }))}
-                  placeholder="Enter a reason for bulk rejection..."
-                  sx={{ mt: 2 }}
-                />
-              )}
+              <TextField
+                autoFocus
+                fullWidth
+                multiline
+                rows={3}
+                label={bulkActionDialog.action === 'reject' ? 'Comment (Optional)' : 'Comment (Optional)'}
+                value={bulkActionDialog.comment}
+                onChange={(e) => setBulkActionDialog(prev => ({ ...prev, comment: e.target.value }))}
+                placeholder={bulkActionDialog.action === 'reject' 
+                  ? 'Enter a reason for bulk rejection...' 
+                  : 'Add a comment for bulk approval...'}
+                sx={{ mt: 2 }}
+              />
 
               {(selectedAgent || debouncedParticipant) && (
                 <Box sx={{ mt: 2, p: 2, backgroundColor: 'var(--bg-muted)', borderRadius: 1 }}>

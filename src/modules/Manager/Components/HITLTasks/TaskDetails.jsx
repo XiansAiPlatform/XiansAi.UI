@@ -48,12 +48,12 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   
   // Action states
-  const [isCompleting, setIsCompleting] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
+  const [isPerformingAction, setIsPerformingAction] = useState(false);
   
-  // Reject dialog state
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState('');
+  // Action dialog state
+  const [actionDialogOpen, setActionDialogOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [actionComment, setActionComment] = useState('');
   
   const tasksApi = useTasksApi();
   const { showSuccess, showError } = useNotification();
@@ -69,14 +69,15 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
       try {
         const fullTask = await tasksApi.getTaskById(idToFetch);
         setTaskData(fullTask);
-        setDraftContent(fullTask.currentDraft || '');
+        // Initialize draft with FinalWork (current state) or InitialWork (starting point)
+        setDraftContent(fullTask.finalWork || fullTask.initialWork || '');
       } catch (err) {
         console.error('Error fetching task details:', err);
         setError('Failed to load task details');
         // Fall back to the task data we already have
         if (task) {
           setTaskData(task);
-          setDraftContent(task.currentDraft || '');
+          setDraftContent(task.finalWork || task.initialWork || '');
         }
       } finally {
         setIsLoading(false);
@@ -138,7 +139,8 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
     setIsSavingDraft(true);
     try {
       await tasksApi.updateTaskDraft(taskData.workflowId, draftContent);
-      setTaskData(prev => ({ ...prev, currentDraft: draftContent }));
+      // Update finalWork with the saved draft content
+      setTaskData(prev => ({ ...prev, finalWork: draftContent }));
       setIsEditingDraft(false);
       showSuccess('Draft saved successfully');
     } catch (err) {
@@ -149,44 +151,70 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
     }
   };
 
-  const handleCompleteTask = async () => {
-    if (!taskData?.workflowId) return;
+  const handleActionClick = (action) => {
+    setSelectedAction(action);
+    setActionComment('');
+    setActionDialogOpen(true);
+  };
+
+  const handlePerformAction = async () => {
+    if (!taskData?.workflowId || !selectedAction) return;
     
-    setIsCompleting(true);
+    // Check if comment is required for reject action
+    const actionLower = selectedAction.toLowerCase();
+    if (actionLower === 'reject' && !actionComment.trim()) {
+      showError('Please provide a comment for rejection');
+      return;
+    }
+
+    setIsPerformingAction(true);
     try {
-      await tasksApi.completeTask(taskData.workflowId);
-      showSuccess('Task completed successfully');
-      setTaskData(prev => ({ ...prev, isCompleted: true, status: 'Completed' }));
+      await tasksApi.performAction(
+        taskData.workflowId, 
+        selectedAction, 
+        actionComment.trim() || null
+      );
+      
+      const actionName = selectedAction.charAt(0).toUpperCase() + selectedAction.slice(1);
+      showSuccess(`Task ${actionName.toLowerCase()}d successfully`);
+      setActionDialogOpen(false);
+      setActionComment('');
+      setSelectedAction(null);
+      
+      // Update task state
+      const newStatus = actionLower === 'approve' || actionLower === 'complete' 
+        ? 'Completed' 
+        : actionLower === 'reject' 
+        ? 'Terminated' 
+        : 'Completed';
+      
+      setTaskData(prev => ({ 
+        ...prev, 
+        isCompleted: true, 
+        status: newStatus,
+        performedAction: selectedAction,
+        comment: actionComment.trim() || null
+      }));
+      
       if (onTaskUpdated) onTaskUpdated();
     } catch (err) {
-      console.error('Error completing task:', err);
-      showError('Failed to complete task: ' + (err.message || 'Unknown error'));
+      console.error('Error performing action:', err);
+      showError('Failed to perform action: ' + (err.message || 'Unknown error'));
     } finally {
-      setIsCompleting(false);
+      setIsPerformingAction(false);
     }
   };
 
-  const handleRejectTask = async () => {
-    if (!taskData?.workflowId || !rejectionReason.trim()) return;
-    
-    setIsRejecting(true);
-    try {
-      await tasksApi.rejectTask(taskData.workflowId, rejectionReason.trim());
-      showSuccess('Task rejected successfully');
-      setRejectDialogOpen(false);
-      setRejectionReason('');
-      setTaskData(prev => ({ ...prev, isCompleted: true, status: 'Terminated' }));
-      if (onTaskUpdated) onTaskUpdated();
-    } catch (err) {
-      console.error('Error rejecting task:', err);
-      showError('Failed to reject task: ' + (err.message || 'Unknown error'));
-    } finally {
-      setIsRejecting(false);
+  const handleCloseActionDialog = () => {
+    if (!isPerformingAction) {
+      setActionDialogOpen(false);
+      setActionComment('');
+      setSelectedAction(null);
     }
   };
 
   const handleCancelEditDraft = () => {
-    setDraftContent(taskData?.currentDraft || '');
+    setDraftContent(taskData?.finalWork || taskData?.initialWork || '');
     setIsEditingDraft(false);
   };
 
@@ -195,7 +223,36 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
     showSuccess('Copied to clipboard');
   };
 
+  // Get action button configuration
+  const getActionConfig = (action) => {
+    const actionLower = action.toLowerCase();
+    switch (actionLower) {
+      case 'approve':
+      case 'complete':
+        return {
+          color: 'success',
+          icon: <CheckCircleIcon />,
+          label: 'Approve'
+        };
+      case 'reject':
+        return {
+          color: 'error',
+          icon: <CancelIcon />,
+          label: 'Reject'
+        };
+      default:
+        return {
+          color: 'primary',
+          icon: <AssignmentIcon />,
+          label: action.charAt(0).toUpperCase() + action.slice(1)
+        };
+    }
+  };
+
   const isTaskActive = taskData && !taskData.isCompleted;
+  // Only show actions when task is in Running status
+  const canPerformActions = isTaskActive && taskData?.status === 'Running';
+  const availableActions = taskData?.availableActions || [];
 
   if (isLoading) {
     return (
@@ -356,105 +413,210 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
                 </Box>
               </Box>
             )}
+
+            {/* Performed Action (if completed) */}
+            {taskData.performedAction && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)', minWidth: 80 }}>
+                  Action:
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <AssignmentIcon sx={{ fontSize: 16, color: 'var(--primary)' }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {taskData.performedAction.charAt(0).toUpperCase() + taskData.performedAction.slice(1)}
+                  </Typography>
+                </Box>
+              </Box>
+            )}
+
+            {/* Comment (if provided) */}
+            {taskData.comment && (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)' }}>
+                  Comment:
+                </Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 1.5,
+                    backgroundColor: 'var(--bg-paper)',
+                    borderRadius: 1,
+                    border: '1px solid var(--border-color)',
+                    whiteSpace: 'pre-wrap',
+                    fontSize: '0.875rem',
+                    color: 'var(--text-primary)'
+                  }}
+                >
+                  {taskData.comment}
+                </Paper>
+              </Box>
+            )}
           </Stack>
         </Paper>
       </Box>
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Draft Section */}
+      {/* Work Content Section */}
       <Box sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', mb: 3 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          mb: 2
-        }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-            Draft Work
-          </Typography>
-          {isTaskActive && !isEditingDraft && (
-            <Button
-              size="small"
-              startIcon={<EditIcon />}
-              onClick={() => setIsEditingDraft(true)}
-              sx={{ textTransform: 'none' }}
-            >
-              Edit Draft
-            </Button>
-          )}
-        </Box>
-
-        {isEditingDraft ? (
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 200 }}>
-            <TextField
-              multiline
-              fullWidth
-              value={draftContent}
-              onChange={(e) => setDraftContent(e.target.value)}
-              placeholder="Enter your draft work here..."
-              sx={{
-                flex: 1,
-                '& .MuiOutlinedInput-root': {
-                  height: '100%',
-                  alignItems: 'flex-start',
-                  backgroundColor: 'var(--bg-paper)',
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.875rem'
-                },
-                '& .MuiInputBase-input': {
-                  height: '100% !important',
-                  overflow: 'auto !important'
-                }
-              }}
-              minRows={8}
-            />
-            <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleCancelEditDraft}
-                disabled={isSavingDraft}
-                sx={{ textTransform: 'none' }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                size="small"
-                startIcon={isSavingDraft ? <CircularProgress size={16} /> : <SaveIcon />}
-                onClick={handleSaveDraft}
-                disabled={isSavingDraft}
-                sx={{ textTransform: 'none' }}
-              >
-                {isSavingDraft ? 'Saving...' : 'Save Draft'}
-              </Button>
+        {/* For Active Tasks: Show Editable Draft */}
+        {isTaskActive ? (
+          <>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              mb: 2
+            }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                Work Content
+              </Typography>
+              {!isEditingDraft && canPerformActions && (
+                <Button
+                  size="small"
+                  startIcon={<EditIcon />}
+                  onClick={() => setIsEditingDraft(true)}
+                  sx={{ textTransform: 'none' }}
+                >
+                  Edit
+                </Button>
+              )}
             </Box>
-          </Box>
+
+            {isEditingDraft ? (
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 200 }}>
+                <TextField
+                  multiline
+                  fullWidth
+                  value={draftContent}
+                  onChange={(e) => setDraftContent(e.target.value)}
+                  placeholder="Enter your work content here..."
+                  sx={{
+                    flex: 1,
+                    '& .MuiOutlinedInput-root': {
+                      height: '100%',
+                      alignItems: 'flex-start',
+                      backgroundColor: 'var(--bg-paper)',
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.875rem'
+                    },
+                    '& .MuiInputBase-input': {
+                      height: '100% !important',
+                      overflow: 'auto !important'
+                    }
+                  }}
+                  minRows={8}
+                />
+                <Box sx={{ display: 'flex', gap: 1, mt: 2, justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleCancelEditDraft}
+                    disabled={isSavingDraft}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={isSavingDraft ? <CircularProgress size={16} /> : <SaveIcon />}
+                    onClick={handleSaveDraft}
+                    disabled={isSavingDraft}
+                    sx={{ textTransform: 'none' }}
+                  >
+                    {isSavingDraft ? 'Saving...' : 'Save Draft'}
+                  </Button>
+                </Box>
+              </Box>
+            ) : (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  flex: 1,
+                  minHeight: 150,
+                  backgroundColor: 'var(--bg-muted)',
+                  borderRadius: 2,
+                  border: '1px solid var(--border-color)',
+                  overflow: 'auto',
+                  whiteSpace: 'pre-wrap',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: '0.875rem',
+                  color: (taskData.finalWork || taskData.initialWork) ? 'var(--text-primary)' : 'var(--text-light)'
+                }}
+              >
+                {taskData.finalWork || taskData.initialWork || 'No content yet. Click "Edit" to add content.'}
+              </Paper>
+            )}
+          </>
         ) : (
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
+          /* For Completed Tasks: Show Side-by-Side Comparison */
+          <>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'var(--text-primary)', mb: 2 }}>
+              Work Content Comparison
+            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 2, 
               flex: 1,
-              minHeight: 150,
-              backgroundColor: 'var(--bg-muted)',
-              borderRadius: 2,
-              border: '1px solid var(--border-color)',
-              overflow: 'auto',
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'var(--font-mono)',
-              fontSize: '0.875rem',
-              color: taskData.currentDraft ? 'var(--text-primary)' : 'var(--text-light)'
-            }}
-          >
-            {taskData.currentDraft || 'No draft content yet. Click "Edit Draft" to add content.'}
-          </Paper>
+              minHeight: 200,
+              flexDirection: { xs: 'column', md: 'row' }
+            }}>
+              {/* Initial Work */}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)', mb: 1, fontWeight: 600 }}>
+                  Initial Work
+                </Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    flex: 1,
+                    backgroundColor: 'var(--bg-muted)',
+                    borderRadius: 2,
+                    border: '1px solid var(--border-color)',
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.875rem',
+                    color: taskData.initialWork ? 'var(--text-primary)' : 'var(--text-light)'
+                  }}
+                >
+                  {taskData.initialWork || 'No initial work content'}
+                </Paper>
+              </Box>
+
+              {/* Final Work */}
+              <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)', mb: 1, fontWeight: 600 }}>
+                  Final Work
+                </Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    flex: 1,
+                    backgroundColor: 'var(--bg-muted)',
+                    borderRadius: 2,
+                    border: '1px solid var(--border-color)',
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: '0.875rem',
+                    color: taskData.finalWork ? 'var(--text-primary)' : 'var(--text-light)'
+                  }}
+                >
+                  {taskData.finalWork || 'No final work content'}
+                </Paper>
+              </Box>
+            </Box>
+          </>
         )}
       </Box>
 
       {/* Action Buttons */}
-      {isTaskActive && (
+      {canPerformActions && availableActions.length > 0 && (
         <>
           <Divider sx={{ mb: 3 }} />
           <Box sx={{ 
@@ -463,78 +625,91 @@ const TaskDetails = ({ task, workflowId, onClose, onTaskUpdated }) => {
             justifyContent: 'flex-end',
             flexWrap: 'wrap'
           }}>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={isRejecting ? <CircularProgress size={16} /> : <CancelIcon />}
-              onClick={() => setRejectDialogOpen(true)}
-              disabled={isCompleting || isRejecting || isSavingDraft}
-              sx={{ textTransform: 'none' }}
-            >
-              Reject Task
-            </Button>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={isCompleting ? <CircularProgress size={16} color="inherit" /> : <CheckCircleIcon />}
-              onClick={handleCompleteTask}
-              disabled={isCompleting || isRejecting || isSavingDraft}
-              sx={{ textTransform: 'none' }}
-            >
-              {isCompleting ? 'Approving...' : 'Mark Approved'}
-            </Button>
+            {availableActions.map((action) => {
+              const config = getActionConfig(action);
+              return (
+                <Button
+                  key={action}
+                  variant={config.color === 'success' ? 'contained' : 'outlined'}
+                  color={config.color}
+                  startIcon={config.icon}
+                  onClick={() => handleActionClick(action)}
+                  disabled={isPerformingAction || isSavingDraft}
+                  sx={{ textTransform: 'none' }}
+                >
+                  {config.label}
+                </Button>
+              );
+            })}
           </Box>
         </>
       )}
 
-      {/* Completed message */}
+      {/* Status message for non-active tasks */}
       {!isTaskActive && (
         <Alert severity="info" sx={{ mt: 2 }}>
           This task has been completed and can no longer be modified.
         </Alert>
       )}
+      {isTaskActive && !canPerformActions && (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          This task is not in a running state and cannot be modified (Status: {taskData?.status}).
+        </Alert>
+      )}
 
-      {/* Reject Dialog */}
+      {/* Action Dialog */}
       <Dialog 
-        open={rejectDialogOpen} 
-        onClose={() => !isRejecting && setRejectDialogOpen(false)}
+        open={actionDialogOpen} 
+        onClose={handleCloseActionDialog}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Reject Task</DialogTitle>
+        <DialogTitle>
+          {selectedAction ? `${selectedAction.charAt(0).toUpperCase() + selectedAction.slice(1)} Task` : 'Perform Action'}
+        </DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Please provide a reason for rejecting this task. This action cannot be undone.
+            {selectedAction?.toLowerCase() === 'reject' 
+              ? 'Please provide a reason for rejecting this task. This action cannot be undone.'
+              : 'You can optionally add a comment to explain this action.'}
           </Typography>
           <TextField
             autoFocus
             fullWidth
             multiline
             rows={4}
-            label="Rejection Reason"
-            value={rejectionReason}
-            onChange={(e) => setRejectionReason(e.target.value)}
-            placeholder="Enter the reason for rejection..."
-            disabled={isRejecting}
+            label={selectedAction?.toLowerCase() === 'reject' ? 'Rejection Reason *' : 'Comment (Optional)'}
+            value={actionComment}
+            onChange={(e) => setActionComment(e.target.value)}
+            placeholder={selectedAction?.toLowerCase() === 'reject' 
+              ? 'Enter the reason for rejection...' 
+              : 'Add a comment (optional)...'}
+            disabled={isPerformingAction}
+            error={selectedAction?.toLowerCase() === 'reject' && !actionComment.trim()}
+            helperText={selectedAction?.toLowerCase() === 'reject' && !actionComment.trim() 
+              ? 'Rejection reason is required' 
+              : ''}
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button 
-            onClick={() => setRejectDialogOpen(false)} 
-            disabled={isRejecting}
+            onClick={handleCloseActionDialog} 
+            disabled={isPerformingAction}
             sx={{ textTransform: 'none' }}
           >
             Cancel
           </Button>
           <Button
             variant="contained"
-            color="error"
-            onClick={handleRejectTask}
-            disabled={isRejecting || !rejectionReason.trim()}
-            startIcon={isRejecting ? <CircularProgress size={16} color="inherit" /> : null}
+            color={selectedAction ? getActionConfig(selectedAction).color : 'primary'}
+            onClick={handlePerformAction}
+            disabled={isPerformingAction}
+            startIcon={isPerformingAction ? <CircularProgress size={16} color="inherit" /> : null}
             sx={{ textTransform: 'none' }}
           >
-            {isRejecting ? 'Rejecting...' : 'Reject Task'}
+            {isPerformingAction 
+              ? `${selectedAction?.charAt(0).toUpperCase() + selectedAction?.slice(1)}ing...` 
+              : `${selectedAction?.charAt(0).toUpperCase() + selectedAction?.slice(1)} Task`}
           </Button>
         </DialogActions>
       </Dialog>
