@@ -12,8 +12,8 @@ import {
   Paper,
 } from '@mui/material';
 
-const AgentBreakdownTable = ({ data, usageType }) => {
-  const { agentBreakdown, totalMetrics } = data || {};
+const AgentBreakdownTable = ({ data }) => {
+  const { agentBreakdown, totalMetrics, unit, metricType } = data || {};
   const [orderBy, setOrderBy] = useState('primaryCount');
   const [order, setOrder] = useState('desc');
 
@@ -50,13 +50,24 @@ const AgentBreakdownTable = ({ data, usageType }) => {
     return `${ms}ms`;
   };
 
-  // Format value based on usage type
+  // Format value based on unit
   const formatValue = (value) => {
-    if (usageType === 'responsetime') {
+    if (unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds')) {
       return formatResponseTime(value);
     }
     return formatNumber(value);
   };
+
+  // Format label for metric type
+  const getMetricLabel = () => {
+    if (!metricType) return 'Total';
+    return metricType.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
+  };
+
+  // Check if optional breakdown fields are available
+  const hasBreakdown = totalMetrics?.promptCount !== null && totalMetrics?.promptCount !== undefined;
 
   if (!agentBreakdown || agentBreakdown.length === 0) {
     return (
@@ -84,15 +95,11 @@ const AgentBreakdownTable = ({ data, usageType }) => {
                   direction={orderBy === 'primaryCount' ? order : 'asc'}
                   onClick={() => handleSort('primaryCount')}
                 >
-                  <strong>
-                    {usageType === 'tokens' ? 'Total Tokens' : 
-                     usageType === 'messages' ? 'Total Messages' : 
-                     'Total Response Time'}
-                  </strong>
+                  <strong>{getMetricLabel()}</strong>
                 </TableSortLabel>
               </TableCell>
 
-              {usageType === 'tokens' && (
+              {hasBreakdown && (
                 <>
                   <TableCell align="right">
                     <TableSortLabel
@@ -115,9 +122,9 @@ const AgentBreakdownTable = ({ data, usageType }) => {
                 </>
               )}
 
-              {usageType === 'responsetime' && (
+              {unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds') && (
                 <TableCell align="right">
-                  <strong>Avg Response Time</strong>
+                  <strong>Avg {getMetricLabel()}</strong>
                 </TableCell>
               )}
 
@@ -156,7 +163,7 @@ const AgentBreakdownTable = ({ data, usageType }) => {
                   </Typography>
                 </TableCell>
 
-                {usageType === 'tokens' && (
+                {hasBreakdown && (
                   <>
                     <TableCell align="right">
                       <Typography variant="body2">
@@ -171,7 +178,7 @@ const AgentBreakdownTable = ({ data, usageType }) => {
                   </>
                 )}
 
-                {usageType === 'responsetime' && (
+                {unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds') && (
                   <TableCell align="right">
                     <Typography variant="body2">
                       {agent.metrics.requestCount > 0
@@ -203,7 +210,7 @@ const AgentBreakdownTable = ({ data, usageType }) => {
                 </Typography>
               </TableCell>
 
-              {usageType === 'tokens' && (
+              {hasBreakdown && (
                 <>
                   <TableCell align="right">
                     <Typography variant="body2" fontWeight="bold">
@@ -218,7 +225,7 @@ const AgentBreakdownTable = ({ data, usageType }) => {
                 </>
               )}
 
-              {usageType === 'responsetime' && (
+              {unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds') && (
                 <TableCell align="right">
                   <Typography variant="body2" fontWeight="bold">
                     {totalMetrics.requestCount > 0
