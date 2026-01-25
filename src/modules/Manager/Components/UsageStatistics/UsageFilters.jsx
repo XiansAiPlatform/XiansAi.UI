@@ -13,6 +13,9 @@ const UsageFilters = ({
   setSelectedUser,
   selectedAgent,
   setSelectedAgent,
+  selectedMetricType,
+  setSelectedMetricType,
+  currentCategoryMetrics,
   dateRange,
   setDateRange,
   groupBy,
@@ -86,6 +89,31 @@ const UsageFilters = ({
               {agentsData.map((agent) => (
                 <MenuItem key={agent.agentName} value={agent.agentName}>
                   {agent.agentName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* Metric Type Filter */}
+        <Box sx={{ minWidth: 200 }}>
+          <Typography variant="caption" sx={{ mb: 0.5, display: 'block', color: 'text.secondary' }}>
+            Metric Type
+          </Typography>
+          <FormControl fullWidth size="small">
+            <Select
+              value={selectedMetricType || ''}
+              onChange={(e) => setSelectedMetricType(e.target.value)}
+              disabled={!currentCategoryMetrics || currentCategoryMetrics.length === 0}
+              sx={{
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'var(--border-color)',
+                },
+              }}
+            >
+              {currentCategoryMetrics?.map((metric) => (
+                <MenuItem key={metric.type} value={metric.type}>
+                  {metric.displayName}
                 </MenuItem>
               ))}
             </Select>
