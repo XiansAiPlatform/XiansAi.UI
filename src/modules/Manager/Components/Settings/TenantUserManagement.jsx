@@ -25,6 +25,7 @@ import {
   DialogActions,
   Stack,
   Paper,
+  OutlinedInput,
 } from "@mui/material";
 import Pagination from "@mui/material/Pagination";
 import EditIcon from "@mui/icons-material/Edit";
@@ -33,6 +34,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useUserTenantApi } from "../../services/user-tenant-api";
 import { useAuth } from "../../auth/AuthContext";
 import { useTenant } from "../../contexts/TenantContext";
@@ -64,6 +66,13 @@ export default function TenantUserManagement() {
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [addEmail, setAddEmail] = useState("");
   const [addLoading, setAddLoading] = useState(false);
+  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+  const [createUserData, setCreateUserData] = useState({
+    email: "",
+    name: "",
+    tenantRoles: [],
+  });
+  const [createLoading, setCreateLoading] = useState(false);
   const userTenantApi = useUserTenantApi();
   const { openSlider, closeSlider } = useSlider();
   const [formLoading, setFormLoading] = useState(false);
@@ -279,6 +288,103 @@ export default function TenantUserManagement() {
     setAddLoading(false);
   };
 
+  // Open create user dialog
+  const handleOpenCreateUserDialog = () => {
+    setCreateUserDialogOpen(true);
+    setCreateUserData({
+      email: "",
+      name: "",
+      tenantRoles: [],
+    });
+    setError("");
+  };
+
+  // Close create user dialog
+  const handleCloseCreateUserDialog = () => {
+    setCreateUserDialogOpen(false);
+    setCreateUserData({
+      email: "",
+      name: "",
+      tenantRoles: [],
+    });
+    setError("");
+  };
+
+  // Handle create user form change
+  const handleCreateUserChange = (field) => (event) => {
+    setCreateUserData((prev) => ({
+      ...prev,
+      [field]: event.target.value,
+    }));
+  };
+
+  // Create new user handler
+  const handleCreateNewUser = async () => {
+    // Validation
+    if (!createUserData.email.trim()) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    if (!createUserData.name.trim()) {
+      setError("Please enter a name.");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(createUserData.email.trim())) {
+      setError("Please enter a valid email format.");
+      return;
+    }
+
+    if (createUserData.tenantRoles.length === 0) {
+      setError("Please select at least one tenant role.");
+      return;
+    }
+
+    setCreateLoading(true);
+    setError("");
+    try {
+      const token = await getAccessTokenSilently();
+      await userTenantApi.createNewUser(
+        token,
+        {
+          email: createUserData.email.trim(),
+          name: createUserData.name.trim(),
+          tenantRoles: createUserData.tenantRoles,
+        },
+        tenant.tenantId
+      );
+      setSuccess("✅ New user successfully created and added to tenant!");
+      setCreateUserData({
+        email: "",
+        name: "",
+        tenantRoles: [],
+      });
+      setCreateUserDialogOpen(false);
+      fetchUsers();
+    } catch (e) {
+      console.log("Error creating new user:", e);
+      let errorMessage = "❌ Failed to create new user.";
+      
+      // Handle RFC 9110 error format (detail field)
+      if (e?.detail) {
+        errorMessage = `❌ ${e.detail}`;
+      } else if (e?.status === 409 || e?.statusCode === 409) {
+        errorMessage = "⚠️ A user with this email already exists in the system.";
+      } else if (e?.errorMessage) {
+        errorMessage = `❌ ${e.errorMessage}`;
+      } else if (e?.title) {
+        errorMessage = `❌ ${e.title}`;
+      }
+      
+      setError(errorMessage);
+      console.error("Error creating new user:", e);
+    }
+    setCreateLoading(false);
+  };
+
   if (tenantLoading || loading) {
     return null; // LoadingContext will show the top progress bar
   }
@@ -349,15 +455,25 @@ export default function TenantUserManagement() {
           </Button>
         </Box>
 
-        {/* Right: Add User Button */}
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<PersonAddIcon />}
-          onClick={handleOpenAddUserDialog}
-        >
-          Add User by Email
-        </Button>
+        {/* Right: Add User Buttons */}
+        <Box display="flex" gap={2}>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<PersonAddIcon />}
+            onClick={handleOpenAddUserDialog}
+          >
+            Add Existing User to Tenant
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleOutlineIcon />}
+            onClick={handleOpenCreateUserDialog}
+          >
+            Create New User
+          </Button>
+        </Box>
       </Box>
 
       {/* Divider for separation */}
@@ -543,6 +659,125 @@ export default function TenantUserManagement() {
             startIcon={addLoading ? null : <PersonAddIcon />}
           >
             {addLoading ? "Adding..." : "Add User"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Create New User Dialog */}
+      <Dialog 
+        open={createUserDialogOpen} 
+        onClose={handleCloseCreateUserDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Box display="flex" alignItems="center" gap={1}>
+            <AddCircleOutlineIcon color="primary" />
+            Create New User
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2.5} sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Create a new user account and add them to this tenant. The user will receive 
+              credentials to access the system.
+            </Typography>
+            
+            <TextField
+              autoFocus
+              fullWidth
+              label="Email Address"
+              type="email"
+              required
+              value={createUserData.email}
+              onChange={handleCreateUserChange("email")}
+              disabled={createLoading}
+              placeholder="user@example.com"
+              helperText="The user's email address (will be used for login)"
+            />
+
+            <TextField
+              fullWidth
+              label="Full Name"
+              type="text"
+              required
+              value={createUserData.name}
+              onChange={handleCreateUserChange("name")}
+              disabled={createLoading}
+              placeholder="John Doe"
+              helperText="The user's full name"
+            />
+
+            <FormControl fullWidth required>
+              <InputLabel id="tenant-roles-label">Tenant Roles</InputLabel>
+              <Select
+                labelId="tenant-roles-label"
+                multiple
+                value={createUserData.tenantRoles}
+                onChange={handleCreateUserChange("tenantRoles")}
+                input={<OutlinedInput label="Tenant Roles" />}
+                disabled={createLoading}
+                renderValue={(selected) => (
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selected.map((value) => (
+                      <Chip key={value} label={value} size="small" />
+                    ))}
+                  </Box>
+                )}
+              >
+                <MenuItem value="TenantAdmin">
+                  <Box>
+                    <Typography variant="body1">Tenant Admin</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Full administrative access to the tenant
+                    </Typography>
+                  </Box>
+                </MenuItem>
+                <MenuItem value="TenantUser">
+                  <Box>
+                    <Typography variant="body1">Tenant User</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Standard user access to tenant resources
+                    </Typography>
+                  </Box>
+                </MenuItem>
+                <MenuItem value="TenantParticipant">
+                  <Box>
+                    <Typography variant="body1">Tenant Participant</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Limited participant access to tenant
+                    </Typography>
+                  </Box>
+                </MenuItem>
+              </Select>
+            </FormControl>
+
+            {error && (
+              <Alert severity="error">
+                {error}
+              </Alert>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={handleCloseCreateUserDialog} 
+            disabled={createLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleCreateNewUser}
+            disabled={
+              createLoading || 
+              !createUserData.email.trim() || 
+              !createUserData.name.trim() || 
+              createUserData.tenantRoles.length === 0
+            }
+            startIcon={createLoading ? null : <AddCircleOutlineIcon />}
+          >
+            {createLoading ? "Creating..." : "Create User"}
           </Button>
         </DialogActions>
       </Dialog>
