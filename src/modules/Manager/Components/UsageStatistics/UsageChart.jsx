@@ -48,7 +48,7 @@ const UsageChart = ({ data, groupBy }) => {
       .map(([key]) => key);
     
       return { grouped, dates, dateMap };
-  }, [agentTimeSeriesData, groupBy, unit]);
+  }, [agentTimeSeriesData, unit]);
 
   // Combine all dates (from total and agents) and create unified dataset
   const allDates = useMemo(() => {
@@ -81,7 +81,7 @@ const UsageChart = ({ data, groupBy }) => {
         const dateB = dateMap.get(b) || parseDateKey(b);
         return dateA.getTime() - dateB.getTime();
       });
-  }, [timeSeriesData, agentChartData, groupBy]);
+  }, [timeSeriesData, agentChartData]);
 
   // Calculate chart dimensions and scale (considering both total and agent data)
   const chartConfig = useMemo(() => {

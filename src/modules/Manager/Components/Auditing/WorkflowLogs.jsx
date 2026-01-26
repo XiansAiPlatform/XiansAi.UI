@@ -463,6 +463,12 @@ const WorkflowLogs = ({
                                                 {log.workflowRunId}
                                             </Box>
                                         )}
+                                        {log.activation && (
+                                            <Box className="metadata-item">
+                                                <span className="label">Activation:</span>
+                                                {log.activation}
+                                            </Box>
+                                        )}
                                     </Box>
                                 </Box>
                             );
