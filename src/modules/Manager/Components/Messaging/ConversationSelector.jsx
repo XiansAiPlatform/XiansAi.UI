@@ -229,7 +229,7 @@ const ConversationSelector = ({
                                             color="text.secondary"
                                             sx={{ wordBreak: 'break-word', whiteSpace: 'normal' }}
                                         >
-                                            Workflow: {getSimplifiedWorkflowName(option.workflowId)}
+                                            {option.workflowId}
                                         </Typography>
                                     )}
                                 </Box>

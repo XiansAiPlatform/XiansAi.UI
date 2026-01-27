@@ -14,7 +14,7 @@ import { useAgentsApi } from '../../services/agents-api';
 import { useLoading } from '../../contexts/LoadingContext';
 import { ContentLoader } from '../Common/StandardLoaders';
 
-const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, onClose }) => {
+const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', isSystemScoped = false, onSave, onClose }) => {
   const knowledgeApi = useKnowledgeApi();
   const agentsApi = useAgentsApi();
   const { loading, setLoading } = useLoading();
@@ -24,6 +24,7 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
     content: '',
     type: 'markdown',
     agent: selectedAgent || '',
+    activation_name: '',
   });
   const [jsonError, setJsonError] = useState(null);
   const [submitError, setSubmitError] = useState(null);
@@ -307,6 +308,27 @@ const KnowledgeEditor = ({ mode = 'add', knowledge, selectedAgent = '', onSave, 
               )}
             </Select>
           </FormControl>
+
+          {!isSystemScoped && (
+            <TextField
+              fullWidth
+              label="Activation Name (idPostfix)"
+              value={formData.activation_name || ''}
+              onChange={(e) => setFormData({ ...formData, activation_name: e.target.value })}
+              sx={{ 
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'var(--background-light)',
+                  borderRadius: 'var(--radius-sm)',
+                  '& fieldset': {
+                    borderColor: 'var(--border-color)'
+                  }
+                }
+              }}
+              placeholder="Optional"
+              helperText="Optional identifier to append to the activation name"
+            />
+          )}
 
           <Box sx={{ 
             flex: 1,
