@@ -10,13 +10,14 @@ import {
   InputLabel,
   FormControlLabel,
   Switch,
+  Alert,
 } from '@mui/material';
 import { Add } from '@mui/icons-material';
 import { useSlider } from '../../contexts/SliderContext';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useTenant } from '../../contexts/TenantContext';
 import KnowledgeEditor from './KnowledgeEditor';
-import KnowledgeItem from './KnowledgeItem';
+import KnowledgeGroupItem from './KnowledgeGroupItem';
 import { useKnowledgeApi } from '../../services/knowledge-api';
 import { useAgentsApi } from '../../services/agents-api';
 import { useNotification } from '../../contexts/NotificationContext';
@@ -26,76 +27,26 @@ import PageFilters from '../Common/PageFilters';
 import EmptyState from '../Common/EmptyState';
 
 const Knowledge = () => {
-  const [knowledgeItems, setKnowledgeItems] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingItem, setIsLoadingItem] = useState(false);
+  const [knowledgeGroups, setKnowledgeGroups] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
   const { isSysAdmin } = useTenant();
   const knowledgeApi = useKnowledgeApi();
   const agentsApi = useAgentsApi();
-  const [expandedId, setExpandedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAgent, setSelectedAgent] = useState('');
   const { showError, showSuccess, showDetailedError } = useNotification();
   const [agents, setAgents] = useState([]);
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
-  const [activeKnowledge, setActiveKnowledge] = useState(null);
-  const [contentSearchTimeout, setContentSearchTimeout] = useState(null);
-  const [isSearchingContent, setIsSearchingContent] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
   const [showTemplateAgents, setShowTemplateAgents] = useState(false);
 
-  const filteredKnowledgeItems = searchQuery && searchResults.length > 0 && isSearchingContent
-    ? searchResults
-    : knowledgeItems.filter(item => 
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
-      ).filter(item => !selectedAgent || item.agent === selectedAgent);
+  // Filter knowledge groups based on search query
+  const filteredKnowledgeGroups = knowledgeGroups.filter(group => 
+    group.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  // Effect for content search with debounce
-  useEffect(() => {
-    if (searchQuery.length > 2) {
-      if (contentSearchTimeout) {
-        clearTimeout(contentSearchTimeout);
-      }
-      
-      setContentSearchTimeout(setTimeout(async () => {
-        setIsSearchingContent(true);
-        try {
-          // Get all knowledge items with full content if search query is substantial
-          const scope = showTemplateAgents ? 'System' : 'Tenant';
-          const fullKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
-          // Handle case where API client redirects on 403 and returns undefined
-          if (fullKnowledgeItems !== undefined) {
-            const results = fullKnowledgeItems.filter(item => 
-              item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-              (item.content && item.content.toLowerCase().includes(searchQuery.toLowerCase()))
-            ).filter(item => !selectedAgent || item.agent === selectedAgent);
-            
-            setSearchResults(results);
-          }
-        } catch (error) {
-          console.error('Error searching knowledge content:', error);
-        } finally {
-          setIsSearchingContent(false);
-        }
-      }, 500));
-    } else {
-      setSearchResults([]);
-      setIsSearchingContent(false);
-      if (contentSearchTimeout) {
-        clearTimeout(contentSearchTimeout);
-      }
-    }
-
-    return () => {
-      if (contentSearchTimeout) {
-        clearTimeout(contentSearchTimeout);
-      }
-    };
-  }, [searchQuery, selectedAgent, knowledgeApi, contentSearchTimeout, showTemplateAgents]);
-
+  // Fetch agents on mount and when scope changes
   useEffect(() => {
     const fetchAgents = async () => {
       setIsLoadingAgents(true);
@@ -117,21 +68,29 @@ const Knowledge = () => {
     fetchAgents();
   }, [agentsApi, showDetailedError, showTemplateAgents]);
 
+  // Fetch knowledge when agent is selected
   useEffect(() => {
     const fetchKnowledge = async () => {
+      if (!selectedAgent) {
+        setKnowledgeGroups([]);
+        return;
+      }
+
+      setIsLoading(true);
       setLoading(true);
       try {
         const scope = showTemplateAgents ? 'System' : 'Tenant';
-        const data = await knowledgeApi.getLatestKnowledge(scope);
+        const data = await knowledgeApi.getLatestKnowledge(scope, selectedAgent);
         // Handle case where API client redirects on 403 and returns undefined
-        if (data !== undefined) {
-          // Sort knowledge by createdAt in descending order
-          const sortedData = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setKnowledgeItems(sortedData);
+        if (data !== undefined && data.groups) {
+          setKnowledgeGroups(data.groups);
+        } else {
+          setKnowledgeGroups([]);
         }
       } catch (error) {
         console.error('Failed to fetch knowledge:', error);
         await handleApiError(error, 'Failed to fetch knowledge items', showDetailedError);
+        setKnowledgeGroups([]);
       } finally {
         setIsLoading(false);
         setLoading(false);
@@ -139,44 +98,42 @@ const Knowledge = () => {
     };
 
     fetchKnowledge();
-  }, [knowledgeApi, showDetailedError, setLoading, showTemplateAgents]);
+  }, [knowledgeApi, showDetailedError, setLoading, selectedAgent, showTemplateAgents]);
 
-  const fetchKnowledgeById = async (id) => {
-    setIsLoadingItem(true);
+  const refreshKnowledge = async () => {
+    if (!selectedAgent) return;
+    
+    setLoading(true);
     try {
-      const data = await knowledgeApi.getKnowledge(id);
-      // Handle case where API client redirects on 403 and returns undefined
-      if (data !== undefined) {
-        setActiveKnowledge(data);
-        return data;
+      const scope = showTemplateAgents ? 'System' : 'Tenant';
+      const data = await knowledgeApi.getLatestKnowledge(scope, selectedAgent);
+      if (data !== undefined && data.groups) {
+        setKnowledgeGroups(data.groups);
       }
-      return null;
     } catch (error) {
-      console.error('Failed to fetch knowledge by ID:', error);
-      await handleApiError(error, 'Failed to load knowledge details', showDetailedError);
-      return null;
+      console.error('Failed to refresh knowledge:', error);
+      await handleApiError(error, 'Failed to refresh knowledge', showError);
     } finally {
-      setIsLoadingItem(false);
+      setLoading(false);
     }
   };
 
   const handleAdd = () => {
+    if (!selectedAgent) {
+      showError('Please select an agent first');
+      return;
+    }
+
     openSlider(
       <KnowledgeEditor 
         mode="add"
         selectedAgent={selectedAgent}
+        isSystemScoped={showTemplateAgents}
         onSave={async (newKnowledge) => {
           setLoading(true);
           try {
             await knowledgeApi.createKnowledge(newKnowledge);
-            // Fetch fresh data after creating
-            const scope = showTemplateAgents ? 'System' : 'Tenant';
-            const updatedKnowledge = await knowledgeApi.getLatestKnowledge(scope);
-            // Handle case where API client redirects on 403 and returns undefined
-            if (updatedKnowledge !== undefined) {
-              const sortedKnowledge = updatedKnowledge.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-              setKnowledgeItems(sortedKnowledge);
-            }
+            await refreshKnowledge();
             closeSlider();
             showSuccess('Knowledge created successfully');
           } catch (error) {
@@ -196,14 +153,7 @@ const Knowledge = () => {
     setLoading(true);
     try {
       await knowledgeApi.createKnowledge(updatedKnowledge);
-      // Fetch fresh data after updating
-      const scope = showTemplateAgents ? 'System' : 'Tenant';
-      const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
-      // Handle case where API client redirects on 403 and returns undefined
-      if (updatedKnowledgeItems !== undefined) {
-        const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setKnowledgeItems(sortedKnowledgeItems);
-      }
+      await refreshKnowledge();
       closeSlider();
       showSuccess('Knowledge updated successfully');
     } catch (error) {
@@ -214,71 +164,23 @@ const Knowledge = () => {
     }
   };
 
-  const handleDeleteAllKnowledge = async (knowledge) => {
+  const handleDeleteKnowledge = async (knowledge) => {
     setLoading(true);
     try {
-      const success = await knowledgeApi.deleteAllVersions(knowledge.name, knowledge.agent);
+      const success = await knowledgeApi.deleteKnowledge(knowledge.id);
       if (success) {
-        // Fetch fresh data after deletion
-        const scope = showTemplateAgents ? 'System' : 'Tenant';
-        const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
-        // Handle case where API client redirects on 403 and returns undefined
-        if (updatedKnowledgeItems !== undefined) {
-          const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setKnowledgeItems(sortedKnowledgeItems);
-        }
-        closeSlider();
-        showSuccess('All versions deleted successfully');
+        await refreshKnowledge();
+        showSuccess('Knowledge deleted successfully');
       }
     } catch (error) {
-      console.error('Failed to delete knowledge versions:', error);
-      let errorMessage = 'Failed to delete knowledge versions';
+      console.error('Failed to delete knowledge:', error);
+      let errorMessage = 'Failed to delete knowledge';
       if (error.response && error.response.status === 404) {
         errorMessage = 'Knowledge not found or already deleted';
       }
       await handleApiError(error, errorMessage, showError);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDeleteOneKnowledge = async (knowledge) => {
-    setLoading(true);
-    try {
-      const success = await knowledgeApi.deleteKnowledge(knowledge.id);
-      if (success) {
-        // Fetch fresh data after creating
-        const scope = showTemplateAgents ? 'System' : 'Tenant';
-        const updatedKnowledgeItems = await knowledgeApi.getLatestKnowledge(scope);
-        // Handle case where API client redirects on 403 and returns undefined
-        if (updatedKnowledgeItems !== undefined) {
-          const sortedKnowledgeItems = updatedKnowledgeItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-          setKnowledgeItems(sortedKnowledgeItems);
-        }
-        closeSlider();
-        showSuccess('Version deleted successfully');
-      }
-    } catch (error) {
-      console.error('Failed to delete knowledge version:', error);
-      let errorMessage = 'Failed to delete version';
-      if (error.response && error.response.status === 404) {
-        errorMessage = 'Version not found or already deleted';
-      }
-      await handleApiError(error, errorMessage, showError);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVersionToggle = async (knowledgeId) => {
-    if (expandedId === knowledgeId) {
-      // Collapse if already expanded
-      setExpandedId(null);
-      setActiveKnowledge(null);
-    } else {
-      // Expand and fetch fresh data
-      setExpandedId(knowledgeId);
-      await fetchKnowledgeById(knowledgeId);
     }
   };
 
@@ -321,12 +223,12 @@ const Knowledge = () => {
               }}
             />
           )}
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="agent-select-label">Agent</InputLabel>
+          <FormControl size="small" sx={{ minWidth: 200 }} required>
+            <InputLabel id="agent-select-label">Select Agent *</InputLabel>
             <Select
               labelId="agent-select-label"
               value={selectedAgent}
-              label="Agent"
+              label="Select Agent *"
               onChange={(e) => setSelectedAgent(e.target.value)}
               disabled={isLoadingAgents}
               sx={{
@@ -337,7 +239,7 @@ const Knowledge = () => {
                   fontSize: '0.875rem',
                 },
                 '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: 'var(--border-color)'
+                  borderColor: selectedAgent ? 'var(--border-color)' : 'var(--warning)'
                 },
                 '&:hover .MuiOutlinedInput-notchedOutline': {
                   borderColor: 'var(--border-color-hover)'
@@ -349,12 +251,12 @@ const Knowledge = () => {
               }}
             >
               <MenuItem value="">
-                <em>All Agents</em>
+                <em>Select an agent...</em>
               </MenuItem>
               {isLoadingAgents ? (
                 <MenuItem disabled><em>Loading...</em></MenuItem>
               ) : agents.length === 0 ? (
-                <MenuItem disabled><em>No agents</em></MenuItem>
+                <MenuItem disabled><em>No agents available</em></MenuItem>
               ) : (
                 agents.map(agent => (
                   <MenuItem key={agent} value={agent}>
@@ -368,6 +270,7 @@ const Knowledge = () => {
               color="primary" 
               size="medium" 
               onClick={handleAdd}
+              disabled={!selectedAgent}
               sx={{ 
                 zIndex: 1,
                 bgcolor: 'var(--primary)',
@@ -380,6 +283,11 @@ const Knowledge = () => {
                 '&:active': {
                   transform: 'scale(0.98)',
                 },
+                '&.Mui-disabled': {
+                  bgcolor: 'var(--bg-disabled)',
+                  color: 'var(--text-disabled)',
+                  boxShadow: 'none'
+                },
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
@@ -390,87 +298,63 @@ const Knowledge = () => {
     />
   );
 
+  const totalKnowledgeCount = filteredKnowledgeGroups.reduce((acc, group) => {
+    let count = 0;
+    if (group.system_scoped) count++;
+    if (group.tenant_default) count++;
+    count += group.activations?.length || 0;
+    return acc + count;
+  }, 0);
+
   return (
     <PageLayout
       title="Knowledge Base"
-      subtitle={`${filteredKnowledgeItems.length} knowledge item${filteredKnowledgeItems.length !== 1 ? 's' : ''}`}
+      subtitle={selectedAgent 
+        ? `${filteredKnowledgeGroups.length} knowledge group${filteredKnowledgeGroups.length !== 1 ? 's' : ''} (${totalKnowledgeCount} total items) for ${selectedAgent}`
+        : 'Select an agent to view knowledge'}
       headerActions={headerActions}
     >
-        
-        {isLoading ? (
-          <Box sx={{ p: 6, textAlign: 'center' }}>
-            <CircularProgress />
-          </Box>
-        ) : filteredKnowledgeItems.length > 0 ? (
-          <div className={`knowledge-grid ${expandedId ? 'has-expanded' : ''}`}>
-            {filteredKnowledgeItems
-              .map((knowledge) => (
-                <div 
-                  key={`knowledge-item-${knowledge.id}`}
-                  className={knowledge.id === expandedId ? 'knowledge-item-expanded' : ''}
-                  style={{ 
-                    transition: 'all 0.2s ease-out',
-                    transformOrigin: 'top center',
-                    position: 'relative'
-                  }}
-                >
-                  {isLoadingItem && knowledge.id === expandedId && (
-                    <Box 
-                      sx={{ 
-                        position: 'absolute', 
-                        top: '50%', 
-                        left: '50%', 
-                        transform: 'translate(-50%, -50%)',
-                        zIndex: 2,
-                        bgcolor: 'rgba(255,255,255,0.7)',
-                        borderRadius: 'var(--radius-md)',
-                        p: 2
-                      }}
-                    >
-                      <CircularProgress size={24} />
-                    </Box>
-                  )}
-                  <KnowledgeItem
-                    knowledge={knowledge.id === expandedId && activeKnowledge ? activeKnowledge : knowledge}
-                    onUpdateKnowledge={handleUpdateKnowledge}
-                    onDeleteAllKnowledge={handleDeleteAllKnowledge}
-                    onDeleteOneKnowledge={handleDeleteOneKnowledge}
-                    isExpanded={expandedId === knowledge.id}
-                    onToggleExpand={() => handleVersionToggle(knowledge.id)}
-                    permissionLevel={knowledge.permissionLevel}
-                  />
-                </div>
-              ))}
-          </div>
-        ) : (
-          <>
-            {isSearchingContent ? (
-              <Box
-                sx={{
-                  p: 6,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
-                  color: 'var(--text-secondary)'
-                }}
-              >
-                <CircularProgress size={24} sx={{ mb: 2 }} />
-                <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 500 }}>
-                  Searching knowledge content...
-                </Typography>
-              </Box>
-            ) : (
-              <EmptyState
-                title={searchQuery ? 'No Matching Knowledge Found' : 'No Knowledge Yet'}
-                description={searchQuery 
-                  ? 'Try adjusting your search terms or clear the search to see all knowledge.'
-                  : 'Create your first knowledge item by clicking the + button above. Knowledge helps customize the AI\'s behavior and responses.'}
-                context={searchQuery ? 'search' : 'knowledge'}
-              />
-            )}
-          </>
-        )}
+      {!selectedAgent ? (
+        <Box sx={{ mt: 4 }}>
+          <Alert severity="info" sx={{ maxWidth: 600, mx: 'auto' }}>
+            <Typography variant="body1" sx={{ fontWeight: 500, mb: 1 }}>
+              Select an Agent to Get Started
+            </Typography>
+            <Typography variant="body2">
+              Please select an agent from the dropdown above to view and manage knowledge items for that agent.
+              Knowledge items are organized into three categories: System Templates, Tenant Defaults, and Activations.
+            </Typography>
+          </Alert>
+        </Box>
+      ) : isLoading ? (
+        <Box sx={{ p: 6, textAlign: 'center' }}>
+          <CircularProgress />
+          <Typography sx={{ mt: 2, color: 'var(--text-secondary)' }}>
+            Loading knowledge for {selectedAgent}...
+          </Typography>
+        </Box>
+      ) : filteredKnowledgeGroups.length > 0 ? (
+        <Box sx={{ mt: 2 }}>
+          {filteredKnowledgeGroups.map((group) => (
+            <KnowledgeGroupItem
+              key={group.name}
+              group={group}
+              onUpdateKnowledge={handleUpdateKnowledge}
+              onDeleteKnowledge={handleDeleteKnowledge}
+              isSystemScoped={showTemplateAgents}
+              selectedAgent={selectedAgent}
+            />
+          ))}
+        </Box>
+      ) : (
+        <EmptyState
+          title={searchQuery ? 'No Matching Knowledge Found' : 'No Knowledge Yet'}
+          description={searchQuery 
+            ? 'Try adjusting your search terms or clear the search to see all knowledge.'
+            : `No knowledge items found for ${selectedAgent}. Create your first knowledge item by clicking the + button above.`}
+          context={searchQuery ? 'search' : 'knowledge'}
+        />
+      )}
     </PageLayout>
   );
 };

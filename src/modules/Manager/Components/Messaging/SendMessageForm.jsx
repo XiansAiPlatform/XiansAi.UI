@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Box,
     CircularProgress,
@@ -41,12 +41,12 @@ const validateMetadata = (metadataString) => {
  * @param {Object} formData - Form data to validate
  * @returns {Object} Validation result
  */
-const validateRequiredFields = ({ participantId, workflowType, workflowId, toSingletonInstance }) => {
+const validateRequiredFields = ({ participantId, workflowType, workflowIdSuffix, toSingletonInstance }) => {
     const missing = [];
     
     if (!participantId) missing.push('Participant ID');
     if (!workflowType) missing.push('Workflow Type');
-    if (!toSingletonInstance && !workflowId) missing.push('Workflow ID');
+    if (!toSingletonInstance && !workflowIdSuffix) missing.push('WorkflowId Suffix');
     
     return {
         isValid: missing.length === 0,
@@ -62,19 +62,19 @@ const validateRequiredFields = ({ participantId, workflowType, workflowId, toSin
 const prepareMessageData = ({ 
     agentName, 
     workflowType, 
-    workflowId, 
     participantId, 
     content, 
     metadata, 
     messageType, 
     threadId, 
     toSingletonInstance,
-    scope
+    scope,
+    workflowIdSuffix
 }) => {
     const data = {
         agent: agentName,
         workflowType,
-        workflowId: toSingletonInstance ? null : workflowId,
+        workflowId: toSingletonInstance ? null : (workflowIdSuffix || null),
         participantId,
         content,
         metadata,
@@ -102,23 +102,21 @@ const SendMessageForm = ({
     sendMessage
 }) => {
     const [workflowType, setWorkflowType] = useState(initialWorkflowType);
-    const [workflowId, setWorkflowId] = useState(initialWorkflowId);
     const [participantId, setParticipantId] = useState(initialParticipantId);
     const [scope, setScope] = useState(initialScope);
     const [content, setContent] = useState('');
     const [metadata, setMetadata] = useState('');
-    const [showMetadata, setShowMetadata] = useState(false);
-    const [showScope, setShowScope] = useState(false);
+    const [chatContentOnly, setChatContentOnly] = useState(true);
+    const [toDefaultTopic, setToDefaultTopic] = useState(true);
     const [messageType, setMessageType] = useState('Chat');
     const [metadataError, setMetadataError] = useState('');
     const [isMetadataValid, setIsMetadataValid] = useState(true);
     const [toSingletonInstance, setToSingletonInstance] = useState(true);
+    const [workflowIdSuffix, setWorkflowIdSuffix] = useState('');
     
-    // Workflow type and instance data
+    // Workflow type data
     const [allWorkflowTypes, setAllWorkflowTypes] = useState([]);
     const [isLoadingTypes, setIsLoadingTypes] = useState(false);
-    const [workflowInstances, setWorkflowInstances] = useState([]);
-    const [isLoadingInstances, setIsLoadingInstances] = useState(false);
     const [error, setError] = useState(null);
     
     const messagingApi = useMessagingApi();
@@ -135,18 +133,18 @@ const SendMessageForm = ({
         
         // Load persisted metadata from localStorage
         const savedMetadata = localStorage.getItem('sendMessageForm_metadata');
-        const savedShowMetadata = localStorage.getItem('sendMessageForm_showMetadata');
+        const savedChatContentOnly = localStorage.getItem('sendMessageForm_chatContentOnly');
         
         if (savedMetadata) {
             setMetadata(savedMetadata);
         }
-        if (savedShowMetadata === 'true') {
-            setShowMetadata(true);
+        if (savedChatContentOnly === 'false') {
+            setChatContentOnly(false);
         }
         
         // Auto-show scope field if initialScope is provided
         if (initialScope) {
-            setShowScope(true);
+            setToDefaultTopic(false);
         }
     }, [initialScope]);
 
@@ -154,7 +152,7 @@ const SendMessageForm = ({
     useEffect(() => {
         setParticipantId(initialParticipantId);
         setWorkflowType(initialWorkflowType);
-        setWorkflowId(initialWorkflowId);
+        setWorkflowIdSuffix(initialWorkflowId);
         setScope(initialScope);
     }, [initialParticipantId, initialWorkflowType, initialWorkflowId, initialScope]);
 
@@ -184,35 +182,6 @@ const SendMessageForm = ({
         fetchWorkflowTypes();
     }, [agentName, agentsApi, showError]);
 
-    // Fetch workflow instances when workflow type changes
-    useEffect(() => {
-        if (!agentName || !workflowType) {
-            setWorkflowInstances([]);
-            if (!initialWorkflowId) {
-                setWorkflowId('');
-            }
-            return;
-        }
-
-        const fetchWorkflowInstances = async () => {
-            setIsLoadingInstances(true);
-            setError(null);
-            try {
-                const response = await agentsApi.getWorkflowInstances(agentName, workflowType);
-                const workflows = response.value || response.data || response || [];
-                setWorkflowInstances(Array.isArray(workflows) ? workflows : []);
-            } catch (err) {
-                const errorMsg = 'Failed to fetch workflow instances.';
-                setError(errorMsg);
-                await handleApiError(err, errorMsg, showError);
-                setWorkflowInstances([]);
-            } finally {
-                setIsLoadingInstances(false);
-            }
-        };
-        
-        fetchWorkflowInstances();
-    }, [agentName, workflowType, agentsApi, showError, initialWorkflowId]);
 
     // Validate metadata when it changes
     useEffect(() => {
@@ -226,22 +195,22 @@ const SendMessageForm = ({
         localStorage.setItem('sendMessageForm_metadata', metadata);
     }, [metadata]);
 
-    // Save showMetadata state to localStorage when it changes
+    // Save chatContentOnly state to localStorage when it changes
     useEffect(() => {
-        localStorage.setItem('sendMessageForm_showMetadata', showMetadata.toString());
-    }, [showMetadata]);
+        localStorage.setItem('sendMessageForm_chatContentOnly', chatContentOnly.toString());
+    }, [chatContentOnly]);
 
     // When switching to Data type, show metadata section by default
     useEffect(() => {
-        if (messageType === 'Data' && !showMetadata) {
-            setShowMetadata(true);
+        if (messageType === 'Data' && chatContentOnly) {
+            setChatContentOnly(false);
         }
-    }, [messageType, showMetadata]);
+    }, [messageType, chatContentOnly]);
 
-    // Clear workflow instance when toSingletonInstance is checked
+    // Clear workflow ID suffix when toSingletonInstance is checked
     useEffect(() => {
         if (toSingletonInstance) {
-            setWorkflowId('');
+            setWorkflowIdSuffix('');
         }
     }, [toSingletonInstance]);
 
@@ -251,47 +220,11 @@ const SendMessageForm = ({
             event.stopPropagation();
         }
         setWorkflowType(newValue || '');
-        setWorkflowId('');
-    };
-
-    const handleWorkflowIdChange = (event, newValue) => {
-        // Stop event propagation to prevent the slider from closing
-        if (event) {
-            event.stopPropagation();
-        }
-        setWorkflowId(newValue ? newValue.workflowId : '');
+        setWorkflowIdSuffix('');
     };
 
     const handleMetadataChange = (e) => {
         setMetadata(e.target.value);
-    };
-
-    const selectedWorkflowObject = useMemo(() =>
-        Array.isArray(workflowInstances)
-            ? workflowInstances.find(wf => wf.workflowId === workflowId) || null
-            : null,
-        [workflowInstances, workflowId]
-    );
-
-    const filterWorkflowIds = (options, { inputValue }) => {
-        if (!inputValue) return options;
-        
-        const lowercaseInput = inputValue.toLowerCase();
-        return options.filter(option => {
-            if (option.workflowId && option.workflowId.toLowerCase().includes(lowercaseInput))
-                return true;
-                
-            if (option.startTime) {
-                const dateStr = new Date(option.startTime).toLocaleString().toLowerCase();
-                if (dateStr.includes(lowercaseInput))
-                    return true;
-            }
-            
-            return (
-                (option.agent && option.agent.toLowerCase().includes(lowercaseInput)) ||
-                (option.workflowType && option.workflowType.toLowerCase().includes(lowercaseInput))
-            );
-        });
     };
 
     /**
@@ -302,7 +235,7 @@ const SendMessageForm = ({
         const fieldValidation = validateRequiredFields({ 
             participantId, 
             workflowType, 
-            workflowId, 
+            workflowIdSuffix, 
             toSingletonInstance 
         });
         
@@ -328,14 +261,14 @@ const SendMessageForm = ({
             const messageData = prepareMessageData({
                 agentName,
                 workflowType,
-                workflowId,
                 participantId,
                 content,
                 metadata: metadataValidation.data,
                 messageType,
                 threadId,
                 toSingletonInstance,
-                scope
+                scope,
+                workflowIdSuffix
             });
             
             response = await messagingApi.sendMessage(messageData);
@@ -352,7 +285,7 @@ const SendMessageForm = ({
                     id: response,
                     participantId,
                     workflowType,
-                    workflowId: toSingletonInstance ? null : workflowId,
+                    workflowId: toSingletonInstance ? null : (workflowIdSuffix || null),
                 };
                 console.log('[SendMessageForm] Calling onMessageSent');
                 console.log('[SendMessageForm] - threadId:', threadId);
@@ -399,8 +332,8 @@ const SendMessageForm = ({
         loading ||
         !participantId ||
         !workflowType ||
-        (!toSingletonInstance && !workflowId) ||
-        (showMetadata && metadata && !isMetadataValid)
+        (!toSingletonInstance && !workflowIdSuffix) ||
+        (!chatContentOnly && metadata && !isMetadataValid)
     );
 
     return (
@@ -499,8 +432,13 @@ const SendMessageForm = ({
                 }}
             />
             
-            <Box sx={{ mt: 1, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ mt: 2, mb: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    minWidth: '200px',
+                    pt: 2
+                }}>
                     <input
                         type="checkbox"
                         checked={toSingletonInstance}
@@ -518,102 +456,21 @@ const SendMessageForm = ({
                         To Singleton Instance
                     </Typography>
                 </Box>
+                
+                {!toSingletonInstance && (
+                    <TextField
+                        label="WorkflowId Suffix (idPostfix)"
+                        value={workflowIdSuffix}
+                        onChange={(e) => setWorkflowIdSuffix(e.target.value)}
+                        fullWidth
+                        sx={{ flex: 1 }}
+                        helperText="Suffix for the workflow ID (e.g., 'user-123')"
+                        disabled={loading}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="Enter workflow ID suffix..."
+                    />
+                )}
             </Box>
-            
-            {!toSingletonInstance && (
-                <Autocomplete
-                    id="workflow-id-select"
-                    options={Array.isArray(workflowInstances) ? workflowInstances : []}
-                    value={selectedWorkflowObject}
-                    onChange={handleWorkflowIdChange}
-                    getOptionLabel={(option) => option?.workflowId || ''}
-                    filterOptions={filterWorkflowIds}
-                    disablePortal
-                    renderOption={(props, option) => {
-                        const { key, ...otherProps } = props;
-                        return (
-                            <li key={key} {...otherProps} style={{ padding: '8px 16px' }}>
-                                <Box sx={{ 
-                                    display: 'flex', 
-                                    flexDirection: 'column', 
-                                    width: '100%',
-                                    borderLeft: '4px solid',
-                                    borderColor: 'primary.main',
-                                    pl: 1,
-                                    py: 0.5
-                                }}>
-                                    <Typography variant="subtitle1" fontWeight="bold">
-                                        {option.workflowId || 'Unnamed Agent'}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        {option.agent || 'Unknown Type'} • {option.workflowType || 'N/A'}
-                                    </Typography>
-                                    <Box sx={{ 
-                                        display: 'flex', 
-                                        justifyContent: 'space-between', 
-                                        mt: 0.5,
-                                        alignItems: 'center'
-                                    }}>
-                                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <Box component="span" sx={{ 
-                                                width: 8, 
-                                                height: 8, 
-                                                borderRadius: '50%', 
-                                                bgcolor: 'success.main',
-                                                display: 'inline-block',
-                                                mr: 0.5
-                                            }}/>
-                                            Started: {option.startTime ? new Date(option.startTime).toLocaleString() : 'Unknown'}
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ 
-                                            color: 'grey.700',
-                                            bgcolor: 'grey.100',
-                                            px: 1,
-                                            py: 0.5,
-                                            borderRadius: 1,
-                                            fontFamily: 'monospace'
-                                        }}>
-                                            {option.runId?.substring(0, 8) || 'N/A'}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </li>
-                        );
-                    }}
-                    renderInput={(params) => (
-                        <TextField 
-                            {...params} 
-                            label="Running Workflow Instance" 
-                            variant="outlined"
-                            margin="normal"
-                            required
-                            placeholder="Search by ID or start time..."
-                            InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                    <>
-                                        {isLoadingInstances && <CircularProgress size={20} />}
-                                        {params.InputProps.endAdornment}
-                                    </>
-                                ),
-                                onClick: (e) => e.stopPropagation()
-                            }}
-                        />
-                    )}
-                    componentsProps={{
-                        popper: {
-                            onClick: (e) => e.stopPropagation()
-                        }
-                    }}
-                    disabled={!workflowType || isLoadingInstances}
-                    fullWidth
-                    ListboxProps={{
-                        style: {
-                            maxHeight: '350px'
-                        }
-                    }}
-                />
-            )}
             
             <TextField
                 label="Participant ID"
@@ -627,18 +484,115 @@ const SendMessageForm = ({
                 onClick={(e) => e.stopPropagation()}
             />
             
-            {showScope && (
-                <TextField
-                    label="Topic/Scope (Optional)"
-                    value={scope}
-                    onChange={(e) => setScope(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                    helperText="Assign this message to a topic/scope for organization (leave empty for default)"
-                    disabled={loading}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder="e.g., billing-inquiry, customer-support"
-                />
+            <Box sx={{ mt: 2, mb: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    minWidth: '200px',
+                    pt: 2
+                }}>
+                    <input
+                        type="checkbox"
+                        checked={toDefaultTopic}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            setToDefaultTopic(e.target.checked);
+                            if (e.target.checked) {
+                                setScope('');
+                            }
+                        }}
+                        style={{ 
+                            marginRight: '8px',
+                            transform: 'scale(1.1)',
+                            cursor: 'pointer'
+                        }}
+                    />
+                    <Typography variant="body2" sx={{ ml: 0.5, fontSize: '0.875rem' }}>
+                        To Default Topic
+                    </Typography>
+                </Box>
+                
+                {!toDefaultTopic && (
+                    <TextField
+                        label="Topic/Scope"
+                        value={scope}
+                        onChange={(e) => setScope(e.target.value)}
+                        fullWidth
+                        sx={{ flex: 1 }}
+                        helperText="Assign this message to a topic/scope for organization"
+                        disabled={loading}
+                        onClick={(e) => e.stopPropagation()}
+                        placeholder="e.g., billing-inquiry, customer-support"
+                    />
+                )}
+            </Box>
+            
+            <TextField
+                label="Text"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                fullWidth
+                margin="normal"
+                multiline
+                rows={2}
+                helperText="Message text to be sent"
+                disabled={loading}
+                inputRef={contentInputRef}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => e.stopPropagation()}
+            />
+            
+            <Box sx={{ mt: 2, mb: 2, display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+                <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    minWidth: '200px',
+                    pt: 2
+                }}>
+                    <input
+                        type="checkbox"
+                        checked={chatContentOnly}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            setChatContentOnly(e.target.checked);
+                            if (e.target.checked) {
+                                setMetadata('');
+                            }
+                        }}
+                        style={{ 
+                            marginRight: '8px',
+                            transform: 'scale(1.1)',
+                            cursor: 'pointer'
+                        }}
+                    />
+                    <Typography variant="body2" sx={{ ml: 0.5, fontSize: '0.875rem' }}>
+                        Chat Content Only
+                    </Typography>
+                </Box>
+                
+                {!chatContentOnly && (
+                    <TextField
+                        label="Data (JSON)"
+                        value={metadata}
+                        onChange={handleMetadataChange}
+                        fullWidth
+                        sx={{ flex: 1 }}
+                        multiline
+                        rows={4}
+                        disabled={loading}
+                        InputProps={{ style: { fontFamily: 'monospace' } }}
+                        error={!!metadataError}
+                        helperText={metadataError || "Additional data associated with the message"}
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={handleMetadataKeyDown}
+                    />
+                )}
+            </Box>
+            
+            {error && (
+                <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+                    {error}
+                </Alert>
             )}
             
             <Box sx={{ mt: 1, mb: 2, display: 'flex', alignItems: 'center' }}>
@@ -658,46 +612,6 @@ const SendMessageForm = ({
                 </RadioGroup>
             </Box>
             
-            <TextField
-                label="Text"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                fullWidth
-                margin="normal"
-                multiline
-                rows={2}
-                helperText="Message text to be sent"
-                disabled={loading}
-                inputRef={contentInputRef}
-                onKeyDown={handleKeyDown}
-                onClick={(e) => e.stopPropagation()}
-            />
-            {showMetadata && (
-                <Box sx={{ width: '100%' }}>
-                    <TextField
-                        label="Data (JSON)"
-                        value={metadata}
-                        onChange={handleMetadataChange}
-                        fullWidth
-                        margin="normal"
-                        multiline
-                        rows={4}
-                        disabled={loading}
-                        InputProps={{ style: { fontFamily: 'monospace' } }}
-                        error={!!metadataError}
-                        helperText={metadataError || "Additional data associated with the message (optional)"}
-                        onClick={(e) => e.stopPropagation()}
-                        onKeyDown={handleMetadataKeyDown}
-                    />
-                </Box>
-            )}
-            
-            {error && (
-                <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
-                    {error}
-                </Alert>
-            )}
-            
             <Button
                 variant="contained"
                 onClick={(e) => {
@@ -711,30 +625,6 @@ const SendMessageForm = ({
                 {loading ? <CircularProgress size={24} /> : 'Send Message'}
             </Button>
             
-            <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'center' }}>
-                <Button 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowScope(!showScope);
-                    }} 
-                    color="primary" 
-                    size="small"
-                    sx={{ textTransform: 'none' }}
-                >
-                    {showScope ? 'Hide Topic' : 'Add Topic'}
-                </Button>
-                <Button 
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setShowMetadata(!showMetadata);
-                    }} 
-                    color="primary" 
-                    size="small"
-                    sx={{ textTransform: 'none' }}
-                >
-                    {showMetadata ? 'Hide Data' : 'Add Data'}
-                </Button>
-            </Box>
         </Box>
     );
 };

@@ -38,9 +38,11 @@ export const useKnowledgeApi = () => {
         }
       },
 
-      getLatestKnowledge: async (scope = null) => {
+      getLatestKnowledge: async (scope = null, agent = null) => {
         try {
-          const queryParams = scope ? { scope } : {};
+          const queryParams = {};
+          if (scope) queryParams.scope = scope;
+          if (agent) queryParams.agent = agent;
           return await apiClient.get('/api/client/knowledge/latest/all', queryParams);
         } catch (error) {
           console.error('Error fetching latest knowledge:', error);
