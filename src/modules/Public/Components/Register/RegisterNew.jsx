@@ -636,73 +636,67 @@ export default function RegisterNew() {
         {isAuthenticated && isSuccess && createdTenant && (
           <FormContainer>
             <TitleSection>
-              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  width: '80px', 
-                  height: '80px', 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.3)'
-                }}>
-                  <FiCheck size={40} color="white" />
-                </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <FiCheck size={24} color="#428b83" style={{ marginRight: '8px' }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    color: '#0f172a',
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    letterSpacing: '-0.025em'
+                  }}
+                >
+                  Tenant Created
+                </Typography>
               </Box>
-              <MainTitle sx={{ color: '#10b981', mb: 2 }}>
-                Tenant Created Successfully!
-              </MainTitle>
               <Typography 
                 variant="body1" 
                 sx={{ 
                   color: '#64748b',
-                  fontSize: '1.125rem',
+                  fontSize: '1rem',
                   fontWeight: 400,
-                  lineHeight: 1.6,
+                  lineHeight: 1.5,
                   textAlign: 'center',
                   mb: 3
                 }}
               >
-                Your tenant <strong style={{ color: '#428b83' }}>{createdTenant.name}</strong> has been created successfully.
-                You have been assigned as the tenant administrator. <strong style={{ color: '#f59e0b' }}>Please contact your system administrator to enable the tenant.</strong>
+                Tenant <strong style={{ color: '#428b83' }}>{createdTenant.name}</strong> has been created. 
+                Please <strong style={{ color: '#fbbf24' }}>contact your system administrator</strong> to enable the tenant.
               </Typography>
             </TitleSection>
 
             <Alert 
-              severity="success" 
+              severity="info" 
               sx={{ 
                 mb: 4,
                 borderRadius: '12px',
-                backgroundColor: 'rgba(34, 197, 94, 0.08)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-                color: '#16a34a',
+                backgroundColor: 'rgba(66, 139, 131, 0.05)',
+                border: '1px solid rgba(66, 139, 131, 0.2)',
+                color: '#428b83',
                 backdropFilter: 'blur(10px)',
-                boxShadow: '0 2px 8px rgba(34, 197, 94, 0.1)',
+                boxShadow: '0 2px 8px rgba(66, 139, 131, 0.08)',
                 '& .MuiAlert-icon': {
                   color: 'inherit',
                 },
                 '& .MuiAlert-message': {
-                  fontWeight: 500,
+                  fontWeight: 400,
                 },
               }}
             >
-              <Typography variant="body2" sx={{ mb: 1, color: 'inherit' }}>
+              <Typography variant="body2" sx={{ color: 'inherit' }}>
                 <strong>Tenant ID:</strong> {createdTenant.tenantId}
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#f59e0b', fontWeight: 600 }}>
-                <strong>Please contact your system administrator to enable the tenant.</strong>
               </Typography>
             </Alert>
             
             <ButtonContainer>
               <ActionButton
-                variant="primary"
+                variant="secondary"
                 onClick={() => window.location.href = `/manager/definitions/templates?org=${createdTenant.tenantId}`}
                 startIcon={<FiExternalLink />}
                 sx={{ flex: 1 }}
               >
-                Try Accessing Dashboard
+                Try Dashboard
               </ActionButton>
             </ButtonContainer>
           </FormContainer>
