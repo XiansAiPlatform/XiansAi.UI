@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Box, Typography, Container, TextField, Button, MenuItem, Alert, CircularProgress } from '@mui/material';
+import { Box, Typography, Container, TextField, Button, Alert, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { FiArrowLeft, FiSend, FiCheck, FiExternalLink } from 'react-icons/fi';
 import { useAuth } from '../../../Manager/auth/AuthContext';
@@ -272,31 +272,6 @@ const ButtonContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const NavigationFooter = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: theme.spacing(3),
-  padding: theme.spacing(3),
-  borderTop: '1px solid rgba(229, 231, 235, 0.3)',
-  background: 'rgba(250, 251, 252, 0.95)',
-  backdropFilter: 'blur(20px)',
-  position: 'relative',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.3), transparent)',
-  },
-  [theme.breakpoints.down('sm')]: {
-    gap: theme.spacing(2),
-    padding: theme.spacing(2),
-    flexWrap: 'wrap',
-  },
-}));
 
 const NavLink = styled(Link)(({ theme }) => ({
   color: '#475569',
@@ -328,9 +303,8 @@ export default function RegisterNew() {
 
   const [formData, setFormData] = useState({
     tenantId: '',
-    companyUrl: '',
+    emailDomain: '',
     companyEmail: '',
-    subscription: 'Free',
   });
 
   // Check if user has any tenants
@@ -391,28 +365,24 @@ export default function RegisterNew() {
     return '';
   };
 
-  const validateUrl = (url) => {
-    if (!url) return '';
-    try {
-      new URL(url);
-      return '';
-    } catch {
-      return 'Please enter a valid URL (e.g., https://example.com)';
-    }
+  const validateEmailDomain = (domain) => {
+    if (!domain) return ''; // Optional field, so no error if empty
+    const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.[a-zA-Z]{2,}$/;
+    if (!domainRegex.test(domain)) return 'Please enter a valid domain (e.g., company.com)';
+    return '';
   };
 
   const tenantIdError = validateTenantId(formData.tenantId);
   const emailError = validateEmail(formData.companyEmail);
-  const urlError = validateUrl(formData.companyUrl);
+  const emailDomainError = validateEmailDomain(formData.emailDomain);
 
   // Check if form is valid
   const isFormValid = 
     formData.tenantId.trim() && 
-    formData.companyUrl.trim() && 
     formData.companyEmail.trim() && 
     !tenantIdError && 
     !emailError && 
-    !urlError;
+    !emailDomainError;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -437,8 +407,9 @@ export default function RegisterNew() {
       const tenantData = {
         tenantId: formData.tenantId.trim(),
         name: formData.tenantId.trim(),
-        domain: formData.companyUrl.trim(),
-        description: `${formData.tenantId.trim()} - ${formData.subscription} plan`
+        domain: formData.emailDomain.trim() || '',
+        description: formData.tenantId.trim(),
+        CreatedBy: formData.companyEmail.trim()
       };
 
       // Call the API to create the tenant
@@ -470,6 +441,57 @@ export default function RegisterNew() {
       <MainContent maxWidth="lg">
         {hasNoTenants && isAuthenticated && !isCheckingTenants && <NoTenantsWarningMessage />}
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
+        
+        {isAuthenticated && (
+          <Box sx={{ 
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 3,
+            mb: 4,
+            padding: 2,
+            borderRadius: '12px',
+            background: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(229, 231, 235, 0.6)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+            '@media (max-width: 600px)': {
+              gap: 2,
+              padding: 1.5,
+              flexWrap: 'wrap',
+            },
+          }}>
+            <NavLink 
+              to="/manager"
+              sx={{
+                background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
+                color: 'white !important',
+                fontWeight: 600,
+                padding: '8px 20px !important',
+                borderRadius: '10px',
+                boxShadow: '0 4px 12px rgba(66, 139, 131, 0.25)',
+                border: 'none',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 20px rgba(66, 139, 131, 0.35)',
+                  backgroundColor: 'transparent !important',
+                  color: 'white !important',
+                },
+              }}
+            >
+              Dashboard
+            </NavLink>
+            <Box sx={{ 
+              width: '1px', 
+              height: '16px', 
+              backgroundColor: 'rgba(229, 231, 235, 0.6)',
+              borderRadius: '0.5px'
+            }} />
+            <NavLink to="/manager/logout">
+              Sign Out
+            </NavLink>
+          </Box>
+        )}
         
         {isAuthenticated && !isSuccess && (
           <FormContainer>
@@ -530,16 +552,15 @@ export default function RegisterNew() {
                   />
                   <StyledTextField
                     fullWidth
-                    label="Company URL"
-                    name="companyUrl"
-                    type="url"
-                    value={formData.companyUrl}
+                    label="Email Domain"
+                    name="emailDomain"
+                    type="text"
+                    value={formData.emailDomain}
                     onChange={handleChange}
-                    placeholder="https://mycompany.com"
-                    required
+                    placeholder="company.com"
                     variant="outlined"
-                    helperText={urlError || "Enter your company's website URL"}
-                    error={!!urlError}
+                    helperText={emailDomainError || "Enter your company's email domain (optional)"}
+                    error={!!emailDomainError}
                     disabled={isSubmitting}
                   />
                 </Box>
@@ -558,21 +579,34 @@ export default function RegisterNew() {
                     error={!!emailError}
                     disabled={isSubmitting}
                   />
-                  <StyledTextField
-                    fullWidth
-                    select
-                    label="Subscription Plan"
-                    name="subscription"
-                    value={formData.subscription}
-                    onChange={handleChange}
-                    variant="outlined"
-                    disabled={isSubmitting}
-                  >
-                    <MenuItem value="Free">Free - Limited Agent Runs</MenuItem>
-
-                  </StyledTextField>
                 </Box>
               </FormGrid>
+              
+              {formData.emailDomain.trim() && (
+                <Alert 
+                  severity="warning" 
+                  sx={{ 
+                    mt: 3,
+                    mb: 2,
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                    color: '#d97706',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.1)',
+                    '& .MuiAlert-icon': {
+                      color: 'inherit',
+                    },
+                    '& .MuiAlert-message': {
+                      fontWeight: 500,
+                      fontSize: '0.875rem',
+                      lineHeight: 1.5,
+                    },
+                  }}
+                >
+                  Adding an email domain will allow End Users with this email domain to gain access to the 'Agent Studio' automatically. If you want explicit access control keep this empty.
+                </Alert>
+              )}
               
               <ButtonContainer>
                 <ActionButton
@@ -602,104 +636,73 @@ export default function RegisterNew() {
         {isAuthenticated && isSuccess && createdTenant && (
           <FormContainer>
             <TitleSection>
-              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  width: '80px', 
-                  height: '80px', 
-                  borderRadius: '50%', 
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                  boxShadow: '0 10px 30px rgba(16, 185, 129, 0.3)'
-                }}>
-                  <FiCheck size={40} color="white" />
-                </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <FiCheck size={24} color="#428b83" style={{ marginRight: '8px' }} />
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    color: '#0f172a',
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    letterSpacing: '-0.025em'
+                  }}
+                >
+                  Tenant Created
+                </Typography>
               </Box>
-              <MainTitle sx={{ color: '#10b981', mb: 2 }}>
-                Tenant Created Successfully!
-              </MainTitle>
               <Typography 
                 variant="body1" 
                 sx={{ 
                   color: '#64748b',
-                  fontSize: '1.125rem',
+                  fontSize: '1rem',
                   fontWeight: 400,
-                  lineHeight: 1.6,
+                  lineHeight: 1.5,
                   textAlign: 'center',
                   mb: 3
                 }}
               >
-                Your tenant <strong style={{ color: '#428b83' }}>{createdTenant.name}</strong> has been created successfully.
-                You have been assigned as the tenant administrator. <strong style={{ color: '#f59e0b' }}>Please contact your system administrator to enable the tenant.</strong>
+                Tenant <strong style={{ color: '#428b83' }}>{createdTenant.name}</strong> has been created. 
+                Please <strong style={{ color: '#fbbf24' }}>contact your system administrator</strong> to enable the tenant.
               </Typography>
             </TitleSection>
 
             <Alert 
-              severity="success" 
+              severity="info" 
               sx={{ 
                 mb: 4,
                 borderRadius: '12px',
-                backgroundColor: 'rgba(34, 197, 94, 0.08)',
-                border: '1px solid rgba(34, 197, 94, 0.2)',
-                color: '#16a34a',
+                backgroundColor: 'rgba(66, 139, 131, 0.05)',
+                border: '1px solid rgba(66, 139, 131, 0.2)',
+                color: '#428b83',
                 backdropFilter: 'blur(10px)',
-                boxShadow: '0 2px 8px rgba(34, 197, 94, 0.1)',
+                boxShadow: '0 2px 8px rgba(66, 139, 131, 0.08)',
                 '& .MuiAlert-icon': {
                   color: 'inherit',
                 },
                 '& .MuiAlert-message': {
-                  fontWeight: 500,
+                  fontWeight: 400,
                 },
               }}
             >
-              <Typography variant="body2" sx={{ mb: 1, color: 'inherit' }}>
+              <Typography variant="body2" sx={{ color: 'inherit' }}>
                 <strong>Tenant ID:</strong> {createdTenant.tenantId}
-              </Typography>
-              <Typography variant="body2" sx={{ color: '#f59e0b', fontWeight: 600 }}>
-                <strong>Please contact your system administrator to enable the tenant.</strong>
               </Typography>
             </Alert>
             
             <ButtonContainer>
               <ActionButton
-                variant="primary"
+                variant="secondary"
                 onClick={() => window.location.href = `/manager/definitions/templates?org=${createdTenant.tenantId}`}
                 startIcon={<FiExternalLink />}
                 sx={{ flex: 1 }}
               >
-                Try Accessing Dashboard
+                Try Dashboard
               </ActionButton>
             </ButtonContainer>
           </FormContainer>
         )}
       </MainContent>
       
-      {isAuthenticated && (
-        <NavigationFooter>
-          <NavLink to="/">
-            Home
-          </NavLink>
-          <Box sx={{ 
-            width: '1px', 
-            height: '16px', 
-            backgroundColor: 'rgba(229, 231, 235, 0.6)',
-            borderRadius: '0.5px'
-          }} />
-          <NavLink to="/manager">
-            Dashboard
-          </NavLink>
-          <Box sx={{ 
-            width: '1px', 
-            height: '16px', 
-            backgroundColor: 'rgba(229, 231, 235, 0.6)',
-            borderRadius: '0.5px'
-          }} />
-          <NavLink to="/manager/logout">
-            Sign Out
-          </NavLink>
-        </NavigationFooter>
-      )}
       
       <RegisterFooter />
     </PageContainer>

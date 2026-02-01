@@ -33,7 +33,8 @@ export const useRegistrationApi = () => {
               TenantId: tenantData.tenantId,
               Name: tenantData.name,
               Domain: tenantData.domain,
-              Description: tenantData.description
+              Description: tenantData.description,
+              CreatedBy: tenantData.CreatedBy
             },
             {
               headers: {

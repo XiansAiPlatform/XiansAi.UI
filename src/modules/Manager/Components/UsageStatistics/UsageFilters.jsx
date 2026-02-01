@@ -51,8 +51,11 @@ const UsageFilters = ({
             </Typography>
             <FormControl fullWidth size="small">
               <Select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
+                value={selectedUser || 'all'}
+                onChange={(e) => {
+                  console.log('User selection changed from', selectedUser, 'to', e.target.value);
+                  setSelectedUser(e.target.value);
+                }}
                 sx={{
                   '& .MuiOutlinedInput-notchedOutline': {
                     borderColor: 'var(--border-color)',
@@ -60,7 +63,7 @@ const UsageFilters = ({
                 }}
               >
                 <MenuItem value="all">All Users</MenuItem>
-                {usersData.map((user) => (
+                {usersData && usersData.length > 0 && usersData.map((user) => (
                   <MenuItem key={user.userId} value={user.userId}>
                     {user.userName || user.userId}
                   </MenuItem>
@@ -77,7 +80,7 @@ const UsageFilters = ({
           </Typography>
           <FormControl fullWidth size="small">
             <Select
-              value={selectedAgent}
+              value={selectedAgent || ''}
               onChange={(e) => setSelectedAgent(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-notchedOutline': {
@@ -127,7 +130,7 @@ const UsageFilters = ({
           </Typography>
           <FormControl fullWidth size="small">
             <Select
-              value={dateRange}
+              value={dateRange || ''}
               onChange={(e) => setDateRange(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-notchedOutline': {
@@ -149,7 +152,7 @@ const UsageFilters = ({
           </Typography>
           <FormControl fullWidth size="small">
             <Select
-              value={groupBy}
+              value={groupBy || ''}
               onChange={(e) => setGroupBy(e.target.value)}
               sx={{
                 '& .MuiOutlinedInput-notchedOutline': {

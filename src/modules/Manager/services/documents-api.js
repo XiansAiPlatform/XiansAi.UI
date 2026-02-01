@@ -29,11 +29,12 @@ export const useDocumentsApi = () => {
        * @param {string} type - Document type
        * @param {number} skip - Number of records to skip (default: 0)
        * @param {number} limit - Maximum number of records to return (default: 50)
+       * @param {Object} additionalParams - Additional query parameters (optional)
        * @returns {Promise<Array>} Array of documents
        */
-      getDocumentsByAgentAndType: async (agentId, type, skip = 0, limit = 50) => {
+      getDocumentsByAgentAndType: async (agentId, type, skip = 0, limit = 50, additionalParams = {}) => {
         try {
-          const queryParams = { skip, limit };
+          const queryParams = { skip, limit, ...additionalParams };
           return await apiClient.get(`/api/client/documents/agents/${agentId}/types/${type}`, queryParams);
         } catch (error) {
           console.error(`Failed to fetch documents for agent ${agentId} and type ${type}:`, error);

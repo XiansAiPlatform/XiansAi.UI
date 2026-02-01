@@ -141,9 +141,9 @@ const UserBreakdownTable = ({ data }) => {
           </TableHead>
 
           <TableBody>
-            {sortedData.map((user) => (
+            {sortedData.map((user, index) => (
               <TableRow
-                key={user.userId}
+                key={user.userId || `user-${index}`}
                 hover
                 sx={{
                   '&:hover': {
@@ -197,7 +197,7 @@ const UserBreakdownTable = ({ data }) => {
             ))}
 
             {/* Total Row */}
-            <TableRow sx={{ backgroundColor: 'var(--bg-secondary)' }}>
+            <TableRow key="total-row" sx={{ backgroundColor: 'var(--bg-secondary)' }}>
               <TableCell>
                 <Typography variant="body2" fontWeight="bold">
                   TOTAL

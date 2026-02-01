@@ -94,9 +94,14 @@ const UsageStatistics = () => {
           setUsersData(result.users || []);
         } catch (err) {
           console.error('Failed to fetch users:', err);
+          setUsersData([]);
         }
       };
       fetchUsers();
+    } else {
+      // Reset user selection for non-admin users
+      setSelectedUser('all');
+      setUsersData([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
@@ -141,6 +146,7 @@ const UsageStatistics = () => {
         // Add user filter for admins
         if (isAdmin && selectedUser !== 'all') {
           params.userId = selectedUser;
+          console.log('Adding userId to params:', selectedUser);
         }
 
         // Add agent filter (trim to handle any whitespace)
@@ -148,6 +154,8 @@ const UsageStatistics = () => {
           params.agentName = selectedAgent.trim();
         }
 
+        console.log('Fetching statistics with params:', params);
+        console.log('Current selectedUser:', selectedUser);
         const data = await getUsageStatistics(params);
         setStatisticsData(data);
       } catch (err) {
