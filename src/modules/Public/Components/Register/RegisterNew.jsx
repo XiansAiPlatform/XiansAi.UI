@@ -408,7 +408,8 @@ export default function RegisterNew() {
         tenantId: formData.tenantId.trim(),
         name: formData.tenantId.trim(),
         domain: formData.emailDomain.trim() || '',
-        description: formData.tenantId.trim()
+        description: formData.tenantId.trim(),
+        CreatedBy: formData.companyEmail.trim()
       };
 
       // Call the API to create the tenant
@@ -562,31 +563,6 @@ export default function RegisterNew() {
                     error={!!emailDomainError}
                     disabled={isSubmitting}
                   />
-                  
-                  {formData.emailDomain.trim() && (
-                    <Alert 
-                      severity="warning" 
-                      sx={{ 
-                        mt: 2,
-                        borderRadius: '12px',
-                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                        border: '1px solid rgba(245, 158, 11, 0.2)',
-                        color: '#d97706',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 2px 8px rgba(245, 158, 11, 0.1)',
-                        '& .MuiAlert-icon': {
-                          color: 'inherit',
-                        },
-                        '& .MuiAlert-message': {
-                          fontWeight: 500,
-                          fontSize: '0.875rem',
-                          lineHeight: 1.5,
-                        },
-                      }}
-                    >
-                      Adding an email domain will allow End Users with this email domain to gain access to the 'Agent Studio' automatically. If you want explicit access control keep this empty.
-                    </Alert>
-                  )}
                 </Box>
                 <Box>
                   <StyledTextField
@@ -605,6 +581,32 @@ export default function RegisterNew() {
                   />
                 </Box>
               </FormGrid>
+              
+              {formData.emailDomain.trim() && (
+                <Alert 
+                  severity="warning" 
+                  sx={{ 
+                    mt: 3,
+                    mb: 2,
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.2)',
+                    color: '#d97706',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 2px 8px rgba(245, 158, 11, 0.1)',
+                    '& .MuiAlert-icon': {
+                      color: 'inherit',
+                    },
+                    '& .MuiAlert-message': {
+                      fontWeight: 500,
+                      fontSize: '0.875rem',
+                      lineHeight: 1.5,
+                    },
+                  }}
+                >
+                  Adding an email domain will allow End Users with this email domain to gain access to the 'Agent Studio' automatically. If you want explicit access control keep this empty.
+                </Alert>
+              )}
               
               <ButtonContainer>
                 <ActionButton
