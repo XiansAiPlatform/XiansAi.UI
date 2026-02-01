@@ -68,50 +68,6 @@ export function RegisterFooter() {
   return (
     <Footer>
       <FooterContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: '#64748b',
-              fontSize: '0.875rem',
-              fontWeight: 400,
-              letterSpacing: '0.05em'
-            }}
-          >
-            Powered by
-          </Typography>
-          <MuiLink
-            href="https://99x.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            sx={{
-              color: '#428b83',
-              fontWeight: 500,
-              textDecoration: 'none',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.25rem 0.5rem',
-              borderRadius: '6px',
-              '&:hover': {
-                color: '#357067',
-                backgroundColor: 'rgba(66, 139, 131, 0.1)',
-                transform: 'translateY(-1px)',
-              }
-            }}
-          >
-            <img 
-              src="/images/99xlogo.svg" 
-              alt="99x" 
-              style={{
-                height: '14px',
-                width: 'auto',
-                opacity: 0.9
-              }}
-            />
-          </MuiLink>
-        </Box>
         
         <Typography 
           variant="caption" 
@@ -122,7 +78,7 @@ export function RegisterFooter() {
             letterSpacing: '0.05em'
           }}
         >
-          © {new Date().getFullYear()} XiansAI Platform.
+          © {new Date().getFullYear()} 99x Group.
         </Typography>
       </FooterContent>
     </Footer>
