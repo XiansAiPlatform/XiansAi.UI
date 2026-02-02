@@ -60,14 +60,14 @@ export default function TenantInfoForm({ tenant, onClose, onSaved }) {
         disabled={loading}
       />
       <TextField
-        label="Domain"
+        label="Domain (Optional)"
         name="domain"
         value={form.domain}
         onChange={handleChange}
         fullWidth
-        required
         margin="normal"
         disabled={loading}
+        helperText="Domain associated with this tenant"
       />
       <TextField
         label="Description"

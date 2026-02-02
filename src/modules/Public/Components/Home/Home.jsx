@@ -358,11 +358,11 @@ export default function NewHome() {
                     </Box>
 
                     <HeroTitle component="h1">
-                        Agent Development Kit
+                        AI Agent Control Plane
                     </HeroTitle>
                     
                     <HeroSubtitle>
-                        Enterprise-grade AI Agent Platform for Building Complex Workflows
+                        Enterprise-grade AI Agent Control Plane for governing your AI Agents
                     </HeroSubtitle>
 
                     <ActionButtonGroup>
