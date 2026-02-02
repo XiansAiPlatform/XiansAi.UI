@@ -133,6 +133,8 @@ REACT_APP_GITHUB_SCOPES=read:user user:email
 REACT_APP_GITHUB_ORGANIZATION_CLAIM=organizations
 ```
 
+**📖 Complete GitHub SSO Documentation:** [docs/GITHUB_SSO.md](docs/GITHUB_SSO.md)
+
 ### Auth0 Configuration
 
 ```bash

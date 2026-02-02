@@ -167,10 +167,6 @@ export default function TenantManagement() {
       setCreateError("Tenant ID is required");
       return;
     }
-    if (!createForm.domain.trim()) {
-      setCreateError("Domain is required");
-      return;
-    }
     setCreateLoading(true);
     setCreateError(null);
     try {
@@ -414,13 +410,13 @@ export default function TenantManagement() {
           />
           <TextField
             margin="dense"
-            label="Domain"
+            label="Domain (Optional)"
             type="text"
             fullWidth
             variant="outlined"
             value={createForm.domain}
             onChange={handleCreateFormChange("domain")}
-            required
+            required={false}
             sx={{ mb: 2 }}
             helperText="Domain associated with this tenant"
           />
@@ -446,8 +442,7 @@ export default function TenantManagement() {
             disabled={
               createLoading ||
               !createForm.name.trim() ||
-              !createForm.tenantId.trim() ||
-              !createForm.domain.trim()
+              !createForm.tenantId.trim()
             }
           >
             {createLoading ? (
