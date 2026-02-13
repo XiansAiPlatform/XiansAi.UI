@@ -393,7 +393,7 @@ const MessagingPage = () => {
                     </Box>
                     
                     {/* Conversation Selector - takes more space */}
-                    <Box sx={{ minWidth: '350px', flex: '1 1 auto', maxWidth: '550px' }}>
+                    <Box sx={{ minWidth: '500px', flex: '1 1 500px', maxWidth: '800px' }}>
                         <ConversationSelector
                             selectedAgentName={selectedAgentName}
                             messagingApi={messagingApi}

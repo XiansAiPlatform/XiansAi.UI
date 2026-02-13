@@ -300,6 +300,23 @@ const RegularMessage = ({ message, isRecent = false }) => {
                                         </TableCell>
                                     </TableRow>
                                     )}
+                                    {message.taskId && (
+                                    <TableRow>
+                                        <TableCell component="th" sx={{ 
+                                            fontWeight: 'bold', 
+                                            width: '30%',
+                                            color: theme.palette.text.secondary
+                                        }}>
+                                            Task ID
+                                        </TableCell>
+                                        <TableCell sx={{ 
+                                            color: theme.palette.text.primary,
+                                            wordBreak: 'break-all'
+                                        }}>
+                                            {message.taskId}
+                                        </TableCell>
+                                    </TableRow>
+                                    )}
                                     <TableRow>
                                         <TableCell component="th" sx={{ 
                                             fontWeight: 'bold', 

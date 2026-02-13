@@ -159,31 +159,6 @@ const SelectionArrow = styled(FiArrowRight)(({ theme }) => ({
   display: 'block',
 }));
 
-const NavigationFooter = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: theme.spacing(3),
-  padding: theme.spacing(3),
-  borderTop: '1px solid rgba(229, 231, 235, 0.3)',
-  background: 'rgba(250, 251, 252, 0.95)',
-  backdropFilter: 'blur(20px)',
-  position: 'relative',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '1px',
-    background: 'linear-gradient(90deg, transparent, rgba(66, 139, 131, 0.3), transparent)',
-  },
-  [theme.breakpoints.down('sm')]: {
-    gap: theme.spacing(2),
-    padding: theme.spacing(2),
-    flexWrap: 'wrap',
-  },
-}));
 
 const NavLink = styled(Link)(({ theme }) => ({
   color: '#475569 !important',
@@ -263,6 +238,57 @@ export default function RegisterSelection() {
         {hasNoTenants && isAuthenticated && !isCheckingTenants && <NoTenantsWarningMessage />}
         <AuthInfoMessage isAuthenticated={isAuthenticated} user={user} />
         
+        {isAuthenticated && (
+          <Box sx={{ 
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 3,
+            mb: 4,
+            padding: 2,
+            borderRadius: '12px',
+            background: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(229, 231, 235, 0.6)',
+            backdropFilter: 'blur(10px)',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
+            '@media (max-width: 600px)': {
+              gap: 2,
+              padding: 1.5,
+              flexWrap: 'wrap',
+            },
+          }}>
+            <NavLink 
+              to="/manager"
+              sx={{
+                background: 'linear-gradient(135deg, #428b83 0%, #357067 100%)',
+                color: 'white !important',
+                fontWeight: 600,
+                padding: '8px 20px !important',
+                borderRadius: '10px',
+                boxShadow: '0 4px 12px rgba(66, 139, 131, 0.25)',
+                border: 'none',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 20px rgba(66, 139, 131, 0.35)',
+                  backgroundColor: 'transparent !important',
+                  color: 'white !important',
+                },
+              }}
+            >
+              Dashboard
+            </NavLink>
+            <Box sx={{ 
+              width: '1px', 
+              height: '16px', 
+              backgroundColor: 'rgba(229, 231, 235, 0.6)',
+              borderRadius: '0.5px'
+            }} />
+            <NavLink to="/manager/logout">
+              Sign Out
+            </NavLink>
+          </Box>
+        )}
+        
         <TitleSection>
           <StepIndicator>Step 1 of 2</StepIndicator>
           <MainTitle>
@@ -279,7 +305,7 @@ export default function RegisterSelection() {
               margin: '0 auto'
             }}
           >
-            Select how you'd like to get started with XiansAI
+            Select how you'd like to get started
           </Typography>
         </TitleSection>
         
@@ -314,31 +340,6 @@ export default function RegisterSelection() {
         </SelectionGrid>
       </MainContent>
       
-      {isAuthenticated && (
-        <NavigationFooter>
-          <NavLink to="/">
-            Home
-          </NavLink>
-          <Box sx={{ 
-            width: '1px', 
-            height: '16px', 
-            backgroundColor: 'rgba(229, 231, 235, 0.6)',
-            borderRadius: '0.5px'
-          }} />
-          <NavLink to="/manager">
-            Dashboard
-          </NavLink>
-          <Box sx={{ 
-            width: '1px', 
-            height: '16px', 
-            backgroundColor: 'rgba(229, 231, 235, 0.6)',
-            borderRadius: '0.5px'
-          }} />
-          <NavLink to="/manager/logout">
-            Sign Out
-          </NavLink>
-        </NavigationFooter>
-      )}
       
       <RegisterFooter />
     </PageContainer>

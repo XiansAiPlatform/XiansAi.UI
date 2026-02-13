@@ -11,10 +11,12 @@ import './UsageStatistics.css';
 
 const UsageStatistics = () => {
   const { isAdmin } = useTenant();
-  const { getUsageStatistics, getUsersWithUsage } = useUsageStatisticsApi();
+  const { getAvailableMetrics, getUsageStatistics, getUsersWithUsage } = useUsageStatisticsApi();
 
   // Filter state
-  const [usageType, setUsageType] = useState('tokens');
+  const [availableMetrics, setAvailableMetrics] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedMetricType, setSelectedMetricType] = useState(null);
   const [selectedUser, setSelectedUser] = useState('all');
   const [selectedAgent, setSelectedAgent] = useState('all');
   const [dateRange, setDateRange] = useState('7days');
@@ -26,6 +28,7 @@ const UsageStatistics = () => {
   const [usersData, setUsersData] = useState([]);
   const [agentsData, setAgentsData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [metricsLoading, setMetricsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Calculate date range
@@ -53,6 +56,35 @@ const UsageStatistics = () => {
     };
   };
 
+  // Fetch available metrics on mount
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      setMetricsLoading(true);
+      try {
+        const metrics = await getAvailableMetrics();
+        setAvailableMetrics(metrics);
+        
+        // Auto-select first category and first metric type
+        if (metrics.categories && metrics.categories.length > 0) {
+          const firstCategory = metrics.categories[0];
+          setSelectedCategory(firstCategory.categoryId);
+          
+          if (firstCategory.metrics && firstCategory.metrics.length > 0) {
+            setSelectedMetricType(firstCategory.metrics[0].type);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch available metrics:', err);
+        setError('Failed to load available metrics');
+      } finally {
+        setMetricsLoading(false);
+      }
+    };
+
+    fetchMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch users (admin only)
   useEffect(() => {
     if (isAdmin) {
@@ -62,61 +94,50 @@ const UsageStatistics = () => {
           setUsersData(result.users || []);
         } catch (err) {
           console.error('Failed to fetch users:', err);
+          setUsersData([]);
         }
       };
       fetchUsers();
+    } else {
+      // Reset user selection for non-admin users
+      setSelectedUser('all');
+      setUsersData([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
-  // Fetch agents list (without filters) to populate dropdown
+  // Extract agents from statistics data (no separate API call needed)
   useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const { startDate, endDate } = getDateRange();
-        const params = {
-          type: usageType,
-          startDate,
-          endDate,
-          groupBy,
-        };
-        // Don't apply agent filter when fetching the list
-        const data = await getUsageStatistics(params);
-        if (data?.agentBreakdown) {
-          const agents = data.agentBreakdown.map(agent => ({
-            agentName: agent.agentName?.trim() || agent.agentName,
-          }));
-          setAgentsData(agents);
-          
-          // If selected agent is not in the list but was previously selected, keep it
-          // This handles the case where filtering by agent makes it disappear from breakdown
-          if (selectedAgent !== 'all' && !agents.find(a => a.agentName === selectedAgent)) {
-            // Agent might have been trimmed, try to find a match
-            const trimmedSelected = selectedAgent.trim();
-            if (!agents.find(a => a.agentName === trimmedSelected)) {
-              // Add the selected agent to the list if it's not there
-              setAgentsData([...agents, { agentName: trimmedSelected }]);
-            }
-          }
+    if (statisticsData?.agentBreakdown) {
+      const agents = statisticsData.agentBreakdown.map(agent => ({
+        agentName: agent.agentName?.trim() || agent.agentName,
+      }));
+      setAgentsData(agents);
+      
+      // If selected agent is not in the list but was previously selected, keep it
+      if (selectedAgent !== 'all' && !agents.find(a => a.agentName === selectedAgent)) {
+        const trimmedSelected = selectedAgent.trim();
+        if (!agents.find(a => a.agentName === trimmedSelected)) {
+          setAgentsData([...agents, { agentName: trimmedSelected }]);
         }
-      } catch (err) {
-        console.error('Failed to fetch agents:', err);
       }
-    };
-    fetchAgents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageType, dateRange, groupBy]);
+    }
+  }, [statisticsData, selectedAgent]);
 
   // Fetch statistics
   useEffect(() => {
     const fetchStatistics = async () => {
+      // Don't fetch if we haven't selected both category and metric type
+      if (!selectedCategory || !selectedMetricType) return;
+
       setLoading(true);
       setError(null);
 
       try {
         const { startDate, endDate } = getDateRange();
         const params = {
-          type: usageType,
+          category: selectedCategory,
+          metricType: selectedMetricType,
           startDate,
           endDate,
           groupBy,
@@ -125,6 +146,7 @@ const UsageStatistics = () => {
         // Add user filter for admins
         if (isAdmin && selectedUser !== 'all') {
           params.userId = selectedUser;
+          console.log('Adding userId to params:', selectedUser);
         }
 
         // Add agent filter (trim to handle any whitespace)
@@ -132,6 +154,8 @@ const UsageStatistics = () => {
           params.agentName = selectedAgent.trim();
         }
 
+        console.log('Fetching statistics with params:', params);
+        console.log('Current selectedUser:', selectedUser);
         const data = await getUsageStatistics(params);
         setStatisticsData(data);
       } catch (err) {
@@ -144,95 +168,94 @@ const UsageStatistics = () => {
 
     fetchStatistics();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageType, selectedUser, selectedAgent, dateRange, groupBy, isAdmin]);
+  }, [selectedCategory, selectedMetricType, selectedUser, selectedAgent, dateRange, groupBy, isAdmin]);
 
-  // Auto-select Agent breakdown tab for response time
-  useEffect(() => {
-    if (usageType === 'responsetime' && breakdownTab === 0) {
-      setBreakdownTab(1);
-    }
-  }, [usageType, breakdownTab]);
-
-  // Map usage type to tab index
-  const getTabIndex = (type) => {
-    switch (type) {
-      case 'tokens': return 0;
-      case 'messages': return 1;
-      case 'responsetime': return 2;
-      default: return 0;
-    }
+  // Get current category index for tabs
+  const getCurrentCategoryIndex = () => {
+    if (!availableMetrics?.categories || !selectedCategory) return 0;
+    return availableMetrics.categories.findIndex(cat => cat.categoryId === selectedCategory);
   };
 
-  // Map tab index to usage type
-  const getUsageTypeFromTab = (index) => {
-    switch (index) {
-      case 0: return 'tokens';
-      case 1: return 'messages';
-      case 2: return 'responsetime';
-      default: return 'tokens';
-    }
+  // Get metrics for the currently selected category
+  const getCurrentCategoryMetrics = () => {
+    if (!availableMetrics?.categories || !selectedCategory) return [];
+    const category = availableMetrics.categories.find(cat => cat.categoryId === selectedCategory);
+    return category?.metrics || [];
   };
 
   const handleTabChange = (event, newValue) => {
-    const newUsageType = getUsageTypeFromTab(newValue);
-    setUsageType(newUsageType);
-    // For response time, default to Agent breakdown tab
-    if (newUsageType === 'responsetime') {
-      setBreakdownTab(1);
+    if (!availableMetrics?.categories) return;
+    
+    const newCategory = availableMetrics.categories[newValue];
+    setSelectedCategory(newCategory.categoryId);
+    
+    // Auto-select first metric type in the category
+    if (newCategory.metrics && newCategory.metrics.length > 0) {
+      setSelectedMetricType(newCategory.metrics[0].type);
     }
   };
 
   return (
     <PageLayout title="Usage Statistics">
       <Box className="usage-statistics-container">
-        {/* Tabs */}
-        <Paper 
-          elevation={0} 
-          sx={{ 
-            mb: 3,
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-paper)',
-          }}
-        >
-          <Tabs
-            value={getTabIndex(usageType)}
-            onChange={handleTabChange}
-            sx={{
-              borderBottom: '1px solid var(--border-color)',
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 500,
-                minHeight: 48,
-              },
-              '& .Mui-selected': {
-                color: 'var(--primary-color, #1976d2)',
-              },
+        {/* Tabs - Dynamic from available metrics */}
+        {!metricsLoading && availableMetrics?.categories && (
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              mb: 3,
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border-color)',
+              backgroundColor: 'var(--bg-paper)',
             }}
           >
-            <Tab label="Tokens" />
-            <Tab label="Messages" />
-            <Tab label="Response Time" />
-          </Tabs>
-        </Paper>
+            <Tabs
+              value={getCurrentCategoryIndex()}
+              onChange={handleTabChange}
+              sx={{
+                borderBottom: '1px solid var(--border-color)',
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  minHeight: 48,
+                },
+                '& .Mui-selected': {
+                  color: 'var(--primary-color, #1976d2)',
+                },
+              }}
+            >
+              {availableMetrics.categories.map((category) => (
+                <Tab 
+                  key={category.categoryId}
+                  label={category.categoryName}
+                />
+              ))}
+            </Tabs>
+          </Paper>
+        )}
 
         {/* Filters */}
-        <UsageFilters
-          selectedUser={selectedUser}
-          setSelectedUser={setSelectedUser}
-          selectedAgent={selectedAgent}
-          setSelectedAgent={setSelectedAgent}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          groupBy={groupBy}
-          setGroupBy={setGroupBy}
-          usersData={usersData}
-          agentsData={agentsData}
-          isAdmin={isAdmin}
-        />
+        {!metricsLoading && (
+          <UsageFilters
+            selectedUser={selectedUser}
+            setSelectedUser={setSelectedUser}
+            selectedAgent={selectedAgent}
+            setSelectedAgent={setSelectedAgent}
+            selectedMetricType={selectedMetricType}
+            setSelectedMetricType={setSelectedMetricType}
+            currentCategoryMetrics={getCurrentCategoryMetrics()}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            groupBy={groupBy}
+            setGroupBy={setGroupBy}
+            usersData={usersData}
+            agentsData={agentsData}
+            isAdmin={isAdmin}
+          />
+        )}
 
         {/* Loading State */}
-        {loading && (
+        {(loading || metricsLoading) && (
           <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
             <CircularProgress />
           </Box>
@@ -246,7 +269,7 @@ const UsageStatistics = () => {
         )}
 
         {/* Statistics Display */}
-        {!loading && !error && statisticsData && (
+        {!loading && !metricsLoading && !error && statisticsData && (
           <>
             {/* Chart */}
             <Paper 
@@ -261,7 +284,6 @@ const UsageStatistics = () => {
             >
               <UsageChart 
                 data={statisticsData}
-                usageType={usageType}
                 groupBy={groupBy}
               />
             </Paper>
@@ -276,7 +298,7 @@ const UsageStatistics = () => {
               }}
             >
               <Tabs
-                value={usageType === 'responsetime' ? 1 : breakdownTab}
+                value={breakdownTab}
                 onChange={(e, newValue) => setBreakdownTab(newValue)}
                 sx={{
                   borderBottom: '1px solid var(--border-color)',
@@ -292,21 +314,19 @@ const UsageStatistics = () => {
                   },
                 }}
               >
-                {usageType !== 'responsetime' && <Tab label="Breakdown by User" />}
+                <Tab label="Breakdown by User" />
                 <Tab label="Breakdown by Agent" />
               </Tabs>
               
               <Box sx={{ p: 3 }}>
-                {usageType !== 'responsetime' && breakdownTab === 0 && (
+                {breakdownTab === 0 && (
                   <UserBreakdownTable 
                     data={statisticsData}
-                    usageType={usageType}
                   />
                 )}
-                {(usageType === 'responsetime' || breakdownTab === 1) && (
+                {breakdownTab === 1 && (
                   <AgentBreakdownTable 
                     data={statisticsData}
-                    usageType={usageType}
                   />
                 )}
               </Box>
@@ -315,7 +335,7 @@ const UsageStatistics = () => {
         )}
 
         {/* Empty State */}
-        {!loading && !error && !statisticsData && (
+        {!loading && !metricsLoading && !error && !statisticsData && (
           <Paper 
             elevation={0} 
             sx={{ 

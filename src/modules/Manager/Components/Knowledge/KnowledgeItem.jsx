@@ -26,7 +26,8 @@ const KnowledgeItem = ({
   onDeleteOneKnowledge,
   isExpanded,
   onToggleExpand,
-  permissionLevel
+  permissionLevel,
+  isSystemScoped
 }) => {
   const { openSlider, closeSlider } = useSlider();
   const { setLoading } = useLoading();
@@ -84,6 +85,7 @@ const KnowledgeItem = ({
       <KnowledgeEditor
         mode="edit"
         knowledge={knowledge}
+        isSystemScoped={isSystemScoped}
         onSave={(updatedKnowledge) => {
           onUpdateKnowledge(updatedKnowledge);
           closeSlider();

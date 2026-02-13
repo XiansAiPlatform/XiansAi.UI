@@ -2,8 +2,14 @@ import React, { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
 import { format } from 'date-fns';
 
-const UsageChart = ({ data, usageType, groupBy }) => {
-  const { timeSeriesData, totalMetrics, agentTimeSeriesData, agentBreakdown } = data || {};
+const UsageChart = ({ data, groupBy }) => {
+  const { timeSeriesData, totalMetrics, agentTimeSeriesData, agentBreakdown, unit, metricType } = data || {};
+
+  // Simple helper: use the date string from API as the key directly
+  const getDateKey = (dateString) => dateString;
+
+  // Simple helper: parse date string to Date object
+  const parseDateKey = (dateKey) => new Date(dateKey);
 
   // Get unique agents and assign colors
   const agents = useMemo(() => {
@@ -22,20 +28,16 @@ const UsageChart = ({ data, usageType, groupBy }) => {
     const dateMap = new Map();
     
     agentTimeSeriesData.forEach((point) => {
+      const dateKey = getDateKey(point.date);
       const date = new Date(point.date);
-      let dateKey;
-      if (groupBy === 'hour') {
-        dateKey = date.toISOString();
-      } else {
-        dateKey = format(date, 'yyyy-MM-dd');
-      }
       
       if (!grouped[dateKey]) {
         grouped[dateKey] = {};
         dateMap.set(dateKey, date);
       }
-      // For response time, calculate average; otherwise use primaryCount
-      const value = usageType === 'responsetime' && point.metrics.requestCount > 0
+      // For time-based units (ms, milliseconds, seconds), calculate average; otherwise use primaryCount
+      const isTimeUnit = unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds');
+      const value = isTimeUnit && point.metrics.requestCount > 0
         ? point.metrics.primaryCount / point.metrics.requestCount
         : point.metrics.primaryCount;
       grouped[dateKey][point.agentName] = value;
@@ -45,24 +47,19 @@ const UsageChart = ({ data, usageType, groupBy }) => {
       .sort((a, b) => a[1].getTime() - b[1].getTime())
       .map(([key]) => key);
     
-    return { grouped, dates, dateMap };
-  }, [agentTimeSeriesData, groupBy, usageType]);
+      return { grouped, dates, dateMap };
+  }, [agentTimeSeriesData, unit]);
 
   // Combine all dates (from total and agents) and create unified dataset
   const allDates = useMemo(() => {
     const dateSet = new Set();
     const dateMap = new Map();
 
-    // Add dates from total time series (only for non-response-time)
-    if (usageType !== 'responsetime' && timeSeriesData) {
+    // Add dates from total time series
+    if (timeSeriesData) {
       timeSeriesData.forEach((d) => {
+        const dateKey = getDateKey(d.date);
         const date = new Date(d.date);
-        let dateKey;
-        if (groupBy === 'hour') {
-          dateKey = date.toISOString();
-        } else {
-          dateKey = format(date, 'yyyy-MM-dd');
-        }
         dateSet.add(dateKey);
         dateMap.set(dateKey, date);
       });
@@ -78,20 +75,20 @@ const UsageChart = ({ data, usageType, groupBy }) => {
       });
     }
 
-    return Array.from(dateSet)
+      return Array.from(dateSet)
       .sort((a, b) => {
-        const dateA = dateMap.get(a) || new Date(a);
-        const dateB = dateMap.get(b) || new Date(b);
+        const dateA = dateMap.get(a) || parseDateKey(a);
+        const dateB = dateMap.get(b) || parseDateKey(b);
         return dateA.getTime() - dateB.getTime();
       });
-  }, [timeSeriesData, agentChartData, groupBy, usageType]);
+  }, [timeSeriesData, agentChartData]);
 
   // Calculate chart dimensions and scale (considering both total and agent data)
   const chartConfig = useMemo(() => {
     let maxValue = 0;
 
-    // Check total time series data (only for non-response-time)
-    if (usageType !== 'responsetime' && timeSeriesData && timeSeriesData.length > 0) {
+    // Check total time series data
+    if (timeSeriesData && timeSeriesData.length > 0) {
       maxValue = Math.max(maxValue, ...timeSeriesData.map(d => d.metrics.primaryCount));
     }
 
@@ -115,7 +112,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
       minValue: Math.max(0, minValue - padding),
       dataPoints: allDates.length,
     };
-  }, [timeSeriesData, agentChartData, allDates, usageType]);
+  }, [timeSeriesData, agentChartData, allDates]);
 
   if (!data || !chartConfig || allDates.length === 0) {
     return (
@@ -147,14 +144,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
   const getValueForDate = (dateKey, dataArray) => {
     if (!dataArray) return null;
     for (const d of dataArray) {
-      const dDate = new Date(d.date);
-      let dKey;
-      if (groupBy === 'hour') {
-        dKey = dDate.toISOString();
-      } else {
-        dKey = format(dDate, 'yyyy-MM-dd');
-      }
-      if (dKey === dateKey) {
+      if (d.date === dateKey) {
         return d.metrics.primaryCount;
       }
     }
@@ -200,12 +190,13 @@ const UsageChart = ({ data, usageType, groupBy }) => {
     return num.toString();
   };
 
-  // Format label based on usage type
+  // Format label based on metric type
   const getLabel = () => {
-    if (usageType === 'tokens') return 'Tokens';
-    if (usageType === 'messages') return 'Messages';
-    if (usageType === 'responsetime') return 'Response Time';
-    return 'Usage';
+    if (!metricType) return 'Usage';
+    // Convert snake_case to Title Case
+    return metricType.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   // Format response time (milliseconds)
@@ -220,35 +211,23 @@ const UsageChart = ({ data, usageType, groupBy }) => {
       {/* Title and Summary */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>
-          {usageType === 'responsetime' ? 'Average ' : ''}{getLabel()} Usage Over Time
+          {getLabel()} Over Time
         </Typography>
         <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
-          {/* Total Tokens/Messages (not shown for response time) */}
-          {usageType !== 'responsetime' && (
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                Total {getLabel()}
-              </Typography>
-              <Typography variant="h5">
-                {formatNumber(totalMetrics.primaryCount)}
-              </Typography>
-            </Box>
-          )}
+          {/* Total metric value */}
+          <Box>
+            <Typography variant="caption" color="text.secondary">
+              Total {getLabel()}
+            </Typography>
+            <Typography variant="h5">
+              {unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds')
+                ? formatResponseTime(Math.round(totalMetrics.primaryCount / (totalMetrics.requestCount || 1)))
+                : formatNumber(totalMetrics.primaryCount)}
+            </Typography>
+          </Box>
           
-          {/* Average Response Time (only for ResponseTime type) */}
-          {usageType === 'responsetime' && totalMetrics.requestCount > 0 && (
-            <Box>
-              <Typography variant="caption" color="text.secondary">
-                Average Response Time
-              </Typography>
-              <Typography variant="h5">
-                {formatResponseTime(Math.round(totalMetrics.primaryCount / totalMetrics.requestCount))}
-              </Typography>
-            </Box>
-          )}
-          
-          {/* Token-specific breakdown (only for tokens) */}
-          {usageType === 'tokens' && totalMetrics.promptCount !== null && (
+          {/* Optional breakdown (only if backend provides promptCount and completionCount) */}
+          {totalMetrics.promptCount !== null && totalMetrics.promptCount !== undefined && (
             <>
               <Box>
                 <Typography variant="caption" color="text.secondary">
@@ -309,7 +288,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
                   fontSize="12"
                   fill="var(--text-secondary)"
                 >
-                  {usageType === 'responsetime' 
+                  {unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds')
                     ? formatResponseTime(Math.round(chartConfig.maxValue * ratio))
                     : formatNumber(Math.round(chartConfig.maxValue * ratio))}
                 </text>
@@ -319,8 +298,8 @@ const UsageChart = ({ data, usageType, groupBy }) => {
 
           {/* Chart area */}
           <g transform={`translate(${padding.left}, ${padding.top})`}>
-            {/* Total line - only show for non-response-time usage types */}
-            {usageType !== 'responsetime' && generateTotalLinePath() && (
+            {/* Total line */}
+            {generateTotalLinePath() && (
               <g>
                 <path
                   d={generateTotalLinePath()}
@@ -336,7 +315,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
                   if (value === null) return null;
                   const x = xScale(i);
                   const y = yScale(value);
-                  const date = new Date(dateKey);
+                  const date = parseDateKey(dateKey);
                   return (
                     <g key={`total-${i}`}>
                       <circle
@@ -377,7 +356,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
                     if (value === 0) return null;
                     const x = xScale(i);
                     const y = yScale(value);
-                    const date = agentChartData.dateMap.get(dateKey) || new Date(dateKey);
+                    const date = agentChartData.dateMap.get(dateKey) || parseDateKey(dateKey);
                     return (
                       <g key={`${agent.name}-${i}`}>
                         <circle
@@ -388,7 +367,7 @@ const UsageChart = ({ data, usageType, groupBy }) => {
                         />
                         <title>
                           {format(date, groupBy === 'hour' ? 'MMM d, yyyy HH:mm' : 'MMM d, yyyy')}: {agent.name} - {
-                            usageType === 'responsetime' 
+                            unit && (unit === 'ms' || unit === 'milliseconds' || unit === 'seconds')
                               ? formatResponseTime(value) + ' (avg)'
                               : formatNumber(value)
                           } {getLabel()}
@@ -407,7 +386,8 @@ const UsageChart = ({ data, usageType, groupBy }) => {
               
               if (!showLabel) return null;
 
-              const date = new Date(dateKey);
+              const date = parseDateKey(dateKey);
+              
               // Format label based on grouping
               const labelFormat = groupBy === 'hour' ? 'HH:mm' : 
                                   groupBy === 'week' ? 'MMM d' :
@@ -432,10 +412,10 @@ const UsageChart = ({ data, usageType, groupBy }) => {
       </Box>
 
       {/* Legend */}
-      {(agents.length > 0 || (timeSeriesData && usageType !== 'responsetime')) && (
+      {(agents.length > 0 || timeSeriesData) && (
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          {/* Total legend - only for non-response-time */}
-          {usageType !== 'responsetime' && timeSeriesData && timeSeriesData.length > 0 && (
+          {/* Total legend */}
+          {timeSeriesData && timeSeriesData.length > 0 && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Box
                 sx={{

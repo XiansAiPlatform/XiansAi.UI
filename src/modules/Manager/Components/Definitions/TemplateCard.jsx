@@ -435,9 +435,33 @@ const TemplateCard = ({ template, onDeploy, onViewDetails, onDelete, isDeploying
           Delete Template
         </DialogTitle>
         <DialogContent>
-          <DialogContentText id="delete-dialog-description">
-            Are you sure you want to delete the template "<strong>{getDisplayName()}</strong>"?
-            This action cannot be undone and will remove the system-scoped agent and all its associated flow definitions.
+          <DialogContentText id="delete-dialog-description" component="div">
+            <Box sx={{ mb: 2 }}>
+              Are you sure you want to delete the template "<strong>{getDisplayName()}</strong>"?
+            </Box>
+            <Box 
+              sx={{ 
+                bgcolor: 'warning.50', 
+                border: '1px solid', 
+                borderColor: 'warning.200',
+                borderRadius: 2, 
+                p: 2, 
+                mb: 2 
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: 'warning.800' }}>
+                ⚠️ Important: Knowledge Deletion
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                • All template-associated knowledge will be <strong>permanently deleted</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                • Knowledge that has been overridden in specific tenants or activations will <strong>NOT be deleted</strong>
+              </Typography>
+            </Box>
+            <Box sx={{ color: 'text.secondary' }}>
+              This action cannot be undone and will remove the system-scoped agent and all its associated flow definitions.
+            </Box>
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>

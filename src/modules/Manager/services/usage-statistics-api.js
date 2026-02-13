@@ -2,15 +2,24 @@ import { useApiClient } from './api-client';
 
 /**
  * Custom hook for Usage Statistics API endpoints
- * Provides methods to fetch token/message usage statistics
+ * Provides methods to fetch flexible usage statistics based on category and metric type
  */
 export const useUsageStatisticsApi = () => {
   const client = useApiClient();
 
   /**
-   * Get usage statistics for a specific type (tokens, messages, etc.)
+   * Get available metric categories and types
+   * @returns {Promise<Object>} Available metrics response with categories
+   */
+  const getAvailableMetrics = async () => {
+    return client.get('/api/client/usage/statistics/available-metrics');
+  };
+
+  /**
+   * Get usage statistics for a specific category and metric type
    * @param {Object} params - Query parameters
-   * @param {string} params.type - Usage type ('tokens', 'messages', 'apicalls', etc.)
+   * @param {string} params.category - Metric category (e.g., 'tokens', 'activity')
+   * @param {string} params.metricType - Specific metric type (e.g., 'total_tokens', 'message_count')
    * @param {string} params.startDate - Start date (ISO 8601 format)
    * @param {string} params.endDate - End date (ISO 8601 format)
    * @param {string} [params.userId] - Optional: filter by user ID (admin only)
@@ -20,10 +29,11 @@ export const useUsageStatisticsApi = () => {
    * @returns {Promise<Object>} Usage statistics response
    */
   const getUsageStatistics = async (params) => {
-    const { type, startDate, endDate, userId, agentName, tenantId, groupBy = 'day' } = params;
+    const { category, metricType, startDate, endDate, userId, agentName, tenantId, groupBy = 'day' } = params;
     
     const queryParams = new URLSearchParams({
-      type,
+      category,
+      metricType,
       startDate,
       endDate,
       groupBy,
@@ -64,6 +74,7 @@ export const useUsageStatisticsApi = () => {
   };
 
   return {
+    getAvailableMetrics,
     getUsageStatistics,
     getUsersWithUsage,
   };

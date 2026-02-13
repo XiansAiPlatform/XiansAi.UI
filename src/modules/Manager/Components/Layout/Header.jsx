@@ -273,7 +273,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
               }} />
               <FormControl size="small" sx={{ minWidth: isMobile ? 120 : 180 }}>
                   <Select
-                  value={selectedOrg}
+                  value={selectedOrg || ''}
                   onChange={handleOrgChange}
                   displayEmpty
                   sx={{

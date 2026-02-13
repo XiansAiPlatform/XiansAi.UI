@@ -31,7 +31,7 @@ export default function UserFormSettings({
   });
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState("");
-  const allRoles = ["TenantAdmin", "TenantUser"];
+  const allRoles = ["TenantAdmin", "TenantUser", "TenantParticipant"];
 
   useEffect(() => {
     if (initialData) {

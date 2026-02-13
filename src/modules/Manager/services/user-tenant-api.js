@@ -182,6 +182,51 @@ export const useUserTenantApi = () => {
           throw error;
         }
       },
+      createNewUser: async (token, userData, tenantId) => {
+        try {
+          const { apiBaseUrl } = getConfig();
+          const response = await fetch(
+            `${apiBaseUrl}/api/user-tenants/CreateNewUser`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                "X-Tenant-Id": tenantId,
+              },
+              body: JSON.stringify(userData),
+            }
+          );
+          const json = await response.json();
+          console.log("Create new user response:", json);
+          
+          // Handle both RFC 9110 format and custom format
+          if (!response.ok) {
+            // If response has RFC 9110 format (type, title, status, detail)
+            if (json.detail || json.title) {
+              const error = new Error(json.detail || json.title || 'An error occurred');
+              Object.assign(error, {
+                ...json,
+                statusCode: json.status,
+              });
+              throw error;
+            }
+            // If response has custom format (isSuccess)
+            if (json.isSuccess === false) {
+              const error = new Error(json.message || 'Request failed');
+              Object.assign(error, json);
+              throw error;
+            }
+            // Generic error
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          return json;
+        } catch (error) {
+          console.log("Failed to create new user:", error);
+          throw error;
+        }
+      },
     };
   }, []);
 };

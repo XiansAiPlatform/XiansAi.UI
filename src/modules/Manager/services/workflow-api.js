@@ -117,8 +117,12 @@ export const useWorkflowApi = () => {
             skip, 
             limit 
           };
-          if (logLevel !== null) {
-            queryParams.logLevel = Number(logLevel);
+          if (logLevel !== null && logLevel !== undefined && logLevel !== '') {
+            // Ensure logLevel is a valid number
+            const numericLogLevel = typeof logLevel === 'number' ? logLevel : Number(logLevel);
+            if (!isNaN(numericLogLevel)) {
+              queryParams.logLevel = numericLogLevel;
+            }
           }
           return await apiClient.get('/api/client/logs/workflow', queryParams);
         } catch (error) {
@@ -142,7 +146,7 @@ export const useWorkflowApi = () => {
             workflowType,
             agentName: agentName,
             parameters,
-            workflowId: flowId,
+            WorkflowIdPostfix: flowId,
             queueName
           };
 

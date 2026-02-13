@@ -99,17 +99,60 @@ export const useTasksApi = () => {
       },
 
       /**
-       * Marks a task as completed.
+       * Performs a generic action on a task with an optional comment.
+       * All actions are treated uniformly and sent to the /action endpoint.
        * @param {string} workflowId - The workflow ID of the task
+       * @param {string} action - The action to perform (e.g., 'approve', 'reject', 'hold')
+       * @param {string} [comment] - Optional comment for the action
        * @returns {Promise<Object>} Success response
        */
-      completeTask: async (workflowId) => {
+      performAction: async (workflowId, action, comment = null) => {
         try {
           if (!workflowId) {
             throw new Error('Workflow ID is required');
           }
 
-          return await apiClient.post(`/api/client/tasks/complete?workflowId=${encodeURIComponent(workflowId)}`);
+          if (!action) {
+            throw new Error('Action is required');
+          }
+
+          // Send to generic /action endpoint with PascalCase properties (C# convention)
+          const requestBody = {
+            Action: action
+          };
+
+          // Add comment if provided
+          if (comment) {
+            requestBody.Comment = comment;
+          }
+
+          return await apiClient.post(
+            `/api/client/tasks/action?workflowId=${encodeURIComponent(workflowId)}`,
+            requestBody
+          );
+        } catch (error) {
+          console.error('Failed to perform action:', error);
+          throw error;
+        }
+      },
+
+      /**
+       * @deprecated Use performAction() instead. Kept for backward compatibility.
+       * Marks a task as completed.
+       * @param {string} workflowId - The workflow ID of the task
+       * @returns {Promise<Object>} Success response
+       */
+      completeTask: async (workflowId) => {
+        console.warn('completeTask() is deprecated. Use performAction() instead.');
+        try {
+          if (!workflowId) {
+            throw new Error('Workflow ID is required');
+          }
+
+          return await apiClient.post(
+            `/api/client/tasks/action?workflowId=${encodeURIComponent(workflowId)}`,
+            { Action: 'approve' }
+          );
         } catch (error) {
           console.error('Failed to complete task:', error);
           throw error;
@@ -117,12 +160,14 @@ export const useTasksApi = () => {
       },
 
       /**
+       * @deprecated Use performAction() instead. Kept for backward compatibility.
        * Rejects a task with a reason message.
        * @param {string} workflowId - The workflow ID of the task
        * @param {string} rejectionMessage - The reason for rejection
        * @returns {Promise<Object>} Success response
        */
       rejectTask: async (workflowId, rejectionMessage) => {
+        console.warn('rejectTask() is deprecated. Use performAction() instead.');
         try {
           if (!workflowId) {
             throw new Error('Workflow ID is required');
@@ -132,9 +177,10 @@ export const useTasksApi = () => {
             throw new Error('Rejection message is required');
           }
 
-          return await apiClient.post(`/api/client/tasks/reject?workflowId=${encodeURIComponent(workflowId)}`, {
-            rejectionMessage
-          });
+          return await apiClient.post(
+            `/api/client/tasks/action?workflowId=${encodeURIComponent(workflowId)}`,
+            { Action: 'reject', Comment: rejectionMessage }
+          );
         } catch (error) {
           console.error('Failed to reject task:', error);
           throw error;

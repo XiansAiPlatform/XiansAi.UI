@@ -35,6 +35,8 @@ import DocumentDetails from './DocumentDetails';
 const DataDocuments = () => {
   const [agents, setAgents] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState('');
+  const [activations, setActivations] = useState([]);
+  const [selectedActivation, setSelectedActivation] = useState('');
   const [documentTypes, setDocumentTypes] = useState([]);
   const [selectedDocumentType, setSelectedDocumentType] = useState('');
   const [documents, setDocuments] = useState([]);
@@ -73,15 +75,19 @@ const DataDocuments = () => {
       setLoading(true);
       setError(null);
       const data = await documentsApi.getDocumentTypesByAgent(selectedAgent);
-      // Ensure data is always an array
-      setDocumentTypes(Array.isArray(data) ? data : []);
+      
+      // Handle API response format: {documentTypes: [...], activationNames: [...]}
+      setDocumentTypes(Array.isArray(data.documentTypes) ? data.documentTypes : []);
+      setActivations(Array.isArray(data.activationNames) ? data.activationNames : []);
       setSelectedDocumentType('');
+      setSelectedActivation('');
     } catch (error) {
       console.error('Failed to load document types:', error);
       const errorMessage = handleApiError(error, 'loading document types');
       setError(errorMessage);
       showError(errorMessage);
-      setDocumentTypes([]); // Reset to empty array on error
+      setDocumentTypes([]);
+      setActivations([]);
     } finally {
       setLoading(false);
     }
@@ -91,11 +97,19 @@ const DataDocuments = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // Prepare additional query parameters
+      const additionalParams = {};
+      if (selectedActivation) {
+        additionalParams.activationName = selectedActivation;
+      }
+      
       const data = await documentsApi.getDocumentsByAgentAndType(
         selectedAgent,
         selectedDocumentType,
         0,
-        1000 // Load all documents for now
+        1000,
+        additionalParams
       );
       
       console.log('Documents API Response:', data);
@@ -132,7 +146,7 @@ const DataDocuments = () => {
     } finally {
       setLoading(false);
     }
-  }, [documentsApi, selectedAgent, selectedDocumentType, setLoading, showError]);
+  }, [documentsApi, selectedAgent, selectedDocumentType, selectedActivation, setLoading, showError]);
 
   // Load agents on mount
   useEffect(() => {
@@ -145,7 +159,9 @@ const DataDocuments = () => {
       loadDocumentTypes();
     } else {
       setDocumentTypes([]);
+      setActivations([]);
       setSelectedDocumentType('');
+      setSelectedActivation('');
       setDocuments([]);
     }
   }, [selectedAgent, loadDocumentTypes]);
@@ -157,7 +173,7 @@ const DataDocuments = () => {
     } else {
       setDocuments([]);
     }
-  }, [selectedAgent, selectedDocumentType, loadDocuments]);
+  }, [selectedAgent, selectedDocumentType, selectedActivation, loadDocuments]);
 
   const handleDocumentClick = (document) => {
     openSlider(
@@ -199,7 +215,7 @@ const DataDocuments = () => {
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedAgent, selectedDocumentType]);
+  }, [searchQuery, selectedAgent, selectedDocumentType, selectedActivation]);
 
   // Handle edge case where current page is beyond available pages after filtering
   useEffect(() => {
@@ -432,6 +448,34 @@ const DataDocuments = () => {
               ))}
             </Select>
           </FormControl>
+
+          {/* Activation Selector */}
+          {selectedAgent && activations.length > 0 && (
+            <FormControl 
+              size="small" 
+              sx={{ 
+                minWidth: isMobile ? '100%' : 200,
+                '& .MuiOutlinedInput-root': {
+                  bgcolor: 'background.paper',
+                  '&:hover': {
+                    bgcolor: 'grey.50'
+                  }
+                }
+              }}
+            >
+              <InputLabel>Select Activation</InputLabel>
+              <Select
+                value={selectedActivation}
+                label="Select Activation"
+                onChange={(e) => setSelectedActivation(e.target.value)}
+              >
+                <MenuItem value=""><em>None</em></MenuItem>
+                {activations.map(activation => (
+                  <MenuItem key={activation} value={activation}>{activation}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
 
           {/* Search Box */}
           <PageFilters

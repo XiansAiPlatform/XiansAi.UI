@@ -64,20 +64,23 @@ const AgentSelector = ({
                         value={selectedAgentName}
                         onChange={(event, newValue) => handleAgentChange(newValue)}
                         getOptionLabel={(option) => option || ''}
-                        renderOption={(props, option) => (
-                            <li {...props}>
-                                <Box sx={{ 
-                                    display: 'flex', 
-                                    flexDirection: 'column',
-                                    width: '100%',
-                                    py: 0.5
-                                }}>
-                                    <Typography variant="body1" fontWeight="medium">
-                                        {option}
-                                    </Typography>
-                                </Box>
-                            </li>
-                        )}
+                        renderOption={(props, option) => {
+                            const { key, ...otherProps } = props;
+                            return (
+                                <li key={key} {...otherProps}>
+                                    <Box sx={{ 
+                                        display: 'flex', 
+                                        flexDirection: 'column',
+                                        width: '100%',
+                                        py: 0.5
+                                    }}>
+                                        <Typography variant="body1" fontWeight="medium">
+                                            {option}
+                                        </Typography>
+                                    </Box>
+                                </li>
+                            );
+                        }}
                         renderInput={(params) => (
                             <TextField 
                                 {...params} 
