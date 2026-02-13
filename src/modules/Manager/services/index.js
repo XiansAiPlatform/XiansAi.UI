@@ -3,6 +3,7 @@ export { useApiClient, getTimeRangeParams } from './api-client';
 
 // Specific API services
 export { useAgentsApi } from './agents-api';
+export { useActivationsApi } from './activations-api';
 export { useDefinitionsApi } from './definitions-api';
 export { useWorkflowApi } from './workflow-api'; 
 export { useSettingsApi } from './settings-api';

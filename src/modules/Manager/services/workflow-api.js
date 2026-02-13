@@ -42,6 +42,7 @@ export const useWorkflowApi = () => {
             agent = null, 
             workflowType = null,
             user = null,
+            idPostfix = null,
             pageSize = 20, 
             pageToken = null 
           } = options;
@@ -62,6 +63,10 @@ export const useWorkflowApi = () => {
 
           if (user) {
             queryParams.user = user;
+          }
+
+          if (idPostfix) {
+            queryParams.idPostfix = idPostfix;
           }
 
           if (pageSize) {
@@ -131,7 +136,7 @@ export const useWorkflowApi = () => {
         }
       },
 
-      startNewWorkflow: async (workflowType, agentName, parameters, flowId = null, queueName = null) => {
+      startNewWorkflow: async (workflowType, agentName, parameters, flowId = null, queueName = null, workflowIdPostfix = null) => {
         try {
           const payload = {
             workflowType,
@@ -141,8 +146,12 @@ export const useWorkflowApi = () => {
             queueName
           };
 
+          if (workflowIdPostfix != null && workflowIdPostfix !== '') {
+            payload.workflowIdPostfix = workflowIdPostfix;
+          }
+
           // Only include optional fields if they have values
-          if (!flowId) delete payload.id;
+          if (!flowId) delete payload.workflowId;
           if (!queueName) delete payload.queueName;
 
           return await apiClient.post('/api/client/workflows', payload);

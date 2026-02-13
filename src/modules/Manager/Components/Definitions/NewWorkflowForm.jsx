@@ -43,13 +43,15 @@ const NewWorkflowForm = ({ definition, onSuccess, onCancel, isMobile }) => {
       
       const flowIdToSend = workflowId || null;
       const queueNameToSend = queueType === 'named' ? queueName : null;
-      
+      const workflowIdPostfixToSend = (workflowId && workflowId.trim()) || null;
+
       await api.startNewWorkflow(
-        definition.workflowType.trim(), 
-        definition.agent.trim(), 
+        definition.workflowType.trim(),
+        definition.agent.trim(),
         parameterValues,
         flowIdToSend,
-        queueNameToSend
+        queueNameToSend,
+        workflowIdPostfixToSend
       );
       onSuccess();
       // Preserve URL search params (like org=...) when navigating
