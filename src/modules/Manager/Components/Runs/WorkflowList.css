@@ -949,6 +949,11 @@
   background: linear-gradient(135deg, rgba(25, 118, 210, 0.02) 0%, rgba(25, 118, 210, 0.05) 100%);
 }
 
+/* Activation filter section – same gradient separation before "Filter by user" */
+.filter-controls .filter-segment-activation {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.02) 0%, rgba(25, 118, 210, 0.05) 100%);
+}
+
 /* Status filter section enhancements */
 .filter-controls .status-filter {
   box-shadow: none !important;
