@@ -85,8 +85,8 @@ const DefinitionList = () => {
     );
   }
 
-  // Empty state
-  if (!definitions.length) {
+  // Empty state - show only when there are no agents at all (not when agents have no definitions)
+  if (!sortedAgentNames.length) {
     return (
       <EmptyState 
         searchQuery={searchQuery}
