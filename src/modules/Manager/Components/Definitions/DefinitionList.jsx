@@ -13,7 +13,6 @@ import { ListSkeleton } from '../../../../components/SkeletonLoaders';
 const DefinitionList = () => {
   const {
     // State
-    definitions,
     error,
     isLoading,
     openDefinitionId,
