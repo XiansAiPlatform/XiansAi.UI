@@ -17,6 +17,7 @@ import {
   Grid,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { TENANT_ROLES } from "../../constants/roles";
 
 export default function UserForm({
   initialData,
@@ -38,7 +39,6 @@ export default function UserForm({
   const [error, setError] = useState("");
   const [newTenant, setNewTenant] = useState("");
   const [newRoles, setNewRoles] = useState([]);
-  const allRoles = ["TenantAdmin", "TenantUser", "TenantParticipant"];
 
   useEffect(() => {
     if (initialData) {
@@ -224,7 +224,7 @@ export default function UserForm({
                 )}
                 disabled={loading}
               >
-                {allRoles.map((role) => (
+                {TENANT_ROLES.map((role) => (
                   <MenuItem key={role} value={role}>
                     {role}
                   </MenuItem>
@@ -307,7 +307,7 @@ export default function UserForm({
               )}
               disabled={loading || !newTenant}
             >
-              {allRoles.map((role) => (
+              {TENANT_ROLES.map((role) => (
                 <MenuItem key={role} value={role}>
                   {role}
                 </MenuItem>

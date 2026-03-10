@@ -38,6 +38,7 @@ X-Tenant-Id: {tenantId}
 - `TenantAdmin` - Full administrative access to the tenant
 - `TenantUser` - Standard user access to tenant resources
 - `TenantParticipant` - Limited participant access to tenant
+- `TenantParticipantAdmin` - Administrative access to tenant participants
 
 ### Response Format
 

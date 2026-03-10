@@ -14,6 +14,7 @@ import {
   Checkbox,
 } from "@mui/material";
 import { useTenant } from "../../contexts/TenantContext";
+import { TENANT_ROLES } from "../../constants/roles";
 
 export default function UserFormSettings({
   initialData,
@@ -31,7 +32,6 @@ export default function UserFormSettings({
   });
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState("");
-  const allRoles = ["TenantAdmin", "TenantUser", "TenantParticipant"];
 
   useEffect(() => {
     if (initialData) {
@@ -139,7 +139,7 @@ export default function UserFormSettings({
           )}
           disabled={loading}
         >
-          {allRoles.map((role) => (
+          {TENANT_ROLES.map((role) => (
             <MenuItem key={role} value={role}>
               {role}
             </MenuItem>

@@ -85,6 +85,8 @@ const isSysAdmin = userRoles.some(role => role.toLowerCase() === 'sysadmin');
 | `SysAdmin` | System Administrator | Full system access, can manage all tenants and users |
 | `TenantAdmin` | Tenant Administrator | Can manage users and settings within their tenant |
 | `TenantUser` | Tenant User | Standard user access within their tenant |
+| `TenantParticipant` | Tenant Participant | Limited participant access to tenant |
+| `TenantParticipantAdmin` | Tenant Participant Admin | Administrative access to tenant participants |
 
 ## Common Use Cases
 
