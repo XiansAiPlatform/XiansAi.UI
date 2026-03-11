@@ -19,12 +19,14 @@ import { useWorkflowApi } from '../../services/workflow-api';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PersonIcon from '@mui/icons-material/Person';
 import ViewListIcon from '@mui/icons-material/ViewList';
+import LabelIcon from '@mui/icons-material/Label';
 import StopCircleIcon from '@mui/icons-material/StopCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import { useLoading } from '../../contexts/LoadingContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { handleApiError } from '../../utils/errorHandler';
 import AgentSelector from './AgentSelector';
+import ActivationSelector from './ActivationSelector';
 import WorkflowTypeSelector from './WorkflowTypeSelector';
 import PaginationControls from './PaginationControls';
 import WorkflowRunCard from './WorkflowRunCard';
@@ -40,6 +42,7 @@ const WorkflowList = () => {
   // New pagination state
   const [workflows, setWorkflows] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectedActivation, setSelectedActivation] = useState(null);
   const [selectedWorkflowType, setSelectedWorkflowType] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('');
@@ -88,6 +91,7 @@ const WorkflowList = () => {
         agent: selectedAgent,
         workflowType: selectedWorkflowType,
         user: debouncedUser || null,
+        idPostfix: selectedActivation || null,
         pageSize: pageSize,
         pageToken: pageToken
       };
@@ -122,7 +126,7 @@ const WorkflowList = () => {
     setCurrentPage(1);
     loadPaginatedWorkflows(null, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, selectedAgent, selectedWorkflowType, debouncedUser, pageSize]);
+  }, [statusFilter, selectedAgent, selectedActivation, selectedWorkflowType, debouncedUser, pageSize]);
 
   // Show hint when navigated from NewWorkflowForm
   useEffect(() => {
@@ -159,6 +163,11 @@ const WorkflowList = () => {
 
   const handleWorkflowTypeChange = (workflowType) => {
     setSelectedWorkflowType(workflowType);
+    setCurrentPage(1);
+  };
+
+  const handleActivationChange = (activation) => {
+    setSelectedActivation(activation);
     setCurrentPage(1);
   };
 
@@ -203,6 +212,7 @@ const WorkflowList = () => {
           agent: selectedAgent,
           workflowType: selectedWorkflowType,
           user: debouncedUser || null,
+          idPostfix: selectedActivation || null,
           pageSize: pageSizeForBulk,
           pageToken: page > 1 ? String(page) : null,
         });
@@ -439,6 +449,27 @@ const WorkflowList = () => {
                   </Box>
                 )}
 
+                {/* Activation Filter */}
+                <Box
+                  className="filter-segment-activation"
+                  sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  px: 2,
+                  py: 1,
+                  minWidth: isMobile ? 'auto' : '200px'
+                }}>
+                  <LabelIcon sx={{ fontSize: 20, color: 'var(--primary)' }} />
+                  <ActivationSelector
+                    selectedActivation={selectedActivation}
+                    onActivationChange={handleActivationChange}
+                    disabled={isLoading}
+                    size="small"
+                    showAllOption={true}
+                  />
+                </Box>
+
                 {/* User Filter */}
                 <TextField
                   size="small"
@@ -559,7 +590,7 @@ const WorkflowList = () => {
               </Box>
 
               {/* Third Row - Active Filters Display */}
-              {(selectedAgent || selectedWorkflowType || debouncedUser || (statusFilter && statusFilter !== 'all')) && (
+              {(selectedAgent || selectedActivation || selectedWorkflowType || debouncedUser || (statusFilter && statusFilter !== 'all')) && (
                 <Box sx={{ 
                   display: 'flex', 
                   gap: 1, 
@@ -571,6 +602,25 @@ const WorkflowList = () => {
                       label={`Agent: ${selectedAgent}`}
                       size="small"
                       onDelete={() => handleAgentChange(null)}
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: 'var(--primary-color)',
+                        fontWeight: 500,
+                        border: '1px solid rgba(25, 118, 210, 0.2)',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'var(--primary-color)',
+                          '&:hover': {
+                            color: 'var(--primary-dark)'
+                          }
+                        }
+                      }}
+                    />
+                  )}
+                  {selectedActivation && (
+                    <Chip 
+                      label={`Activation: ${selectedActivation}`}
+                      size="small"
+                      onDelete={() => handleActivationChange(null)}
                       sx={{
                         backgroundColor: 'rgba(25, 118, 210, 0.08)',
                         color: 'var(--primary-color)',
@@ -677,6 +727,7 @@ const WorkflowList = () => {
                 {(() => {
                   const filters = [];
                   if (selectedAgent) filters.push(`agent "${selectedAgent}"`);
+                  if (selectedActivation) filters.push(`activation "${selectedActivation}"`);
                   if (selectedWorkflowType) filters.push(`type "${selectedWorkflowType}"`);
                   if (debouncedUser) filters.push(`user "${debouncedUser}"`);
                   
@@ -760,8 +811,8 @@ const WorkflowList = () => {
           </Paper>
         ) : (
           <EmptyState
-            title={isLoading ? 'Loading Workflow Runs...' : (selectedAgent || debouncedUser) ? 'No Workflow Runs Found' : 'No Workflow Runs Found'}
-            description={(selectedAgent || debouncedUser) ? 
+            title={isLoading ? 'Loading Workflow Runs...' : (selectedAgent || selectedActivation || debouncedUser) ? 'No Workflow Runs Found' : 'No Workflow Runs Found'}
+            description={(selectedAgent || selectedActivation || debouncedUser) ? 
               'Try changing the filters or check if workflows have been started matching your criteria.' :
               'To get started, navigate to Flow Definitions to create and activate new workflow definitions.'}
             context="runs"
@@ -789,6 +840,7 @@ const WorkflowList = () => {
         title={(() => {
           const filters = [];
           if (selectedAgent) filters.push(`"${selectedAgent}"`);
+          if (selectedActivation) filters.push(`Activation: "${selectedActivation}"`);
           if (selectedWorkflowType) filters.push(`Type: "${selectedWorkflowType}"`);
           if (debouncedUser) filters.push(`User: "${debouncedUser}"`);
           
@@ -799,6 +851,7 @@ const WorkflowList = () => {
         message={(() => {
           const filters = [];
           if (selectedAgent) filters.push('agent');
+          if (selectedActivation) filters.push('activation');
           if (selectedWorkflowType) filters.push('workflow type');
           if (debouncedUser) filters.push('user');
           
