@@ -13,7 +13,6 @@ import {
   Edit, 
   Delete, 
   KeyboardArrowDown,
-  FolderOpen,
   CloudOutlined,
   BusinessOutlined,
   ExtensionOutlined

@@ -41,6 +41,7 @@ import { useTenant } from "../../contexts/TenantContext";
 import { useSlider } from "../../contexts/SliderContext";
 import { useLoading } from "../../contexts/LoadingContext";
 import UserFormSettings from "./UserFormSettings";
+import { TENANT_ROLES, TENANT_ROLE_METADATA } from "../../constants/roles";
 import ConfirmationDialog from "../Common/ConfirmationDialog";
 import { useConfirmation } from "../Common/useConfirmation";
 
@@ -725,30 +726,18 @@ export default function TenantUserManagement() {
                   </Box>
                 )}
               >
-                <MenuItem value="TenantAdmin">
-                  <Box>
-                    <Typography variant="body1">Tenant Admin</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Full administrative access to the tenant
-                    </Typography>
-                  </Box>
-                </MenuItem>
-                <MenuItem value="TenantUser">
-                  <Box>
-                    <Typography variant="body1">Tenant User</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Standard user access to tenant resources
-                    </Typography>
-                  </Box>
-                </MenuItem>
-                <MenuItem value="TenantParticipant">
-                  <Box>
-                    <Typography variant="body1">Tenant Participant</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Limited participant access to tenant
-                    </Typography>
-                  </Box>
-                </MenuItem>
+                {TENANT_ROLES.map((role) => (
+                  <MenuItem key={role} value={role}>
+                    <Box>
+                      <Typography variant="body1">
+                        {TENANT_ROLE_METADATA[role]?.label ?? role}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {TENANT_ROLE_METADATA[role]?.description ?? ""}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
 

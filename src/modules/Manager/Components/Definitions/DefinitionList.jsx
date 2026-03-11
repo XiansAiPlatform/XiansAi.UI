@@ -13,7 +13,6 @@ import { ListSkeleton } from '../../../../components/SkeletonLoaders';
 const DefinitionList = () => {
   const {
     // State
-    definitions,
     error,
     isLoading,
     openDefinitionId,
@@ -85,8 +84,8 @@ const DefinitionList = () => {
     );
   }
 
-  // Empty state
-  if (!definitions.length) {
+  // Empty state - show only when there are no agents at all (not when agents have no definitions)
+  if (!sortedAgentNames.length) {
     return (
       <EmptyState 
         searchQuery={searchQuery}
