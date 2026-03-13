@@ -301,12 +301,29 @@ export default function TenantManagement() {
                         color="primary"
                       />
                       <Box>
-                        <Typography
-                          variant="subtitle1"
-                          sx={{ fontWeight: 500 }}
-                        >
-                          {tenant.name || tenant.tenantName}
-                        </Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Typography
+                            variant="subtitle1"
+                            sx={{ fontWeight: 500 }}
+                          >
+                            {tenant.name}
+                          </Typography>
+                          {tenant.tenantId && (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                px: 1,
+                                py: 0.25,
+                                borderRadius: 1,
+                                backgroundColor: "var(--bg-muted, rgba(0,0,0,0.06))",
+                                color: "text.secondary",
+                                fontFamily: "monospace",
+                              }}
+                            >
+                              {tenant.tenantId}
+                            </Typography>
+                          )}
+                        </Box>
                         {tenant.description && (
                           <Typography variant="body2" color="text.secondary">
                             {tenant.description}
@@ -418,7 +435,7 @@ export default function TenantManagement() {
             onChange={handleCreateFormChange("domain")}
             required={false}
             sx={{ mb: 2 }}
-            helperText="Domain associated with this tenant"
+            helperText="Email domain associated with this tenant. if Specified any user from that domain can login to AgentStudio automatically."
           />
           <TextField
             margin="dense"
