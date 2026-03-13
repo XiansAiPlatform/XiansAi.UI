@@ -4,6 +4,7 @@ import {
     Typography,
     Button,
     Input,
+    TextField,
     Stack,
     CircularProgress,
     Grid,
@@ -17,17 +18,12 @@ import {
     DialogContent,
     DialogContentText,
     DialogActions,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select
 } from "@mui/material";
 import { useState, useEffect } from 'react';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import './Settings.css';
-import { colorThemes } from '../../theme/mui-theme';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { useTenantsApi } from '../../services/tenants-api';
 import { useTenant } from '../../contexts/TenantContext'; 
@@ -38,12 +34,10 @@ const BrandingSettings = () => {
     const [logoFile, setLogoFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
     const [isUploading, setIsUploading] = useState(false);    
-    const [primaryColor, setPrimaryColor] = useState('#0ea5e9');
-    const [secondaryColor, setSecondaryColor] = useState('#dc004e');
     const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [logoInfo, setLogoInfo] = useState({ width: 0, height: 0 });
-    const [selectedTheme, setSelectedTheme] = useState('default');
+    const [selectedTheme, setSelectedTheme] = useState('');
     const { tenant, fetchTenant, isAdmin } = useTenant();
     
     // Add a state variable to hold the tenantId
@@ -300,16 +294,10 @@ const BrandingSettings = () => {
                 img.src = URL.createObjectURL(file);
             }
         });
-    };    // Handle theme selection change
+    };
+
     const handleThemeChange = (event) => {
-        const themeName = event.target.value;
-        setSelectedTheme(themeName);
-        
-        // Set primary and secondary colors from selected theme
-        if (colorThemes[themeName]) {
-            setPrimaryColor(colorThemes[themeName].primary.main);
-            setSecondaryColor(colorThemes[themeName].secondary.main);
-        }
+        setSelectedTheme(event.target.value);
     };
 
     // Load tenant data
@@ -336,23 +324,10 @@ const BrandingSettings = () => {
                     }
                     
                     // Load theme name
-                    if (tenant.theme && colorThemes[tenant.theme]) {
+                    if (tenant.theme) {
                         setSelectedTheme(tenant.theme);
-                        
-                        // Update color pickers based on the selected theme
-                        if (colorThemes[tenant.theme]) {
-                            setPrimaryColor(colorThemes[tenant.theme].primary.main);
-                            setSecondaryColor(colorThemes[tenant.theme].secondary.main);
-                        }
                     }
 
-                    // Load colors if available
-                    if (tenant?.primaryColor) {
-                        setPrimaryColor(tenant.primaryColor);
-                    }
-                    if (tenant?.secondaryColor) {
-                        setSecondaryColor(tenant.secondaryColor);
-                    }
                 } catch (error) {
                     console.error('Error processing tenant data:', error);
                 }
@@ -542,83 +517,15 @@ const BrandingSettings = () => {
                                     <Typography variant="subtitle1" gutterBottom>
                                         Theme Selection
                                     </Typography>
-                                    <FormControl fullWidth sx={{ mb: 2 }}>
-                                        <InputLabel id="theme-select-label">Theme</InputLabel>
-                                        <Select
-                                            labelId="theme-select-label"
-                                            id="theme-select"
-                                            value={selectedTheme}
-                                            label="Theme"
-                                            onChange={handleThemeChange}
-                                        >                                            
-                                            <MenuItem value="default">Default Theme</MenuItem>
-                                            <MenuItem value="nordicMidnightSun">Midnight Sun (Midnattssol)</MenuItem>
-                                            <MenuItem value="nordicForest">Forest (Skogsrike)</MenuItem>
-                                            <MenuItem value="nordicIce">Ice (Isblink)</MenuItem>
-                                            <MenuItem value="nordicAurora">Aurora (Nordlys)</MenuItem>
-                                            <MenuItem value="nordicFjord">Fjord (Fjordblå)</MenuItem>
-                                            <MenuItem value="nordicWinter">Winter (Vintervit)</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Box>
-                                
-                                <Box>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        Primary Color
-                                    </Typography>
-
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Box
-                                            sx={{
-                                                width: 48,
-                                                height: 48,
-                                                bgcolor: primaryColor,
-                                                borderRadius: '4px',
-                                                border: '1px solid #ddd',
-                                                mr: 2
-                                            }}
-                                        />
-
-                                        <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
-                                            {primaryColor.toUpperCase()}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Box>
-                                    <Typography variant="subtitle1" gutterBottom>
-                                        Secondary Color
-                                    </Typography>
-
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Box
-                                            sx={{
-                                                width: 48,
-                                                height: 48,
-                                                bgcolor: secondaryColor,
-                                                borderRadius: '4px',
-                                                border: '1px solid #ddd',
-                                                mr: 2
-                                            }}
-                                        />
-
-                                        <Typography variant="body2" sx={{ ml: 2, color: 'text.secondary' }}>
-                                            {secondaryColor.toUpperCase()}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Box sx={{ mt: 2 }}>
-                                    <Typography variant="subtitle1">Preview</Typography>
-                                    <Box sx={{ mt: 1, display: 'flex', gap: 2 }}>
-                                        <Button variant="contained" sx={{ bgcolor: primaryColor, '&:hover': { bgcolor: primaryColor } }}>
-                                            Primary Button
-                                        </Button>
-
-                                        <Button variant="contained" color="secondary" sx={{ bgcolor: secondaryColor, '&:hover': { bgcolor: secondaryColor } }}>
-                                            Secondary Button
-                                        </Button>
-                                    </Box>
+                                    <TextField
+                                        fullWidth
+                                        label="Theme Name"
+                                        value={selectedTheme}
+                                        onChange={handleThemeChange}
+                                        placeholder="Enter theme name"
+                                        helperText="This theme will be applied to the associated application."
+                                        sx={{ mb: 2 }}
+                                    />
                                 </Box>
                             </Stack>
                         </CardContent>

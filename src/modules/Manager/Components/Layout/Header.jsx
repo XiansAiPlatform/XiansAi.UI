@@ -276,6 +276,22 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                   value={selectedOrg || ''}
                   onChange={handleOrgChange}
                   displayEmpty
+                  renderValue={(value) => {
+                    if (!value) return <span style={{ color: 'var(--text-muted)' }}>Select Organization</span>;
+                    const tenantName = tenant?.name && tenant.name !== value ? tenant.name : null;
+                    return (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.825rem' }}>
+                          {tenantName || value}
+                        </span>
+                        {tenantName && (
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary, #888)', fontFamily: 'monospace', letterSpacing: '0.02em' }}>
+                            {value}
+                          </span>
+                        )}
+                      </Box>
+                    );
+                  }}
                   sx={{
                     fontSize: '0.825rem',
                     fontWeight: 500,
@@ -298,7 +314,16 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                   </MenuItem>
                   {organizations.map((org, index) => (
                     <MenuItem key={index} value={org}>
-                      {org}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                        <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>
+                          {org === selectedOrg && tenant?.name && tenant.name !== org ? tenant.name : org}
+                        </span>
+                        {org === selectedOrg && tenant?.name && tenant.name !== org && (
+                          <span style={{ fontSize: '0.72rem', color: '#888', fontFamily: 'monospace' }}>
+                            {org}
+                          </span>
+                        )}
+                      </Box>
                     </MenuItem>
                   ))}
                 </Select>

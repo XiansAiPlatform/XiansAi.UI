@@ -11,10 +11,13 @@ import { useTenantsApi } from "../../services/tenants-api";
 
 export default function TenantInfoForm({ tenant, onClose, onSaved }) {
   const tenantsApi = useTenantsApi();
+  const tenantId = tenant.tenantId || tenant.id || "";
+
   const [form, setForm] = useState({
     name: tenant.name || "",
     domain: tenant.domain || "",
     description: tenant.description || "",
+    timezone: tenant.timezone || "",
     enabled: tenant.enabled !== false,
   });
   const [loading, setLoading] = useState(false);
@@ -50,6 +53,15 @@ export default function TenantInfoForm({ tenant, onClose, onSaved }) {
         </Alert>
       )}
       <TextField
+        label="Tenant ID"
+        value={tenantId}
+        fullWidth
+        margin="normal"
+        InputProps={{ readOnly: true }}
+        disabled
+        helperText="Tenant ID cannot be changed"
+      />
+      <TextField
         label="Name"
         name="name"
         value={form.name}
@@ -67,7 +79,7 @@ export default function TenantInfoForm({ tenant, onClose, onSaved }) {
         fullWidth
         margin="normal"
         disabled={loading}
-        helperText="Domain associated with this tenant"
+        helperText="Email domain associated with this tenant. if Specified any user from that domain can login to AgentStudio automatically."
       />
       <TextField
         label="Description"
@@ -77,6 +89,16 @@ export default function TenantInfoForm({ tenant, onClose, onSaved }) {
         fullWidth
         margin="normal"
         disabled={loading}
+      />
+      <TextField
+        label="Timezone"
+        name="timezone"
+        value={form.timezone}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        disabled={loading}
+        helperText="e.g. America/New_York, Europe/London, UTC"
       />
       <FormControlLabel
         control={
