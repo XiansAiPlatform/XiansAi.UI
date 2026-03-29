@@ -4,10 +4,9 @@ import CACertificates from './AppServerSettings';
 import BrandingSettings from './BrandingSettings';
 import ApiKeySettings from './ApiKeySettings';
 import './Settings.css';
-import { useTenant } from '../../contexts/TenantContext'; 
-import ApproveUserRequests from "./ApproveUserRequests";
-import InviteUser from "./InviteUser";
+import { useTenant } from '../../contexts/TenantContext';
 import TenantUserManagement from "./TenantUserManagement";
+import ApproveUserRequests from "./ApproveUserRequests";
 import TenantAuthSettings from './TenantAuthSettings';
 import PageLayout from '../Common/PageLayout';
 
@@ -35,16 +34,13 @@ const Settings = () => {
 
     tabs.push({ label: "API Keys", component: <ApiKeySettings /> });
     tabs.push({ label: "Open ID Connect", component: <TenantAuthSettings /> });
-    tabs.push({ label: "Users", component: null }); // Will be handled by sub-tabs
+    tabs.push({ label: "Tenant Users", component: null }); // Sub-tabs: management + approve requests
     tabs.push({ label: "Branding", component: <BrandingSettings /> });
   }
 
-  // Sub-tabs for Users section
   const userSubTabs = [
     { label: "User Management", component: <TenantUserManagement /> },
-    { label: "Invite Users", component: <InviteUser /> },
-    { label: "Approve Requests", component: <ApproveUserRequests /> }
-
+    { label: "Approve Requests", component: <ApproveUserRequests /> },
   ];
 
   // Check if current tab is the Users tab
@@ -55,8 +51,8 @@ const Settings = () => {
       return (
         <Box>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs 
-              value={currentUserSubTab} 
+            <Tabs
+              value={currentUserSubTab}
               onChange={handleUserSubTabChange}
               aria-label="user management sub-tabs"
               sx={{
@@ -75,7 +71,7 @@ const Settings = () => {
                 },
               }}
             >
-              {userSubTabs.map((tab, idx) => (
+              {userSubTabs.map((tab) => (
                 <Tab key={tab.label} label={tab.label} />
               ))}
             </Tabs>
@@ -85,9 +81,8 @@ const Settings = () => {
           </Box>
         </Box>
       );
-    } else {
-      return tabs[currentTab]?.component;
     }
+    return tabs[currentTab]?.component;
   };
 
   return (
@@ -119,13 +114,9 @@ const Settings = () => {
         </Tabs>
       </Box>
 
-      <PageLayout title="Tenant Settings">
+      <PageLayout title="Tenant Admin Settings">
         <Box className="settings-container">
-          <Alert severity="info" className="info-alert" sx={{ mb: 3 }}>
-            These settings are required for your agent to run.
-            <br />
-            Configure the certificate and server url in the Agent Settings.
-          </Alert>
+
 
           <Box role="tabpanel">
             {renderTabContent()}

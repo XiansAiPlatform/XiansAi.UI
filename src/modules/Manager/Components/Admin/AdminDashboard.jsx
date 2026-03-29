@@ -43,7 +43,7 @@ export default function AdminDashboard() {
         </Tabs>
       </Box>
 
-      <PageLayout title="System Admin">
+      <PageLayout title="System Admin Settings">
         <Box className="settings-container">
           <Paper 
             elevation={0} 
