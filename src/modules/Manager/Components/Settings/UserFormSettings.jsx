@@ -28,26 +28,30 @@ export default function UserFormSettings({
     name: "",
     email: "",
     isSysAdmin: false,
-    active: true,
+    approvedForTenant: true,
   });
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (initialData) {
+      const tenantRole = (initialData.tenantRoles || []).find(
+        (tr) => tr.tenant === tenant?.tenantId
+      );
+      const isApproved =
+        tenantRole != null
+          ? (tenantRole.is_approved ?? tenantRole.isApproved) !== false
+          : true;
       setForm({
         name: initialData.name || "",
         email: initialData.email || "",
         isSysAdmin: !!initialData.isSysAdmin,
-        active: initialData.isLockedOut === false,
+        approvedForTenant: isApproved,
       });
-      // Find roles for the current tenant only
-      const tenantRole = (initialData.tenantRoles || []).find(
-        (tr) => tr.tenant === tenant?.tenantId
-      );
-      setRoles(tenantRole ? tenantRole.roles : []);
+      setRoles(tenantRole?.roles ?? []);
     } else {
       setRoles([]);
+      setForm((prev) => ({ ...prev, approvedForTenant: true }));
     }
   }, [initialData, tenant]);
 
@@ -76,7 +80,7 @@ export default function UserFormSettings({
         {
           tenant: tenant.tenantId,
           roles,
-          isApproved: true,
+          isApproved: form.approvedForTenant,
         },
       ];
       await onSave({ ...form, userId: initialData?.userId, tenantRoles });
@@ -114,13 +118,13 @@ export default function UserFormSettings({
         <FormControlLabel
         control={
           <Checkbox
-            name="active"
-            checked={form.active}
+            name="approvedForTenant"
+            checked={form.approvedForTenant}
             onChange={handleChange}
             disabled={loading}
           />
         }
-        label="Active"
+        label="Approved for Tenant"
       />
       </Box>
       <FormControl size="small" sx={{ minWidth: 180, mt: 2 }}>

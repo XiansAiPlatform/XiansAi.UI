@@ -32,6 +32,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -180,6 +181,26 @@ export default function TenantUserManagement() {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
   };
+
+  /** Global account lock (system admin), not tenant approval. */
+  const isSystemLockedOut = (user) =>
+    user.isLockedOut === true || user.is_locked_out === true;
+
+  const getLockMetadataLines = (user) => {
+    const lines = [];
+    const by = user.lockedOutBy ?? user.locked_out_by;
+    const reason = user.lockedOutReason ?? user.locked_out_reason;
+    const at = user.lockedOutAt ?? user.locked_out_at;
+    if (by) lines.push(`By: ${by}`);
+    if (reason) lines.push(reason);
+    if (at) lines.push(`At: ${formatDate(at)}`);
+    return lines;
+  };
+
+  const getSystemLockoutTooltipLines = (user) => [
+    "This account is locked by a system administrator.",
+    ...getLockMetadataLines(user),
+  ];
 
   const getTenantRolesDisplay = (tenantRoles) => {
     if (!tenantRoles || tenantRoles.length === 0) return "No tenants";
@@ -464,7 +485,7 @@ export default function TenantUserManagement() {
             startIcon={<PersonAddIcon />}
             onClick={handleOpenAddUserDialog}
           >
-            Add Existing User to Tenant
+            Add Existing to Tenant
           </Button>
           <Button
             variant="contained"
@@ -514,7 +535,12 @@ export default function TenantUserManagement() {
               <TableRow>
                 <TableCell>Name</TableCell>
                 <TableCell>Email</TableCell>
-                <TableCell>Status</TableCell>
+                <TableCell>Approved</TableCell>
+                <TableCell>
+                  <Tooltip title="Global account lock applied by a system administrator (not tenant approval).">
+                    <span>System lock</span>
+                  </Tooltip>
+                </TableCell>
                 <TableCell>Tenant Roles</TableCell>
                 <TableCell>Created</TableCell>
                 <TableCell>Actions</TableCell>
@@ -526,22 +552,54 @@ export default function TenantUserManagement() {
                   <TableCell>{user.name}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>
-                    {user.isLockedOut ? (
-                      <Chip
-                        label="Locked"
-                        color="error"
-                        size="small"
-                        icon={<LockIcon />}
-                        onClick={() => {}}
-                      />
+                    {(() => {
+                      const tr = (user.tenantRoles || []).find(
+                        (x) => x.tenant === tenant.tenantId
+                      );
+                      const approved =
+                        (tr?.is_approved ?? tr?.isApproved) !== false;
+                      return approved ? (
+                        <Chip
+                          label="Approved"
+                          color="success"
+                          size="small"
+                          icon={<LockOpenIcon />}
+                          onClick={() => {}}
+                        />
+                      ) : (
+                        <Chip
+                          label="Pending"
+                          color="warning"
+                          size="small"
+                          icon={<LockIcon />}
+                          onClick={() => {}}
+                        />
+                      );
+                    })()}
+                  </TableCell>
+                  <TableCell>
+                    {isSystemLockedOut(user) ? (
+                      <Tooltip
+                        title={
+                          <Box
+                            component="span"
+                            sx={{ whiteSpace: "pre-line", display: "block" }}
+                          >
+                            {getSystemLockoutTooltipLines(user).join("\n")}
+                          </Box>
+                        }
+                      >
+                        <Chip
+                          label="Locked"
+                          color="error"
+                          size="small"
+                          icon={<AdminPanelSettingsIcon />}
+                        />
+                      </Tooltip>
                     ) : (
-                      <Chip
-                        label="Active"
-                        color="success"
-                        size="small"
-                        icon={<LockOpenIcon />}
-                        onClick={() => {}}
-                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Not locked
+                      </Typography>
                     )}
                   </TableCell>
                   <TableCell>
