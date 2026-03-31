@@ -63,7 +63,6 @@ const WorkflowList = () => {
   // Bulk terminate state
   const [confirmTerminateOpen, setConfirmTerminateOpen] = useState(false);
   const [isTerminatingAll, setIsTerminatingAll] = useState(false);
-  const [terminateProgress, setTerminateProgress] = useState({ total: 0, completed: 0 });
 
   // Debounce user filter input
   useEffect(() => {
@@ -198,70 +197,15 @@ const WorkflowList = () => {
       setConfirmTerminateOpen(false);
       setIsTerminatingAll(true);
 
-      // Gather all running workflow IDs across pages (respecting selected agent)
-      let page = 1;
-      const pageSizeForBulk = 100;
-      let allIds = [];
-      // Force status to running for bulk termination regardless of current filter
-      // but if user selected a specific agent, respect it
-      // Loop through pages until no next page
-      // Use nextPageToken if provided, otherwise increment page
-      while (true) {
-        const response = await api.fetchPaginatedWorkflowRuns({
-          status: 'running',
-          agent: selectedAgent,
-          workflowType: selectedWorkflowType,
-          user: debouncedUser || null,
-          idPostfix: selectedActivation || null,
-          pageSize: pageSizeForBulk,
-          pageToken: page > 1 ? String(page) : null,
-        });
-        const workflowsPage = response?.workflows || [];
-        const ids = workflowsPage.map(w => w.workflowId).filter(Boolean);
-        allIds.push(...ids);
+      await api.cancelAllWorkflows(true);
 
-        if (response?.hasNextPage) {
-          if (response?.nextPageToken) {
-            const next = parseInt(response.nextPageToken, 10);
-            page = Number.isNaN(next) ? page + 1 : next;
-          } else {
-            page += 1;
-          }
-        } else {
-          break;
-        }
-      }
-
-      // Deduplicate IDs
-      allIds = Array.from(new Set(allIds));
-
-      if (allIds.length === 0) {
-        showSuccess('No running workflows to terminate.');
-        return;
-      }
-
-      setTerminateProgress({ total: allIds.length, completed: 0 });
-
-      // Execute cancellations sequentially to avoid server overload
-      for (let i = 0; i < allIds.length; i += 1) {
-        const id = allIds[i];
-        try {
-          await api.executeWorkflowCancelAction(id, true);
-        } catch (err) {
-          console.error('Failed to terminate workflow', id, err);
-        }
-        setTerminateProgress(prev => ({ ...prev, completed: i + 1 }));
-      }
-
-      showSuccess(`Termination requests sent for ${allIds.length} workflow${allIds.length === 1 ? '' : 's'}.`);
-      // Refresh list (stay on current page)
+      showSuccess('Terminate requests sent for all running workflows.');
       await loadPaginatedWorkflows(currentPage > 1 ? String(currentPage) : null, false);
     } catch (error) {
       console.error('Bulk terminate failed', error);
       showError('Failed to terminate workflows. Please try again.');
     } finally {
       setIsTerminatingAll(false);
-      setTerminateProgress({ total: 0, completed: 0 });
     }
   };
 
@@ -750,7 +694,7 @@ const WorkflowList = () => {
               }}>
                 <StopCircleIcon fontSize="small" />
                 <Typography variant="body2">
-                  Terminating {terminateProgress.completed}/{terminateProgress.total} running workflow{terminateProgress.total === 1 ? '' : 's'}...
+                  Sending terminate requests for all running workflows...
                 </Typography>
               </Box>
             )}
@@ -837,28 +781,8 @@ const WorkflowList = () => {
       {/* Confirm bulk terminate */}
       <ConfirmationDialog
         open={confirmTerminateOpen}
-        title={(() => {
-          const filters = [];
-          if (selectedAgent) filters.push(`"${selectedAgent}"`);
-          if (selectedActivation) filters.push(`Activation: "${selectedActivation}"`);
-          if (selectedWorkflowType) filters.push(`Type: "${selectedWorkflowType}"`);
-          if (debouncedUser) filters.push(`User: "${debouncedUser}"`);
-          
-          return filters.length > 0 
-            ? `Terminate all running for ${filters.join(', ')}?`
-            : 'Terminate all running workflows?';
-        })()}
-        message={(() => {
-          const filters = [];
-          if (selectedAgent) filters.push('agent');
-          if (selectedActivation) filters.push('activation');
-          if (selectedWorkflowType) filters.push('workflow type');
-          if (debouncedUser) filters.push('user');
-          
-          return filters.length > 0
-            ? `This will send terminate requests for all currently running workflows for the selected ${filters.join(', ')}. This action cannot be undone.`
-            : 'This will send terminate requests for all currently running workflows you have access to. This action cannot be undone.';
-        })()}
+        title="Terminate all running workflows?"
+        message="This will immediately terminate all currently running workflows for the tenant. This action cannot be undone."
         confirmLabel="Terminate all"
         cancelLabel="Cancel"
         severity="error"

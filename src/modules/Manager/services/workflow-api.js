@@ -140,6 +140,15 @@ export const useWorkflowApi = () => {
         }
       },
 
+      cancelAllWorkflows: async (force = true) => {
+        try {
+          return await apiClient.post('/api/client/workflows/cancel-all', null, { force });
+        } catch (error) {
+          console.error('Failed to cancel all workflows:', error);
+          throw error;
+        }
+      },
+
       startNewWorkflow: async (workflowType, agentName, parameters, flowId = null, queueName = null, workflowIdPostfix = null) => {
         try {
           const payload = {

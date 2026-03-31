@@ -191,6 +191,19 @@ export const useScheduleApi = () => {
           console.error(`Failed to delete schedules for agent ${agentName}:`, error);
           throw error;
         }
+      },
+
+      /**
+       * Deletes all schedules for the current tenant
+       * @returns {Promise<void>}
+       */
+      deleteAllSchedules: async () => {
+        try {
+          return await apiClient.delete('/api/client/schedules/all');
+        } catch (error) {
+          console.error('Failed to delete all schedules:', error);
+          throw error;
+        }
       }
     };
   }, [apiClient]);
