@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import * as React from 'react';
-import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip } from '@mui/material';
+import { Box, Typography, Menu, MenuItem, Avatar, Select, FormControl, IconButton, Tooltip, TextField, InputAdornment, ListSubheader } from '@mui/material';
 import './Layout.css'; // Import the CSS file
 import { useAuth } from '../../auth/AuthContext';
 import LogoutIcon from '@mui/icons-material/Logout';
 import BusinessIcon from '@mui/icons-material/Business';
 import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
 import { useSelectedOrg } from '../../contexts/OrganizationContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -18,7 +19,15 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
-  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768); 
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
+  const [orgSearch, setOrgSearch] = React.useState('');
+  const orgSearchInputRef = React.useRef(null);
+  const filteredOrgs = React.useMemo(
+    () => organizations.filter((org) =>
+      org.toLowerCase().includes(orgSearch.toLowerCase())
+    ),
+    [organizations, orgSearch]
+  );
    const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });    
    const [logoImage, setLogoImage] = React.useState(null);
   const { tenant } = useTenant();
@@ -131,9 +140,7 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
   const handleOrgChange = (event) => {
     const newOrg = event.target.value;
     setSelectedOrg(newOrg);
-    
-    // The OrganizationContext will handle updating the URL parameter
-    // No need to navigate away from current page
+    setOrgSearch('');
   };
 
   const handleMenu = (event) => {
@@ -248,7 +255,6 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
           alignItems: 'center',
           gap: isMobile ? '12px' : '20px'
         }}>
-          <Tooltip title="Select organization">
             <Box sx={{
               display: 'flex',
               alignItems: 'center',
@@ -275,6 +281,14 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                   <Select
                   value={selectedOrg || ''}
                   onChange={handleOrgChange}
+                  onOpen={() => {
+                    requestAnimationFrame(() => orgSearchInputRef.current?.focus());
+                  }}
+                  onClose={() => setOrgSearch('')}
+                  MenuProps={{
+                    autoFocus: false,
+                    disableAutoFocusItem: true,
+                  }}
                   displayEmpty
                   renderValue={(value) => {
                     if (!value) return <span style={{ color: 'var(--text-muted)' }}>Select Organization</span>;
@@ -309,27 +323,59 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                     }
                   }}
                 >
-                  <MenuItem disabled value="">
-                    Select Organization
-                  </MenuItem>
-                  {organizations.map((org, index) => (
-                    <MenuItem key={index} value={org}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
-                        <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>
-                          {org === selectedOrg && tenant?.name && tenant.name !== org ? tenant.name : org}
-                        </span>
-                        {org === selectedOrg && tenant?.name && tenant.name !== org && (
-                          <span style={{ fontSize: '0.72rem', color: '#888', fontFamily: 'monospace' }}>
-                            {org}
-                          </span>
-                        )}
-                      </Box>
+                  <ListSubheader sx={{ p: 0, lineHeight: 'normal', backgroundColor: 'white' }}>
+                    <TextField
+                      size="small"
+                      placeholder="Search organizations..."
+                      value={orgSearch}
+                      onChange={(e) => setOrgSearch(e.target.value)}
+                      onKeyDown={(e) => e.stopPropagation()}
+                      onClick={(e) => e.stopPropagation()}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      inputRef={orgSearchInputRef}
+                      autoFocus
+                      fullWidth
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <SearchIcon sx={{ fontSize: '16px', color: 'var(--text-secondary)' }} />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        px: 1,
+                        pt: 1,
+                        pb: 0.5,
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.8rem',
+                          borderRadius: 'var(--radius-md)',
+                        }
+                      }}
+                    />
+                  </ListSubheader>
+                  {filteredOrgs.length === 0 ? (
+                    <MenuItem disabled sx={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                      No organizations found
                     </MenuItem>
-                  ))}
+                  ) : (
+                    filteredOrgs.map((org) => (
+                      <MenuItem key={org} value={org}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                          <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>
+                            {org === selectedOrg && tenant?.name && tenant.name !== org ? tenant.name : org}
+                          </span>
+                          {org === selectedOrg && tenant?.name && tenant.name !== org && (
+                            <span style={{ fontSize: '0.72rem', color: '#888', fontFamily: 'monospace' }}>
+                              {org}
+                            </span>
+                          )}
+                        </Box>
+                      </MenuItem>
+                    ))
+                  )}
                 </Select>
               </FormControl>
             </Box>
-          </Tooltip>
 
           <Box sx={{
             display: 'flex',
