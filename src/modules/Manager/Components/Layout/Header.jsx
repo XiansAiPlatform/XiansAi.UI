@@ -18,15 +18,18 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const { selectedOrg, setSelectedOrg, organizations } = useSelectedOrg();
+  const { selectedOrg, setSelectedOrg, organizations, orgNamesMap } = useSelectedOrg();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth <= 768);
   const [orgSearch, setOrgSearch] = React.useState('');
   const orgSearchInputRef = React.useRef(null);
   const filteredOrgs = React.useMemo(
-    () => organizations.filter((org) =>
-      org.toLowerCase().includes(orgSearch.toLowerCase())
-    ),
-    [organizations, orgSearch]
+    () => organizations.filter((org) => {
+      const searchTerm = orgSearch.toLowerCase();
+      const tenantName = orgNamesMap?.[org] || '';
+      return org.toLowerCase().includes(searchTerm) ||
+             tenantName.toLowerCase().includes(searchTerm);
+    }),
+    [organizations, orgSearch, orgNamesMap]
   );
    const [userData, setUserData] = React.useState({ name: 'User', email: '', id: '' });    
    const [logoImage, setLogoImage] = React.useState(null);
@@ -292,7 +295,9 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                   displayEmpty
                   renderValue={(value) => {
                     if (!value) return <span style={{ color: 'var(--text-muted)' }}>Select Organization</span>;
-                    const tenantName = tenant?.name && tenant.name !== value ? tenant.name : null;
+                    const tenantName = orgNamesMap?.[value] && orgNamesMap[value] !== value
+                      ? orgNamesMap[value]
+                      : (tenant?.name && tenant.name !== value ? tenant.name : null);
                     return (
                       <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
                         <span style={{ fontWeight: 600, fontSize: '0.825rem' }}>
@@ -358,20 +363,23 @@ const Header = ({ pageTitle = "", toggleNav, isNavCollapsed }) => {
                       No organizations found
                     </MenuItem>
                   ) : (
-                    filteredOrgs.map((org) => (
-                      <MenuItem key={org} value={org}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
-                          <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>
-                            {org === selectedOrg && tenant?.name && tenant.name !== org ? tenant.name : org}
-                          </span>
-                          {org === selectedOrg && tenant?.name && tenant.name !== org && (
+                    filteredOrgs.map((org) => {
+                      const name = orgNamesMap?.[org] && orgNamesMap[org] !== org
+                        ? orgNamesMap[org]
+                        : (org === selectedOrg && tenant?.name && tenant.name !== org ? tenant.name : null);
+                      return (
+                        <MenuItem key={org} value={org}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', lineHeight: 1.3 }}>
+                            <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>
+                              {name || org}
+                            </span>
                             <span style={{ fontSize: '0.72rem', color: '#888', fontFamily: 'monospace' }}>
                               {org}
                             </span>
-                          )}
-                        </Box>
-                      </MenuItem>
-                    ))
+                          </Box>
+                        </MenuItem>
+                      );
+                    })
                   )}
                 </Select>
               </FormControl>

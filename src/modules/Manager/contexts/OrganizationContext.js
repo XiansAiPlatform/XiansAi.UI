@@ -13,6 +13,7 @@ const URL_PARAM_KEY = 'org';
 export function OrganizationProvider({ children }) {
   const [selectedOrg, setSelectedOrg] = useState('');
   const [organizations, setOrganizations] = useState([]);
+  const [orgNamesMap, setOrgNamesMap] = useState({});
   const [isOrgLoading, setIsOrgLoading] = useState(true);
   const { getAccessTokenSilently, isAuthenticated, isLoading: isAuthLoading, user, isProcessingCallback } = useAuth();
   const { showDetailedError } = useNotification();
@@ -78,7 +79,28 @@ export function OrganizationProvider({ children }) {
 
 
         if (orgs.length > 0) {
-          setOrganizations(orgs);
+          // Handle both response formats:
+          // - Legacy: string[] of tenant IDs, e.g. ["tenant-1", "tenant-2"]
+          // - Enriched: object[] with id and name, e.g. [{tenantId: "tenant-1", name: "Acme Corp"}, ...]
+          const isEnrichedFormat = typeof orgs[0] === 'object' && orgs[0] !== null;
+
+          let orgIds;
+          const namesMap = {};
+
+          if (isEnrichedFormat) {
+            orgIds = orgs.map(o => o.tenantId || o.id);
+            orgs.forEach(o => {
+              const id = o.tenantId || o.id;
+              if (o.name && o.name !== id) {
+                namesMap[id] = o.name;
+              }
+            });
+          } else {
+            orgIds = orgs;
+          }
+
+          setOrganizations(orgIds);
+          setOrgNamesMap(namesMap);
 
           // Priority: URL param > localStorage > first available
           const urlOrg = getParam(URL_PARAM_KEY);
@@ -87,16 +109,16 @@ export function OrganizationProvider({ children }) {
           let orgToSelect = null;
           
           // Check URL parameter first
-          if (urlOrg && orgs.includes(urlOrg)) {
+          if (urlOrg && orgIds.includes(urlOrg)) {
             orgToSelect = urlOrg;
           } 
           // Then check localStorage
-          else if (storedOrg && orgs.includes(storedOrg)) {
+          else if (storedOrg && orgIds.includes(storedOrg)) {
             orgToSelect = storedOrg;
           } 
           // Finally use first available
-          else if (orgs.length > 0) {
-            orgToSelect = orgs[0];
+          else if (orgIds.length > 0) {
+            orgToSelect = orgIds[0];
           }
 
           if (orgToSelect) {
@@ -175,6 +197,7 @@ export function OrganizationProvider({ children }) {
         selectedOrg,
         setSelectedOrg: updateSelectedOrg,
         organizations,
+        orgNamesMap,
         isOrgLoading
       }}
     >

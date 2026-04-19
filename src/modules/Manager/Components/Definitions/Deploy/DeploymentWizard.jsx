@@ -246,7 +246,7 @@ const DeploymentWizard = ({ template, onDeploy, onCancel }) => {
             startIcon={<DeployIcon />}
             sx={{ px: 4, py: 1.5 }}
           >
-            Deploy Agent
+            Deploy To Current Tenant
           </Button>
           <Button variant="outlined" onClick={onCancel}>
             Cancel
