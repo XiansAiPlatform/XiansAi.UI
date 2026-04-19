@@ -89,12 +89,21 @@ export default function TenantManagement() {
     });
   };
 
-  const filteredTenants = tenants.filter(
-    (tenant) =>
-      tenant.name?.toLowerCase().includes(filter.toLowerCase()) ||
-      tenant.tenantId?.toLowerCase().includes(filter.toLowerCase()) ||
-      tenant.domain?.toLowerCase().includes(filter.toLowerCase())
-  );
+  const filteredTenants = tenants
+    .filter(
+      (tenant) =>
+        tenant.name?.toLowerCase().includes(filter.toLowerCase()) ||
+        tenant.tenantId?.toLowerCase().includes(filter.toLowerCase()) ||
+        tenant.domain?.toLowerCase().includes(filter.toLowerCase())
+    )
+    .sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt) : null;
+      const dateB = b.createdAt ? new Date(b.createdAt) : null;
+      if (dateA && dateB) return dateB - dateA;
+      if (dateA) return -1;
+      if (dateB) return 1;
+      return 0;
+    });
 
   const handleEditAdmin = (tenant) => {
     openSlider(
@@ -197,7 +206,7 @@ export default function TenantManagement() {
             ? newTenant.enabled
             : true,
       };
-      setTenants((prevTenants) => [...prevTenants, tenantToAdd]);
+      setTenants((prevTenants) => [tenantToAdd, ...prevTenants]);
       handleCreateDialogClose();
       setError(null);
     } catch (err) {
