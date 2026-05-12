@@ -20,6 +20,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { formatStatus } from '../utils/ConversationUtils';
 import MarkdownRenderer from './MarkdownRenderer';
+import MessageFeedback from './MessageFeedback';
 
 /**
  * Component for displaying regular incoming/outgoing messages
@@ -27,8 +28,10 @@ import MarkdownRenderer from './MarkdownRenderer';
  * @param {Object} props
  * @param {Object} props.message - The message object
  * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
+ * @param {string} [props.agentName] - Agent name (for feedback API)
+ * @param {Function} [props.onFeedbackSubmitted] - (messageId, feedback) => void
  */
-const RegularMessage = ({ message, isRecent = false }) => {
+const RegularMessage = ({ message, isRecent = false, agentName, onFeedbackSubmitted }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
     const isIncoming = message.direction === 'Incoming';
@@ -43,6 +46,7 @@ const RegularMessage = ({ message, isRecent = false }) => {
 
     return (
         <Box 
+            className="message-row"
             sx={{ 
                 display: 'flex', 
                 flexDirection: 'column',
@@ -239,6 +243,14 @@ const RegularMessage = ({ message, isRecent = false }) => {
                         >
                             {messageContent}
                         </Typography>
+                    )}
+
+                    {!isIncoming && agentName && (
+                        <MessageFeedback
+                            message={message}
+                            agentName={agentName}
+                            onFeedbackSubmitted={onFeedbackSubmitted}
+                        />
                     )}
                     
                     <Collapse in={expanded} timeout="auto" unmountOnExit sx={{ mt: 2 }}>
