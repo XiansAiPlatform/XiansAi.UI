@@ -104,13 +104,22 @@ const RegularMessage = ({ message, isRecent = false, agentName, onFeedbackSubmit
                         />
                     </Avatar>
                 )}
-                
-                <Paper 
-                    elevation={0} 
+
+                {/* Bubble + feedback below (feedback is outside the Paper bubble) */}
+                <Box
+                    sx={{
+                        width: '70%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: isIncoming ? 'flex-start' : 'flex-end',
+                    }}
+                >
+                <Paper
+                    elevation={0}
                     sx={{
                         p: { left: 0, right: 2.5, top: 2, bottom: 2 },
                         pl: 1.5,
-                        width: '70%',
+                        width: '100%',
                         backgroundColor: isRecent 
                             ? (isIncoming ? theme.palette.info.light : theme.palette.primary.light) + '20' // Add 20% opacity
                             : isIncoming ? theme.palette.grey[50] : theme.palette.grey[100],
@@ -245,14 +254,6 @@ const RegularMessage = ({ message, isRecent = false, agentName, onFeedbackSubmit
                         </Typography>
                     )}
 
-                    {!isIncoming && agentName && (
-                        <MessageFeedback
-                            message={message}
-                            agentName={agentName}
-                            onFeedbackSubmitted={onFeedbackSubmitted}
-                        />
-                    )}
-                    
                     <Collapse in={expanded} timeout="auto" unmountOnExit sx={{ mt: 2 }}>
                         <Divider sx={{ my: 1, borderColor: theme.palette.grey[300] }} />
                         
@@ -585,7 +586,16 @@ const RegularMessage = ({ message, isRecent = false, agentName, onFeedbackSubmit
                         )}
                     </Collapse>
                 </Paper>
-                
+
+                    {!isIncoming && agentName && (
+                        <MessageFeedback
+                            message={message}
+                            agentName={agentName}
+                            onFeedbackSubmitted={onFeedbackSubmitted}
+                        />
+                    )}
+                </Box>
+
                 {!isIncoming && (
                     <Avatar 
                         sx={{ 

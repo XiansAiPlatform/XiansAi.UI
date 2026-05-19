@@ -70,25 +70,17 @@ const MessageFeedback = ({ message, agentName, onFeedbackSubmitted }) => {
 
     const fb = message.feedback;
 
-    if (fb) {
-        return (
-            <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-                <Typography variant="caption" color="text.secondary">
-                    Your rating:
-                </Typography>
-                <Rating value={fb.starRating} readOnly size="small" />
-                {fb.reasonCategory && (
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                        (
-                        {REASON_OPTIONS.find((o) => o.value === fb.reasonCategory)?.label ||
-                            LEGACY_REASON_LABELS[fb.reasonCategory] ||
-                            fb.reasonCategory}
-                        )
-                    </Typography>
-                )}
-            </Box>
-        );
-    }
+    /** Submitted summary + “Rate response” sit below the bubble; visible on .message-row hover (always on touch). */
+    const feedbackBarSx = {
+        mt: 0.75,
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        opacity: 0,
+        transition: 'opacity 0.2s ease',
+        '.message-row:hover &': { opacity: 1 },
+        '@media (hover: none)': { opacity: 1 },
+    };
 
     const handleSubmit = async () => {
         if (starRating < 1) {
@@ -146,71 +138,89 @@ const MessageFeedback = ({ message, agentName, onFeedbackSubmitted }) => {
     };
 
     return (
-        <>
-            <Box sx={{ mt: 0.5, alignSelf: 'flex-end' }}>
-                <Button size="small" variant="text" color="secondary" onClick={() => setOpen(true)}>
-                    Rate response
-                </Button>
-            </Box>
-
-            <Dialog open={open} onClose={() => !submitting && setOpen(false)} maxWidth="xs" fullWidth>
-                <DialogTitle>Rate this response</DialogTitle>
-                <DialogContent>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        How helpful was this reply?
+        <Box sx={feedbackBarSx}>
+            {fb ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+                    <Typography variant="caption" color="text.secondary">
+                        Your rating:
                     </Typography>
-                    <Rating
-                        name="message-feedback-stars"
-                        value={starRating}
-                        onChange={(_e, v) => setStarRating(v || 0)}
-                        size="large"
-                    />
-
-                    {starRating > 0 && starRating < 4 && (
-                        <FormControl fullWidth sx={{ mt: 2 }}>
-                            <InputLabel id="feedback-reason-label">Reason</InputLabel>
-                            <Select
-                                labelId="feedback-reason-label"
-                                label="Reason"
-                                value={reasonCategory}
-                                onChange={(e) => setReasonCategory(e.target.value)}
-                            >
-                                {REASON_OPTIONS.map((o) => (
-                                    <MenuItem key={o.value} value={o.value}>
-                                        {o.label}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                    <Rating value={fb.starRating} readOnly size="small" />
+                    {fb.reasonCategory && (
+                        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                            (
+                            {REASON_OPTIONS.find((o) => o.value === fb.reasonCategory)?.label ||
+                                LEGACY_REASON_LABELS[fb.reasonCategory] ||
+                                fb.reasonCategory}
+                            )
+                        </Typography>
                     )}
+                </Box>
+            ) : (
+                <>
+                    <Button size="small" variant="text" color="secondary" onClick={() => setOpen(true)}>
+                        Rate response
+                    </Button>
 
-                    <TextField
-                        label={
-                            starRating > 0 && starRating < 4 && reasonCategory === OTHER_REASON
-                                ? 'Comment (required)'
-                                : 'Comment (optional)'
-                        }
-                        required={
-                            !!(starRating > 0 && starRating < 4 && reasonCategory === OTHER_REASON)
-                        }
-                        multiline
-                        minRows={2}
-                        fullWidth
-                        sx={{ mt: 2 }}
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpen(false)} disabled={submitting}>
-                        Cancel
-                    </Button>
-                    <Button variant="contained" onClick={handleSubmit} disabled={submitting || starRating < 1}>
-                        Submit
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </>
+                    <Dialog open={open} onClose={() => !submitting && setOpen(false)} maxWidth="xs" fullWidth>
+                        <DialogTitle>Rate this response</DialogTitle>
+                        <DialogContent>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                                How helpful was this reply?
+                            </Typography>
+                            <Rating
+                                name="message-feedback-stars"
+                                value={starRating}
+                                onChange={(_e, v) => setStarRating(v || 0)}
+                                size="large"
+                            />
+
+                            {starRating > 0 && starRating < 4 && (
+                                <FormControl fullWidth sx={{ mt: 2 }}>
+                                    <InputLabel id="feedback-reason-label">Reason</InputLabel>
+                                    <Select
+                                        labelId="feedback-reason-label"
+                                        label="Reason"
+                                        value={reasonCategory}
+                                        onChange={(e) => setReasonCategory(e.target.value)}
+                                    >
+                                        {REASON_OPTIONS.map((o) => (
+                                            <MenuItem key={o.value} value={o.value}>
+                                                {o.label}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            )}
+
+                            <TextField
+                                label={
+                                    starRating > 0 && starRating < 4 && reasonCategory === OTHER_REASON
+                                        ? 'Comment (required)'
+                                        : 'Comment (optional)'
+                                }
+                                required={
+                                    !!(starRating > 0 && starRating < 4 && reasonCategory === OTHER_REASON)
+                                }
+                                multiline
+                                minRows={2}
+                                fullWidth
+                                sx={{ mt: 2 }}
+                                value={comment}
+                                onChange={(e) => setComment(e.target.value)}
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpen(false)} disabled={submitting}>
+                                Cancel
+                            </Button>
+                            <Button variant="contained" onClick={handleSubmit} disabled={submitting || starRating < 1}>
+                                Submit
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </>
+            )}
+        </Box>
     );
 };
 
