@@ -379,6 +379,12 @@ const ChatConversation = forwardRef((
         }
     }, [selectedThreadId, messagesPage, hasMoreMessages, isLoadingMore, isLoadingMessages, messagingApi, showError, pageSize, selectedScope]);
 
+    const handleMessageFeedbackSubmitted = useCallback((messageId, feedback) => {
+        setMessages((prev) =>
+            prev.map((m) => (m.id === messageId ? { ...m, feedback } : m))
+        );
+    }, []);
+
     return (
         <Paper 
             elevation={0}
@@ -424,6 +430,8 @@ const ChatConversation = forwardRef((
                     loadMoreMessages={loadMoreMessages}
                     isMessageRecent={isMessageRecent}
                     isTyping={isTyping}
+                    agentName={agentName}
+                    onMessageFeedbackSubmitted={handleMessageFeedbackSubmitted}
                 />
             </Box>
         </Paper>

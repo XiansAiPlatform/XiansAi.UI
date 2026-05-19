@@ -29,7 +29,9 @@ const MessagesList = ({
     loadMoreMessages,
     isMessageRecent,
     showTypingAfterHandover = false,
-    isTyping = false
+    isTyping = false,
+    agentName,
+    onMessageFeedbackSubmitted
 }) => {
     // State to track when to show typing indicator
     const [showTypingIndicator, setShowTypingIndicator] = useState(false);
@@ -167,6 +169,8 @@ const MessagesList = ({
                         key={msg.id || index}
                         message={msg}
                         isRecent={isMessageRecent(msg)}
+                        agentName={agentName}
+                        onFeedbackSubmitted={onMessageFeedbackSubmitted}
                     />
                 ))}
             </List>

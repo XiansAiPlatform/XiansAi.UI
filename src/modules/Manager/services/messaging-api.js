@@ -128,6 +128,19 @@ export const useMessagingApi = () => {
       },
 
       /**
+       * Submit human feedback for an agent (outgoing) message (Web API — same auth as messaging).
+       * @param {Object} payload - Feedback body
+       */
+      submitFeedback: async (payload) => {
+        try {
+          return await apiClient.post('/api/client/messaging/feedback', payload);
+        } catch (error) {
+          console.error('Error submitting feedback:', error);
+          throw error;
+        }
+      },
+
+      /**
        * Streams real-time message events for a specific thread using Server-Sent Events (SSE)
        * @param {string} threadId - Thread ID to stream messages for
        * @param {Function} onEventReceived - Callback function to handle received events

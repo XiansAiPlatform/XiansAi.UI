@@ -22,7 +22,7 @@ import RegularMessage from './RegularMessage';
  * @param {Array} [props.message.logs] - Optional message logs
  * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
  */
-const MessageItem = ({ message, isRecent = false }) => {
+const MessageItem = ({ message, isRecent = false, agentName, onFeedbackSubmitted }) => {
     // Debugging information (only output for first message or every 10th message)
     const shouldLog = message.id === 'first' || (message.id && message.id.endsWith('0'));
     if (shouldLog) {
@@ -46,7 +46,7 @@ const MessageItem = ({ message, isRecent = false }) => {
         return <SystemMessage message={message} />;
     }
 
-    return <RegularMessage message={message} isRecent={isRecent} />;
+    return <RegularMessage message={message} isRecent={isRecent} agentName={agentName} onFeedbackSubmitted={onFeedbackSubmitted} />;
 };
 
 export default MessageItem; 

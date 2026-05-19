@@ -20,6 +20,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { formatStatus } from '../utils/ConversationUtils';
 import MarkdownRenderer from './MarkdownRenderer';
+import MessageFeedback from './MessageFeedback';
 
 /**
  * Component for displaying regular incoming/outgoing messages
@@ -27,8 +28,10 @@ import MarkdownRenderer from './MarkdownRenderer';
  * @param {Object} props
  * @param {Object} props.message - The message object
  * @param {boolean} [props.isRecent] - Whether the message is recent (less than 1 minute old)
+ * @param {string} [props.agentName] - Agent name (for feedback API)
+ * @param {Function} [props.onFeedbackSubmitted] - (messageId, feedback) => void
  */
-const RegularMessage = ({ message, isRecent = false }) => {
+const RegularMessage = ({ message, isRecent = false, agentName, onFeedbackSubmitted }) => {
     const theme = useTheme();
     const [expanded, setExpanded] = useState(false);
     const isIncoming = message.direction === 'Incoming';
@@ -43,6 +46,7 @@ const RegularMessage = ({ message, isRecent = false }) => {
 
     return (
         <Box 
+            className="message-row"
             sx={{ 
                 display: 'flex', 
                 flexDirection: 'column',
@@ -100,13 +104,22 @@ const RegularMessage = ({ message, isRecent = false }) => {
                         />
                     </Avatar>
                 )}
-                
-                <Paper 
-                    elevation={0} 
+
+                {/* Bubble + feedback below (feedback is outside the Paper bubble) */}
+                <Box
+                    sx={{
+                        width: '70%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: isIncoming ? 'flex-start' : 'flex-end',
+                    }}
+                >
+                <Paper
+                    elevation={0}
                     sx={{
                         p: { left: 0, right: 2.5, top: 2, bottom: 2 },
                         pl: 1.5,
-                        width: '70%',
+                        width: '100%',
                         backgroundColor: isRecent 
                             ? (isIncoming ? theme.palette.info.light : theme.palette.primary.light) + '20' // Add 20% opacity
                             : isIncoming ? theme.palette.grey[50] : theme.palette.grey[100],
@@ -240,7 +253,7 @@ const RegularMessage = ({ message, isRecent = false }) => {
                             {messageContent}
                         </Typography>
                     )}
-                    
+
                     <Collapse in={expanded} timeout="auto" unmountOnExit sx={{ mt: 2 }}>
                         <Divider sx={{ my: 1, borderColor: theme.palette.grey[300] }} />
                         
@@ -573,7 +586,16 @@ const RegularMessage = ({ message, isRecent = false }) => {
                         )}
                     </Collapse>
                 </Paper>
-                
+
+                    {!isIncoming && agentName && (
+                        <MessageFeedback
+                            message={message}
+                            agentName={agentName}
+                            onFeedbackSubmitted={onFeedbackSubmitted}
+                        />
+                    )}
+                </Box>
+
                 {!isIncoming && (
                     <Avatar 
                         sx={{ 
